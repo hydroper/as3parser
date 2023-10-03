@@ -190,6 +190,8 @@ enum K {
     W = "w";
     S = "s";
 }
+
+const k: K = "w";
 ```
 
 ## Arrow functions
@@ -222,8 +224,37 @@ const s =
 The record type is simply a plain `Object` with compile-time type checking. Any field whose type accepts `undefined` — including nullable types — is optional.
 
 ```as3
-type R = {};
+type R = {
+    // Optional field
+    x?: String,
+};
 ```
+
+## Union type
+
+The union type is simply the any type (`*`) with compile-time type checking.
+
+```as3
+type U = MemberA | MemberB;
+type U2 =
+    | MemberA
+    | MemberB
+    | MemberC;
+```
+
+## Complement type
+
+The complement type is simply the any type (`*`) with compile-time type checking. It is used for adding properties to a set of existing record types.
+
+All types contained within a complement type must be record types.
+
+```as3
+type C = R & {};
+```
+
+## Function type
+
+The function type is simply the `Function` type with compile-time type checking.
 
 ## Nullability operators
 
