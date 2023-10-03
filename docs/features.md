@@ -14,6 +14,18 @@ The _globalConstant_ compiler option adds a `global` constant identifying the to
 }
 ```
 
+Example:
+
+```as3
+package com.q {
+    public class Vector {}
+}
+import com.q.*;
+
+com.q.Vector;
+global.Vector;
+```
+
 ## Type inference
 
 The _typeInference_ compiler option adds type inference for specific contexts such that:
@@ -124,7 +136,8 @@ class C.<T> {}
 
 ## Keywords
 
-Keywords are valid identifiers after dot and `?.`.
+- Keywords are valid identifiers after dot and `?.`.
+- A keyword can be used as an identifier as in `#keyword`.
 
 ## Asynchronous and generators
 
@@ -137,7 +150,8 @@ A function containing the `await` operator is implicitly asynchronous; a functio
 ## Collections
 
 - Proper `Map.<K, V>` and `Set.<T>` types and their equivalents.
-  - When K is string, due to conflicts, uses `$` prefix internally.
+  - When K is string, due to conflicts, `Map` uses `$` prefix internally.
+  - `Map.isEmpty` and `Map.nonEmpty` should be efficient and just use AVM `nextnameindex` once.
 - Iterators
 
 ## Primitive types
@@ -162,7 +176,7 @@ The `enum` context keyword is used for a versatile enum definition:
 With the `typeInference` compiler option on, constants implicitly convert to tagged enums.
 
 ```as3
-// Defines a class `E` with two functions `X(...)`, `Y(...)` and `Z()`.
+// Defines a class `E` with three functions `X(...)`, `Y(...)` and `Z()`.
 enum E {
     X [ Number ];
     Y { x: E, y: Number };
@@ -176,15 +190,25 @@ let const e = E.Z();
 // Pattern matching
 let const r = switch enum (e) {
     // Exhaustive
-    E.X [x] => "Got E.X",
+    case (E.X [x]): "Got E.X",
 
     // Non-exhaustive
-    E.Y {x: E.Y [xx], y} => "Got E.Y",
+    case (E.Y {x: E.Z, y}): "Got E.Y",
 
     // `default` can be used if all the previous patterns
     // are non-exhaustive.
-    default => "Got anything else",
+    default: "Got anything else",
 };
+
+// Pattern matching statement
+switch enum (e) {
+    case (E.X [_]) {
+        trace("X");
+    }
+    default {
+        trace("Y or Z");
+    }
+}
 
 enum K {
     W = "w";
@@ -246,7 +270,7 @@ type U2 =
 
 The complement type is simply the any type (`*`) with compile-time type checking. It is used for adding properties to a set of existing record types.
 
-All types contained within a complement type must be record types.
+All types contained in a complement type must be record types.
 
 ```as3
 type C = R & {};
@@ -256,8 +280,18 @@ type C = R & {};
 
 The function type is simply the `Function` type with compile-time type checking.
 
+```as3
+type F = (a: T, b?: T, ...c) => void;
+```
+
 ## Nullability operators
 
 - Postfix `!`
 - Optional chaining: `?.`, `?.(...)` and `?.[...]`
 - `??`
+
+## Vector
+
+Some improvements to the Vector type:
+
+- You can assign an array initializer directly to a `Vector.<T>` typed variable.
