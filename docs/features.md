@@ -100,13 +100,25 @@ const [x, y] = array; // array
 
 ## Block-scoped variables
 
-Variables are block-scoped and can shadow others in the same scope, if the compiler option `flexibleVariables` is `true`.
+Variables are block-scoped and can shadow others in the same scope, if the compiler option `variables` is `"next"`:
+
+```json
+{
+    "compilerOptions": {
+        "variables": "next"
+    }
+}
+```
+
+A program demonstrating the effects of the above setting:
 
 ```as3
-var x = 0;
-const y = 0;
+const x = 0;
+{
+    const x = 0;
+}
 
-// shadowing
+// Shadowing
 var x: Number = +Infinity;
 var x: String = "";
 ```
