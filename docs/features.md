@@ -505,10 +505,14 @@ Regardless, the following types are recognized as iterable:
 - `MapEntries.<K, V>`, yielding `[K, V]`
 - `MapKeys.<K, V>`, yielding `K`
 - `MapValues.<K, V>`, yielding `V`
+- `WeakMap.<K, V>` and its iterators, yielding similiarly to `Map.<K, V>` and its iterators
+- `Set.<T>`, yielding `T`
+- `SetValues.<T>`, yielding `T`
+- `WeakSet.<T>` and its iterators, yielding similiarly to `Set.<T>` and its iterators
 
 ## Sources
 
-The sources are supplied to the compiler only through `sources.include` and `source.exclude` arrays taking globbing patterns:
+The sources are supplied to the compiler only through `sources.include` and `sources.exclude` arrays taking globbing patterns:
 
 ```json
 {
