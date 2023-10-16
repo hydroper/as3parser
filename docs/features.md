@@ -35,8 +35,9 @@ The global package (also called top-level) is imported into a parent anonymous s
 The _typeInference_ compiler option adds type inference for specific contexts such that:
 
 - constants from tagged enums implicitly convert to tagged enums,
-- variable bindings have the type of the assigned expression, and
-- function signatures without a return type annotation are taken as returning `void`.
+- variable bindings have the type of the assigned expression,
+- function signatures without a return type annotation are taken as returning `void`, and
+- `for` and `for each` perform type inference for the left variable based on the iterable.
 
 The compiler with the _typeInference_ option being true still emits warnings for untyped function parameters except:
 
