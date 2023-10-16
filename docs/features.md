@@ -319,6 +319,9 @@ With the `typeInference` compiler option on, constants implicitly convert to tag
 ```as3
 // Defines a class `E` with three static functions `X(...)`, `Y(...)` and `Z()`,
 // and an instance method `f`.
+//
+// Each variant generates a hidden class.
+//
 enum E {
     X [ Number ];
     Y { x: E, y: Number };
