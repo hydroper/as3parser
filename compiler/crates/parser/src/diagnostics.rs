@@ -90,7 +90,7 @@ impl Diagnostic {
         self.format(&diagnostics_en::MESSAGES)
     }
 
-    pub fn format(&self, message_map: &HashMap<i32, String>) -> String {}
+    pub fn format(&self, messages: &HashMap<i32, String>) -> String {}
 }
 
 #[derive(Clone)]
