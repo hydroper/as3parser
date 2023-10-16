@@ -273,17 +273,20 @@ public function f.<T = () => void>(): void
 The following code:
 
 ```as3
-namespace Q {
-    const x: Number = 64;
-    class C {}
+public namespace Q {
+    public const x: Number = 64;
+    public class C {}
 }
 ```
 
 translates to:
 
 ```as3
-const Q_x: Number = 64;
-class Q_C {}
+public class Q_C {}
+public class Q {
+    public static const x: Number = 64;
+    public static const C: Class = Q_C;
+}
 ```
 
 ## Object initializer
@@ -502,3 +505,18 @@ Regardless, the following types are recognized as iterable:
 - `MapEntries.<K, V>`, yielding `[K, V]`
 - `MapKeys.<K, V>`, yielding `K`
 - `MapValues.<K, V>`, yielding `V`
+
+## Sources
+
+The sources are supplied to the compiler only through `sources.include` and `source.exclude` arrays taking globbing patterns:
+
+```json
+{
+    "sources": {
+        "include": ["src"],
+        "exclude": [],
+    }
+}
+```
+
+A source may consist of multiple definitions in multiple packages.
