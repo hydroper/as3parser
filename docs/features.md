@@ -1,6 +1,6 @@
 # Features
 
-This project adds a number of features to ActionScript 3.0. Some of them must be enabled explicitly as they affect existing sources.
+This project adds a number of features to ActionScript 3.0. Some of them must be enabled explicitly as they affect existing sources and some allow for format migration, such as ASDoc comments.
 
 ## Global
 
@@ -28,7 +28,7 @@ global.Vector;
 
 ## Global import
 
-The global package (also called top-level) is imported into a parent anonymous scope, differently from the previous ActionScript compilers. This does not break compatibility and the goal is to allow overriding global names.
+The global package (also called top-level) is imported into a parent anonymous scope, differently from the previous ActionScript compilers. This does not break compatibility and the goal is to allow overriding names in the top-level package.
 
 ## Type inference
 
@@ -488,3 +488,7 @@ v not instanceof T;
 _Right-hand side_: The right-hand side of an `as`, `is` or `instanceof` is still given an expression, not a type expression, despite the introduction of numerous type annotations. Furthermore, the right-hand side is limited to concrete types; types such as union types that map to another type are not allowed as the right-hand side of these operators.
 
 _`as` result type_: The `as` operator returns `T?`.
+
+## Iterators
+
+Proper iterators should be supported futurely. This relies on the ActionScript API getting some updates.
