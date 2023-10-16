@@ -1,4 +1,6 @@
 use std::collections::HashMap;
+use maplit::hashmap;
+
 use crate::{Location, diagnostics_en};
 
 #[derive(Clone)]
@@ -87,10 +89,46 @@ impl Diagnostic {
     }
 
     pub fn format_en(&self) -> String {
-        self.format(&diagnostics_en::MESSAGES)
+        let category = (if self.is_verify_error {
+            "Verify error"
+        } else if self.is_warning {
+            "Warning"
+        } else {
+            "Syntax error"
+        }).to_owned();
+
+        let file_path = self.location.source.file_path.clone().map_or("".to_owned(), |s| format!("{s}:"));
+        let line = self.location.first_line_number();
+        let column = self.location.first_column() + 1;
+        let message = self.format_message_en();
+        let id = self.id().to_string();
+        format!("{file_path}{line}:{column}: {category} #{id} {message}")
     }
 
-    pub fn format(&self, messages: &HashMap<i32, String>) -> String {}
+    pub fn format_message_en(&self) -> String {
+        self.format_message(&diagnostics_en::MESSAGES)
+    }
+
+    pub fn format_message(&self, messages: &HashMap<i32, String>) -> String {
+        let mut string_arguments: HashMap<String, String> = hashmap!{};
+        let mut i = 1;
+        for argument in &self.arguments {
+            string_arguments.insert(i.to_string(), self.format_argument(*argument.clone()));
+            i += 1;
+        }
+        use crate::util::StringIncognitoFormat;
+        let Some(msg) = messages.get(&self.id()) else {
+            let id = self.id();
+            panic!("Message map is missing message for ID {id}");
+        };
+        msg.incognito_format(string_arguments)
+    }
+
+    fn format_argument(&self, argument: DiagnosticArgument) -> String {
+        match argument {
+            DiagnosticArgument::String(s) => s.clone(),
+        }
+    }
 }
 
 #[derive(Clone)]

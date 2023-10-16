@@ -11,3 +11,4 @@ as3_arena = { path = "../arena" }
 conv = "0.3.3"
 maplit = "1.0.2"
 lazy-regex = "3.0.2"
+lazy_static = "1.4.0"

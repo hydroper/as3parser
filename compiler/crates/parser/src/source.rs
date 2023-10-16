@@ -8,7 +8,9 @@ pub struct Source {
     pub(crate) text: String,
     pub(crate) line_number_offsets: RefCell<Vec<usize>>,
     pub(crate) already_tokenized: Cell<bool>,
-    pub(crate) diagnostics: RefCell<Vec<Diagnostic>>,
+    diagnostics: RefCell<Vec<Diagnostic>>,
+    pub(crate) error_count: Cell<u32>,
+    pub(crate) warning_count: Cell<u32>,
     pub(crate) invalidated: Cell<bool>,
 }
 
@@ -22,6 +24,8 @@ impl Source {
             already_tokenized: Cell::new(false),
             diagnostics: RefCell::new(vec![]),
             invalidated: Cell::new(false),
+            error_count: Cell::new(0),
+            warning_count: Cell::new(0),
         })
     }
 
@@ -52,9 +56,20 @@ impl Source {
     }
 
     pub fn add_diagnostic(&self, diagnostic: Diagnostic) {
-        if !diagnostic.is_warning() {
+        if diagnostic.is_warning() {
+            self.warning_count.set(self.warning_count.get() + 1);
+        } else {
+            self.error_count.set(self.error_count.get() + 1);
             self.invalidated.set(true);
         }
         self.diagnostics.borrow_mut().push(diagnostic);
+    }
+
+    pub fn error_count(&self) -> u32 {
+        self.error_count.get()
+    }
+
+    pub fn warning_count(&self) -> u32 {
+        self.warning_count.get()
     }
 }
