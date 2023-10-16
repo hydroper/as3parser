@@ -324,7 +324,17 @@ enum E {
     Y { x: E, y: Number };
     Z;
 
-    // Custom definitions
+    // Variant with meta-data
+    [WhateverMetadata]
+    W;
+
+    X2 {
+        // Field with meta-data
+        [WhateverMetadata]
+        x: Number,
+    }
+
+    // Class block
     class {
         function f(): void {}
     }
