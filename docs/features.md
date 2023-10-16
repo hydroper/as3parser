@@ -311,7 +311,7 @@ A function containing the `await` operator is implicitly asynchronous; a functio
 - Proper `Map.<K, V>` and `Set.<T>` types and their equivalents.
   - When K is string, due to conflicts, `Map` uses `$` prefix internally.
   - `Map.isEmpty` and `Map.nonEmpty` should be efficient and just use AVM `nextnameindex` once.
-  - Iterating `map.entries()` directly through `for each`, where `map` is visibly a `Map.<K, V>`, should output optimized AVM code without instantiating an iterator.
+- Iterators
 
 ## Enums
 
@@ -498,3 +498,7 @@ Regardless, the following types are recognized as iterable:
 - `Array`
 - `Vector.<T>`
 - `Proxy` subclasses that override `flash_proxy::nextNameIndex` and `flash_proxy::nextValue`.
+- `Map.<K, V>`, yielding `[K, V]`
+- `MapEntries.<K, V>`, yielding `[K, V]`
+- `MapKeys.<K, V>`, yielding `K`
+- `MapValues.<K, V>`, yielding `V`
