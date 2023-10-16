@@ -1,4 +1,5 @@
-use crate::Location;
+use std::collections::HashMap;
+use crate::{Location, diagnostics_en};
 
 #[derive(Clone)]
 pub struct Diagnostic {
@@ -6,6 +7,7 @@ pub struct Diagnostic {
     pub(crate) kind: DiagnosticKind,
     pub(crate) is_warning: bool,
     pub(crate) is_verify_error: bool,
+    pub(crate) arguments: Vec<Box<DiagnosticArgument>>,
 }
 
 impl Eq for Diagnostic {}
@@ -30,30 +32,33 @@ impl PartialOrd for Diagnostic {
 }
 
 impl Diagnostic {
-    pub fn new_syntax_error(location: Location, kind: DiagnosticKind) -> Self {
+    pub fn new_syntax_error(location: Location, kind: DiagnosticKind, arguments: Vec<Box<DiagnosticArgument>>) -> Self {
         Self {
             location,
             kind,
             is_verify_error: false,
             is_warning: false,
+            arguments,
         }
     }
 
-    pub fn new_verify_error(location: Location, kind: DiagnosticKind) -> Self {
+    pub fn new_verify_error(location: Location, kind: DiagnosticKind, arguments: Vec<Box<DiagnosticArgument>>) -> Self {
         Self {
             location,
             kind,
             is_verify_error: true,
             is_warning: false,
+            arguments,
         }
     }
 
-    pub fn new_warning(location: Location, kind: DiagnosticKind) -> Self {
+    pub fn new_warning(location: Location, kind: DiagnosticKind, arguments: Vec<Box<DiagnosticArgument>>) -> Self {
         Self {
             location,
             kind,
             is_verify_error: false,
             is_warning: true,
+            arguments,
         }
     }
 
@@ -73,18 +78,34 @@ impl Diagnostic {
         self.is_verify_error
     }
 
-    pub fn id(&self) -> u64 {
-        self.id_and_international_message().0
+    pub fn arguments(&self) -> Vec<Box<DiagnosticArgument>> {
+        self.arguments.clone()
     }
 
-    pub fn international_message(&self) -> String {
-        self.id_and_international_message().1
+    pub fn id(&self) -> i32 {
+        self.kind.id()
     }
 
-    pub fn id_and_international_message(&self) -> (u64, String) {
-        match self.kind {}
+    pub fn format_en(&self) -> String {
+        self.format(&diagnostics_en::MESSAGES)
     }
+
+    pub fn format(&self, message_map: &HashMap<i32, String>) -> String {}
 }
 
-#[derive(Eq, PartialEq, Clone)]
-pub enum DiagnosticKind {}
+#[derive(Clone)]
+pub enum DiagnosticArgument {
+    String(String),
+}
+
+#[repr(i32)]
+#[derive(Eq, PartialEq, Clone, Copy)]
+pub enum DiagnosticKind {
+    UnexpectedOrInvalidToken = 1024,
+}
+
+impl DiagnosticKind {
+    pub fn id(&self) -> i32 {
+        *self as i32
+    }
+}

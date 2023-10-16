@@ -1,8 +1,9 @@
 pub(crate) mod diagnostics;
+pub(crate) mod diagnostics_en;
 pub(crate) mod tokenizer;
 pub(crate) mod location;
 pub(crate) mod source;
-pub(crate) mod util;
+pub mod util;
 
 pub use diagnostics::*;
 pub use tokenizer::*;
