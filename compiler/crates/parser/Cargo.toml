@@ -12,3 +12,4 @@ lalrpop = "0.20.0"
 file_paths = "0.1.2"
 as3_arena = { path = "../arena" }
 lalrpop-util = { version = "0.20.0", features = ["lexer"] }
+conv = "0.3.3"

@@ -1,0 +1,43 @@
+use std::str::FromStr;
+use conv::ValueFrom;
+use crate::errors::NumericLiteralError;
+
+grammar;
+
+pub NumericLiteral: f64 = <s:r"(?x)
+    # DecimalLiteral
+    0 | (
+        (([1-9][0-9]*(_[0-9]+)*)
+            (\.([0-9]+(_[0-9]+)*)?))
+        |
+        (\.[0-9]+(_[0-9]+)*)
+        |
+        ([Ee][+\-]?[0-9]+(_[0-9]+)*)?
+    )
+    # HexLiteral
+    | (
+        0[Xx][0-9A-Fa-f]+(_[0-9A-Fa-f]+)*
+    )
+    # BinLiteral
+    | (
+        0[Bb][01]+(_[01]+)*
+    )
+    "> => {
+        if s.starts_with("0X") || s.starts_with("0x") {
+            let s = s[2..].replace('_', "");
+            let n = u64::from_str_radix(s, 16);
+            let n = n.map_err(|_| NumericLiteralError::TooLarge)
+                .and_then(|n| f64::value_from(n).map_err(|_| NumericLiteralError::TooLarge));
+            return n;
+        }
+        if s.starts_with("0B") || s.starts_with("0b") {
+            let s = s[2..].replace('_', "");
+            let n = u64::from_str_radix(s, 2);
+            let n = n.map_err(|_| NumericLiteralError::TooLarge)
+                .and_then(|n| f64::value_from(n).map_err(|_| NumericLiteralError::TooLarge));
+            return n;
+        }
+        let s = s.replace('_', "");
+        let n = f64::from_str(&s);
+        n
+    };
