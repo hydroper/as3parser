@@ -316,11 +316,17 @@ The `enum` context keyword is used for a versatile enum definition:
 With the `typeInference` compiler option on, constants implicitly convert to tagged enums.
 
 ```as3
-// Defines a class `E` with three functions `X(...)`, `Y(...)` and `Z()`.
+// Defines a class `E` with three static functions `X(...)`, `Y(...)` and `Z()`,
+// and an instance method `f`.
 enum E {
     X [ Number ];
     Y { x: E, y: Number };
     Z;
+
+    // Custom definitions
+    class {
+        function f(): void {}
+    }
 }
 
 const e = E.X([64]);
