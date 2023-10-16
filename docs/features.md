@@ -77,6 +77,12 @@ The _nullability_ compiler option has the following effects:
 }
 ```
 
+## Nullability operators
+
+- Postfix `!`
+- Optional chaining: `?.`, `?.(...)` and `?.[...]`
+- `??`, `??=`
+
 ## Destructuring patterns
 
 Destructuring patterns are introduced to variable bindings. A pattern may have a postfix `!` for asserting that a base is non-null.
@@ -88,17 +94,17 @@ const [x, y] = array; // array
 ({x, y} = p); // record
 ```
 
-## Let variables
+## Block-scoped variables
 
-Let variables are block-scoped and can shadow others in the same scope. `let` is used for writable variables; `let const` is used for read-only variables. Let variables must not shadow when directly within a type's block.
+Variables are block-scoped and can shadow others in the same scope, if the compiler option `flexibleVariables` is `true`.
 
 ```as3
-let x = 0;
-let const y = 0;
+var x = 0;
+const y = 0;
 
 // shadowing
-let x: Number = +Infinity;
-let x: String = "";
+var x: Number = +Infinity;
+var x: String = "";
 ```
 
 ## Import alias
@@ -109,6 +115,18 @@ import n2 = q.n1;
 // Open `public` from `q` and alias it
 import q2 = q.*;
 q2::x
+
+// Open `public` from `q` and its recursive subpackages
+// and alias `q` and its recursive subpackages as `q3`
+import q3 = q.**;
+```
+
+## Power expression
+
+The following expression is equivalent to `Math.pow(n, p)`:
+
+```as3
+n ** p
 ```
 
 ## Type alias
@@ -125,7 +143,7 @@ The tuple type is equivalent to an `Array` with additional compile-time type che
 
 ## Generics
 
-A type or function may be generic.
+A type or function may be generic. Type parameters in the output bytecode are simply the any type.
 
 - `.<P1, ...Pn>`
 - `where`
@@ -136,8 +154,133 @@ class C.<T> {}
 
 ## Keywords
 
-- Keywords are valid identifiers after dot and `?.`.
-- A keyword can be used as an identifier as in `#keyword`.
+_Dot tokens_: Keywords are valid identifiers after dot and `?.`.
+
+_Intrinsics definitions_: The intrinsic namespace `https://actionscript.org/intrinsics` allows defining properties whose name is a possibly reserved word.
+
+This namespace can be directly defined in the compiler configuration to the top-level package, with the desired name:
+
+```json
+{
+    "compilerOptions": {
+        "intrinsicsNamespace": "as3Intrinsics"
+    }
+}
+```
+
+Intrinsic definitions can be defined through `as3Intrinsics::define`. This function is processed by the compiler and is equivalent to either a function, variable, or virtual property definition. The usage is as follows:
+
+```as3
+// `var variableName: T;`
+as3Intrinsics::define.<T>(public, "variableName", {
+    // Optional setting: whether it is a constant variable.
+    readOnly: true,
+
+    // Optional setting: list of definition modifiers as strings
+    modifiers: [],
+
+    // Optional setting: initial value.
+    value: initialValue,
+});
+
+// Virtual property
+as3Intrinsics::define.<T>(public, "propertyName", {
+    // Optional setting: list of definition modifiers as strings
+    modifiers: [],
+
+    // Getter
+    get: () => v,
+
+    // Setter
+    set: v => {},
+});
+
+// Function
+as3Intrinsics::define(public, "functionName", {
+    // Optional setting: list of definition modifiers as strings
+    modifiers: [],
+
+    // Required setting
+    signature: as3Intrinsics::Type.<SignatureType>,
+
+    // Optional setting: the body. It must be specified
+    // or omitted depending on the `native` modifier.
+    body: signature => body,
+
+    // Optional setting
+    generics: {
+        // Optional parameters to introduce as a
+        // sequence of strings.
+        params: [],
+
+        // Optional map of default types to the parameters, as a
+        // record from parameter string to an assigned type.
+        // The assigned type may additionally be expressed through
+        // `as3Intrinsics::Type.<T>`, where `T` is the target type.
+        defaults: {},
+
+        // Optional constraints as a record from parameter string
+        // to a a list of types.
+        constraints: {},
+    },
+});
+```
+
+The following `f` definition:
+
+```as3
+as3Intrinsics::define(public, "f", {
+    signature: as3Intrinsics::Type.<() => void>,
+    body: () => {},
+    generics: {
+        params: ["T"],
+        defaults: {
+            T: as3Intrinsics::Type.<() => void>,
+        },
+        constraints: {
+            T: IEatable,
+        },
+    },
+});
+```
+
+Is equivalent to the following `f` definition:
+
+```as3
+public function f.<T = () => void>(): void
+    where T: IEatable
+{}
+```
+
+## Namespace definition
+
+The following code:
+
+```as3
+namespace Q {
+    const x: Number = 64;
+    class C {}
+}
+```
+
+translates to:
+
+```as3
+const Q_x: Number = 64;
+class Q_C {}
+```
+
+## Object initializer
+
+_Shorthand_: Shorthand fields equivalent to ECMAScript shorthand fields are added.
+
+_Rest_: Rest components equivalent to ECMAScript rest components are added.
+
+_Trailling comma_: The object initializer is allowed to contain a trailling comma.
+
+## Array initializer
+
+_Rest_: Rest components equivalent to ECMAScript rest components are added.
 
 ## Asynchronous and generators
 
@@ -153,18 +296,6 @@ A function containing the `await` operator is implicitly asynchronous; a functio
   - When K is string, due to conflicts, `Map` uses `$` prefix internally.
   - `Map.isEmpty` and `Map.nonEmpty` should be efficient and just use AVM `nextnameindex` once.
 - Iterators
-
-## Primitive types
-
-Proper aliases are provided for existing primitive types:
-
-```as3
-Int == int
-NonNegInt == uint
-Double == Number
-```
-
-If AVM introduces a single-precision floating point in the future, it is additionally aliased as `Single`.
 
 ## Enums
 
@@ -183,21 +314,21 @@ enum E {
     Z;
 }
 
-let const e = E.X([64]);
-let const e = E.Y({ x: e, y: 64 });
-let const e = E.Z();
+const e = E.X([64]);
+const e = E.Y({ x: e, y: 64 });
+const e = E.Z();
 
-// Pattern matching
-let const r = switch enum (e) {
+// Pattern matching expression
+const r = switch enum (e) {
     // Exhaustive
-    case (E.X [x]): "Got E.X",
+    case (E.X [x]) => "Got E.X",
 
     // Non-exhaustive
-    case (E.Y {x: E.Z, y}): "Got E.Y",
+    case (E.Y {x: E.Z, y}) => "Got E.Y",
 
     // `default` can be used if all the previous patterns
     // are non-exhaustive.
-    default: "Got anything else",
+    default => "Got anything else",
 };
 
 // Pattern matching statement
@@ -236,13 +367,6 @@ const s =
     """;
 ```
 
-## String.format
-
-```as3
-"{x}".format({ x: 10 })
-"{1}".format([ 10 ])
-```
-
 ## Record type
 
 The record type is simply a plain `Object` with compile-time type checking. Any field whose type accepts `undefined` — including nullable types — is optional.
@@ -251,6 +375,20 @@ The record type is simply a plain `Object` with compile-time type checking. Any 
 type R = {
     // Optional field
     x?: String,
+};
+```
+
+## Global import
+
+The global package (also called top-level) is imported into scope differently compared to the previous ActionScript compilers. This does not break compatibility and the goal is to allow overriding
+
+## Plain object record type
+
+The compile-time `Record.<K, V>` type allows typing plain objects at compile-time. It is equivalent to `*`. The `K` type must be `String` or `Number`.
+
+```as3
+var o: Record.<Number, String> = {
+    1: "s",
 };
 ```
 
@@ -284,14 +422,40 @@ The function type is simply the `Function` type with compile-time type checking.
 type F = (a: T, b?: T, ...c) => void;
 ```
 
-## Nullability operators
-
-- Postfix `!`
-- Optional chaining: `?.`, `?.(...)` and `?.[...]`
-- `??`
-
 ## Vector
 
 Some improvements to the Vector type:
 
 - You can assign an array initializer directly to a `Vector.<T>` typed variable.
+
+## Template literal
+
+The ECMAScript template literal is available:
+
+```as3
+f `${x}`;
+```
+
+## String literal type
+
+String literals are valid types.
+
+## ASDoc
+
+_ASDoc variant_: ASDoc comments can be configured to use an improved format that supports Markdown and facilitates writing comments. Set the compiler option `asdoc` to 2 (that is, ASDoc version 2) to use this facility:
+
+```json
+{
+    "compilerOptions": {
+        "asdoc": 2
+    }
+}
+```
+
+_Format migration_: Sources using ASDoc 1 format can be migrated to sources using ASDoc 2 format through the `asc migrate asdoc2` command.
+
+_Places_: ASDoc comments can be applied to additional places, such as to type aliases and record types.
+
+## Meta-data
+
+The compiler will eventually handle all of ActionScript meta-data and document them.
