@@ -102,7 +102,7 @@ impl Diagnostic {
         let column = self.location.first_column() + 1;
         let message = self.format_message_en();
         let id = self.id().to_string();
-        format!("{file_path}{line}:{column}: {category} #{id} {message}")
+        format!("{file_path}{line}:{column}: {category} #{id}: {message}")
     }
 
     pub fn format_message_en(&self) -> String {
@@ -140,6 +140,8 @@ pub enum DiagnosticArgument {
 #[derive(Eq, PartialEq, Clone, Copy)]
 pub enum DiagnosticKind {
     UnexpectedOrInvalidToken = 1024,
+    UnexpectedToken = 1025,
+    UnexpectedEnd = 1026,
 }
 
 impl DiagnosticKind {

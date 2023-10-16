@@ -7,6 +7,8 @@ lazy_static! {
     pub static ref MESSAGES: HashMap<i32, String> = hashmap! {
         // DiagnosticKind::K.id() => "".into(),
         DiagnosticKind::UnexpectedOrInvalidToken.id() => "Unexpected or invalid token".into(),
+        DiagnosticKind::UnexpectedToken.id() => "Unexpected token".into(),
+        DiagnosticKind::UnexpectedEnd.id() => "Unexpected end of program".into(),
         // DiagnosticKind::K.id() => "".into(),
     };
 }
