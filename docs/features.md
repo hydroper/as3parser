@@ -172,23 +172,13 @@ class C.<T> {}
 
 _Dot tokens_: Keywords are valid identifiers after dot and `?.`.
 
-_Intrinsics definitions_: The intrinsic namespace `https://actionscript.org/intrinsics` allows defining properties whose name is a possibly reserved word.
+_Intrinsics definitions_: The package `as3.intrinsics` allows defining properties whose name is a possibly reserved word.
 
-This namespace can be directly defined in the compiler configuration to the top-level package, with the desired name:
-
-```json
-{
-    "compilerOptions": {
-        "intrinsicsNamespace": "as3Intrinsics"
-    }
-}
-```
-
-Intrinsic definitions can be defined through `as3Intrinsics::define`. This function is processed by the compiler and is equivalent to either a function, variable, or virtual property definition. The usage is as follows:
+Intrinsic definitions can be defined through `as3.intrinsics.define`. This function is processed by the compiler and is equivalent to either a function, variable, or virtual property definition. The usage is as follows:
 
 ```as3
 // `var variableName: T;`
-as3Intrinsics::define.<T>(public, "variableName", {
+as3.intrinsics.define.<T>(public, "variableName", {
     // Optional setting: whether it is a constant variable.
     readOnly: true,
 
@@ -200,7 +190,7 @@ as3Intrinsics::define.<T>(public, "variableName", {
 });
 
 // Virtual property
-as3Intrinsics::define.<T>(public, "propertyName", {
+as3.intrinsics.define.<T>(public, "propertyName", {
     // Optional setting: list of definition modifiers as strings
     modifiers: [],
 
@@ -212,12 +202,12 @@ as3Intrinsics::define.<T>(public, "propertyName", {
 });
 
 // Function
-as3Intrinsics::define(public, "functionName", {
+as3.intrinsics.define(public, "functionName", {
     // Optional setting: list of definition modifiers as strings
     modifiers: [],
 
     // Required setting
-    signature: as3Intrinsics::Type.<SignatureType>,
+    signature: as3.intrinsics::Type.<SignatureType>,
 
     // Optional setting: the body. It must be specified
     // or omitted depending on the `native` modifier.
@@ -232,7 +222,7 @@ as3Intrinsics::define(public, "functionName", {
         // Optional map of default types to the parameters, as a
         // record from parameter string to an assigned type.
         // The assigned type may additionally be expressed through
-        // `as3Intrinsics::Type.<T>`, where `T` is the target type.
+        // `as3.intrinsics::Type.<T>`, where `T` is the target type.
         defaults: {},
 
         // Optional constraints as a record from parameter string
@@ -245,13 +235,13 @@ as3Intrinsics::define(public, "functionName", {
 The following `f` definition:
 
 ```as3
-as3Intrinsics::define(public, "f", {
-    signature: as3Intrinsics::Type.<() => void>,
+as3.intrinsics.define(public, "f", {
+    signature: as3.intrinsics::Type.<() => void>,
     body: () => {},
     generics: {
         params: ["T"],
         defaults: {
-            T: as3Intrinsics::Type.<() => void>,
+            T: as3.intrinsics::Type.<() => void>,
         },
         constraints: {
             T: IEatable,
@@ -340,19 +330,29 @@ const e = E.Z();
 // Pattern matching expression
 const r = switch enum (e) {
     // Exhaustive
-    case (E.X [x]) => "Got E.X",
+    case E.X [x] => "Got E.X",
 
     // Non-exhaustive
-    case (E.Y {x: E.Z, y}) => "Got E.Y",
+    case E.Y {x: E.Z, y} => "Got E.Y",
 
     // `default` can be used if all the previous patterns
     // are non-exhaustive.
     default => "Got anything else",
 };
 
+// Pattern matching if statement
+if (const E.X[v] = e) {
+    // v: Number
+}
+
+// Irrefutable pattern matching
+const E.X[v] = e else {
+    throw new Error("Unreachable");
+};
+
 // Pattern matching statement
 switch enum (e) {
-    case (E.X [_]) {
+    case E.X [_] {
         trace("X");
     }
     default {
@@ -367,6 +367,8 @@ enum K {
 
 const k: K = "w";
 ```
+
+Matching patterns may be combined with a `|` separator as in `P1 | P2 | Pn`.
 
 ## Arrow functions
 
