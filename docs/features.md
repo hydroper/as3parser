@@ -290,13 +290,13 @@ class Q_C {}
 
 _Shorthand_: Shorthand fields equivalent to ECMAScript shorthand fields are added.
 
-_Rest_: Rest components equivalent to ECMAScript rest components are added.
+_Rest_: Rest components equivalent to ECMAScript rest components are added, taking a compatible iterable value.
 
 _Trailling comma_: The object initializer is allowed to contain a trailling comma.
 
 ## Array initializer
 
-_Rest_: Rest components equivalent to ECMAScript rest components are added.
+_Rest_: Rest components equivalent to ECMAScript rest components are added, taking a compatible iterable value.
 
 ## Asynchronous and generators
 
@@ -311,7 +311,7 @@ A function containing the `await` operator is implicitly asynchronous; a functio
 - Proper `Map.<K, V>` and `Set.<T>` types and their equivalents.
   - When K is string, due to conflicts, `Map` uses `$` prefix internally.
   - `Map.isEmpty` and `Map.nonEmpty` should be efficient and just use AVM `nextnameindex` once.
-- Iterators
+  - Iterating `map.entries()` directly through `for each`, where `map` is visibly a `Map.<K, V>`, should output optimized AVM code without instantiating an iterator.
 
 ## Enums
 
@@ -491,4 +491,10 @@ _`as` result type_: The `as` operator returns `T?`.
 
 ## Iterators
 
-Proper iterators should be supported futurely. This relies on the ActionScript API getting some updates.
+Proper iterators may be supported futurely as this relies on the ActionScript API getting some updates.
+
+Regardless, the following types are recognized as iterable:
+
+- `Array`
+- `Vector.<T>`
+- `Proxy` subclasses that override `flash_proxy::nextNameIndex` and `flash_proxy::nextValue`.
