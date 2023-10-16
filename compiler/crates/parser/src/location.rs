@@ -7,17 +7,17 @@ use crate::source::Source;
 #[derive(Clone)]
 pub struct Location {
     /// The source file that this location belongs to.
-    pub source: Rc<Source>,
+    pub(crate) source: Rc<Source>,
 
     /// First line number, counted from one.
-    pub first_line_number: usize,
+    pub(crate) first_line_number: usize,
 
     /// Last line number, counted from one.
-    pub last_line_number: usize,
+    pub(crate) last_line_number: usize,
 
-    pub first_offset: usize,
+    pub(crate) first_offset: usize,
 
-    pub last_offset: usize,
+    pub(crate) last_offset: usize,
 }
 
 impl PartialEq for Location {
@@ -37,6 +37,31 @@ impl PartialOrd for Location {
 }
 
 impl Location {
+    /// The source file that this location belongs to.
+    pub fn source(&self) -> Rc<Source> {
+        Rc::clone(&self.source)
+    }
+
+    /// First line number, counted from one.
+    pub fn first_line_number(&self) -> usize {
+        self.first_line_number
+    }
+
+    /// Last line number, counted from one.
+    pub fn last_line_number(&self) -> usize {
+        self.first_line_number
+    }
+
+    // The first byte offset of this location.
+    pub fn first_offset(&self) -> usize {
+        self.first_offset
+    }
+
+    // The last byte offset of this location.
+    pub fn last_offset(&self) -> usize {
+        self.last_offset
+    }
+
     /// Zero based first column of the location in code points.
     pub fn first_column(&self) -> usize {
         let line_offset = *self.source.line_number_offsets.borrow().get(self.first_line_number).unwrap_or(&0);

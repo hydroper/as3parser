@@ -1,9 +1,0 @@
-use std::str::FromStr;
-use conv::ValueFrom;
-use crate::errors::NumericLiteralError;
-
-grammar;
-
-pub Nothing: String = "foo" => {
-    "".into()
-};

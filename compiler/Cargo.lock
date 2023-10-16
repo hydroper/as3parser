@@ -23,7 +23,6 @@ dependencies = [
  "conv",
  "file_paths",
  "lalrpop",
- "lalrpop-util",
 ]
 
 [[package]]
