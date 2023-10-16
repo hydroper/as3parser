@@ -478,7 +478,7 @@ _ASDoc variant_: ASDoc comments can be configured to use an improved format that
 
 _Format migration_: Sources using ASDoc 1 format can be migrated to sources using ASDoc 2 format through the `asc migrate asdoc2` command.
 
-_Places_: ASDoc comments can be applied to additional places, such as to type aliases and record types.
+_Places_: ASDoc comments can be applied to additional places, such as to type aliases and record fields.
 
 ## Meta-data
 
