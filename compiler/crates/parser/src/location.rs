@@ -20,6 +20,8 @@ pub struct Location {
     pub(crate) last_offset: usize,
 }
 
+impl Eq for Location {}
+
 impl PartialEq for Location {
     fn eq(&self, other: &Self) -> bool {
         Rc::ptr_eq(&self.source, &other.source) &&
@@ -27,6 +29,12 @@ impl PartialEq for Location {
             self.last_line_number == other.last_line_number &&
             self.first_offset == other.first_offset &&
             self.last_offset == other.last_offset
+    }
+}
+
+impl Ord for Location {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.partial_cmp(other).unwrap_or(Ordering::Equal)
     }
 }
 

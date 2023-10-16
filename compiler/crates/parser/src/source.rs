@@ -46,4 +46,15 @@ impl Source {
     pub fn diagnostics(&self) -> Vec<Diagnostic> {
         self.diagnostics.borrow().clone()
     }
+
+    pub fn sort_diagnostics(&self) {
+        self.diagnostics.borrow_mut().sort();
+    }
+
+    pub fn add_diagnostic(&self, diagnostic: Diagnostic) {
+        if !diagnostic.is_warning() {
+            self.invalidated.set(true);
+        }
+        self.diagnostics.borrow_mut().push(diagnostic);
+    }
 }
