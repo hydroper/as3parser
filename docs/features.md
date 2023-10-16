@@ -26,6 +26,10 @@ com.q.Vector;
 global.Vector;
 ```
 
+## Global import
+
+The global package (also called top-level) is imported into a parent anonymous scope, differently from the previous ActionScript compilers. This does not break compatibility and the goal is to allow overriding global names.
+
 ## Type inference
 
 The _typeInference_ compiler option adds type inference for specific contexts such that:
@@ -378,10 +382,6 @@ type R = {
 };
 ```
 
-## Global import
-
-The global package (also called top-level) is imported into scope differently compared to the previous ActionScript compilers. This does not break compatibility and the goal is to allow overriding
-
 ## Plain object record type
 
 The compile-time `Record.<K, V>` type allows typing plain objects at compile-time. It is equivalent to `*`. The `K` type must be `String` or `Number`.
@@ -438,7 +438,7 @@ f `${x}`;
 
 ## String literal type
 
-String literals are valid types.
+String literals are valid types, equivalent to `String`, but with additional type checking.
 
 ## ASDoc
 
@@ -458,4 +458,21 @@ _Places_: ASDoc comments can be applied to additional places, such as to type al
 
 ## Meta-data
 
-The compiler will eventually handle all of ActionScript meta-data and document them.
+The compiler will eventually handle all of ActionScript meta-data and document them:
+
+- `Embed`
+- `Event`
+- Some introduced by Apache Royale, such as `Bindable`
+
+## Type relationship expressions
+
+_Negated_: The context keyword `not` is used to indicate that an `is` or `instanceof` expression is negated. The `instanceof` operator may be preceded by `not`, while the `is` operator may be followed by `not`.
+
+```as3
+v is not T;
+v not instanceof T;
+```
+
+_Right-hand side_: The right-hand side of an `as`, `is` or `instanceof` is still given an expression, not a type expression, despite the introduction of numerous type annotations. Furthermore, the right-hand side is limited to concrete types; types such as union types that map to another type are not allowed as the right-hand side of these operators.
+
+_`as` result type_: The `as` operator returns `T?`.
