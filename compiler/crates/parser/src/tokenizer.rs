@@ -22,4 +22,8 @@ impl<'input> Tokenizer<'input> {
             code_points: CodePointsReader::from(source_text),
         }
     }
+
+    pub fn next(&mut self, reserved_words: bool) -> Token {
+        //
+    }
 }
