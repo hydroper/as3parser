@@ -487,6 +487,7 @@ _Places_: ASDoc comments can be applied to additional places, such as to type al
 
 The compiler will eventually handle all of ActionScript meta-data and document them:
 
+- `SWF`
 - `Embed`
 - `Event`
 - Some introduced by Apache Royale, such as `Bindable`
@@ -524,13 +525,14 @@ Regardless, the following types are recognized as iterable:
 
 ## Sources
 
-The sources are supplied to the compiler only through `sources.include` and `sources.exclude` arrays taking globbing patterns:
+The sources are supplied to the compiler only through `sources.include` and `sources.exclude` arrays taking globbing patterns, and the main class for a SWF is specified by `sources.mainClass`:
 
 ```json
 {
     "sources": {
         "include": ["src"],
         "exclude": [],
+        "mainClass": "Main"
     }
 }
 ```
