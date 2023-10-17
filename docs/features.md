@@ -44,7 +44,7 @@ The compiler with the _typeInference_ option being true still emits warnings for
 
 ## No switch fallthroughs
 
-The _noSwitchFallthroughs_ compiler option implicitly adds a `break` statement to non-empty switch cases.
+The _noSwitchFallthroughs_ compiler option, when `true`, requires that non-empty switch cases contain a trailling `break` statement.
 
 ```json
 {
@@ -338,6 +338,8 @@ enum E {
     }
 }
 ```
+
+_`switch`_: A `switch` over an enumeration must be exhaustive and cover all variants with a trailling `break` statement.
 
 ## Arrow functions
 
