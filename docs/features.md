@@ -318,7 +318,7 @@ enum E {
 const e: E = "v1";
 ```
 
-_Subclass enumerations_: Subclass enumerations consist of `class` variants.
+_Subclass enumerations_: Subclass enumerations attach a subclass to the variants.
 
 ```as3
 enum E {
