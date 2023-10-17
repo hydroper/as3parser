@@ -1,5 +1,5 @@
 use std::rc::Rc;
-use crate::{Source, util::CodePointsReader};
+use crate::{Source, util::CodePointsReader, IntolerableError};
 
 #[derive(Copy, Clone, PartialEq)]
 pub enum Token {
@@ -13,7 +13,8 @@ pub struct Tokenizer<'input> {
 }
 
 impl<'input> Tokenizer<'input> {
-    pub fn new(source: Rc<Source>, source_text: &'input str) -> Self {
+    pub fn new(source: &Rc<Source>, source_text: &'input str) -> Self {
+        let source = Rc::clone(source);
         assert!(!source.already_tokenized.get(), "A Source must only be tokenized once.");
         source.already_tokenized.set(true);
         Self {
@@ -23,7 +24,10 @@ impl<'input> Tokenizer<'input> {
         }
     }
 
-    pub fn next(&mut self, reserved_words: bool) -> Token {
-        //
+    pub fn next(&mut self, reserved_words: bool) -> Result<Token, IntolerableError> {
+        loop {
+            let ch = self.code_points.peek_or_zero();
+        }
+        final_result_here
     }
 }
