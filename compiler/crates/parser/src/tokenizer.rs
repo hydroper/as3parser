@@ -29,7 +29,9 @@ impl<'input> Tokenizer<'input> {
             let ch = self.code_points.peek_or_zero();
             if character_validation::is_whitespace(ch) {
                 self.code_points.next();
-            } else if !(self.consume_line_terminator() || self.consume_comment()) {
+            } else if self.consume_line_terminator() || self.consume_comment() {
+                // Consumed line terminator or comment
+            } else {
                 break;
             }
         }
