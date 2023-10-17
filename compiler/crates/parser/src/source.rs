@@ -1,6 +1,7 @@
 use std::rc::Rc;
 use std::cell::{RefCell, Cell};
 use crate::Diagnostic;
+use crate::compiler_options::CompilerOptions;
 
 /// Represents an ActionScript source file.
 pub struct Source {
@@ -12,11 +13,12 @@ pub struct Source {
     pub(crate) error_count: Cell<u32>,
     pub(crate) warning_count: Cell<u32>,
     pub(crate) invalidated: Cell<bool>,
+    pub(crate) compiler_options: Rc<CompilerOptions>,
 }
 
 impl Source {
     /// Constructs a source file in unparsed and non verified state.
-    pub fn new(file_path: Option<String>, text: String) -> Rc<Self> {
+    pub fn new(file_path: Option<String>, text: String, compiler_options: &Rc<CompilerOptions>) -> Rc<Self> {
         Rc::new(Self {
             file_path,
             text,
@@ -26,6 +28,7 @@ impl Source {
             invalidated: Cell::new(false),
             error_count: Cell::new(0),
             warning_count: Cell::new(0),
+            compiler_options: Rc::clone(compiler_options),
         })
     }
 

@@ -1,3 +1,4 @@
+pub mod compiler_options;
 pub(crate) mod diagnostics;
 pub(crate) mod diagnostics_en;
 pub(crate) mod tokenizer;
