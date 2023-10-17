@@ -24,7 +24,7 @@ The global package (also called top-level) is imported into a parent anonymous s
 
 The _typeInference_ compiler option adds type inference for specific contexts such that:
 
-- constants from tagged enums implicitly convert to tagged enums,
+- constants from discriminant enums implicitly convert to discriminant enums,
 - variable bindings have the type of the assigned expression,
 - function signatures without a return type annotation are taken as returning `void`, and
 - `for` and `for each` perform type inference for the left variable based on the iterable.
@@ -301,7 +301,7 @@ A function containing the `await` operator is implicitly asynchronous; a functio
 
 The `enum` context keyword defines simple enumerations. Algebraic data types are complex and do not fit well with ActionScript, therefore the feature was oversimplified.
 
-_Tagged enumerations_: Tagged enumerations consist of variants mapped to constants. With the `typeInference` compiler option on, constants such as string literals implicitly convert to tagged enumerations.
+_Discriminant enumerations_: Discriminant enumerations consist of variants mapped to constants. With the `typeInference` compiler option on, constants such as string literals implicitly convert to discriminant enumerations.
 
 ```as3
 // Defines a class `E`.
