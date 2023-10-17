@@ -4,17 +4,7 @@ This project adds a number of features to ActionScript 3.0. Some of them must be
 
 ## Global
 
-The _globalConstant_ compiler option adds a `global` constant identifying the top-level package, which allows resolving ambiguities in the lexical scope.
-
-```json
-{
-    "compilerOptions": {
-        "globalConstant": true
-    }
-}
-```
-
-Example:
+A `global` constant, defined in a parent anonymous scope of the source, identifies the top-level package, which allows to resolve ambiguities in the lexical scope:
 
 ```as3
 package com.q {
