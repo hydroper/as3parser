@@ -89,7 +89,7 @@ const [x, y] = array; // array
 ({x, y} = p); // record
 ```
 
-## Block-scoped variables
+## Improved variables
 
 Variables are block-scoped and can shadow others in the same scope, if the compiler option `variables` is `"next"`:
 
@@ -299,86 +299,45 @@ A function containing the `await` operator is implicitly asynchronous; a functio
 
 ## Enums
 
-The `enum` context keyword is used for a versatile enum definition:
+The `enum` context keyword defines simple enumerations. Algebraic data types are complex and do not fit well with ActionScript, therefore the feature was oversimplified.
 
-- An enum definition can be used for algebraic data types and tagged enums;
-- An enum definition can contain user function definitions in its block.
-
-With the `typeInference` compiler option on, constants implicitly convert to tagged enums.
+_Tagged enumerations_: Tagged enumerations consist of variants mapped to constants. With the `typeInference` compiler option on, constants such as string literals implicitly convert to tagged enumerations.
 
 ```as3
-// Defines a class `E` with three static functions `X(...)`, `Y(...)` and `Z()`,
-// and an instance method `f`.
-//
-// Each variant generates a hidden class.
-//
+// Defines a class `E`.
 enum E {
-    X [ Number ];
-    Y { x: E, y: Number };
-    Z;
+    V1 = "v1";
+    V2 = "v2";
+    V3 = "v3";
 
-    // Variant with meta-data
-    [WhateverMetadata]
-    W;
-
-    X2 {
-        // Field with meta-data
-        [WhateverMetadata]
-        x: Number,
-    }
-
-    // Class block
+    // The class representing the enum
     class {
         function f(): void {}
     }
 }
-
-const e = E.X([64]);
-const e = E.Y({ x: e, y: 64 });
-const e = E.Z();
-
-// Pattern matching expression
-const r = switch enum (e) {
-    // Exhaustive
-    case E.X [x] => "Got E.X",
-
-    // Non-exhaustive
-    case E.Y {x: E.Z, y} => "Got E.Y",
-
-    // `default` can be used if all the previous patterns
-    // are non-exhaustive.
-    default => "Got anything else",
-};
-
-// Pattern matching if statement
-if (const E.X[v] = e) {
-    // v: Number
-}
-
-// Irrefutable pattern matching
-const E.X[v] = e else {
-    throw new Error("Unreachable");
-};
-
-// Pattern matching statement
-switch enum (e) {
-    case E.X [_] {
-        trace("X");
-    }
-    default {
-        trace("Y or Z");
-    }
-}
-
-enum K {
-    W = "w";
-    S = "s";
-}
-
-const k: K = "w";
+const e: E = "v1";
 ```
 
-Matching patterns may be combined with a `|` separator as in `P1 | P2 | Pn`.
+_Subclass enumerations_: Subclass enumerations consist of `class` variants.
+
+```as3
+enum E {
+    V1("v1") {
+        override function f(): void {}
+    }
+
+    // Super class of all variants
+    class {
+        public const s: String;
+
+        function E(s: String) {
+            this.s = s;
+        }
+
+        function f(): void {}
+    }
+}
+```
 
 ## Arrow functions
 
@@ -538,3 +497,9 @@ The sources are supplied to the compiler only through `sources.include` and `sou
 ```
 
 A source may consist of multiple definitions in multiple packages.
+
+## Migrations
+
+- Migrate code to ASDoc 2
+- Migrate code to nullability, by translating existing type annotations to include `null` explicitly
+- Migrate code to improved variables
