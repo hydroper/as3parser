@@ -462,6 +462,10 @@ _Right-hand side_: The right-hand side of an `as`, `is` or `instanceof` is still
 
 _`as` result type_: The `as` operator returns `T?`.
 
+## Arrow functions
+
+Arrow functions with destructuring patterns are supported.
+
 ## Iterators
 
 Proper iterators may be supported futurely as this relies on the ActionScript API getting some updates.

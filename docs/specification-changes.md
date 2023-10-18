@@ -4,9 +4,11 @@
 
 - Added punctuators:
   - `**`
+  - `**=`
   - `?.`
   - `??`
   - `??=`
+  - `=>`
 - Added context keywords:
   - `enum`
   - `not`

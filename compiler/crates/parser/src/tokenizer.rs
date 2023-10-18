@@ -1,9 +1,78 @@
 use std::rc::Rc;
-use crate::{Source, util::CodePointsReader, IntolerableError, Location, character_validation, Diagnostic, DiagnosticKind, Comment};
+use crate::{Source, util::CodePointsReader, IntolerableError, Location, character_validation, Diagnostic, DiagnosticKind, Comment, keywords};
 
 #[derive(Copy, Clone, PartialEq)]
 pub enum Token {
     Eof,
+
+    // Punctuator
+    ColonColon,
+    /// The `@` token.
+    Attribute,
+    LeftParen,
+    RightParen,
+    LeftBracket,
+    RightBracket,
+    LeftBrace,
+    RightBrace,
+    Dot,
+    Semicolon,
+    Comma,
+    Lt,
+    Gt,
+    /// `<=`
+    Le,
+    /// `>=`
+    Ge,
+    Equals,
+    NotEquals,
+    StrictEquals,
+    StrictNotEquals,
+    Plus,
+    Minus,
+    Times,
+    Div,
+    Remainder,
+    Increment,
+    Decrement,
+    LeftShift,
+    RightShift,
+    UnsignedRightShift,
+    BitwiseAnd,
+    BitwiseXor,
+    BitwiseOr,
+    BitwiseNot,
+    LogicalAnd,
+    LogicalXor,
+    LogicalOr,
+    Question,
+    Exclamation,
+    Colon,
+    Assign,
+    AddAssign,
+    SubtractAssign,
+    MultiplyAssign,
+    DivideAssign,
+    RemainderAssign,
+    LeftShiftAssign,
+    RightShiftAssign,
+    UnsignedRightShiftAssign,
+    BitwiseAndAssign,
+    BitwiseXorAssign,
+    BitwiseOrAssign,
+    LogicalAndAssign,
+    LogicalXorAssign,
+    LogicalOrAssign,
+    /// `**`
+    Power,
+    /// `**=`
+    PowerAssign,
+    /// `??`
+    NullCoalescing,
+    /// `??=`
+    NullCoalescingAssign,
+    /// `?.`
+    OptionalChaining,
 
     // Reserved words
     As,
@@ -51,75 +120,117 @@ pub enum Token {
     With,
 }
 
-pub fn match_reserved_word(name: &str) -> Option<Token> {
-    match name.len() {
-        1 => None,
-        2 => {
-            match name {
-                "as" => Some(Token::As),
-                "do" => Some(Token::Do),
-                "if" => Some(Token::If),
-                "in" => Some(Token::In),
-                "is" => Some(Token::Is),
-                _ => None,
-            }
-        },
-        3 => {
-            match name {
-                _ => None,
-            }
-        },
-        4 => {
-            match name {
-                _ => None,
-            }
-        },
-        5 => {
-            match name {
-                _ => None,
-            }
-        },
-        6 => {
-            match name {
-                _ => None,
-            }
-        },
-        7 => {
-            match name {
-                _ => None,
-            }
-        },
-        8 => {
-            match name {
-                _ => None,
-            }
-        },
-        9 => {
-            match name {
-                _ => None,
-            }
-        },
-        10 => {
-            match name {
-                _ => None,
-            }
-        },
-        11 => {
-            match name {
-                _ => None,
-            }
-        },
-        12 => {
-            match name {
-                _ => None,
-            }
-        },
-        13 => {
-            match name {
-                _ => None,
-            }
-        },
-        _ => None,
+impl ToString for Token {
+    fn to_string(&self) -> String {
+        (match self {
+            Token::Eof => "end of program",
+
+            // Punctuators
+            Token::ColonColon => "::",
+            Token::Attribute => "@",
+            Token::LeftParen => "(",
+            Token::RightParen => ")",
+            Token::LeftBracket => "[",
+            Token::RightBracket => "]",
+            Token::LeftBrace => "{",
+            Token::RightBrace => "}",
+            Token::Dot => ".",
+            Token::Semicolon => ";",
+            Token::Comma => ",",
+            Token::Lt => "<",
+            Token::Gt => ">",
+            Token::Le => "<=",
+            Token::Ge => ">=",
+            Token::Equals,
+            Token::NotEquals,
+            Token::StrictEquals,
+            Token::StrictNotEquals,
+            Token::Plus,
+            Token::Minus,
+            Token::Times,
+            Token::Div,
+            Token::Remainder,
+            Token::Increment,
+            Token::Decrement,
+            Token::LeftShift,
+            Token::RightShift,
+            Token::UnsignedRightShift,
+            Token::BitwiseAnd,
+            Token::BitwiseXor,
+            Token::BitwiseOr,
+            Token::BitwiseNot,
+            Token::LogicalAnd,
+            Token::LogicalXor,
+            Token::LogicalOr,
+            Token::Question,
+            Token::Exclamation,
+            Token::Colon,
+            Token::Assign,
+            Token::AddAssign,
+            Token::SubtractAssign,
+            Token::MultiplyAssign,
+            Token::DivideAssign,
+            Token::RemainderAssign,
+            Token::LeftShiftAssign,
+            Token::RightShiftAssign,
+            Token::UnsignedRightShiftAssign,
+            Token::BitwiseAndAssign,
+            Token::BitwiseXorAssign,
+            Token::BitwiseOrAssign,
+            Token::LogicalAndAssign,
+            Token::LogicalXorAssign,
+            Token::LogicalOrAssign,
+            Token::Power,
+            Token::PowerAssign,
+            Token::NullCoalescing,
+            Token::NullCoalescingAssign,
+            Token::OptionalChaining,
+
+            // Reserved words
+            Token::As => "as",
+            Token::Break => "break",
+            Token::Case => "case",
+            Token::Catch => "catch",
+            Token::Class => "class",
+            Token::Const => "const",
+            Token::Continue => "continue",
+            Token::Default => "default",
+            Token::Delete => "delete",
+            Token::Do => "do",
+            Token::Else => "else",
+            Token::Extends => "extends",
+            Token::False => "false",
+            Token::Finally => "finally",
+            Token::For => "for",
+            Token::Function => "function",
+            Token::If => "if",
+            Token::Implements => "implements",
+            Token::Import => "import",
+            Token::In => "in",
+            Token::Instanceof => "instanceof",
+            Token::Interface => "interface",
+            Token::Internal => "internal",
+            Token::Is => "is",
+            Token::New => "new",
+            Token::Null => "null",
+            Token::Package => "package",
+            Token::Private => "private",
+            Token::Protected => "protected",
+            Token::Public => "public",
+            Token::Return => "return",
+            Token::Super => "super",
+            Token::Switch => "switch",
+            Token::This => "this",
+            Token::Throw => "throw",
+            Token::True => "true",
+            Token::Try => "try",
+            Token::Typeof => "typeof",
+            Token::Use => "use",
+            Token::Var => "var",
+            Token::Void => "void",
+            Token::While => "while",
+            Token::With => "with",
+        }).into()
     }
 }
 
@@ -260,7 +371,7 @@ impl<'input> Tokenizer<'input> {
         }
         let location = start.combine_with(self.current_character_location());
         if reserved_words {
-            if let Some(token) = match_reserved_word(name.as_ref()) {
+            if let Some(token) = keywords::identifier_name_to_keyword_token(name.as_ref()) {
                 return Ok(Some((token, location)));
             }
         }
