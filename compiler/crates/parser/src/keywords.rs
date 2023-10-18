@@ -1,7 +1,12 @@
 use crate::Token;
 
-/// Attempts to convert an IdentifierName to a keyword token.
-pub fn identifier_name_to_keyword_token(name: &str) -> Option<Token> {
+/// Checks if an IdentifierName is a reserved word.
+pub fn is_reserved_word(name: &str) -> bool {
+    reserved_word_token(name).is_some()
+}
+
+/// Attempts to convert an IdentifierName to a reserved word token.
+pub fn reserved_word_token(name: &str) -> Option<Token> {
     match name.len() {
         1 => None,
         2 => {

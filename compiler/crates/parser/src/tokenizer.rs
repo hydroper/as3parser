@@ -1,6 +1,7 @@
 use std::rc::Rc;
 use crate::{Source, util::CodePointsReader, IntolerableError, Location, character_validation, Diagnostic, DiagnosticKind, Comment, keywords};
 
+/// Represents a lexical token.
 #[derive(Clone, PartialEq)]
 pub enum Token {
     Eof,
@@ -391,43 +392,46 @@ impl<'input> Tokenizer<'input> {
 
     fn scan_identifier(&mut self, reserved_words: bool) -> Result<Option<(Token, Location)>, IntolerableError> {
         let start = self.current_character_location();
-        let Some(ch) = self.consume_identifier_start()? else {
+        let mut escaped = false;
+        let Some((ch, escaped_2)) = self.consume_identifier_start()? else {
             return Ok(None);
         };
+        escaped = escaped || escaped_2;
         let mut name = String::new();
         name.push(ch);
-        while let Some(ch) = self.consume_identifier_part()? {
+        while let Some((ch, escaped_2)) = self.consume_identifier_part()? {
+            escaped = escaped || escaped_2;
             name.push(ch);
         }
         let location = start.combine_with(self.current_character_location());
-        if reserved_words {
-            if let Some(token) = keywords::identifier_name_to_keyword_token(name.as_ref()) {
+        if reserved_words && !escaped {
+            if let Some(token) = keywords::reserved_word_token(name.as_ref()) {
                 return Ok(Some((token, location)));
             }
         }
-        result_here
+        Ok(Some((Token::Identifier(name), location)))
     }
 
-    fn consume_identifier_start(&mut self) -> Result<Option<char>, IntolerableError> {
+    fn consume_identifier_start(&mut self) -> Result<Option<(char, bool)>, IntolerableError> {
         let ch = self.code_points.peek_or_zero();
         if character_validation::is_identifier_start(ch) {
-            return Ok(Some(ch));
+            return Ok(Some((ch, false)));
         }
         if self.code_points.peek_or_zero() == '\\' {
             self.code_points.next();
-            return Ok(Some(self.expect_unicode_escape_sequence()?));
+            return Ok(Some((self.expect_unicode_escape_sequence()?, true)));
         }
         Ok(None)
     }
 
-    fn consume_identifier_part(&mut self) -> Result<Option<char>, IntolerableError> {
+    fn consume_identifier_part(&mut self) -> Result<Option<(char, bool)>, IntolerableError> {
         let ch = self.code_points.peek_or_zero();
         if character_validation::is_identifier_part(ch) {
-            return Ok(Some(ch));
+            return Ok(Some((ch, false)));
         }
         if self.code_points.peek_or_zero() == '\\' {
             self.code_points.next();
-            return Ok(Some(self.expect_unicode_escape_sequence()?));
+            return Ok(Some((self.expect_unicode_escape_sequence()?, true)));
         }
         Ok(None)
     }
