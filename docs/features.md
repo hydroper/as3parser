@@ -1,6 +1,6 @@
 # Features
 
-This project adds a number of features to ActionScript 3.0. Some of them must be enabled explicitly as they affect existing sources and some allow for format migration, such as ASDoc comments.
+This project would add a number of features to ActionScript 3.0. Some of them must be enabled explicitly as they affect existing sources and some allow for format migration, such as ASDoc comments.
 
 ## Global
 
