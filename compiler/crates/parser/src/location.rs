@@ -15,8 +15,10 @@ pub struct Location {
     /// Last line number, counted from one.
     pub(crate) last_line_number: usize,
 
+    /// First UTF-8 offset.
     pub(crate) first_offset: usize,
 
+    /// Last UTF-8 offset.
     pub(crate) last_offset: usize,
 }
 
@@ -45,6 +47,51 @@ impl PartialOrd for Location {
 }
 
 impl Location {
+    /// Builds a location.
+    pub fn with_lines_and_offsets(
+        source: &Rc<Source>,
+        first_line_number: usize,
+        last_line_number: usize,
+        first_offset: usize,
+        last_offset: usize,
+    ) -> Self {
+        Self {
+            source: Rc::clone(source),
+            first_line_number,
+            last_line_number,
+            first_offset,
+            last_offset,
+        }
+    }
+
+    /// Builds a location.
+    pub fn with_line_and_offsets(
+        source: &Rc<Source>,
+        line_number: usize,
+        first_offset: usize,
+        last_offset: usize,
+    ) -> Self {
+        Self::with_lines_and_offsets(source, line_number, line_number, first_offset, last_offset)
+    }
+
+    /// Builds a location.
+    pub fn with_line_and_offset(source: &Rc<Source>, line_number: usize, offset: usize) -> Self {
+        Self::with_lines_and_offsets(source, line_number, line_number, offset, offset)
+    }
+
+    /// Build a location by combining two locations. `self`
+    /// serves as the first location, while `other` serves as the
+    /// last location.
+    pub fn combine_with(&self, other: Location) -> Self {
+        Self {
+            source: Rc::clone(&self.source),
+            first_line_number: self.first_line_number,
+            last_line_number: other.last_line_number,
+            first_offset: self.first_offset,
+            last_offset: other.last_offset,
+        }
+    }
+
     /// The source file that this location belongs to.
     pub fn source(&self) -> Rc<Source> {
         Rc::clone(&self.source)

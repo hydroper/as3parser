@@ -1,6 +1,6 @@
 use std::rc::Rc;
 use std::cell::{RefCell, Cell};
-use crate::Diagnostic;
+use crate::{Diagnostic, Comment};
 use crate::compiler_options::CompilerOptions;
 
 /// Represents an ActionScript source file.
@@ -14,6 +14,10 @@ pub struct Source {
     pub(crate) warning_count: Cell<u32>,
     pub(crate) invalidated: Cell<bool>,
     pub(crate) compiler_options: Rc<CompilerOptions>,
+
+    /// The comments present in the source file. It is allowed to
+    /// dynamically modify their contents in the structure.
+    pub comments: RefCell<Vec<Comment>>,
 }
 
 impl Source {
@@ -29,6 +33,7 @@ impl Source {
             error_count: Cell::new(0),
             warning_count: Cell::new(0),
             compiler_options: Rc::clone(compiler_options),
+            comments: RefCell::new(vec![]),
         })
     }
 

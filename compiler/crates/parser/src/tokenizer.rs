@@ -45,13 +45,7 @@ impl<'input> Tokenizer<'input> {
 
     pub fn current_character_location(&self) -> Location {
         let offset = self.code_points.index();
-        Location {
-            source: Rc::clone(&self.source),
-            first_line_number: self.current_line_number,
-            last_line_number: self.current_line_number,
-            first_offset: offset,
-            last_offset: offset,
-        }
+        Location::with_line_and_offset(&self.source, self.current_line_number, offset)
     }
 
     // LineTerminator
@@ -78,6 +72,8 @@ impl<'input> Tokenizer<'input> {
             return false;
         }
         let ch2 = self.code_points.peek_at_or_zero(1);
-        if ch == '*' {}
+        if ch2 == '/' {
+            let start = self.current_character_location();
+        }
     }
 }
