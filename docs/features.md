@@ -464,7 +464,7 @@ _`as` result type_: The `as` operator returns `T?`.
 
 ## Arrow functions
 
-Arrow functions with destructuring patterns are supported.
+Arrow functions with destructuring patterns are supported. They have the same semantics from ECMAScript arrow functions.
 
 ## Iterators
 
