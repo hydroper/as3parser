@@ -80,4 +80,18 @@ impl Source {
     pub fn warning_count(&self) -> u32 {
         self.warning_count.get()
     }
+    
+    /// Gets offset from line number (counted from one).
+    pub fn get_line_offset(&self, line: usize) -> Option<usize> {
+        self.line_number_offsets.borrow().get(line).map(|v| *v)
+    }
+
+    pub fn get_line_indent(&self, line: usize) -> usize {
+        let mut line_offset = self.get_line_offset(line).unwrap_or(*self.line_number_offsets.borrow().last().unwrap());
+        let mut i: usize = 0;
+        for ch in self.text[line_offset..].chars() {
+            foo_foo_foo_foo_foo;
+        }
+        i - line_offset
+    }
 }

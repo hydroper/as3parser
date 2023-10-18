@@ -723,7 +723,7 @@ impl<'input> Tokenizer<'input> {
         // Triple string literal
         if self.code_points.peek_or_zero() == delim && self.code_points.peek_at_or_zero(1) == delim {
             self.code_points.skip_count_in_place(2);
-            return self.scan_triple_string_literal(delim);
+            return self.scan_triple_string_literal(delim, start);
         }
 
         let mut builder = String::new();
@@ -754,7 +754,35 @@ impl<'input> Tokenizer<'input> {
 
         Ok(Some((Token::StringLiteral(value), location)))
     }
-    
+
+    fn scan_triple_string_literal(&mut self, delim: char, start: Location) -> Result<Option<(Token, Location)>, IntolerableError> {
+        let mut lines: Vec<String> = vec![];
+        let mut builder = String::new();
+
+        loop {
+            if let Some(s) = self.consume_escape_sequence()? {
+                builder.push_str(&s);
+            } else {
+                let ch = self.code_points.peek_or_zero();
+                if ch == delim && self.code_points.peek_at_or_zero(1) == delim && self.code_points.peek_at_or_zero(2) == delim {
+                    self.code_points.skip_count_in_place(3);
+                    lines.push(builder.clone());
+                    break;
+                } else if character_validation::is_line_terminator(ch) {
+                    lines.push(builder.clone());
+                    builder.clear();
+                    self.consume_line_terminator();
+                } else if !self.code_points.has_remaining() {
+                    self.add_unexpected_error();
+                    return Err(IntolerableError);
+                } else {
+                    builder.push(ch);
+                    self.code_points.next();
+                }
+            }
+        }
+    }
+
     fn consume_escape_sequence(&mut self) -> Result<Option<String>, IntolerableError> {
         if self.code_points.peek_or_zero() != '\\' {
             return Ok(None);
