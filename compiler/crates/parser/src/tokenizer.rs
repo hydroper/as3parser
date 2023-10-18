@@ -726,7 +726,33 @@ impl<'input> Tokenizer<'input> {
             return self.scan_triple_string_literal(delim);
         }
 
-        result_here
+        let mut builder = String::new();
+
+        loop {
+            if let Some(s) = self.consume_escape_sequence()? {
+                builder.push_str(&s);
+            } else {
+                let ch = self.code_points.peek_or_zero();
+                if ch == delim {
+                    self.code_points.next();
+                    break;
+                } else if character_validation::is_line_terminator(ch) {
+                    self.source.add_diagnostic(Diagnostic::new_syntax_error(self.current_character_ahead_location(), DiagnosticKind::UnallowedLineBreak, vec![]));
+                    self.consume_line_terminator();
+                } else if !self.code_points.has_remaining() {
+                    self.add_unexpected_error();
+                    return Err(IntolerableError);
+                } else {
+                    builder.push(ch);
+                    self.code_points.next();
+                }
+            }
+        }
+
+        let location = start.combine_with(self.current_cursor_location());
+        let value = self.source.text[(location.first_offset + 1)..(location.last_offset - 1)].to_owned();
+
+        Ok(Some((Token::StringLiteral(value), location)))
     }
     
     fn consume_escape_sequence(&mut self) -> Result<Option<String>, IntolerableError> {

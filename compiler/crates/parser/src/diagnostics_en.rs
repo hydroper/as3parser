@@ -10,6 +10,7 @@ lazy_static! {
         DiagnosticKind::UnexpectedEnd.id() => "Unexpected end of program".into(),
         DiagnosticKind::FailedProcessingNumericLiteral.id() => "Failed processing numeric literal".into(),
         DiagnosticKind::UnallowedNumericSuffix.id() => "Unallowed numeric suffix".into(),
+        DiagnosticKind::UnallowedLineBreak.id() => "Unallowed line break".into(),
         // DiagnosticKind::K.id() => "".into(),
     };
 }

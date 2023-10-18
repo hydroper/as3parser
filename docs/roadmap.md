@@ -5,7 +5,7 @@
 - [ ] *InputElementDiv*
   - [x] Identifiers
   - [x] Numeric literal
-  - [ ] String literal
+  - [x] String literal
   - [ ] Triple string literal
   - [ ] Punctuators
     - [ ] ColonColon

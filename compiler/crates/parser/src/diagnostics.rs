@@ -143,6 +143,7 @@ pub enum DiagnosticKind {
     UnexpectedEnd = 1025,
     FailedProcessingNumericLiteral = 1026,
     UnallowedNumericSuffix = 1027,
+    UnallowedLineBreak = 1028,
 }
 
 impl DiagnosticKind {
