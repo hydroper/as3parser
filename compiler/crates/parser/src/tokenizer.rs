@@ -4,6 +4,123 @@ use crate::{Source, util::CodePointsReader, IntolerableError, Location, characte
 #[derive(Copy, Clone, PartialEq)]
 pub enum Token {
     Eof,
+
+    // Reserved words
+    As,
+    Break,
+    Case,
+    Catch,
+    Class,
+    Const,
+    Continue,
+    Default,
+    Delete,
+    Do,
+    Else,
+    Extends,
+    False,
+    Finally,
+    For,
+    Function,
+    If,
+    Implements,
+    Import,
+    In,
+    Instanceof,
+    Interface,
+    Internal,
+    Is,
+    New,
+    Null,
+    Package,
+    Private,
+    Protected,
+    Public,
+    Return,
+    Super,
+    Switch,
+    This,
+    Throw,
+    True,
+    Try,
+    Typeof,
+    Use,
+    Var,
+    Void,
+    While,
+    With,
+}
+
+pub fn match_reserved_word(name: &str) -> Option<Token> {
+    match name.len() {
+        1 => None,
+        2 => {
+            match name {
+                "as" => Some(Token::As),
+                "do" => Some(Token::Do),
+                "if" => Some(Token::If),
+                "in" => Some(Token::In),
+                "is" => Some(Token::Is),
+                _ => None,
+            }
+        },
+        3 => {
+            match name {
+                _ => None,
+            }
+        },
+        4 => {
+            match name {
+                _ => None,
+            }
+        },
+        5 => {
+            match name {
+                _ => None,
+            }
+        },
+        6 => {
+            match name {
+                _ => None,
+            }
+        },
+        7 => {
+            match name {
+                _ => None,
+            }
+        },
+        8 => {
+            match name {
+                _ => None,
+            }
+        },
+        9 => {
+            match name {
+                _ => None,
+            }
+        },
+        10 => {
+            match name {
+                _ => None,
+            }
+        },
+        11 => {
+            match name {
+                _ => None,
+            }
+        },
+        12 => {
+            match name {
+                _ => None,
+            }
+        },
+        13 => {
+            match name {
+                _ => None,
+            }
+        },
+        _ => None,
+    }
 }
 
 pub struct Tokenizer<'input> {
@@ -132,16 +249,49 @@ impl<'input> Tokenizer<'input> {
     }
 
     fn scan_identifier(&mut self, reserved_words: bool) -> Result<Option<(Token, Location)>, IntolerableError> {
-        let ch = self.consume_identifier_start() else {
+        let start = self.current_character_location();
+        let Some(ch) = self.consume_identifier_start()? else {
             return Ok(None);
         };
+        let mut name = String::new();
+        name.push(ch);
+        while let Some(ch) = self.consume_identifier_part()? {
+            name.push(ch);
+        }
+        let location = start.combine_with(self.current_character_location());
+        if reserved_words {
+            if let Some(token) = match_reserved_word(name.as_ref()) {
+                return Ok(Some((token, location)));
+            }
+        }
+        result_here
     }
 
-    fn consume_identifier_start(&mut self) -> Result<char, IntolerableError> {
+    fn consume_identifier_start(&mut self) -> Result<Option<char>, IntolerableError> {
         let ch = self.code_points.peek_or_zero();
+        if character_validation::is_identifier_start(ch) {
+            return Ok(Some(ch));
+        }
+        if self.code_points.peek_or_zero() == '\\' {
+            self.code_points.next();
+            return Ok(Some(self.expect_unicode_escape_sequence()?));
+        }
+        Ok(None)
     }
 
-    fn consume_unicode_escape_sequence(&mut self) -> Result<char, IntolerableError> {
+    fn consume_identifier_part(&mut self) -> Result<Option<char>, IntolerableError> {
+        let ch = self.code_points.peek_or_zero();
+        if character_validation::is_identifier_part(ch) {
+            return Ok(Some(ch));
+        }
+        if self.code_points.peek_or_zero() == '\\' {
+            self.code_points.next();
+            return Ok(Some(self.expect_unicode_escape_sequence()?));
+        }
+        Ok(None)
+    }
+
+    fn expect_unicode_escape_sequence(&mut self) -> Result<char, IntolerableError> {
         let start = self.current_character_location();
         if self.code_points.peek_or_zero() != 'u' {
             self.add_unexpected_error();
