@@ -19,6 +19,8 @@ pub enum Token {
     Attribute,
     /// The `..` token.
     Descendants,
+    /// The `...` token.
+    Ellipsis,
     LeftParen,
     RightParen,
     LeftBracket,
@@ -153,6 +155,7 @@ impl ToString for Token {
             Token::ColonColon => "'::'",
             Token::Attribute => "'@'",
             Token::Descendants => "'..'",
+            Token::Ellipsis => "'...'",
             Token::LeftParen => "'('",
             Token::RightParen => "')'",
             Token::LeftBracket => "'['",
@@ -295,6 +298,9 @@ impl<'input> Tokenizer<'input> {
             }
         }
         if let Some(result) = self.scan_identifier(reserved_words)? {
+            return Ok(result);
+        }
+        if let Some(result) = self.scan_dot_or_numeric_literal() {
             return Ok(result);
         }
         let start = self.current_character_location();
@@ -493,5 +499,33 @@ impl<'input> Tokenizer<'input> {
         }
         self.code_points.next();
         Ok(ch as u32)
+    }
+
+    fn scan_dot_or_numeric_literal(&mut self) -> Result<(Token, Location), IntolerableError> {
+        let start = self.current_character_location();
+        let ch = self.code_points.peek_or_zero();
+        if ch == '.' {
+            self.code_points.next();
+            let seq = self.code_points.peek_seq(2);
+            // Ellipsis
+            if seq.as_ref() == ".." {
+                self.code_points.skip_count_in_place(2);
+                return Ok((Token::Ellipsis, start.combine_with(self.current_character_location())));
+            }
+            let ch = seq.get(..1).map(|ch| ch.chars().next().unwrap()).unwrap_or('\x00');
+            // Descendants
+            if ch == '.' {
+                self.code_points.next();
+                return Ok((Token::Descendants, start.combine_with(self.current_character_location())));
+            }
+            // Dot
+            if !character_validation::is_dec_digit(ch) {
+                return Ok((Token::Dot, start.combine_with(self.current_character_location())));
+            }
+
+            // NumericLiteral
+            work_here;
+        }
+        result_here
     }
 }
