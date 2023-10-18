@@ -288,7 +288,9 @@ impl<'input> Tokenizer<'input> {
         }
     }
 
-    pub fn next(&mut self, reserved_words: bool) -> Result<(Token, Location), IntolerableError> {
+    /// Scans for an InputElementDiv token. If `reserved_words` is false,
+    /// all reserved words are taken as identifiers.
+    pub fn scan_ie_div(&mut self, reserved_words: bool) -> Result<(Token, Location), IntolerableError> {
         loop {
             let ch = self.code_points.peek_or_zero();
             if character_validation::is_whitespace(ch) {
