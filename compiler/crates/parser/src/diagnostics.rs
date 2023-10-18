@@ -140,8 +140,7 @@ pub enum DiagnosticArgument {
 #[derive(Eq, PartialEq, Clone, Copy)]
 pub enum DiagnosticKind {
     UnexpectedOrInvalidToken = 1024,
-    UnexpectedToken = 1025,
-    UnexpectedEnd = 1026,
+    UnexpectedEnd = 1025,
 }
 
 impl DiagnosticKind {

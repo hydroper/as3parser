@@ -18,6 +18,21 @@ impl<'a> CodePointsReader<'a> {
         self.clone().char_indices.next().is_none()
     }
 
+    /// Skips a code point in the reader. This is equivalent to
+    /// calling `next()`.
+    pub fn skip_in_place(&mut self) {
+        self.next();
+    }
+
+    /// Skips the given number of code points in the reader.
+    pub fn skip_count_in_place(&mut self, count: usize) {
+        for _ in 0..count {
+            if self.next().is_none() {
+                break;
+            }
+        }
+    }
+
     /// Returns the current index in the string.
     pub fn index(&self) -> usize {
         self.clone().char_indices.next().map_or(0, |(i, _)| i)
@@ -44,7 +59,9 @@ impl<'a> CodePointsReader<'a> {
     pub fn peek_at(&self, index: usize) -> Option<char> {
         let mut indices = self.clone().char_indices;
         for _ in 0..index {
-            indices.next();
+            if indices.next().is_none() {
+                break;
+            }
         }
         indices.next().map(|(_, cp)| cp)
     }
