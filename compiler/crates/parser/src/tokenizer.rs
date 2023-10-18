@@ -1,5 +1,7 @@
 use std::rc::Rc;
-use crate::{Source, util::CodePointsReader, IntolerableError, Location, character_validation, Diagnostic, DiagnosticKind, Comment, keywords};
+use std::str::FromStr;
+use conv::ValueFrom;
+use crate::{Source, util::CodePointsReader, IntolerableError, Location, character_validation, Diagnostic, DiagnosticKind, Comment, keywords, NumericRangeError};
 
 /// Represents a lexical token.
 #[derive(Clone, PartialEq)]
@@ -300,28 +302,36 @@ impl<'input> Tokenizer<'input> {
         if let Some(result) = self.scan_identifier(reserved_words)? {
             return Ok(result);
         }
-        if let Some(result) = self.scan_dot_or_numeric_literal() {
+        if let Some(result) = self.scan_dot_or_numeric_literal()? {
             return Ok(result);
         }
-        let start = self.current_character_location();
+        let start = self.current_cursor_location();
 
         final_result_here
     }
 
+    /// Current line number, counted from one.
     pub fn current_line_number(&self) -> usize {
         self.current_line_number
     }
 
-    pub fn current_character_location(&self) -> Location {
+    fn current_character_ahead_location(&self) -> Location {
+        let offset = self.code_points.index();
+        let mut next_code_points = self.code_points.clone();
+        next_code_points.next();
+        Location::with_line_and_offsets(&self.source, self.current_line_number, offset, next_code_points.index() + 1)
+    }
+
+    fn current_cursor_location(&self) -> Location {
         let offset = self.code_points.index();
         Location::with_line_and_offset(&self.source, self.current_line_number, offset)
     }
 
-    pub fn add_unexpected_error(&self) {
+    fn add_unexpected_error(&self) {
         if self.code_points.has_remaining() {
-            self.source.add_diagnostic(Diagnostic::new_syntax_error(self.current_character_location(), DiagnosticKind::UnexpectedOrInvalidToken, vec![]))
+            self.source.add_diagnostic(Diagnostic::new_syntax_error(self.current_character_ahead_location(), DiagnosticKind::UnexpectedOrInvalidToken, vec![]))
         } else {
-            self.source.add_diagnostic(Diagnostic::new_syntax_error(self.current_character_location(), DiagnosticKind::UnexpectedEnd, vec![]))
+            self.source.add_diagnostic(Diagnostic::new_syntax_error(self.current_cursor_location(), DiagnosticKind::UnexpectedEnd, vec![]))
         }
     }
 
@@ -349,12 +359,12 @@ impl<'input> Tokenizer<'input> {
         }
         let ch2 = self.code_points.peek_at_or_zero(1);
         if ch2 == '/' {
-            let start = self.current_character_location();
+            let start = self.current_cursor_location();
             self.code_points.skip_count_in_place(2);
             while !character_validation::is_line_terminator(self.code_points.peek_or_zero()) && self.code_points.has_remaining() {
                 self.code_points.skip_in_place();
             }
-            let location = start.combine_with(self.current_character_location());
+            let location = start.combine_with(self.current_cursor_location());
             self.consume_line_terminator();
 
             self.source.comments.borrow_mut().push(Comment {
@@ -366,7 +376,7 @@ impl<'input> Tokenizer<'input> {
             return Ok(true);
         }
         if ch2 == '*' {
-            let start = self.current_character_location();
+            let start = self.current_cursor_location();
             self.code_points.skip_count_in_place(2);
 
             loop {
@@ -383,7 +393,7 @@ impl<'input> Tokenizer<'input> {
                 }
             }
 
-            let location = start.combine_with(self.current_character_location());
+            let location = start.combine_with(self.current_cursor_location());
 
             self.source.comments.borrow_mut().push(Comment {
                 multiline: true,
@@ -397,7 +407,7 @@ impl<'input> Tokenizer<'input> {
     }
 
     fn scan_identifier(&mut self, reserved_words: bool) -> Result<Option<(Token, Location)>, IntolerableError> {
-        let start = self.current_character_location();
+        let start = self.current_cursor_location();
         let mut escaped = false;
         let Some((ch, escaped_2)) = self.consume_identifier_start()? else {
             return Ok(None);
@@ -409,7 +419,7 @@ impl<'input> Tokenizer<'input> {
             escaped = escaped || escaped_2;
             name.push(ch);
         }
-        let location = start.combine_with(self.current_character_location());
+        let location = start.combine_with(self.current_cursor_location());
         if reserved_words && !escaped {
             if let Some(token) = keywords::reserved_word_token(name.as_ref()) {
                 return Ok(Some((token, location)));
@@ -443,7 +453,7 @@ impl<'input> Tokenizer<'input> {
     }
 
     fn expect_unicode_escape_sequence(&mut self) -> Result<char, IntolerableError> {
-        let start = self.current_character_location();
+        let start = self.current_cursor_location();
         if self.code_points.peek_or_zero() != 'u' {
             self.add_unexpected_error();
             return Err(IntolerableError);
@@ -457,7 +467,7 @@ impl<'input> Tokenizer<'input> {
                 | (self.expect_hex_digit()? << 4)
                 | self.expect_hex_digit()?);
             let Some(r) = r else {
-                self.source.add_diagnostic(Diagnostic::new_syntax_error(start.combine_with(self.current_character_location()), DiagnosticKind::UnexpectedOrInvalidToken, vec![]));
+                self.source.add_diagnostic(Diagnostic::new_syntax_error(start.combine_with(self.current_cursor_location()), DiagnosticKind::UnexpectedOrInvalidToken, vec![]));
                 return Err(IntolerableError);
             };
             return Ok(r);
@@ -477,7 +487,7 @@ impl<'input> Tokenizer<'input> {
             return Err(IntolerableError);
         }
         self.code_points.next();
-        let location = start.combine_with(self.current_character_location());
+        let location = start.combine_with(self.current_cursor_location());
         let r = u32::from_str_radix(&self.source.text[(start.first_offset + 2)..(location.last_offset - 1)], 16);
         let Ok(r) = r else {
             self.source.add_diagnostic(Diagnostic::new_syntax_error(location, DiagnosticKind::UnexpectedOrInvalidToken, vec![]));
@@ -501,31 +511,195 @@ impl<'input> Tokenizer<'input> {
         Ok(ch as u32)
     }
 
-    fn scan_dot_or_numeric_literal(&mut self) -> Result<(Token, Location), IntolerableError> {
-        let start = self.current_character_location();
+    fn scan_dot_or_numeric_literal(&mut self) -> Result<Option<(Token, Location)>, IntolerableError> {
+        let start = self.current_cursor_location();
         let ch = self.code_points.peek_or_zero();
+        let mut initial_dot = false;
         if ch == '.' {
+            initial_dot = true;
             self.code_points.next();
+
             let seq = self.code_points.peek_seq(2);
             // Ellipsis
-            if seq.as_ref() == ".." {
+            if seq == ".." {
                 self.code_points.skip_count_in_place(2);
-                return Ok((Token::Ellipsis, start.combine_with(self.current_character_location())));
+                return Ok(Some((Token::Ellipsis, start.combine_with(self.current_cursor_location()))));
             }
             let ch = seq.get(..1).map(|ch| ch.chars().next().unwrap()).unwrap_or('\x00');
             // Descendants
             if ch == '.' {
                 self.code_points.next();
-                return Ok((Token::Descendants, start.combine_with(self.current_character_location())));
+                return Ok(Some((Token::Descendants, start.combine_with(self.current_cursor_location()))));
             }
             // Dot
             if !character_validation::is_dec_digit(ch) {
-                return Ok((Token::Dot, start.combine_with(self.current_character_location())));
+                return Ok(Some((Token::Dot, start.combine_with(self.current_cursor_location()))));
             }
 
             // NumericLiteral
-            work_here;
+            while character_validation::is_dec_digit(self.code_points.peek_or_zero()) {
+                self.code_points.next();
+                self.consume_underscore_followed_by_dec_digit();
+            }
+        } else if ch == '0' {
+            self.code_points.next();
+            let ch_2 = self.code_points.peek_or_zero();
+
+            // HexLiteral
+            if ['X', 'x'].contains(&ch_2) {
+                self.code_points.next();
+                return self.scan_hex_literal(start.clone());
+            }
+
+            // BinLiteral;
+            if ['B', 'b'].contains(&ch_2) {
+                self.code_points.next();
+                return self.scan_bin_literal(start.clone());
+            }
+        } else if character_validation::is_dec_digit(ch) {
+            self.code_points.next();
+            while character_validation::is_dec_digit(self.code_points.peek_or_zero()) {
+                self.code_points.next();
+                self.consume_underscore_followed_by_dec_digit();
+            }
+        } else {
+            return Ok(None);
         }
-        result_here
+
+        if !initial_dot && self.code_points.peek_or_zero() == '.' {
+            self.code_points.next();
+            if !character_validation::is_dec_digit(self.code_points.peek_or_zero()) {
+                self.add_unexpected_error();
+                return Err(IntolerableError);
+            }
+            while character_validation::is_dec_digit(self.code_points.peek_or_zero()) {
+                self.code_points.next();
+                self.consume_underscore_followed_by_dec_digit();
+            }
+        }
+
+        // Decimal exponent
+        if ['E', 'e'].contains(&self.code_points.peek_or_zero()) {
+            self.code_points.next();
+            if ['+', '-'].contains(&self.code_points.peek_or_zero()) {
+                self.code_points.next();
+            }
+            if !character_validation::is_dec_digit(self.code_points.peek_or_zero()) {
+                self.add_unexpected_error();
+                return Err(IntolerableError);
+            }
+            while character_validation::is_dec_digit(self.code_points.peek_or_zero()) {
+                self.code_points.next();
+                self.consume_underscore_followed_by_dec_digit();
+            }
+        }
+
+        self.unallow_numeric_suffix();
+
+        let location = start.combine_with(self.current_cursor_location());
+        let string = self.source.text[location.first_offset..location.last_offset].to_owned().replace('_', "");
+
+        let Ok(v) = f64::from_str(&string) else {
+            self.source.add_diagnostic(Diagnostic::new_syntax_error(location, DiagnosticKind::FailedProcessingNumericLiteral, vec![]));
+            return Err(IntolerableError);
+        };
+
+        Ok(Some((Token::NumericLiteral(v), location)))
+    }
+
+    fn scan_hex_literal(&mut self, start: Location) -> Result<Option<(Token, Location)>, IntolerableError> {
+        if !character_validation::is_hex_digit(self.code_points.peek_or_zero()) {
+            self.add_unexpected_error();
+            return Err(IntolerableError);
+        }
+        while character_validation::is_hex_digit(self.code_points.peek_or_zero()) {
+            self.code_points.next();
+            self.consume_underscore_followed_by_hex_digit();
+        }
+
+        self.unallow_numeric_suffix();
+
+        let location = start.combine_with(self.current_cursor_location());
+
+        let s = self.source.text[(location.first_offset + 2)..location.last_offset].replace('_', "");
+        let n = u64::from_str_radix(&s, 16);
+        let n = n.map_err(|_| NumericRangeError)
+            .and_then(|n| f64::value_from(n).map_err(|_| NumericRangeError));
+
+        let Ok(n) = n else {
+            self.source.add_diagnostic(Diagnostic::new_syntax_error(location, DiagnosticKind::FailedProcessingNumericLiteral, vec![]));
+            return Err(IntolerableError);
+        };
+
+        Ok(Some((Token::NumericLiteral(n), location)))
+    }
+
+    fn scan_bin_literal(&mut self, start: Location) -> Result<Option<(Token, Location)>, IntolerableError> {
+        if !character_validation::is_bin_digit(self.code_points.peek_or_zero()) {
+            self.add_unexpected_error();
+            return Err(IntolerableError);
+        }
+        while character_validation::is_bin_digit(self.code_points.peek_or_zero()) {
+            self.code_points.next();
+            self.consume_underscore_followed_by_bin_digit();
+        }
+
+        self.unallow_numeric_suffix();
+
+        let location = start.combine_with(self.current_cursor_location());
+
+        let s = self.source.text[(location.first_offset + 2)..location.last_offset].replace('_', "");
+        let n = u64::from_str_radix(&s, 2);
+        let n = n.map_err(|_| NumericRangeError)
+            .and_then(|n| f64::value_from(n).map_err(|_| NumericRangeError));
+
+        let Ok(n) = n else {
+            self.source.add_diagnostic(Diagnostic::new_syntax_error(location, DiagnosticKind::FailedProcessingNumericLiteral, vec![]));
+            return Err(IntolerableError);
+        };
+
+        Ok(Some((Token::NumericLiteral(n), location)))
+    }
+
+    fn consume_underscore_followed_by_dec_digit(&mut self) -> Result<(), IntolerableError> {
+        if self.code_points.peek_or_zero() == '_' {
+            self.code_points.next();
+            if !character_validation::is_dec_digit(self.code_points.peek_or_zero()) {
+                self.add_unexpected_error();
+                return Err(IntolerableError);
+            }
+            self.code_points.next();
+        }
+        Ok(())
+    }
+
+    fn consume_underscore_followed_by_hex_digit(&mut self) -> Result<(), IntolerableError> {
+        if self.code_points.peek_or_zero() == '_' {
+            self.code_points.next();
+            if !character_validation::is_hex_digit(self.code_points.peek_or_zero()) {
+                self.add_unexpected_error();
+                return Err(IntolerableError);
+            }
+            self.code_points.next();
+        }
+        Ok(())
+    }
+
+    fn consume_underscore_followed_by_bin_digit(&mut self) -> Result<(), IntolerableError> {
+        if self.code_points.peek_or_zero() == '_' {
+            self.code_points.next();
+            if !character_validation::is_bin_digit(self.code_points.peek_or_zero()) {
+                self.add_unexpected_error();
+                return Err(IntolerableError);
+            }
+            self.code_points.next();
+        }
+        Ok(())
+    }
+
+    fn unallow_numeric_suffix(&self) {
+        if character_validation::is_identifier_start(self.code_points.peek_or_zero()) {
+            self.add_unexpected_error();
+        }
     }
 }

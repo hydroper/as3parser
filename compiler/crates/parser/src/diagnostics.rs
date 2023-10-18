@@ -141,6 +141,8 @@ pub enum DiagnosticArgument {
 pub enum DiagnosticKind {
     UnexpectedOrInvalidToken = 1024,
     UnexpectedEnd = 1025,
+    FailedProcessingNumericLiteral = 1026,
+    UnallowedNumericSuffix = 1027,
 }
 
 impl DiagnosticKind {

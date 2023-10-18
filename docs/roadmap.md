@@ -4,7 +4,7 @@
 
 - [ ] *InputElementDiv*
   - [x] Identifiers
-  - [ ] Numeric literal
+  - [x] Numeric literal
   - [ ] String literal
   - [ ] Triple string literal
   - [ ] Punctuators
@@ -18,7 +18,7 @@
     - [ ] RightBracket
     - [ ] LeftBrace
     - [ ] RightBrace
-    - [ ] Dot
+    - [x] Dot
     - [ ] Semicolon
     - [ ] Comma
     - [ ] Lt
