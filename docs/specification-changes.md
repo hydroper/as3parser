@@ -1,5 +1,7 @@
 # Language specification changes
 
+This document is incomplete yet.
+
 ## Lexical structure
 
 - Added punctuators:
@@ -24,6 +26,8 @@
   - Triple string literal
 - Added escapes:
   - Unicode scalar escape (`\u{}`), present in string literals and identifiers
+- String literal
+  - Allowed escape sequences of line terminator
 
 ## Expressions
 

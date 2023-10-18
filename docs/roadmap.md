@@ -18,6 +18,7 @@
     - [ ] RightBracket
     - [ ] LeftBrace
     - [ ] RightBrace
+    - [ ] FatArrow
     - [x] Dot
     - [ ] Semicolon
     - [ ] Comma

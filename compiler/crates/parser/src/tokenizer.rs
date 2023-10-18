@@ -77,6 +77,8 @@ pub enum Token {
     LogicalAndAssign,
     LogicalXorAssign,
     LogicalOrAssign,
+    /// `=>`
+    FatArrow,
     /// `**`
     Power,
     /// `**=`
@@ -167,6 +169,7 @@ impl ToString for Token {
             Token::Dot => "'.'",
             Token::Semicolon => "';'",
             Token::Comma => "','",
+            Token::FatArrow => "=>",
             Token::Lt => "'<'",
             Token::Gt => "'>'",
             Token::Le => "'<='",
@@ -305,6 +308,9 @@ impl<'input> Tokenizer<'input> {
             return Ok(result);
         }
         if let Some(result) = self.scan_dot_or_numeric_literal()? {
+            return Ok(result);
+        }
+        if let Some(result) = self.scan_string_literal()? {
             return Ok(result);
         }
         let start = self.current_cursor_location();
@@ -454,6 +460,7 @@ impl<'input> Tokenizer<'input> {
         Ok(None)
     }
 
+    /// Expects UnicodeEscapeSequence starting from `u`.
     fn expect_unicode_escape_sequence(&mut self) -> Result<char, IntolerableError> {
         let start = self.current_cursor_location();
         if self.code_points.peek_or_zero() != 'u' {
@@ -702,6 +709,91 @@ impl<'input> Tokenizer<'input> {
     fn unallow_numeric_suffix(&self) {
         if character_validation::is_identifier_start(self.code_points.peek_or_zero()) {
             self.add_unexpected_error();
+        }
+    }
+
+    fn scan_string_literal(&mut self) -> Result<Option<(Token, Location)>, IntolerableError> {
+        let delim = self.code_points.peek_or_zero();
+        if !['"', '\''].contains(&delim) {
+            return Ok(None);
+        }
+        let start = self.current_cursor_location();
+        self.code_points.next();
+
+        // Triple string literal
+        if self.code_points.peek_or_zero() == delim && self.code_points.peek_at_or_zero(1) == delim {
+            self.code_points.skip_count_in_place(2);
+            return self.scan_triple_string_literal(delim);
+        }
+
+        result_here
+    }
+    
+    fn consume_escape_sequence(&mut self) -> Result<Option<String>, IntolerableError> {
+        if self.code_points.peek_or_zero() != '\\' {
+            return Ok(None);
+        }
+        self.code_points.next();
+        if !self.code_points.has_remaining() {
+            self.add_unexpected_error();
+            return Err(IntolerableError);
+        }
+        if self.consume_line_terminator() {
+            return Ok(Some("".into()));
+        }
+        let ch = self.code_points.peek_or_zero();
+        match ch {
+            '\'' | '"' | '\\' => {
+                self.code_points.next();
+                Ok(Some(ch.into()))
+            },
+            'u' => {
+                Ok(Some(self.expect_unicode_escape_sequence()?.into()))
+            },
+            'x' => {
+                self.code_points.next();
+                let v = (self.expect_hex_digit()? << 4) | self.expect_hex_digit()?;
+                let v = char::from_u32(v).unwrap();
+                Ok(Some(v.into()))
+            },
+            'b' => {
+                self.code_points.next();
+                Ok(Some('\x08'.into()))
+            },
+            'f' => {
+                self.code_points.next();
+                Ok(Some('\x0C'.into()))
+            },
+            'n' => {
+                self.code_points.next();
+                Ok(Some('\x0A'.into()))
+            },
+            'r' => {
+                self.code_points.next();
+                Ok(Some('\x0D'.into()))
+            },
+            't' => {
+                self.code_points.next();
+                Ok(Some('\x09'.into()))
+            },
+            'v' => {
+                self.code_points.next();
+                Ok(Some('\x0B'.into()))
+            },
+            '0' => {
+                self.code_points.next();
+                if character_validation::is_dec_digit(self.code_points.peek_or_zero()) {
+                    self.add_unexpected_error();
+                }
+                Ok(Some('\x00'.into()))
+            },
+            ch => {
+                if character_validation::is_dec_digit(ch) {
+                    self.add_unexpected_error();
+                }
+                self.code_points.next();
+                Ok(Some(ch.into()))
+            },
         }
     }
 }
