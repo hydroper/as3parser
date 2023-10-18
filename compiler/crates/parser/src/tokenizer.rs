@@ -53,4 +53,31 @@ impl<'input> Tokenizer<'input> {
             last_offset: offset,
         }
     }
+
+    // LineTerminator
+    fn consume_line_terminator(&mut self) -> bool {
+        let ch = self.code_points.peek_or_zero();
+        if ch == '\x0D' && self.code_points.peek_at_or_zero(1) == '\x0A' {
+            self.code_points.next();
+            self.code_points.next();
+            self.source.line_number_offsets.borrow_mut().push(self.code_points.index());
+            self.current_line_number += 1;
+            return true;
+        }
+        if character_validation::is_line_terminator(ch) {
+            self.source.line_number_offsets.borrow_mut().push(self.code_points.index());
+            self.current_line_number += 1;
+            return true;
+        }
+        false
+    }
+
+    fn consume_comment(&mut self) -> bool {
+        let ch = self.code_points.peek_or_zero();
+        if ch != '/' {
+            return false;
+        }
+        let ch2 = self.code_points.peek_at_or_zero(1);
+        if ch == '*' {}
+    }
 }

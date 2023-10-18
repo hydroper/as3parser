@@ -40,6 +40,21 @@ impl<'a> CodePointsReader<'a> {
         self.clone().next_or_zero()
     }
 
+    /// Peeks the next code point at the given zero based code point index.
+    pub fn peek_at(&self, index: usize) -> Option<char> {
+        let mut indices = self.clone().char_indices;
+        for _ in 0..index {
+            indices.next();
+        }
+        indices.next().map(|(_, cp)| cp)
+    }
+
+    /// Peeks the next code point at the given zero based code point index.
+    /// If there are no code points available, returns U+00.
+    pub fn peek_at_or_zero(&self, index: usize) -> char {
+        self.peek_at(index).unwrap_or('\x00')
+    }
+
     /// Peeks a number of code points until the string's end.
     pub fn peek_seq(&self, num_code_points: u64) -> String {
         let mut r = String::new();

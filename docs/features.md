@@ -367,8 +367,12 @@ The record type is simply a plain `Object` with compile-time type checking. Any 
 type R = {
     // Optional field
     x?: String,
+
+    ["default"]: *,
 };
 ```
+
+A field may be read-only by preceding it with the context keyword `readonly`.
 
 ## Plain object record type
 
@@ -415,14 +419,6 @@ type F = (a: T, b?: T, ...c) => void;
 Some improvements to the Vector type:
 
 - You can assign an array initializer directly to a `Vector.<T>` typed variable.
-
-## Template literal
-
-The ECMAScript template literal is available:
-
-```as3
-f `${x}`;
-```
 
 ## String literal type
 
