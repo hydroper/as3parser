@@ -13,10 +13,7 @@ pub struct Source {
     pub(crate) warning_count: Cell<u32>,
     pub(crate) invalidated: Cell<bool>,
     pub(crate) compiler_options: Rc<CompilerOptions>,
-
-    /// The comments present in the source file. It is allowed to
-    /// dynamically modify their contents in the structure.
-    pub comments: RefCell<Vec<Comment>>,
+    pub(crate) comments: RefCell<Vec<Comment>>,
 }
 
 impl Source {
@@ -50,6 +47,12 @@ impl Source {
     /// and/or verification.
     pub fn invalidated(&self) -> bool {
         self.invalidated.get()
+    }
+
+    /// The comments present in the source file. It is allowed to
+    /// dynamically modify their contents in the structure.
+    pub fn comments(&self) -> &RefCell<Vec<Comment>> {
+        &self.comments
     }
 
     /// Diagnostics of the source file after parsing and/or

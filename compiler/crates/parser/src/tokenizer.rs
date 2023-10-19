@@ -778,6 +778,7 @@ impl<'input> Tokenizer<'input> {
             return true;
         }
         if character_validation::is_line_terminator(ch) {
+            self.code_points.next();
             self.source.line_number_offsets.borrow_mut().push(self.code_points.index());
             self.current_line_number += 1;
             return true;
@@ -802,7 +803,7 @@ impl<'input> Tokenizer<'input> {
 
             self.source.comments.borrow_mut().push(Comment {
                 multiline: false,
-                content: self.source.text[location.first_offset()..location.last_offset()].to_owned(),
+                content: self.source.text[(location.first_offset() + 2)..location.last_offset()].to_owned(),
                 location,
             });
 
@@ -830,7 +831,7 @@ impl<'input> Tokenizer<'input> {
 
             self.source.comments.borrow_mut().push(Comment {
                 multiline: true,
-                content: self.source.text[location.first_offset()..(location.last_offset() - 2)].to_owned(),
+                content: self.source.text[(location.first_offset() + 2)..(location.last_offset() - 2)].to_owned(),
                 location,
             });
 
@@ -1534,5 +1535,34 @@ mod tests {
         assert!(matches!(tokenizer.scan_ie_div(true), Ok((Token::Identifier(_n), _))));
         assert!(matches!(tokenizer.scan_ie_div(true), Ok((Token::Times, _))));
         assert!(matches!(tokenizer.scan_ie_div(true), Ok((Token::Identifier(_n), _))));
+    }
+
+    #[test]
+    fn tokenize_comments() {
+        let _n = "n".to_owned();
+        let source = Source::new(None, "
+            // Single-line comment
+            /* Multi-line comment */
+        ".into(), &CompilerOptions::new());
+        let mut tokenizer = Tokenizer::new(&source, &source.text());
+        assert!(matches!(tokenizer.scan_ie_div(true), Ok((Token::Eof, _))));
+        assert_eq!(source.comments().borrow()[0].content(), " Single-line comment");
+        assert_eq!(source.comments().borrow()[1].content(), " Multi-line comment ");
+    }
+
+    #[test]
+    fn tokenize_strings() {
+        let _string1 = "Some content".to_owned();
+        let _string2 = "Another\ncontent".to_owned();
+        let source = Source::new(None, r###"
+            "Some content"
+            """
+            Another
+            content
+            """
+        "###.into(), &CompilerOptions::new());
+        let mut tokenizer = Tokenizer::new(&source, &source.text());
+        assert!(matches!(tokenizer.scan_ie_div(true), Ok((Token::StringLiteral(_string1), _))));
+        assert!(matches!(tokenizer.scan_ie_div(true), Ok((Token::StringLiteral(_string2), _))));
     }
 }

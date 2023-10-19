@@ -24,6 +24,8 @@ This document is incomplete yet.
   - `type`
 - Added literals:
   - Triple string literal
+    - Line breaks produce `\n`
+    - Features a particular indentation handling
 - Added escapes:
   - Unicode scalar escape (`\u{}`), present in string literals and identifiers
 - String literal
