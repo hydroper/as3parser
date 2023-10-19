@@ -8,7 +8,7 @@ pub struct QualifiedIdentifier {
 }
 
 pub enum IdentifierOrBrackets {
-    Identifier(String),
+    Identifier(String, Location),
     Brackets(Rc<Expression>),
 }
 
@@ -40,6 +40,14 @@ pub enum ExpressionKind {
         /// Element sequence possibly containing RestExpressions.
         elements: Vec<Rc<Expression>>,
         type_annotation: Option<Rc<TypeAnnotation>>,
+    },
+    ObjectInitializer {
+        fields: Vec<ObjectFieldOrRest>,
+        type_annotation: Option<Rc<TypeAnnotation>>,
+    },
+    FunctionExpression {
+        name: Option<(String, Location)>,
+        common: Rc<FunctionCommon>,
     },
 
     /// Used as a base for optional chaining operators from
@@ -86,4 +94,94 @@ pub enum ReservedNamespace {
     Private,
     Protected,
     Internal,
+}
+
+pub enum ObjectFieldOrRest {
+    Field {
+        key: Rc<(ObjectKey, Location)>,
+        /// A key suffix that has effect solely when parsing
+        /// an object initializer as a destructuring pattern.
+        #[doc(hidden)]
+        key_suffix: ObjectKeySuffix,
+        /// If `None`, this is a shorthand field.
+        value: Option<Rc<Expression>>,
+    },
+    Rest(Rc<Expression>),
+}
+
+pub enum ObjectKeySuffix {
+    None,
+    NonNull,
+}
+
+pub enum ObjectKey {
+    Identifier(String),
+    String(String),
+    Number(f64),
+    Brackets(Rc<Expression>),
+}
+
+pub struct TypeAnnotation {
+    pub location: Location,
+    pub kind: TypeAnnotationKind,
+}
+
+pub enum TypeAnnotationKind {
+    QualifiedIdentifier(QualifiedIdentifier),
+    Member {
+        base: Rc<TypeAnnotation>,
+        member: QualifiedIdentifier,
+    },
+    Tuple(Vec<Rc<TypeAnnotation>>),
+    Record(Vec<RecordTypeField>),
+    Void,
+    Nullable(Rc<TypeAnnotation>),
+    NonNullable(Rc<TypeAnnotation>),
+    FunctionType {
+        params: Vec<FunctionTypeParam>,
+        return_annotation: Rc<TypeAnnotation>,
+    },
+    StringLiteral(String),
+    NumberLiteral(f64),
+    Union(Vec<Rc<TypeAnnotation>>),
+    /// `&`
+    Complement {
+        base: Rc<TypeAnnotation>,
+        complement: Rc<TypeAnnotation>,
+    },
+    /// `base.<T1, Tn>`
+    TypeArguments {
+        base: Rc<TypeAnnotation>,
+        arguments: Vec<Rc<TypeAnnotation>>,
+    },
+}
+
+pub struct FunctionTypeParam {
+    pub kind: FunctionTypeParamKind,
+    pub name: (String, Location),
+    pub type_annotation: Option<Rc<TypeAnnotation>>,
+}
+
+pub enum FunctionTypeParamKind {
+    Required,
+    Optional,
+    Rest,
+}
+
+pub struct RecordTypeField {
+    pub key: Rc<(RecordTypeKey, Location)>,
+    pub key_suffix: RecordTypeKeySuffix,
+}
+
+pub enum RecordTypeKeySuffix {
+    None,
+    NonNullable,
+    Nullable,
+}
+
+pub enum RecordTypeKey {
+    Identifier(String),
+    String(String),
+    Number(f64),
+    Brackets(Rc<Expression>),
 }

@@ -153,7 +153,7 @@ The tuple type is equivalent to an `Array` with additional compile-time type che
 A type or function may be generic. Type parameters in the output bytecode are simply the any type.
 
 - `.<P1, ...Pn>`
-- `where`
+- Use the `[Where("T", constraint = "SomeType")]` meta-data for constraints on classes and functions.
 
 ```as3
 class C.<T> {}
@@ -374,7 +374,7 @@ type R = {
 
 A field may be read-only by preceding it with the context keyword `readonly`.
 
-## Plain object record type
+## Plain record type
 
 The compile-time `Record.<K, V>` type allows typing plain objects at compile-time. It is equivalent to `*`. The `K` type must be `String` or `Number`.
 
