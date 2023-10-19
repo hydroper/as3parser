@@ -7,6 +7,9 @@ pub use arena::*;
 mod code_points_reader;
 pub use code_points_reader::CodePointsReader;
 
+mod rc_hashable;
+pub use rc_hashable::*;
+
 /// The `StringIncognitoFormat` trait allows formatting string parameters
 /// of arbitrary name that is computed at runtime.
 ///
