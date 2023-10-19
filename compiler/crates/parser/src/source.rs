@@ -1,7 +1,6 @@
 use std::rc::Rc;
 use std::cell::{RefCell, Cell};
-use crate::{Diagnostic, Comment, character_validation};
-use crate::compiler_options::CompilerOptions;
+use crate::*;
 
 /// Represents an ActionScript source file.
 pub struct Source {

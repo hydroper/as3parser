@@ -1,5 +1,5 @@
 pub mod character_validation;
-pub mod compiler_options;
+pub(crate) mod compiler_options;
 pub(crate) mod comment;
 pub(crate) mod diagnostics;
 pub(crate) mod diagnostics_en;
@@ -11,6 +11,7 @@ pub mod keywords;
 pub mod util;
 
 pub use comment::*;
+pub use compiler_options::*;
 pub use diagnostics::*;
 pub use errors::*;
 pub use tokenizer::*;

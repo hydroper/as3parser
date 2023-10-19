@@ -1,7 +1,7 @@
 use std::rc::Rc;
 use std::str::FromStr;
 use conv::ValueFrom;
-use crate::{Source, util::CodePointsReader, IntolerableError, Location, character_validation, Diagnostic, DiagnosticKind, Comment, keywords, NumericRangeError};
+use crate::*;
 
 /// Represents a lexical token.
 #[derive(Clone, PartialEq)]
@@ -1514,5 +1514,15 @@ impl<'input> Tokenizer<'input> {
         }
 
         Ok(None)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn tokenize_n_per_n() {
+        let source = Source::new(None, "n * n".into(), &CompilerOptions::new());
     }
 }
