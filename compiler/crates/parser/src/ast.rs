@@ -7,6 +7,11 @@ pub struct QualifiedIdentifier {
     pub name: IdentifierOrBrackets,
 }
 
+pub struct NonAttributeQualifiedIdentifier {
+    pub qualifier: Option<Rc<Expression>>,
+    pub name: IdentifierOrBrackets,
+}
+
 pub enum IdentifierOrBrackets {
     Identifier(String, Location),
     Brackets(Rc<Expression>),
@@ -37,8 +42,8 @@ pub enum ExpressionKind {
     /// This expression is not valid in other contexts.
     RestExpression(Rc<Expression>),
     ArrayInitializer {
-        /// Element sequence possibly containing RestExpressions.
-        elements: Vec<Rc<Expression>>,
+        /// Element sequence possibly containing RestExpressions and ellisions.
+        elements: Vec<Option<Rc<Expression>>>,
         type_annotation: Option<Rc<TypeAnnotation>>,
     },
     ObjectInitializer {
@@ -49,10 +54,22 @@ pub enum ExpressionKind {
         name: Option<(String, Location)>,
         common: Rc<FunctionCommon>,
     },
+    SuperExpression(Option<Vec<Rc<Expression>>>),
 
-    /// Used as a base for optional chaining operators from
-    /// which subsequent postfix operators may evaluate.
-    OptionalChainingPlaceholder,
+    /// Expression containing an optional chaining operator.
+    OptionalChaining {
+        base: Rc<Expression>,
+        /// Postfix operators that execute if the base is not `null`
+        /// and not `undefined`. The topmost node in this field is
+        /// [`ExpressionKind::OptionalChainingHost`], which holds
+        /// a non-null value.
+        operations: Rc<Expression>,
+    },
+
+    /// The topmost expression from which postfix operators
+    /// follow in an [`ExpressionKind::OptionalChaining`] expression
+    /// inside the `operations` field.
+    OptionalChainingHost,
 }
 
 pub enum XMLElementContent {
@@ -115,7 +132,7 @@ pub enum ObjectKeySuffix {
 }
 
 pub enum ObjectKey {
-    Identifier(String),
+    NonAttributeQualifiedIdentifier(NonAttributeQualifiedIdentifier),
     String(String),
     Number(f64),
     Brackets(Rc<Expression>),
@@ -180,7 +197,7 @@ pub enum RecordTypeKeySuffix {
 }
 
 pub enum RecordTypeKey {
-    Identifier(String),
+    NonAttributeQualifiedIdentifier(NonAttributeQualifiedIdentifier),
     String(String),
     Number(f64),
     Brackets(Rc<Expression>),

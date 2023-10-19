@@ -36,4 +36,4 @@ This document is incomplete yet.
 
 - Previously undocumented expression: `new <T>[]`
 - Optional chaining
-  - Creates a placeholder node from which further postfix operators may execute.
+  - Creates a base node from which postfix operators may execute.
