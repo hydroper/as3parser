@@ -104,3 +104,7 @@ pub fn is_xml_name_part(ch: char) -> bool {
         GeneralCategory::DecimalNumber,
     ].contains(&category)
 }
+
+pub fn is_xml_whitespace(ch: char) -> bool {
+    ch == '\x20' || ch == '\x09' || ch == '\x0A' || ch == '\x0D'
+}

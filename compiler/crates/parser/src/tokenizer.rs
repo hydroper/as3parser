@@ -135,8 +135,10 @@ pub enum Token {
     While,
     With,
 
+    XmlWhitespace,
     XmlLtSlash,
     XmlSlashGt,
+    XmlText(String),
     XmlName(String),
     XmlMarkup(String),
     XmlAttributeValue(String),
@@ -264,8 +266,10 @@ impl ToString for Token {
             Token::While => "'while'",
             Token::With => "'with'",
 
+            Token::XmlWhitespace => "XML whitespace",
             Token::XmlLtSlash => "'</'",
             Token::XmlSlashGt => "'/>'",
+            Token::XmlText(_) => "XML text",
             Token::XmlName(_) => "XML name",
             Token::XmlMarkup(_) => "XML markup",
             Token::XmlAttributeValue(_) => "XML attribute value",
@@ -1293,5 +1297,222 @@ impl<'input> Tokenizer<'input> {
                 Ok(Some(ch.into()))
             },
         }
+    }
+
+    /// Scans for an InputElementXMLTag token.
+    pub fn scan_ie_xml_tag(&mut self) -> Result<(Token, Location), IntolerableError> {
+        let start = self.current_cursor_location();
+        let ch = self.code_points.peek_or_zero();
+
+        // XmlName
+        if character_validation::is_xml_name_start(ch) {
+            self.code_points.next();
+            while character_validation::is_xml_name_part(self.code_points.peek_or_zero()) {
+                self.code_points.next();
+            }
+            let location = start.combine_with(self.current_cursor_location());
+            let name = self.source.text[location.first_offset..location.last_offset].to_owned();
+            return Ok((Token::XmlName(name), location));
+        }
+
+        // XmlWhitespace
+        if character_validation::is_xml_whitespace(ch) {
+            while character_validation::is_xml_whitespace(self.code_points.peek_or_zero()) {
+                if !self.consume_line_terminator() {
+                    self.code_points.next();
+                }
+            }
+            let location = start.combine_with(self.current_cursor_location());
+            return Ok((Token::XmlWhitespace, location));
+        }
+
+        match ch {
+            // Assign
+            '=' => {
+                self.code_points.next();
+                let location = start.combine_with(self.current_cursor_location());
+                Ok((Token::Assign, location))
+            },
+
+            // Gt
+            '>' => {
+                self.code_points.next();
+                let location = start.combine_with(self.current_cursor_location());
+                Ok((Token::Gt, location))
+            },
+
+            // XmlSlashGt
+            '/' => {
+                self.code_points.next();
+                if self.code_points.peek_or_zero() != '>' {
+                    self.add_unexpected_error();
+                    return Err(IntolerableError);
+                }
+                self.code_points.next();
+                let location = start.combine_with(self.current_cursor_location());
+                Ok((Token::XmlSlashGt, location))
+            },
+
+            // XmlAttributeValue
+            '"' | '\'' => {
+                let delim = ch;
+                self.code_points.next();
+                while self.code_points.peek_or_zero() != delim && self.code_points.has_remaining() {
+                    self.code_points.next();
+                }
+                if self.code_points.reached_end() {
+                    self.add_unexpected_error();
+                    return Err(IntolerableError)
+                }
+                let value = self.source.text[(start.first_offset + 1)..self.current_cursor_location().first_offset].to_owned();
+                self.code_points.next();
+                
+                let location = start.combine_with(self.current_cursor_location());
+                Ok((Token::XmlAttributeValue(value), location))
+            },
+
+            // LeftBrace
+            '{' => {
+                self.code_points.next();
+                let location = start.combine_with(self.current_cursor_location());
+                Ok((Token::LeftBrace, location))
+            },
+
+            _ => {
+                self.add_unexpected_error();
+                Err(IntolerableError)
+            },
+        }
+    }
+
+    /// Scans for an InputElementXMLContent token.
+    pub fn scan_ie_xml_content(&mut self) -> Result<(Token, Location), IntolerableError> {
+        let start = self.current_cursor_location();
+        let ch = self.code_points.peek_or_zero();
+
+        match ch {
+            '<' => {
+                self.code_points.next();
+
+                // XmlMarkup
+                if let Some(r) = self.scan_xml_markup(start.clone())? {
+                    return Ok(r);
+                }
+
+                // XmlLtSlash
+                if self.code_points.peek_or_zero() == '/' {
+                    self.code_points.next();
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::XmlLtSlash, location));
+                }
+
+                // Lt
+                let location = start.combine_with(self.current_cursor_location());
+                Ok((Token::Lt, location))
+            },
+            
+            // LeftBrace
+            '{' => {
+                self.code_points.next();
+                let location = start.combine_with(self.current_cursor_location());
+                Ok((Token::LeftBrace, location))
+            },
+
+            // XmlName
+            _ => {
+                loop {
+                    let ch = self.code_points.peek_or_zero();
+                    if ['<', '{'].contains(&ch) {
+                        break;
+                    }
+                    if character_validation::is_line_terminator(ch) {
+                        self.consume_line_terminator();
+                    } else if self.code_points.reached_end() {
+                        self.add_unexpected_error();
+                        return Err(IntolerableError);
+                    } else {
+                        self.code_points.next();
+                    }
+                }
+
+                let location = start.combine_with(self.current_cursor_location());
+                let content = self.source.text[location.first_offset..location.last_offset].to_owned();
+                Ok((Token::XmlText(content), location))
+            },
+        }
+    }
+
+    /// Attempts to scan a XMLMarkup token after a `<` character.
+    pub fn scan_xml_markup(&mut self, start: Location) -> Result<Option<(Token, Location)>, IntolerableError> {
+        // XMLComment
+        if self.code_points.peek_seq(2) == "!--" {
+            self.code_points.skip_count_in_place(3);
+            loop {
+                if self.code_points.peek_or_zero() == '-' && self.code_points.peek_seq(3) == "-->" {
+                    self.code_points.skip_count_in_place(3);
+                    break;
+                } else if character_validation::is_line_terminator(self.code_points.peek_or_zero()) {
+                    self.consume_line_terminator();
+                } else if self.code_points.reached_end() {
+                    self.add_unexpected_error();
+                    return Err(IntolerableError);
+                } else {
+                    self.code_points.next();
+                }
+            }
+
+            let location = start.combine_with(self.current_cursor_location());
+            let content = self.source.text[location.first_offset..location.last_offset].to_owned();
+
+            return Ok(Some((Token::XmlMarkup(content), location)));
+        }
+
+        // XMLCDATA
+        if self.code_points.peek_seq(8) == "![CDATA[" {
+            self.code_points.skip_count_in_place(8);
+            loop {
+                if self.code_points.peek_or_zero() == ']' && self.code_points.peek_seq(3) == "]]>" {
+                    self.code_points.skip_count_in_place(3);
+                    break;
+                } else if character_validation::is_line_terminator(self.code_points.peek_or_zero()) {
+                    self.consume_line_terminator();
+                } else if self.code_points.reached_end() {
+                    self.add_unexpected_error();
+                    return Err(IntolerableError);
+                } else {
+                    self.code_points.next();
+                }
+            }
+
+            let location = start.combine_with(self.current_cursor_location());
+            let content = self.source.text[location.first_offset..location.last_offset].to_owned();
+
+            return Ok(Some((Token::XmlMarkup(content), location)));
+        }
+
+        // XMLPI
+        if self.code_points.peek_or_zero() == '?' {
+            self.code_points.next();
+            loop {
+                if self.code_points.peek_or_zero() == '?' && self.code_points.peek_at_or_zero(1) == '>' {
+                    self.code_points.skip_count_in_place(2);
+                    break;
+                } else if character_validation::is_line_terminator(self.code_points.peek_or_zero()) {
+                    self.consume_line_terminator();
+                } else if self.code_points.reached_end() {
+                    self.add_unexpected_error();
+                    return Err(IntolerableError);
+                } else {
+                    self.code_points.next();
+                }
+            }
+
+            let location = start.combine_with(self.current_cursor_location());
+            let content = self.source.text[location.first_offset..location.last_offset].to_owned();
+
+            return Ok(Some((Token::XmlMarkup(content), location)));
+        }
+
+        Ok(None)
     }
 }
