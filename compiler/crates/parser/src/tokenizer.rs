@@ -314,8 +314,384 @@ impl<'input> Tokenizer<'input> {
             return Ok(result);
         }
         let start = self.current_cursor_location();
-
-        final_result_here
+        match self.code_points.peek_or_zero() {
+            ',' => {
+                // Comma
+                self.code_points.next();
+                let location = start.combine_with(self.current_cursor_location());
+                return Ok((Token::Comma, location));
+            },
+            '(' => {
+                // LeftParen
+                self.code_points.next();
+                let location = start.combine_with(self.current_cursor_location());
+                return Ok((Token::LeftParen, location));
+            },
+            ')' => {
+                // RightParen
+                self.code_points.next();
+                let location = start.combine_with(self.current_cursor_location());
+                return Ok((Token::RightParen, location));
+            },
+            '[' => {
+                // LeftBracket
+                self.code_points.next();
+                let location = start.combine_with(self.current_cursor_location());
+                return Ok((Token::LeftBracket, location));
+            },
+            ']' => {
+                // RightBracket
+                self.code_points.next();
+                let location = start.combine_with(self.current_cursor_location());
+                return Ok((Token::RightBracket, location));
+            },
+            '{' => {
+                // LeftBrace
+                self.code_points.next();
+                let location = start.combine_with(self.current_cursor_location());
+                return Ok((Token::LeftBrace, location));
+            },
+            '}' => {
+                // RightBrace
+                self.code_points.next();
+                let location = start.combine_with(self.current_cursor_location());
+                return Ok((Token::RightBrace, location));
+            },
+            ':' => {
+                self.code_points.next();
+                // ColonColon
+                if self.code_points.peek_or_zero() == ':' {
+                    self.code_points.next();
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::ColonColon, location));
+                }
+                // Colon
+                let location = start.combine_with(self.current_cursor_location());
+                return Ok((Token::Colon, location));
+            },
+            '=' => {
+                self.code_points.next();
+                let ch = self.code_points.peek_or_zero();
+                // FatArrow
+                if ch == '>' {
+                    self.code_points.next();
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::FatArrow, location));
+                }
+                // StrictEquals
+                if ch == '=' && self.code_points.peek_at_or_zero(1) == '=' {
+                    self.code_points.skip_count_in_place(2);
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::StrictEquals, location));
+                }
+                // Equals
+                if ch == '=' {
+                    self.code_points.next();
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::Equals, location));
+                }
+                // Assign
+                let location = start.combine_with(self.current_cursor_location());
+                return Ok((Token::Assign, location));
+            },
+            '!' => {
+                self.code_points.next();
+                let ch = self.code_points.peek_or_zero();
+                // StrictNotEquals
+                if ch == '=' && self.code_points.peek_at_or_zero(1) == '=' {
+                    self.code_points.skip_count_in_place(2);
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::StrictNotEquals, location));
+                }
+                // NotEquals
+                if ch == '=' {
+                    self.code_points.next();
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::NotEquals, location));
+                }
+                // Exclamation
+                let location = start.combine_with(self.current_cursor_location());
+                return Ok((Token::Exclamation, location));
+            },
+            '?' => {
+                self.code_points.next();
+                let ch = self.code_points.peek_or_zero();
+                // OptionalChaining
+                if ch == '.' {
+                    self.code_points.next();
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::OptionalChaining, location));
+                }
+                // NullCoalescingAssign
+                if ch == '?' && self.code_points.peek_at_or_zero(1) == '=' {
+                    self.code_points.skip_count_in_place(2);
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::NullCoalescingAssign, location));
+                }
+                // NullCoalescing
+                if ch == '?' {
+                    self.code_points.next();
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::NullCoalescing, location));
+                }
+                // Question
+                let location = start.combine_with(self.current_cursor_location());
+                return Ok((Token::Question, location));
+            },
+            ';' => {
+                // Semicolon
+                self.code_points.next();
+                let location = start.combine_with(self.current_cursor_location());
+                return Ok((Token::Semicolon, location));
+            },
+            '<' => {
+                self.code_points.next();
+                let ch = self.code_points.peek_or_zero();
+                // Le
+                if ch == '=' {
+                    self.code_points.next();
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::Le, location));
+                }
+                // LeftShiftAssign
+                if ch == '<' && self.code_points.peek_at_or_zero(1) == '=' {
+                    self.code_points.skip_count_in_place(2);
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::LeftShiftAssign, location));
+                }
+                // LeftShift
+                if ch == '<' {
+                    self.code_points.next();
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::LeftShift, location));
+                }
+                // Lt
+                let location = start.combine_with(self.current_cursor_location());
+                return Ok((Token::Lt, location));
+            },
+            '>' => {
+                self.code_points.next();
+                let ch = self.code_points.peek_or_zero();
+                // Ge
+                if ch == '=' {
+                    self.code_points.next();
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::Ge, location));
+                }
+                // RightShiftAssign
+                if ch == '>' && self.code_points.peek_at_or_zero(1) == '=' {
+                    self.code_points.skip_count_in_place(2);
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::RightShiftAssign, location));
+                }
+                // UnsignedRightShiftAssign
+                if ch == '>' && self.code_points.peek_seq(3) == ">>=" {
+                    self.code_points.skip_count_in_place(3);
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::UnsignedRightShiftAssign, location));
+                }
+                // UnsignedRightShift
+                if ch == '>' && self.code_points.peek_at_or_zero(1) == '>' {
+                    self.code_points.skip_count_in_place(2);
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::UnsignedRightShift, location));
+                }
+                // RightShift
+                if ch == '<' {
+                    self.code_points.next();
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::RightShift, location));
+                }
+                // Gt
+                let location = start.combine_with(self.current_cursor_location());
+                return Ok((Token::Gt, location));
+            },
+            '@' => {
+                // Attribute
+                self.code_points.next();
+                let location = start.combine_with(self.current_cursor_location());
+                return Ok((Token::Attribute, location));
+            },
+            '+' => {
+                self.code_points.next();
+                let ch = self.code_points.peek_or_zero();
+                // Increment
+                if ch == '+' {
+                    self.code_points.next();
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::Increment, location));
+                }
+                // AddAssign
+                if ch == '=' {
+                    self.code_points.next();
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::AddAssign, location));
+                }
+                // Plus
+                let location = start.combine_with(self.current_cursor_location());
+                return Ok((Token::Plus, location));
+            },
+            '-' => {
+                self.code_points.next();
+                let ch = self.code_points.peek_or_zero();
+                // Decrement
+                if ch == '-' {
+                    self.code_points.next();
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::Decrement, location));
+                }
+                // SubtractAssign
+                if ch == '=' {
+                    self.code_points.next();
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::SubtractAssign, location));
+                }
+                // Minus
+                let location = start.combine_with(self.current_cursor_location());
+                return Ok((Token::Minus, location));
+            },
+            '*' => {
+                self.code_points.next();
+                let ch = self.code_points.peek_or_zero();
+                // PowerAssign
+                if ch == '*' && self.code_points.peek_at_or_zero(1) == '=' {
+                    self.code_points.skip_count_in_place(2);
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::PowerAssign, location));
+                }
+                // Power
+                if ch == '*' {
+                    self.code_points.next();
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::Power, location));
+                }
+                // MultiplyAssign
+                if ch == '=' {
+                    self.code_points.next();
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::MultiplyAssign, location));
+                }
+                // Times
+                let location = start.combine_with(self.current_cursor_location());
+                return Ok((Token::Times, location));
+            },
+            '/' => {
+                self.code_points.next();
+                let ch = self.code_points.peek_or_zero();
+                // DivideAssign
+                if ch == '=' {
+                    self.code_points.next();
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::DivideAssign, location));
+                }
+                // Div
+                let location = start.combine_with(self.current_cursor_location());
+                return Ok((Token::Div, location));
+            },
+            '%' => {
+                self.code_points.next();
+                let ch = self.code_points.peek_or_zero();
+                // RemainderAssign
+                if ch == '=' {
+                    self.code_points.next();
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::RemainderAssign, location));
+                }
+                // Remainder
+                let location = start.combine_with(self.current_cursor_location());
+                return Ok((Token::Remainder, location));
+            },
+            '&' => {
+                self.code_points.next();
+                let ch = self.code_points.peek_or_zero();
+                // LogicalAndAssign
+                if ch == '&' && self.code_points.peek_at_or_zero(1) == '=' {
+                    self.code_points.skip_count_in_place(2);
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::LogicalAndAssign, location));
+                }
+                // LogicalAnd
+                if ch == '&' {
+                    self.code_points.next();
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::LogicalAnd, location));
+                }
+                // BitwiseAndAssign
+                if ch == '=' {
+                    self.code_points.next();
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::BitwiseAndAssign, location));
+                }
+                // BitwiseAnd
+                let location = start.combine_with(self.current_cursor_location());
+                return Ok((Token::BitwiseAnd, location));
+            },
+            '^' => {
+                self.code_points.next();
+                let ch = self.code_points.peek_or_zero();
+                // LogicalXorAssign
+                if ch == '^' && self.code_points.peek_at_or_zero(1) == '=' {
+                    self.code_points.skip_count_in_place(2);
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::LogicalXorAssign, location));
+                }
+                // LogicalXor
+                if ch == '^' {
+                    self.code_points.next();
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::LogicalXor, location));
+                }
+                // BitwiseXorAssign
+                if ch == '=' {
+                    self.code_points.next();
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::BitwiseXorAssign, location));
+                }
+                // BitwiseXor
+                let location = start.combine_with(self.current_cursor_location());
+                return Ok((Token::BitwiseXor, location));
+            },
+            '|' => {
+                self.code_points.next();
+                let ch = self.code_points.peek_or_zero();
+                // LogicalOrAssign
+                if ch == '|' && self.code_points.peek_at_or_zero(1) == '=' {
+                    self.code_points.skip_count_in_place(2);
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::LogicalOrAssign, location));
+                }
+                // LogicalOr
+                if ch == '|' {
+                    self.code_points.next();
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::LogicalOr, location));
+                }
+                // BitwiseOrAssign
+                if ch == '=' {
+                    self.code_points.next();
+                    let location = start.combine_with(self.current_cursor_location());
+                    return Ok((Token::BitwiseOrAssign, location));
+                }
+                // BitwiseOr
+                let location = start.combine_with(self.current_cursor_location());
+                return Ok((Token::BitwiseOr, location));
+            },
+            '~' => {
+                // BitwiseNot
+                self.code_points.next();
+                let location = start.combine_with(self.current_cursor_location());
+                return Ok((Token::BitwiseNot, location));
+            },
+            _ => {
+                if self.code_points.has_remaining() {
+                    self.add_unexpected_error();
+                    return Err(IntolerableError);
+                // Eof
+                } else {
+                    return Ok((Token::Eof, start))
+                }
+            },
+        }
     }
 
     /// Current line number, counted from one.
@@ -548,7 +924,7 @@ impl<'input> Tokenizer<'input> {
             // NumericLiteral
             while character_validation::is_dec_digit(self.code_points.peek_or_zero()) {
                 self.code_points.next();
-                self.consume_underscore_followed_by_dec_digit();
+                self.consume_underscore_followed_by_dec_digit()?;
             }
         } else if ch == '0' {
             self.code_points.next();
@@ -569,7 +945,7 @@ impl<'input> Tokenizer<'input> {
             self.code_points.next();
             while character_validation::is_dec_digit(self.code_points.peek_or_zero()) {
                 self.code_points.next();
-                self.consume_underscore_followed_by_dec_digit();
+                self.consume_underscore_followed_by_dec_digit()?;
             }
         } else {
             return Ok(None);
@@ -583,7 +959,7 @@ impl<'input> Tokenizer<'input> {
             }
             while character_validation::is_dec_digit(self.code_points.peek_or_zero()) {
                 self.code_points.next();
-                self.consume_underscore_followed_by_dec_digit();
+                self.consume_underscore_followed_by_dec_digit()?;
             }
         }
 
@@ -599,7 +975,7 @@ impl<'input> Tokenizer<'input> {
             }
             while character_validation::is_dec_digit(self.code_points.peek_or_zero()) {
                 self.code_points.next();
-                self.consume_underscore_followed_by_dec_digit();
+                self.consume_underscore_followed_by_dec_digit()?;
             }
         }
 
@@ -623,7 +999,7 @@ impl<'input> Tokenizer<'input> {
         }
         while character_validation::is_hex_digit(self.code_points.peek_or_zero()) {
             self.code_points.next();
-            self.consume_underscore_followed_by_hex_digit();
+            self.consume_underscore_followed_by_hex_digit()?;
         }
 
         self.unallow_numeric_suffix();
@@ -650,7 +1026,7 @@ impl<'input> Tokenizer<'input> {
         }
         while character_validation::is_bin_digit(self.code_points.peek_or_zero()) {
             self.code_points.next();
-            self.consume_underscore_followed_by_bin_digit();
+            self.consume_underscore_followed_by_bin_digit()?;
         }
 
         self.unallow_numeric_suffix();
@@ -759,6 +1135,8 @@ impl<'input> Tokenizer<'input> {
         let mut lines: Vec<String> = vec![];
         let mut builder = String::new();
 
+        let initial_line_break = self.consume_line_terminator();
+
         loop {
             if let Some(s) = self.consume_escape_sequence()? {
                 builder.push_str(&s);
@@ -781,6 +1159,28 @@ impl<'input> Tokenizer<'input> {
                 }
             }
         }
+
+        let location = start.combine_with(self.current_cursor_location());
+        let last_line = if initial_line_break && lines.len() > 1 {
+            lines.pop().unwrap()
+        } else {
+            "".to_owned()
+        };
+
+        let base_indent = character_validation::indent_count(&last_line);
+
+        let mut lines: Vec<String> = lines.iter().map(|line| {
+            let indent = character_validation::indent_count(line);
+            line[usize::min(base_indent, indent)..].to_owned()
+        }).collect();
+
+        let last_line = last_line[base_indent..].to_owned();
+        if !last_line.is_empty() {
+            lines.push(last_line);
+        }
+
+        let value = lines.join("\n");
+        Ok(Some((Token::StringLiteral(value), location)))
     }
 
     fn consume_escape_sequence(&mut self) -> Result<Option<String>, IntolerableError> {

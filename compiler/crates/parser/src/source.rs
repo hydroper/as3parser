@@ -1,6 +1,6 @@
 use std::rc::Rc;
 use std::cell::{RefCell, Cell};
-use crate::{Diagnostic, Comment};
+use crate::{Diagnostic, Comment, character_validation};
 use crate::compiler_options::CompilerOptions;
 
 /// Represents an ActionScript source file.
@@ -87,11 +87,8 @@ impl Source {
     }
 
     pub fn get_line_indent(&self, line: usize) -> usize {
-        let mut line_offset = self.get_line_offset(line).unwrap_or(*self.line_number_offsets.borrow().last().unwrap());
-        let mut i: usize = 0;
-        for ch in self.text[line_offset..].chars() {
-            foo_foo_foo_foo_foo;
-        }
-        i - line_offset
+        let line_offset = self.get_line_offset(line).unwrap_or(*self.line_number_offsets.borrow().last().unwrap());
+        let indent = character_validation::indent_count(&self.text[line_offset..]);
+        indent - line_offset
     }
 }

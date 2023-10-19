@@ -3,6 +3,18 @@ use unicode_general_category::{get_general_category, GeneralCategory};
 
 pub static CR_OR_CRLF_REGEX: Lazy<Regex> = lazy_regex!(r"\r\n?");
 
+/// Returns the count of indentation characters in a string.
+pub fn indent_count(string: &str) -> usize {
+    let mut n: usize = 0;
+    for ch in string.chars() {
+        if !is_whitespace(ch) {
+            break;
+        }
+        n += 1;
+    }
+    n
+}
+
 pub fn is_whitespace(ch: char) -> bool {
     if ch == '\x20' || ch == '\x09' || ch == '\x08'
     || ch == '\x0C' || ch == '\u{A0}' {

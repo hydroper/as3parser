@@ -2,74 +2,74 @@
 
 ## Tokenizer
 
-- [ ] *InputElementDiv*
+- [x] *InputElementDiv*
   - [x] Identifiers
   - [x] Numeric literal
   - [x] String literal
-  - [ ] Triple string literal
-  - [ ] Punctuators
-    - [ ] ColonColon
-    - [ ] Attribute
+  - [x] Triple string literal
+  - [x] Punctuators
+    - [x] ColonColon
+    - [x] Attribute
     - [x] Descendants
     - [x] Ellipsis
-    - [ ] LeftParen
-    - [ ] RightParen
-    - [ ] LeftBracket
-    - [ ] RightBracket
-    - [ ] LeftBrace
-    - [ ] RightBrace
-    - [ ] FatArrow
+    - [x] LeftParen
+    - [x] RightParen
+    - [x] LeftBracket
+    - [x] RightBracket
+    - [x] LeftBrace
+    - [x] RightBrace
+    - [x] FatArrow
     - [x] Dot
-    - [ ] Semicolon
-    - [ ] Comma
-    - [ ] Lt
-    - [ ] Gt
-    - [ ] Le
-    - [ ] Ge
-    - [ ] Equals
-    - [ ] NotEquals
-    - [ ] StrictEquals
-    - [ ] StrictNotEquals
-    - [ ] Plus
-    - [ ] Minus
-    - [ ] Times
-    - [ ] Div
-    - [ ] Remainder
-    - [ ] Increment
-    - [ ] Decrement
-    - [ ] LeftShift
-    - [ ] RightShift
-    - [ ] UnsignedRightShift
-    - [ ] BitwiseAnd
-    - [ ] BitwiseXor
-    - [ ] BitwiseOr
-    - [ ] BitwiseNot
-    - [ ] LogicalAnd
-    - [ ] LogicalXor
-    - [ ] LogicalOr
-    - [ ] Question
-    - [ ] Exclamation
-    - [ ] Colon
-    - [ ] Assign
-    - [ ] AddAssign
-    - [ ] SubtractAssign
-    - [ ] MultiplyAssign
-    - [ ] DivideAssign
-    - [ ] RemainderAssign
-    - [ ] LeftShiftAssign
-    - [ ] RightShiftAssign
-    - [ ] UnsignedRightShiftAssign
-    - [ ] BitwiseAndAssign
-    - [ ] BitwiseXorAssign
-    - [ ] BitwiseOrAssign
-    - [ ] LogicalAndAssign
-    - [ ] LogicalXorAssign
-    - [ ] LogicalOrAssign
-    - [ ] Power
-    - [ ] PowerAssign
-    - [ ] NullCoalescing
-    - [ ] NullCoalescingAssign
-    - [ ] OptionalChaining
+    - [x] Semicolon
+    - [x] Comma
+    - [x] Lt
+    - [x] Gt
+    - [x] Le
+    - [x] Ge
+    - [x] Equals
+    - [x] NotEquals
+    - [x] StrictEquals
+    - [x] StrictNotEquals
+    - [x] Plus
+    - [x] Minus
+    - [x] Times
+    - [x] Div
+    - [x] Remainder
+    - [x] Increment
+    - [x] Decrement
+    - [x] LeftShift
+    - [x] RightShift
+    - [x] UnsignedRightShift
+    - [x] BitwiseAnd
+    - [x] BitwiseXor
+    - [x] BitwiseOr
+    - [x] BitwiseNot
+    - [x] LogicalAnd
+    - [x] LogicalXor
+    - [x] LogicalOr
+    - [x] Question
+    - [x] Exclamation
+    - [x] Colon
+    - [x] Assign
+    - [x] AddAssign
+    - [x] SubtractAssign
+    - [x] MultiplyAssign
+    - [x] DivideAssign
+    - [x] RemainderAssign
+    - [x] LeftShiftAssign
+    - [x] RightShiftAssign
+    - [x] UnsignedRightShiftAssign
+    - [x] BitwiseAndAssign
+    - [x] BitwiseXorAssign
+    - [x] BitwiseOrAssign
+    - [x] LogicalAndAssign
+    - [x] LogicalXorAssign
+    - [x] LogicalOrAssign
+    - [x] Power
+    - [x] PowerAssign
+    - [x] NullCoalescing
+    - [x] NullCoalescingAssign
+    - [x] OptionalChaining
 - [ ] *RegularExpressionLiteral*
 - [ ] *InputElementXMLTag*
 - [ ] *InputElementXMLContent*
