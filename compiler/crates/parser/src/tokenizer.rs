@@ -947,7 +947,15 @@ impl<'input> Tokenizer<'input> {
             return Err(IntolerableError);
         }
         self.code_points.next();
-        Ok(ch as u32)
+        Ok(
+            if ch >= 'A' && ch <= 'F' {
+                (ch as u32) - 0x41 + 10
+            } else if ch >= 'a' && ch <= 'f' {
+                (ch as u32) - 0x61 + 10
+            } else {
+                (ch as u32) - 0x30
+            }
+        )
     }
 
     fn scan_dot_or_numeric_literal(&mut self) -> Result<Option<(Token, Location)>, IntolerableError> {
@@ -996,7 +1004,6 @@ impl<'input> Tokenizer<'input> {
                 return self.scan_bin_literal(start.clone());
             }
         } else if character_validation::is_dec_digit(ch) {
-            self.code_points.next();
             while character_validation::is_dec_digit(self.code_points.peek_or_zero()) {
                 self.code_points.next();
                 self.consume_underscore_followed_by_dec_digit()?;
@@ -1156,11 +1163,11 @@ impl<'input> Tokenizer<'input> {
             return self.scan_triple_string_literal(delim, start);
         }
 
-        let mut builder = String::new();
+        let mut value = String::new();
 
         loop {
             if let Some(s) = self.consume_escape_sequence()? {
-                builder.push_str(&s);
+                value.push_str(&s);
             } else {
                 let ch = self.code_points.peek_or_zero();
                 if ch == delim {
@@ -1173,15 +1180,13 @@ impl<'input> Tokenizer<'input> {
                     self.add_unexpected_error();
                     return Err(IntolerableError);
                 } else {
-                    builder.push(ch);
+                    value.push(ch);
                     self.code_points.next();
                 }
             }
         }
 
         let location = start.combine_with(self.current_cursor_location());
-        let value = self.source.text[(location.first_offset + 1)..(location.last_offset - 1)].to_owned();
-
         Ok(Some((Token::StringLiteral(value), location)))
     }
 
@@ -1532,9 +1537,11 @@ mod tests {
         let _n = "n".to_owned();
         let source = Source::new(None, "n * n".into(), &CompilerOptions::new());
         let mut tokenizer = Tokenizer::new(&source, &source.text());
-        assert!(matches!(tokenizer.scan_ie_div(true), Ok((Token::Identifier(_n), _))));
+        let Ok((Token::Identifier(name), _)) = tokenizer.scan_ie_div(true) else { panic!() };
+        assert_eq!(name, "n");
         assert!(matches!(tokenizer.scan_ie_div(true), Ok((Token::Times, _))));
-        assert!(matches!(tokenizer.scan_ie_div(true), Ok((Token::Identifier(_n), _))));
+        let Ok((Token::Identifier(name), _)) = tokenizer.scan_ie_div(true) else { panic!() };
+        assert_eq!(name, "n");
     }
 
     #[test]
@@ -1552,17 +1559,53 @@ mod tests {
 
     #[test]
     fn tokenize_strings() {
-        let _string1 = "Some content".to_owned();
-        let _string2 = "Another\ncontent".to_owned();
         let source = Source::new(None, r###"
-            "Some content"
+            "Some \u{41}\u0041\x41 content"
             """
             Another
+                common
             content
             """
         "###.into(), &CompilerOptions::new());
         let mut tokenizer = Tokenizer::new(&source, &source.text());
-        assert!(matches!(tokenizer.scan_ie_div(true), Ok((Token::StringLiteral(_string1), _))));
-        assert!(matches!(tokenizer.scan_ie_div(true), Ok((Token::StringLiteral(_string2), _))));
+
+        let Ok((Token::StringLiteral(s), _)) = tokenizer.scan_ie_div(true) else { panic!() };
+        assert_eq!(s, "Some AAA content");
+
+        let Ok((Token::StringLiteral(s), _)) = tokenizer.scan_ie_div(true) else { panic!() };
+        assert_eq!(s, "Another\n    common\ncontent");
+    }
+
+    #[test]
+    fn tokenize_numbers() {
+        let numbers: Vec<f64> = vec![
+            0.0,
+            50.0,
+            1_000.0,
+            0.5,
+            0.5,
+            1_000.0,
+            1_000.0,
+            0.001,
+            0.0,
+            0.0,
+        ];
+        let source = Source::new(None, r###"
+            0
+            50
+            1_000
+            0.5
+            .5
+            1e3
+            1e+3
+            1e-3
+            0x00_00
+            0b0000_0000
+        "###.into(), &CompilerOptions::new());
+        let mut tokenizer = Tokenizer::new(&source, &source.text());
+        for n in numbers {
+            let Ok((Token::NumericLiteral(n2), _)) = tokenizer.scan_ie_div(true) else { panic!() };
+            assert_eq!(n, n2);
+        }
     }
 }
