@@ -7,6 +7,7 @@ pub(crate) mod errors;
 pub(crate) mod tokenizer;
 pub(crate) mod location;
 pub(crate) mod source;
+pub mod ast;
 pub mod keywords;
 pub mod util;
 

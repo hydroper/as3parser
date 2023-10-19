@@ -18,6 +18,7 @@ This document is incomplete yet.
   - `=>`
     - Used by arrow functions
 - Added context keywords:
+  - `embed`
   - `enum`
   - `not`
   - `readonly`

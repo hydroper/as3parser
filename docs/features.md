@@ -484,6 +484,14 @@ Regardless, the following types are recognized as iterable:
 - `SetValues.<T>`, yielding `T`
 - `WeakSet.<T>` and its iterators, yielding similiarly to `Set.<T>` and its iterators
 
+## Embed expression
+
+The `embed` context keyword is used by embed expressions. They can be used to directly import local binaries or text.
+
+```as3
+const ba: flash.utils.ByteArray = embed "./data.bin";
+```
+
 ## Sources
 
 The sources are supplied to the compiler only through `sources.include` and `sources.exclude` arrays taking globbing patterns, and the main class for a SWF is specified by `sources.mainClass`:
