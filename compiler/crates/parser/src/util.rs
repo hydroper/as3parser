@@ -1,6 +1,9 @@
 use std::collections::HashMap;
 use lazy_regex::*;
 
+mod arena;
+pub use arena::*;
+
 mod code_points_reader;
 pub use code_points_reader::CodePointsReader;
 
