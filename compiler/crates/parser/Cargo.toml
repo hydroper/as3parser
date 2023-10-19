@@ -8,7 +8,6 @@ license = "MIT OR Apache-2.0"
 
 [dependencies]
 file_paths = "0.1.2"
-as3_arena = { path = "../arena" }
 conv = "0.3.3"
 maplit = "1.0.2"
 lazy-regex = "3.0.2"

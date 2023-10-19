@@ -12,14 +12,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "as3_arena"
-version = "0.1.0"
-
-[[package]]
 name = "as3_parser"
 version = "0.1.0"
 dependencies = [
- "as3_arena",
  "conv",
  "file_paths",
  "lazy-regex",
