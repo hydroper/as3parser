@@ -694,6 +694,48 @@ impl<'input> Tokenizer<'input> {
         }
     }
 
+    /// Scans regular expression after a `/` or `/=` token has been scanned by
+    /// `scan_ie_div`.
+    pub fn scan_regexp_literal(&mut self, start: Location) -> Result<(Token, Location), IntolerableError> {
+        let mut body = String::new();
+        loop {
+            let ch = self.code_points.peek_or_zero();
+            if ch == '/' {
+                self.code_points.next();
+                break;
+            } else if ch == '\\' {
+                self.code_points.next();
+                body.push('\\');
+                let ch = self.code_points.peek_or_zero();
+                if self.code_points.reached_end() {
+                    self.add_unexpected_error();
+                    return Err(IntolerableError);
+                } else if character_validation::is_line_terminator(ch) {
+                    self.add_unexpected_error();
+                }
+                self.consume_line_terminator();
+                body.push(ch);
+            } else if character_validation::is_line_terminator(ch) {
+                body.push('\n');
+                self.consume_line_terminator();
+            } else if self.code_points.reached_end() {
+                self.add_unexpected_error();
+                return Err(IntolerableError);
+            } else {
+                body.push(ch);
+                self.code_points.next();
+            }
+        }
+
+        let mut flags = String::new();
+        while let Some((ch, _)) = self.consume_identifier_part()? {
+            flags.push(ch);
+        }
+        
+        let location = start.combine_with(self.current_cursor_location());
+        Ok((Token::RegExpLiteral { body, flags }, location))
+    }
+
     /// Current line number, counted from one.
     pub fn current_line_number(&self) -> usize {
         self.current_line_number
@@ -812,6 +854,7 @@ impl<'input> Tokenizer<'input> {
         Ok(Some((Token::Identifier(name), location)))
     }
 
+    /// Returns a tuple in the form (*character*, *escaped*).
     fn consume_identifier_start(&mut self) -> Result<Option<(char, bool)>, IntolerableError> {
         let ch = self.code_points.peek_or_zero();
         if character_validation::is_identifier_start(ch) {
@@ -824,6 +867,7 @@ impl<'input> Tokenizer<'input> {
         Ok(None)
     }
 
+    /// Returns a tuple in the form (*character*, *escaped*).
     fn consume_identifier_part(&mut self) -> Result<Option<(char, bool)>, IntolerableError> {
         let ch = self.code_points.peek_or_zero();
         if character_validation::is_identifier_part(ch) {
