@@ -1369,7 +1369,9 @@ impl<'input> Tokenizer<'input> {
                 let delim = ch;
                 self.code_points.next();
                 while self.code_points.peek_or_zero() != delim && self.code_points.has_remaining() {
-                    self.code_points.next();
+                    if !self.consume_line_terminator() {
+                        self.code_points.next();
+                    }
                 }
                 if self.code_points.reached_end() {
                     self.add_unexpected_error();
@@ -1607,5 +1609,25 @@ mod tests {
             let Ok((Token::NumericLiteral(n2), _)) = tokenizer.scan_ie_div(true) else { panic!() };
             assert_eq!(n, n2);
         }
+    }
+
+    #[test]
+    fn tokenize_regexp() {
+        let source = Source::new(None, r###"
+            /(?:)/
+            /(?:)/gi
+        "###.into(), &CompilerOptions::new());
+
+        let mut tokenizer = Tokenizer::new(&source, &source.text());
+
+        let Ok((Token::Div, start)) = tokenizer.scan_ie_div(true) else { panic!() };
+        let Ok((Token::RegExpLiteral { body, flags }, _)) = tokenizer.scan_regexp_literal(start) else { panic!() };
+        assert_eq!(body, "(?:)");
+        assert_eq!(flags, "");
+
+        let Ok((Token::Div, start)) = tokenizer.scan_ie_div(true) else { panic!() };
+        let Ok((Token::RegExpLiteral { body, flags }, _)) = tokenizer.scan_regexp_literal(start) else { panic!() };
+        assert_eq!(body, "(?:)");
+        assert_eq!(flags, "gi");
     }
 }
