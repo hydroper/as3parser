@@ -2,6 +2,7 @@ use std::rc::Rc;
 use std::str::FromStr;
 use conv::ValueFrom;
 use crate::*;
+use crate::util::CodePointsReader;
 
 /// Represents a lexical token.
 #[derive(Clone, PartialEq)]
@@ -284,6 +285,8 @@ pub struct Tokenizer<'input> {
 }
 
 impl<'input> Tokenizer<'input> {
+    /// Constructs a tokenizer. The given `source_text` parameter must be the same
+    /// as `&source.text()`.
     pub fn new(source: &Rc<Source>, source_text: &'input str) -> Self {
         let source = Rc::clone(source);
         assert!(!source.already_tokenized.get(), "A Source must only be tokenized once.");
@@ -862,6 +865,7 @@ impl<'input> Tokenizer<'input> {
     fn consume_identifier_start(&mut self) -> Result<Option<(char, bool)>, IntolerableError> {
         let ch = self.code_points.peek_or_zero();
         if character_validation::is_identifier_start(ch) {
+            self.code_points.next();
             return Ok(Some((ch, false)));
         }
         if self.code_points.peek_or_zero() == '\\' {
@@ -875,6 +879,7 @@ impl<'input> Tokenizer<'input> {
     fn consume_identifier_part(&mut self) -> Result<Option<(char, bool)>, IntolerableError> {
         let ch = self.code_points.peek_or_zero();
         if character_validation::is_identifier_part(ch) {
+            self.code_points.next();
             return Ok(Some((ch, false)));
         }
         if self.code_points.peek_or_zero() == '\\' {
@@ -1523,6 +1528,11 @@ mod tests {
 
     #[test]
     fn tokenize_n_per_n() {
+        let _n = "n".to_owned();
         let source = Source::new(None, "n * n".into(), &CompilerOptions::new());
+        let mut tokenizer = Tokenizer::new(&source, &source.text());
+        assert!(matches!(tokenizer.scan_ie_div(true), Ok((Token::Identifier(_n), _))));
+        assert!(matches!(tokenizer.scan_ie_div(true), Ok((Token::Times, _))));
+        assert!(matches!(tokenizer.scan_ie_div(true), Ok((Token::Identifier(_n), _))));
     }
 }
