@@ -23,38 +23,93 @@ pub struct Expression {
 }
 
 pub enum ExpressionKind {
-    NullLiteral,
-    BooleanLiteral(bool),
-    NumericLiteral(f64),
-    StringLiteral(String),
-    ThisLiteral,
-    RegExpLiteral {
+    Null,
+    Boolean(bool),
+    Numeric(f64),
+    String(String),
+    This,
+    RegExp {
         body: String,
         flags: String,
     },
-    QualifiedIdentifier(QualifiedIdentifier),
-    XMLMarkup(String),
-    XMLElement(XMLElement),
-    XMLList(Vec<XMLElementContent>),
+    Id(QualifiedIdentifier),
+    XmlMarkup(String),
+    XmlElement(XmlElement),
+    XmlList(Vec<XmlElementContent>),
     ReservedNamespace(ReservedNamespace),
-    ParenExpression(Rc<Expression>),
+    Paren(Rc<Expression>),
     /// Present as part of an array initializer only.
     /// This expression is not valid in other contexts.
-    RestExpression(Rc<Expression>),
+    Rest(Rc<Expression>),
     ArrayInitializer {
-        /// Element sequence possibly containing RestExpressions and ellisions.
+        /// Element sequence possibly containing `Rest`s and ellisions.
         elements: Vec<Option<Rc<Expression>>>,
-        type_annotation: Option<Rc<TypeAnnotation>>,
+        type_annotation: Option<Rc<TypeExpression>>,
     },
     ObjectInitializer {
         fields: Vec<ObjectFieldOrRest>,
-        type_annotation: Option<Rc<TypeAnnotation>>,
+        type_annotation: Option<Rc<TypeExpression>>,
     },
-    FunctionExpression {
+    Function {
         name: Option<(String, Location)>,
         common: Rc<FunctionCommon>,
     },
-    SuperExpression(Option<Vec<Rc<Expression>>>),
+    ArrowFunction(Rc<FunctionCommon>),
+    Super(Option<Vec<Rc<Expression>>>),
+    New {
+        base: Rc<Expression>,
+        arguments: Option<Vec<Expression>>,
+    },
+    /// The `o.x` expression.
+    DotMember {
+        base: Rc<Expression>,
+        id: QualifiedIdentifier,
+    },
+    /// The `o[k]` expression.
+    BracketsMember {
+        base: Rc<Expression>,
+        key: Rc<Expression>,
+    },
+    /// `base.<T1, Tn>`
+    WithTypeArguments {
+        base: Rc<Expression>,
+        arguments: Vec<Rc<Expression>>,
+    },
+    /// The `o.(condition)` expression.
+    Filter {
+        base: Rc<Expression>,
+        condition: Rc<Expression>,
+    },
+    /// The `o..x` expression.
+    Descendants {
+        base: Rc<Expression>,
+        id: QualifiedIdentifier,
+    },
+    Call {
+        base: Rc<Expression>,
+        arguments: Vec<Rc<Expression>>,
+    },
+    Unary {
+        base: Rc<Expression>,
+        operator: Operator,
+    },
+    Binary {
+        left: Rc<Expression>,
+        operator: Operator,
+        right: Rc<Expression>,
+    },
+    Conditional {
+        test: Rc<Expression>,
+        consequent: Rc<Expression>,
+        alternative: Rc<Expression>,
+    },
+    Assignment {
+        left: Rc<Destructuring>,
+        compound: Option<Operator>,
+        right: Rc<Expression>,
+    },
+    /// The `x, y` expression.
+    Sequence(Vec<Expression>, Vec<Expression>),
 
     /// Expression containing an optional chaining operator.
     OptionalChaining {
@@ -62,7 +117,7 @@ pub enum ExpressionKind {
         /// Postfix operators that execute if the base is not `null`
         /// and not `undefined`. The topmost node in this field is
         /// [`ExpressionKind::OptionalChainingHost`], which holds
-        /// a non-null value.
+        /// a non-null and not-undefined value.
         operations: Rc<Expression>,
     },
 
@@ -72,36 +127,36 @@ pub enum ExpressionKind {
     OptionalChainingHost,
 }
 
-pub enum XMLElementContent {
+pub enum XmlElementContent {
     Interpolation(Rc<Expression>),
     Markup(String),
     Text(String),
-    XMLElement(XMLElement),
+    XmlElement(XmlElement),
 }
 
-pub struct XMLElement {
-    pub opening_tag_name: XMLTagName,
-    pub attributes: Vec<XMLAttributeOrInterpolation>,
-    pub content: Vec<XMLElementContent>,
-    pub closing_tag_name: Option<XMLTagName>,
+pub struct XmlElement {
+    pub opening_tag_name: XmlTagName,
+    pub attributes: Vec<XmlAttributeOrInterpolation>,
+    pub content: Vec<XmlElementContent>,
+    pub closing_tag_name: Option<XmlTagName>,
 }
 
-pub enum XMLTagName {
+pub enum XmlTagName {
     Name(String),
     Interpolation(Rc<Expression>),
 }
 
-pub enum XMLAttributeOrInterpolation {
-    Attribute(XMLAttribute),
+pub enum XmlAttributeOrInterpolation {
+    Attribute(XmlAttribute),
     Interpolation(Rc<Expression>),
 }
 
-pub struct XMLAttribute {
+pub struct XmlAttribute {
     pub name: String,
-    pub value: XMLAttributeValueOrInterpolation,
+    pub value: XmlAttributeValueOrInterpolation,
 }
 
-pub enum XMLAttributeValueOrInterpolation {
+pub enum XmlAttributeValueOrInterpolation {
     Value(String),
     Interpolation(Rc<Expression>),
 }
@@ -138,45 +193,49 @@ pub enum ObjectKey {
     Brackets(Rc<Expression>),
 }
 
-pub struct TypeAnnotation {
+pub struct TypeExpression {
     pub location: Location,
-    pub kind: TypeAnnotationKind,
+    pub kind: TypeExpressionKind,
 }
 
-pub enum TypeAnnotationKind {
-    QualifiedIdentifier(QualifiedIdentifier),
-    Member {
-        base: Rc<TypeAnnotation>,
+pub enum TypeExpressionKind {
+    Id(QualifiedIdentifier),
+    DotMember {
+        base: Rc<TypeExpression>,
         member: QualifiedIdentifier,
     },
-    Tuple(Vec<Rc<TypeAnnotation>>),
+    Tuple(Vec<Rc<TypeExpression>>),
     Record(Vec<RecordTypeField>),
+    /// `*`
+    Any,
     Void,
-    Nullable(Rc<TypeAnnotation>),
-    NonNullable(Rc<TypeAnnotation>),
-    FunctionType {
+    Undefined,
+    Nullable(Rc<TypeExpression>),
+    NonNullable(Rc<TypeExpression>),
+    Function {
         params: Vec<FunctionTypeParam>,
-        return_annotation: Rc<TypeAnnotation>,
+        return_annotation: Rc<TypeExpression>,
     },
     StringLiteral(String),
     NumberLiteral(f64),
-    Union(Vec<Rc<TypeAnnotation>>),
+    /// `|`
+    Union(Vec<Rc<TypeExpression>>),
     /// `&`
     Complement {
-        base: Rc<TypeAnnotation>,
-        complement: Rc<TypeAnnotation>,
+        base: Rc<TypeExpression>,
+        complement: Rc<TypeExpression>,
     },
     /// `base.<T1, Tn>`
-    TypeArguments {
-        base: Rc<TypeAnnotation>,
-        arguments: Vec<Rc<TypeAnnotation>>,
+    WithTypeArguments {
+        base: Rc<TypeExpression>,
+        arguments: Vec<Rc<TypeExpression>>,
     },
 }
 
 pub struct FunctionTypeParam {
     pub kind: FunctionTypeParamKind,
     pub name: (String, Location),
-    pub type_annotation: Option<Rc<TypeAnnotation>>,
+    pub type_annotation: Option<Rc<TypeExpression>>,
 }
 
 pub enum FunctionTypeParamKind {

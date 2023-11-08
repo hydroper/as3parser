@@ -26,7 +26,7 @@ The _typeInference_ compiler option adds type inference for specific contexts su
 
 - constants from discriminant enums implicitly convert to discriminant enums,
 - variable bindings have the type of the assigned expression,
-- function signatures without a return type annotation are taken as returning `void`, and
+- function signatures without a return type expression are taken as returning `void`, and
 - `for` and `for each` perform type inference for the left variable based on the iterable.
 
 The compiler with the _typeInference_ option being true still emits warnings for untyped function parameters except:
@@ -59,8 +59,8 @@ The _noSwitchFallthroughs_ compiler option, when `true`, requires that non-empty
 The _nullability_ compiler option has the following effects:
 
 - types exclude `null` by default;
-- the type annotations `T?` and `?T` indicate a nullable type;
-- the type annotation `T!` indicates a non-nullable type;
+- the type expressions `T?` and `?T` indicate a nullable type;
+- the type expression `T!` indicates a non-nullable type;
 - accessing a property from a nullable type first requires either a postfix `!` or an optional chaining operator;
 - the postfix `!` operator asserts that a value is non-null.
 
@@ -74,9 +74,11 @@ The _nullability_ compiler option has the following effects:
 
 ## Nullability operators
 
-- Postfix `!`
-- Optional chaining: `?.`, `?.(...)` and `?.[...]`
-- `??`, `??=`
+Nullability operators consider a value to be null when it is either `undefined` or `null`.
+
+* Postfix `!`
+* Optional chaining: `?.`, `?.(...)` and `?.[...]`
+* `??`, `??=`
 
 ## Destructuring patterns
 
@@ -163,90 +165,15 @@ class C.<T> {}
 
 _Dot tokens_: Keywords are valid identifiers after dot and `?.`.
 
-_Intrinsics definitions_: The package `as3.intrinsics` allows defining properties whose name is a possibly reserved word.
+_`::` tokens_: Keywords are valid identifiers after `::`.
 
-Intrinsic definitions can be defined through `as3.intrinsics.define`. This function is processed by the compiler and is equivalent to either a function, variable, or virtual property definition. The usage is as follows:
-
-```as3
-// `var variableName: T;`
-as3.intrinsics.define.<T>(public, "variableName", {
-    // Optional setting: whether it is a constant variable.
-    readOnly: true,
-
-    // Optional setting: list of definition modifiers as strings
-    modifiers: [],
-
-    // Optional setting: initial value.
-    value: initialValue,
-});
-
-// Virtual property
-as3.intrinsics.define.<T>(public, "propertyName", {
-    // Optional setting: list of definition modifiers as strings
-    modifiers: [],
-
-    // Getter
-    get: () => v,
-
-    // Setter
-    set: v => {},
-});
-
-// Function
-as3.intrinsics.define(public, "functionName", {
-    // Optional setting: list of definition modifiers as strings
-    modifiers: [],
-
-    // Required setting
-    signature: as3.intrinsics::Type.<SignatureType>,
-
-    // Optional setting: the body. It must be specified
-    // or omitted depending on the `native` modifier.
-    body: signature => body,
-
-    // Optional setting
-    generics: {
-        // Optional parameters to introduce as a
-        // sequence of strings.
-        params: [],
-
-        // Optional map of default types to the parameters, as a
-        // record from parameter string to an assigned type.
-        // The assigned type may additionally be expressed through
-        // `as3.intrinsics::Type.<T>`, where `T` is the target type.
-        defaults: {},
-
-        // Optional constraints as a record from parameter string
-        // to a a list of types.
-        constraints: {},
-    },
-});
-```
-
-The following `f` definition:
+_Escaped definitions_: The language introduces the context word `escaped` to allow defining names that are reserved words. Use the meta-data `[ReadOnly]` to define constants and `[Modifiers("m1", ..."mN")]` to add modifiers. It defining variable definitions, getters, setters and function definitions.
 
 ```as3
-as3.intrinsics.define(public, "f", {
-    signature: as3.intrinsics::Type.<() => void>,
-    body: () => {},
-    generics: {
-        params: ["T"],
-        defaults: {
-            T: as3.intrinsics::Type.<() => void>,
-        },
-        constraints: {
-            T: IEatable,
-        },
-    },
-});
-```
+use escaped public::x = 10;
 
-Is equivalent to the following `f` definition:
-
-```as3
-public function f.<T = () => void>(): void
-    where T: IEatable
-{}
+use escaped public::y = function get() (10);
+use escaped public::y = function set(v) {};
 ```
 
 ## Namespace definition
@@ -458,9 +385,17 @@ v is not T;
 v not instanceof T;
 ```
 
-_Right-hand side_: The right-hand side of an `as`, `is` or `instanceof` is still given an expression, not a type expression, despite the introduction of numerous type annotations. Furthermore, the right-hand side is limited to concrete types; types such as union types that map to another type are not allowed as the right-hand side of these operators.
+_Right-hand side_: The right-hand side of an `as`, `is` or `instanceof` is still given an expression, not a type expression, despite the introduction of numerous type expressions. Furthermore, the right-hand side is limited to concrete types; types such as union types that map to another type are not allowed as the right-hand side of these operators.
 
 _`as` result type_: The `as` operator returns `T?`.
+
+## `in` operator
+
+_Negated_:
+
+```as3
+k not in o;
+```
 
 ## Arrow functions
 
@@ -508,8 +443,16 @@ The sources are supplied to the compiler only through `sources.include` and `sou
 
 A source may consist of multiple definitions in multiple packages.
 
+## Miscellaneous
+
+*Added type expressions*:
+
+```as3
+undefined
+```
+
 ## Migrations
 
 - Migrate code to ASDoc 2
-- Migrate code to nullability, by translating existing type annotations to include `null` explicitly
+- Migrate code to nullability, by translating existing type expressions to include `null` explicitly
 - Migrate code to improved variables
