@@ -47,7 +47,7 @@ pub enum ExpressionKind {
         type_annotation: Option<Rc<TypeExpression>>,
     },
     ObjectInitializer {
-        fields: Vec<ObjectFieldOrRest>,
+        fields: Vec<ObjectInitializerItem>,
         type_annotation: Option<Rc<TypeExpression>>,
     },
     Function {
@@ -174,7 +174,7 @@ pub enum ReservedNamespace {
     Internal,
 }
 
-pub enum ObjectFieldOrRest {
+pub enum ObjectInitializerItem {
     Field {
         key: Rc<(ObjectKey, Location)>,
         /// Used when parsing an object initializer as a destructuring pattern.
@@ -187,7 +187,7 @@ pub enum ObjectFieldOrRest {
 }
 
 pub enum ObjectKey {
-    NonAttributeQualifiedIdentifier(NonAttributeQualifiedIdentifier),
+    Id(NonAttributeQualifiedIdentifier),
     String(String),
     Number(f64),
     Brackets(Rc<Expression>),
@@ -195,17 +195,39 @@ pub enum ObjectKey {
 
 pub struct Destructuring {
     pub location: Location,
+    pub kind: DestructuringKind,
     /// Indicates whether the pattern asserts that the
     /// destructuring base is not any of `undefined` and `null`.
+    /// The patterns use the `!` punctuator to indicate this behavior.
     pub non_null: bool,
-    pub kind: DestructuringKind,
+    pub type_annotation: Option<Rc<TypeExpression>>,
 }
 
 pub enum DestructuringKind {
     Binding {
         name: (String, Location),
-        type_annotation: Option<Rc<TypeExpression>>,
     },
+    Record(Vec<Rc<RecordDestructuringField>>),
+    Array(Vec<Rc<ArrayDestructuringItem>>),
+}
+
+pub struct RecordDestructuringField {
+    pub location: Location,
+    pub key: Rc<(RecordDestructuringKey, Location)>,
+    pub non_null: bool,
+    pub alias: Option<Rc<Destructuring>>,
+}
+
+pub enum RecordDestructuringKey {
+    Id(QualifiedIdentifier),
+    String(String),
+    Number(f64),
+    Brackets(Rc<Expression>),
+}
+
+pub enum ArrayDestructuringItem {
+    Pattern(Rc<Destructuring>),
+    Rest(Rc<Destructuring>, Location),
 }
 
 pub struct TypeExpression {
@@ -260,8 +282,10 @@ pub enum FunctionTypeParamKind {
 }
 
 pub struct RecordTypeField {
+    pub readonly: bool,
     pub key: Rc<(RecordTypeKey, Location)>,
     pub key_suffix: RecordTypeKeySuffix,
+    pub type_annotation: Option<Rc<TypeExpression>>,
 }
 
 pub enum RecordTypeKeySuffix {
@@ -271,7 +295,7 @@ pub enum RecordTypeKeySuffix {
 }
 
 pub enum RecordTypeKey {
-    NonAttributeQualifiedIdentifier(NonAttributeQualifiedIdentifier),
+    Id(NonAttributeQualifiedIdentifier),
     String(String),
     Number(f64),
     Brackets(Rc<Expression>),
