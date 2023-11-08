@@ -5,6 +5,7 @@
 
 # Parsing
 
-* [ ] `allow_final_type_annotation`
-  * Conditional
-  * Miscellaneous other cases in the other language project
+* [ ] Expressions
+  * [ ] `with_type_annotation`
+    * Conditional
+    * Miscellaneous other cases in the other language project

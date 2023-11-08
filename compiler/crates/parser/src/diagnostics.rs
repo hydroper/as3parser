@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use maplit::hashmap;
 
-use crate::{Location, diagnostics_en};
+use crate::{Location, diagnostics_defaults};
 
 #[derive(Clone)]
 pub struct Diagnostic {
@@ -106,7 +106,7 @@ impl Diagnostic {
     }
 
     pub fn format_message_en(&self) -> String {
-        self.format_message(&diagnostics_en::MESSAGES)
+        self.format_message(&diagnostics_defaults::MESSAGES)
     }
 
     pub fn format_message(&self, messages: &HashMap<i32, String>) -> String {

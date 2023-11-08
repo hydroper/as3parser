@@ -300,3 +300,101 @@ pub enum RecordTypeKey {
     Number(f64),
     Brackets(Rc<Expression>),
 }
+
+pub struct Statement {
+    pub location: Location,
+    pub kind: StatementKind,
+}
+
+pub enum StatementKind {
+    Empty,
+    Super(Vec<Rc<Expression>>),
+    Block(Block),
+    If {
+        condition: Rc<Expression>,
+        consequent: Rc<Statement>,
+        alternative: Option<Rc<Statement>>,
+    },
+    Switch {
+        discriminant: Rc<Expression>,
+        cases: Vec<SwitchCase>,
+    },
+    SwitchType {
+        discriminant: Rc<Expression>,
+        cases: Vec<SwitchTypeCase>,
+    },
+    Do {
+        body: Rc<Statement>,
+        test: Rc<Expression>,
+    },
+    While {
+        test: Rc<Expression>,
+        body: Rc<Statement>,
+    },
+    For {
+        init: Option<ForInit>,
+        test: Option<Rc<Expression>>,
+        update: Option<Rc<Expression>>,
+        body: Rc<Statement>,
+    },
+    ForIn {
+        each: bool,
+        left: ForInLeft,
+        right: Rc<Expression>,
+        body: Rc<Statement>,
+    },
+    With {
+        object: Rc<Expression>,
+        body: Rc<Statement>,
+    },
+    Continue {
+        label: Option<String>,
+    },
+    Break {
+        label: Option<String>,
+    },
+    Return {
+        expression: Option<Rc<Expression>>,
+    },
+    Throw {
+        expression: Rc<Expression>,
+    },
+    Try {},
+}
+
+pub enum ForInit {
+    Variable(SimpleVariableDeclaration),
+    Expression(Rc<Expression>),
+}
+
+pub enum ForInLeft {
+    Variable(SimpleVariableDeclaration),
+    Expression(Rc<Expression>),
+}
+
+pub struct SimpleVariableDeclaration {
+    pub kind: VariableKind,
+    pub bindings: Vec<VariableBinding>,
+}
+
+pub struct VariableBinding {
+    pub pattern: Rc<Destructuring>,
+    pub init: Option<Rc<Expression>>,
+}
+
+pub enum VariableKind {
+    Var,
+    Const,
+}
+
+pub struct SwitchCase {
+    pub test: Option<Rc<Expression>>,
+    pub consequent: Vec<Rc<Directive>>,
+}
+
+pub struct SwitchTypeCase {
+    pub pattern: Rc<Destructuring>,
+    pub block: Block,
+}
+
+pub struct Block(pub Vec<Rc<Directive>>);

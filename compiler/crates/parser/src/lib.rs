@@ -2,7 +2,7 @@ pub mod character_validation;
 pub(crate) mod compiler_options;
 pub(crate) mod comment;
 pub(crate) mod diagnostics;
-pub(crate) mod diagnostics_en;
+pub(crate) mod diagnostics_defaults;
 pub(crate) mod errors;
 pub(crate) mod operator;
 pub(crate) mod tokenizer;

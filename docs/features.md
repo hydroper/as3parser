@@ -268,6 +268,19 @@ enum E {
 
 _`switch`_: A `switch` over an enumeration must be exhaustive and cover all variants with a trailling `break` statement.
 
+## `switch type`
+
+```as3
+switch type (v) {
+    case (v: T) {
+        // v: T
+    }
+    default {
+        //
+    }
+}
+```
+
 ## Arrow functions
 
 ```as3
