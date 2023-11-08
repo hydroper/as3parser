@@ -167,7 +167,7 @@ _Dot tokens_: Keywords are valid identifiers after dot and `?.`.
 
 _`::` tokens_: Keywords are valid identifiers after `::`.
 
-_Escaped definitions_: The language introduces the context word `escaped` to allow defining names that are reserved words. Use the meta-data `[ReadOnly]` to define constants and `[Modifiers("m1", ..."mN")]` to add modifiers. It defining variable definitions, getters, setters and function definitions.
+_Escaped definitions_: The language introduces the context word `escaped` to allow defining names that are reserved words. Use the meta-data `[ReadOnly]` to define constants and `[Modifiers("m1", ..."mN")]` to add modifiers. It allows defining variable definitions, getters, setters and function definitions.
 
 ```as3
 use escaped public::x = 10;
