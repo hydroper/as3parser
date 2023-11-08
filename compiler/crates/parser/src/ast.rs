@@ -109,7 +109,13 @@ pub enum ExpressionKind {
         right: Rc<Expression>,
     },
     /// The `x, y` expression.
-    Sequence(Vec<Expression>, Vec<Expression>),
+    Sequence(Vec<Rc<Expression>>, Vec<Rc<Expression>>),
+
+    /// Expression used internally only.
+    WithTypeAnnotation {
+        base: Rc<Expression>,
+        type_annotation: Rc<TypeExpression>,
+    },
 
     /// Expression containing an optional chaining operator.
     OptionalChaining {
@@ -171,19 +177,13 @@ pub enum ReservedNamespace {
 pub enum ObjectFieldOrRest {
     Field {
         key: Rc<(ObjectKey, Location)>,
-        /// A key suffix that has effect solely when parsing
-        /// an object initializer as a destructuring pattern.
+        /// Used when parsing an object initializer as a destructuring pattern.
         #[doc(hidden)]
-        key_suffix: ObjectKeySuffix,
+        destructuring_non_null: bool,
         /// If `None`, this is a shorthand field.
         value: Option<Rc<Expression>>,
     },
     Rest(Rc<Expression>),
-}
-
-pub enum ObjectKeySuffix {
-    None,
-    NonNull,
 }
 
 pub enum ObjectKey {
@@ -191,6 +191,21 @@ pub enum ObjectKey {
     String(String),
     Number(f64),
     Brackets(Rc<Expression>),
+}
+
+pub struct Destructuring {
+    pub location: Location,
+    /// Indicates whether the pattern asserts that the
+    /// destructuring base is not any of `undefined` and `null`.
+    pub non_null: bool,
+    pub kind: DestructuringKind,
+}
+
+pub enum DestructuringKind {
+    Binding {
+        name: (String, Location),
+        type_annotation: Option<Rc<TypeExpression>>,
+    },
 }
 
 pub struct TypeExpression {
