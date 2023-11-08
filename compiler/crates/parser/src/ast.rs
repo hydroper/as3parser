@@ -46,6 +46,11 @@ pub enum ExpressionKind {
         elements: Vec<Option<Rc<Expression>>>,
         type_annotation: Option<Rc<TypeExpression>>,
     },
+    /// `new <T> []`
+    VectorInitializer {
+        /// Element sequence possibly containing `Rest`s.
+        elements: Vec<Rc<Expression>>,
+    },
     ObjectInitializer {
         fields: Vec<ObjectInitializerItem>,
         type_annotation: Option<Rc<TypeExpression>>,
@@ -115,6 +120,11 @@ pub enum ExpressionKind {
     WithTypeAnnotation {
         base: Rc<Expression>,
         type_annotation: Rc<TypeExpression>,
+    },
+
+    Embed {
+        source: String,
+        type_annotation: Option<Rc<TypeExpression>>,
     },
 
     /// Expression containing an optional chaining operator.

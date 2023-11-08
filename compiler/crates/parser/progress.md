@@ -1,6 +1,6 @@
 * [x] Expressions
 * [x] Destructuring (array, record, binding)
-* [ ] Statements
+* [x] Statements
 * [ ] Directives
 
 # Parsing
