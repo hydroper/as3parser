@@ -359,7 +359,27 @@ pub enum StatementKind {
     Throw {
         expression: Rc<Expression>,
     },
-    Try {},
+    Try {
+        block: Block,
+        catch_clauses: Vec<CatchClause>,
+        finally_clause: FinallyClause,
+    },
+    Expression(Rc<Expression>),
+    Labeled {
+        label: (String, Location),
+        statement: Rc<Statement>,
+    },
+    DefaultXmlNamespace(Rc<Expression>),
+    SimpleVariableDeclaration(SimpleVariableDeclaration),
+}
+
+pub struct CatchClause {
+    pub pattern: Rc<Destructuring>,
+    pub block: Block,
+}
+
+pub struct FinallyClause {
+    pub block: Block,
 }
 
 pub enum ForInit {
@@ -373,7 +393,7 @@ pub enum ForInLeft {
 }
 
 pub struct SimpleVariableDeclaration {
-    pub kind: VariableKind,
+    pub kind: (VariableKind, Location),
     pub bindings: Vec<VariableBinding>,
 }
 
@@ -398,3 +418,32 @@ pub struct SwitchTypeCase {
 }
 
 pub struct Block(pub Vec<Rc<Directive>>);
+
+pub struct Directive {
+    pub location: Location,
+    pub kind: DirectiveKind,
+}
+
+pub enum DirectiveKind {
+    Statement(Rc<Statement>),
+    Include {
+        source: String,
+        replaced_by: Vec<Rc<Directive>>,
+    },
+    /// An import directive.
+    /// 
+    /// If it is an alias with a wildcard import item,
+    /// it is a package alias that opens the public namespace
+    /// and aliases it.
+    Import {
+        alias: Option<(String, Location)>,
+        package_name: Vec<(String, Location)>,
+        import_item: (ImportItem, Location),
+    },
+    UseNamespace(Rc<Expression>),
+}
+
+pub enum ImportItem {
+    Wildcard,
+    Name(String),
+}

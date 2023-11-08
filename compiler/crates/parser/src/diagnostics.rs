@@ -88,7 +88,7 @@ impl Diagnostic {
         self.kind.id()
     }
 
-    pub fn format_en(&self) -> String {
+    pub fn format_default(&self) -> String {
         let category = (if self.is_verify_error {
             "Verify error"
         } else if self.is_warning {
@@ -100,12 +100,12 @@ impl Diagnostic {
         let file_path = self.location.source.file_path.clone().map_or("".to_owned(), |s| format!("{s}:"));
         let line = self.location.first_line_number();
         let column = self.location.first_column() + 1;
-        let message = self.format_message_en();
+        let message = self.format_message_default();
         let id = self.id().to_string();
         format!("{file_path}{line}:{column}: {category} #{id}: {message}")
     }
 
-    pub fn format_message_en(&self) -> String {
+    pub fn format_message_default(&self) -> String {
         self.format_message(&diagnostics_defaults::MESSAGES)
     }
 
