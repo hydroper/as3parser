@@ -440,27 +440,65 @@ pub struct Directive {
 
 pub enum DirectiveKind {
     Statement(Rc<Statement>),
-    Include {
-        source: String,
-        replaced_by: Vec<Rc<Directive>>,
-    },
+    Include(Rc<IncludeDirective>),
     /// An import directive.
     /// 
     /// If it is an alias with a wildcard import item,
     /// it is a package alias that opens the public namespace
     /// and aliases it.
-    Import {
-        alias: Option<(String, Location)>,
-        package_name: Vec<(String, Location)>,
-        import_item: (ImportItem, Location),
-    },
+    Import(Rc<ImportDirective>),
     UseNamespace(Rc<Expression>),
-    VariableDefinition {
-        annotations: DefinitionAnnotations,
-        escaped: bool,
-        kind: VariableKind,
-        bindings: Vec<VariableBinding>,
-    },
+    VariableDefinition(Rc<VariableDefinition>),
+    FunctionDefinition(Rc<FunctionDefinition>),
+    ConstructorDefinition(Rc<ConstructorDefinition>),
+    GetterDefinition(Rc<GetterDefinition>),
+    SetterDefinition(Rc<SetterDefinition>),
+}
+
+pub struct IncludeDirective {
+    pub source: String,
+    pub replaced_by: Vec<Rc<Directive>>,
+}
+
+pub struct ImportDirective {
+    pub alias: Option<(String, Location)>,
+    pub package_name: Vec<(String, Location)>,
+    pub import_item: (ImportItem, Location),
+}
+
+pub struct VariableDefinition {
+    pub annotations: DefinitionAnnotations,
+    pub escaped: bool,
+    pub kind: VariableKind,
+    pub bindings: Vec<VariableBinding>,
+}
+
+pub struct FunctionDefinition {
+    pub annotations: DefinitionAnnotations,
+    pub escaped: bool,
+    pub name: (String, Location),
+    pub generics: Generics,
+    pub common: Rc<FunctionCommon>,
+}
+
+pub struct ConstructorDefinition {
+    pub annotations: DefinitionAnnotations,
+    pub name: (String, Location),
+    pub common: Rc<FunctionCommon>,
+}
+
+pub struct GetterDefinition {
+    pub annotations: DefinitionAnnotations,
+    pub escaped: bool,
+    pub name: (String, Location),
+    pub common: Rc<FunctionCommon>,
+}
+
+pub struct SetterDefinition {
+    pub annotations: DefinitionAnnotations,
+    pub escaped: bool,
+    pub name: (String, Location),
+    pub common: Rc<FunctionCommon>,
 }
 
 pub enum ImportItem {
@@ -495,4 +533,50 @@ pub struct Metadata {
 pub struct MetadataEntry {
     pub key: Option<(String, Location)>,
     pub value: (String, Location),
+}
+
+pub struct Generics {
+    pub params: Option<Vec<Rc<GenericParam>>>,
+    pub where_clause: Option<GenericsWhere>,
+}
+
+pub struct GenericParam {
+    pub location: Location,
+    pub name: (String, Location),
+    pub constraints: Vec<Rc<TypeExpression>>,
+    pub default_type: Option<Rc<TypeExpression>>,
+}
+
+pub struct GenericsWhere {
+    pub constraints: Vec<GenericsWhereConstraint>,
+}
+
+pub struct GenericsWhereConstraint {
+    pub name: (String, Location),
+    pub constraint: Rc<TypeExpression>,
+}
+
+pub struct FunctionCommon {
+    pub flags: FunctionFlags,
+    pub params: Vec<FunctionParam>,
+    pub return_annotation: Option<Rc<TypeExpression>>,
+    pub body: Option<FunctionBody>,
+}
+
+pub struct FunctionParam {
+    pub kind: FunctionParamKind,
+    pub binding: VariableBinding,
+}
+
+bitflags! {
+    #[derive(Copy, Clone, PartialEq, Eq)]
+    pub struct FunctionFlags: u32 {
+        const AWAIT     = 0b00000001;
+        const YIELD     = 0b00000010;
+    }
+}
+
+pub enum FunctionBody {
+    Block(Block),
+    Expression(Rc<Expression>),
 }

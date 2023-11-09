@@ -440,6 +440,10 @@ The `embed` context keyword is used by embed expressions. They can be used to di
 const ba: flash.utils.ByteArray = embed "./data.bin";
 ```
 
+## Include directive
+
+The include directive is altered to not replace source text and instead contribute directives to the respective source, maintaining source locations.
+
 ## Sources
 
 The sources are supplied to the compiler only through `sources.include` and `sources.exclude` arrays taking globbing patterns, and the main class for a SWF is specified by `sources.mainClass`:
