@@ -118,12 +118,12 @@ impl Diagnostic {
             string_arguments.insert(i.to_string(), self.format_argument(*argument.clone()));
             i += 1;
         }
-        use crate::util::StringIncognitoFormat;
+        use late_format::LateFormat;
         let Some(msg) = messages.get(&self.id()) else {
             let id = self.id();
             panic!("Message map is missing message for ID {id}");
         };
-        msg.incognito_format(string_arguments)
+        msg.late_format(string_arguments)
     }
 
     fn format_argument(&self, argument: DiagnosticArgument) -> String {

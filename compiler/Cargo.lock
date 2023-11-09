@@ -19,6 +19,7 @@ dependencies = [
  "by_address",
  "conv",
  "file_paths",
+ "late_format",
  "lazy-regex",
  "lazy_static",
  "maplit",
@@ -67,6 +68,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "29d8ab237e56d61d866204d981374b344ee83e84e0ab337b0ba53ce8e62a293b"
 dependencies = [
  "lazy-regex",
+]
+
+[[package]]
+name = "late_format"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c20a4c2785e13b46810cdd5b6df71b2bbacd6195d18d37b99098c6f52631dc6d"
+dependencies = [
+ "lazy-regex",
+ "maplit",
 ]
 
 [[package]]
