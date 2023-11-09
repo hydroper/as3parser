@@ -164,4 +164,12 @@ impl<'input> Parser<'input> {
             },
         }
     }
+
+    pub fn expect_eof(&mut self) -> Result<(), ParserFailure> {
+        self.expect(Token::Eof)
+    }
+
+    pub fn parse_opt_expression(&mut self) -> Result<Option<ast::Expression>, ParserFailure> {
+        //
+    }
 }
