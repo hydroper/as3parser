@@ -441,11 +441,6 @@ pub struct Directive {
 pub enum DirectiveKind {
     Statement(Rc<Statement>),
     Include(Rc<IncludeDirective>),
-    /// An import directive.
-    /// 
-    /// If it is an alias with a wildcard import item,
-    /// it is a package alias that opens the public namespace
-    /// and aliases it.
     Import(Rc<ImportDirective>),
     UseNamespace(Rc<Expression>),
     VariableDefinition(Rc<VariableDefinition>),
@@ -478,6 +473,11 @@ pub struct IncludeDirective {
     pub replaced_by: Vec<Rc<Directive>>,
 }
 
+/// An import directive.
+/// 
+/// If it is an alias with a wildcard import item,
+/// it is a package alias that opens the public namespace
+/// and aliases it.
 pub struct ImportDirective {
     pub alias: Option<(String, Location)>,
     pub package_name: Vec<(String, Location)>,
