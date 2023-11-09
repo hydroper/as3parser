@@ -1,5 +1,6 @@
 use std::rc::Rc;
 use crate::*;
+use crate::util::default;
 
 pub struct Parser<'input> {
     tokenizer: Tokenizer<'input>,
@@ -169,7 +170,31 @@ impl<'input> Parser<'input> {
         self.expect(Token::Eof)
     }
 
-    pub fn parse_opt_expression(&mut self) -> Result<Option<ast::Expression>, ParserFailure> {
-        //
+    pub fn parse_opt_expression(&mut self, context: ExpressionContext) -> Result<Option<Rc<ast::Expression>>, ParserFailure> {
+        let mut exp: Option<Rc<ast::Expression>> = self.parse_opt_primary_expression();
+        if let Some(exp) = exp {
+            return Ok(Some(self.parse_subexpressions(exp, context.clone())?));
+        }
+        Ok(None)
+    }
+}
+
+/// Context used to control the parsing of an expression.
+#[derive(Clone)]
+pub struct ExpressionContext {
+    pub min_precedence: OperatorPrecedence,
+    pub allow_in: bool,
+    pub allow_assignment: bool,
+    pub with_type_annotation: bool,
+}
+
+impl Default for ExpressionContext {
+    fn default() -> Self {
+        Self {
+            min_precedence: OperatorPrecedence::List,
+            allow_in: true,
+            allow_assignment: true,
+            with_type_annotation: true,
+        }
     }
 }
