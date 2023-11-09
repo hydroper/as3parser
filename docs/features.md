@@ -228,45 +228,39 @@ A function containing the `await` operator is implicitly asynchronous; a functio
 
 The `enum` context keyword defines simple enumerations. Algebraic data types are complex and do not fit well with ActionScript, therefore the feature was oversimplified.
 
-_Discriminant enumerations_: Discriminant enumerations consist of variants mapped to constants. With the `typeInference` compiler option on, constants such as string literals implicitly convert to discriminant enumerations.
+Simple enumerations consist of variants mapped to (string, number) pairs. With the `typeInference` compiler option on, string literals implicitly convert to enumerations.
 
 ```as3
 // Defines a class `E`.
 enum E {
-    V1 = "v1";
-    V2 = "v2";
-    V3 = "v3";
+    const V1 = "v1";
+    const V2 = "v2";
+    const V3 = "v3";
 
-    // The class representing the enum
-    class {
-        function f(): void {}
-    }
+    public function f(): void {}
 }
 const e: E = "v1";
 ```
 
-_Subclass enumerations_: Subclass enumerations attach a subclass to the variants.
+The constant definition of a member can assign a string, a number, a `[string, number]` pair or a `[number, string]` pair to customize the member constants. The string and number can be obtained through `toString()` and `valueOf()` respectively. The number and string are determined automatically if omitted.
+
+_`switch`_: A `switch` over an enumeration must be exhaustive and cover all members with a trailling `break` statement.
+
+## Set enums
+
+Set enums consist of combinatory members, represented as bitwise flags. Such enums are defined with the `[Set]` metadata. Set enums benefit from type inference.
 
 ```as3
+[Set]
 enum E {
-    V1("v1") {
-        override function f(): void {}
-    }
-
-    // Super class of all variants
-    class {
-        public const s: String;
-
-        function E(s: String) {
-            this.s = s;
-        }
-
-        function f(): void {}
-    }
+    const V1;
+    const V2;
+    const V3;
 }
+const v: E = ["v1", "v2", "v3"];
+const v: E = {v1: true, v2: true, v3: true};
+v.include("v2").exclude("v2").toggle("v2").filter("v2").has("v2");
 ```
-
-_`switch`_: A `switch` over an enumeration must be exhaustive and cover all variants with a trailling `break` statement.
 
 ## `switch type`
 

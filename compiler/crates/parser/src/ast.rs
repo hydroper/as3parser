@@ -453,6 +453,18 @@ pub enum DirectiveKind {
     ConstructorDefinition(Rc<ConstructorDefinition>),
     GetterDefinition(Rc<GetterDefinition>),
     SetterDefinition(Rc<SetterDefinition>),
+    TypeDefinition(Rc<TypeDefinition>),
+    ClassDefinition(Rc<ClassDefinition>),
+    EnumDefinition(Rc<EnumDefinition>),
+}
+
+pub struct ClassDefinition {
+    pub annotations: DefinitionAnnotations,
+    pub name: (String, Location),
+    pub generics: Generics,
+    pub extends_clause: Option<Rc<TypeExpression>>,
+    pub implements_clause: Option<Vec<Rc<TypeExpression>>>,
+    pub block: Block,
 }
 
 pub struct IncludeDirective {
@@ -499,6 +511,13 @@ pub struct SetterDefinition {
     pub escaped: bool,
     pub name: (String, Location),
     pub common: Rc<FunctionCommon>,
+}
+
+pub struct TypeDefinition {
+    pub annotations: DefinitionAnnotations,
+    pub left: (String, Location),
+    pub generics: Generics,
+    pub right: Rc<TypeExpression>,
 }
 
 pub enum ImportItem {
