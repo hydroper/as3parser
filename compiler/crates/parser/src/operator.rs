@@ -2,6 +2,7 @@
 pub enum Operator {
     PostIncrement,
     PostDecrement,
+    NonNull,
     Delete,
     Void,
     Typeof,
