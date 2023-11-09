@@ -223,7 +223,22 @@ const e: E = "v1";
 
 The constant definition of a member can assign a string, a number, a `[string, number]` pair or a `[number, string]` pair to customize the member constants. The string and number can be obtained through `toString()` and `valueOf()` respectively. The number and string are determined automatically if omitted.
 
+```as3
+e.valueOf(); // number
+e.toString(); // string
+```
+
 The number type defaults to `Number`. It can be altered through the `[Number(T)]` metadata.
+
+An enum class defines a static method `from(v)` that takes either a string or a compatible number and returns an object of its type. This method throws a `TypeError` if the value does not match a member; for set enums, it will ignore non matching bits.
+
+```as3
+try {
+    const e = E.from(value);
+} catch (error: TypeError) {
+    //
+}
+```
 
 _`switch`_: A `switch` over an enumeration must be exhaustive and cover all members with a trailling `break` statement.
 
@@ -356,6 +371,11 @@ _Format migration_: Sources using ASDoc 1 format can be migrated to sources usin
 _Places_: ASDoc comments can be applied to additional places, such as to type aliases and record fields.
 
 ## Meta-data
+
+Meta-data are the same as of the Adobe ActionScript compiler and include syntax such as:
+
+* keyless entries, either in the form `s` or `"s"`, such as in `[D(s)]` and `[D("s")]`;
+* qualified names, in the form `q::x`, such as in `[q::x]`.
 
 The compiler will eventually handle all of ActionScript meta-data and document them:
 
