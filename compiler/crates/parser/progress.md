@@ -37,8 +37,8 @@ Syntax:
   * [ ] Vector initializer (`new <T> [...]`)
   * [ ] Object initializer
   * [ ] Function expression
-  * Arrow function
-    * [ ] It is parsed from either a non-qualified identifier or a parentheses expression.
+  * [ ] Arrow function
+    * [ ] It is parsed from either a non qualified identifier or a parentheses expression.
     * [ ] Parse empty parameters: `() => x`
   * [ ] Super expression
   * [ ] New expression
