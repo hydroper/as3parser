@@ -455,6 +455,12 @@ pub enum DirectiveKind {
         import_item: (ImportItem, Location),
     },
     UseNamespace(Rc<Expression>),
+    VariableDefinition {
+        annotations: DefinitionAnnotations,
+        escaped: bool,
+        kind: VariableKind,
+        bindings: Vec<VariableBinding>,
+    },
 }
 
 pub enum ImportItem {
