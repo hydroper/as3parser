@@ -43,4 +43,5 @@ pub enum Operator {
     LogicalAnd,
     LogicalXor,
     LogicalOr,
+    NullCoalescing,
 }

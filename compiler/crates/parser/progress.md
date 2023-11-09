@@ -57,6 +57,10 @@ Syntax:
       * [ ] `++`
       - [ ] `--`
   * [ ] Binary operators
+    * [ ] `not in`
+    * [ ] `not instanceof`
+    * [ ] `is not`
+    * [ ] `??`
   * [ ] Conditional
   * [ ] `pattern = v`
   * [ ] `x, y`
