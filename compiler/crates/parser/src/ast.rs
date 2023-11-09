@@ -285,6 +285,7 @@ pub struct FunctionTypeParam {
     pub type_annotation: Option<Rc<TypeExpression>>,
 }
 
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum FunctionParamKind {
     Required,
     Optional,
@@ -298,6 +299,7 @@ pub struct RecordTypeField {
     pub type_annotation: Option<Rc<TypeExpression>>,
 }
 
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum RecordTypeKeySuffix {
     None,
     NonNullable,
@@ -412,6 +414,7 @@ pub struct VariableBinding {
     pub init: Option<Rc<Expression>>,
 }
 
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum VariableKind {
     Var,
     Const,
