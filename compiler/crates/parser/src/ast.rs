@@ -467,6 +467,12 @@ pub struct ClassDefinition {
     pub block: Block,
 }
 
+pub struct EnumDefinition {
+    pub annotations: DefinitionAnnotations,
+    pub name: (String, Location),
+    pub block: Block,
+}
+
 pub struct IncludeDirective {
     pub source: String,
     pub replaced_by: Vec<Rc<Directive>>,

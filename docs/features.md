@@ -244,6 +244,8 @@ const e: E = "v1";
 
 The constant definition of a member can assign a string, a number, a `[string, number]` pair or a `[number, string]` pair to customize the member constants. The string and number can be obtained through `toString()` and `valueOf()` respectively. The number and string are determined automatically if omitted.
 
+The number type defaults to `Number`. It can be altered through the `[Number(T)]` metadata.
+
 _`switch`_: A `switch` over an enumeration must be exhaustive and cover all members with a trailling `break` statement.
 
 ## Set enums
