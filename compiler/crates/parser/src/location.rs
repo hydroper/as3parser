@@ -92,6 +92,19 @@ impl Location {
         }
     }
 
+    /// Build a location by combining two locations. `self`
+    /// serves as the first location, while the first column and first line
+    /// of `other` serves as the last location.
+    pub fn combine_with_start_of(&self, other: Location) -> Self {
+        Self {
+            source: Rc::clone(&self.source),
+            first_line_number: self.first_line_number,
+            last_line_number: other.first_line_number,
+            first_offset: self.first_offset,
+            last_offset: other.first_offset,
+        }
+    }
+
     /// The source file that this location belongs to.
     pub fn source(&self) -> Rc<Source> {
         Rc::clone(&self.source)

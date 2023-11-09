@@ -6,6 +6,7 @@ pub struct Parser<'input> {
     tokenizer: Tokenizer<'input>,
     previous_token: (Token, Location),
     token: (Token, Location),
+    locations: Vec<Location>,
 }
 
 impl<'input> Parser<'input> {
@@ -15,11 +16,20 @@ impl<'input> Parser<'input> {
             tokenizer: Tokenizer::new(source),
             previous_token: (Token::Eof, Location::with_line_and_offset(&source, 1, 0)),
             token: (Token::Eof, Location::with_line_and_offset(&source, 1, 0)),
+            locations: vec![],
         }
     }
 
     fn source(&self) -> &Rc<Source> {
         &self.tokenizer.source
+    }
+
+    fn push_location(&mut self, location: &Location) {
+        self.locations.push(location.clone());
+    }
+
+    fn pop_location(&mut self) -> Location {
+        self.locations.pop().unwrap().combine_with_start_of(self.token.1.clone())
     }
 
     fn add_syntax_error(&self, location: Location, kind: DiagnosticKind, arguments: Vec<Box<DiagnosticArgument>>) {
