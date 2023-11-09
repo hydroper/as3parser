@@ -56,6 +56,7 @@ Syntax:
   * [ ] `o[k]`
   * [ ] `o.<...>`
   * [ ] `o.(condition)`
+    * [ ] If it is followed by `::` and condition is not a list expression, it is reinterpreted as a qualified identifier.
   * [ ] `o..x`
     * [ ] Keywords are not reserved after `..`
   * [ ] `f()`
