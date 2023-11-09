@@ -11,6 +11,8 @@ lazy_static! {
         DiagnosticKind::FailedProcessingNumericLiteral.id() => "Failed processing numeric literal".into(),
         DiagnosticKind::UnallowedNumericSuffix.id() => "Unallowed numeric suffix".into(),
         DiagnosticKind::UnallowedLineBreak.id() => "Unallowed line break".into(),
+        DiagnosticKind::Expected.id() => "Expected {1} before {2}".into(),
+        DiagnosticKind::ExpectedIdentifier.id() => "Expected identifier before {2}".into(),
         // DiagnosticKind::K.id() => "".into(),
     };
 }

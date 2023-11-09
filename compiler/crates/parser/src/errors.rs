@@ -1,4 +1,4 @@
 #[derive(Copy, Clone)]
-pub struct IntolerableError;
+pub struct ParserFailure;
 
 pub struct NumericRangeError;

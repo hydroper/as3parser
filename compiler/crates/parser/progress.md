@@ -22,7 +22,9 @@ Syntax:
   * [ ] `this`
   * [ ] Regular expression
   * [ ] Qualified identifier
-    * If followed by `=>`, it is reinterpreted as an arrow function.
+    * [ ] If followed by `=>`, it is reinterpreted as an arrow function.
+    * [ ] Keywords are not reserved after `::`
+    * [ ] Keywords are not reserved after `@`
   * [ ] XML markup
   * [ ] XML element
   * [ ] XML list
@@ -31,7 +33,7 @@ Syntax:
   * [ ] `protected`
   * [ ] `internal`
   * [ ] `(x)`
-    * If followed by `=>`, it is reinterpreted as an arrow function.
+    * [ ] If followed by `=>`, it is reinterpreted as an arrow function.
   * [ ] `...x`
   * [ ] Array initializer
   * [ ] Vector initializer (`new <T> [...]`)
@@ -43,13 +45,19 @@ Syntax:
   * [ ] Super expression
   * [ ] New expression
   * [ ] `o.x`
+    * [ ] Keywords are not reserved after `.`
+    * [ ] `public`, `private`, `protected`, `internal` are reserved before `::`
+    * [ ] Keywords are not reserved after `@`
   * [ ] `o?.x`
+    * [ ] Keywords are not reserved after `?.`
+    * [ ] `public`, `private`, `protected`, `internal` are reserved before `::`
   * [ ] `o?.[k]`
   * [ ] `o?.(...)`
   * [ ] `o[k]`
   * [ ] `o.<...>`
   * [ ] `o.(condition)`
   * [ ] `o..x`
+    * [ ] Keywords are not reserved after `..`
   * [ ] `f()`
   * [ ] Unary operators
     * [ ] Postfix

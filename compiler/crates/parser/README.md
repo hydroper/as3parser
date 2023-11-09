@@ -4,6 +4,10 @@
 
 An ActionScript 3 parser and verifier written in the Rust language.
 
+## Requirements
+
+* Nightly Rust
+
 ## Usage
 
 *Tokenizing*:

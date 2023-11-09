@@ -4,282 +4,8 @@ use conv::ValueFrom;
 use crate::*;
 use crate::util::CodePointsReader;
 
-/// Represents a lexical token.
-#[derive(Clone, PartialEq)]
-pub enum Token {
-    Eof,
-    Identifier(String),
-    StringLiteral(String),
-    NumericLiteral(f64),
-    RegExpLiteral {
-        body: String,
-        flags: String,
-    },
-
-    // Punctuator
-    ColonColon,
-    /// The `@` token.
-    Attribute,
-    /// The `..` token.
-    Descendants,
-    /// The `...` token.
-    Ellipsis,
-    LeftParen,
-    RightParen,
-    LeftBracket,
-    RightBracket,
-    LeftBrace,
-    RightBrace,
-    Dot,
-    Semicolon,
-    Comma,
-    Lt,
-    Gt,
-    /// `<=`
-    Le,
-    /// `>=`
-    Ge,
-    Equals,
-    NotEquals,
-    StrictEquals,
-    StrictNotEquals,
-    Plus,
-    Minus,
-    Times,
-    Div,
-    Remainder,
-    Increment,
-    Decrement,
-    LeftShift,
-    RightShift,
-    UnsignedRightShift,
-    BitwiseAnd,
-    BitwiseXor,
-    BitwiseOr,
-    BitwiseNot,
-    LogicalAnd,
-    LogicalXor,
-    LogicalOr,
-    Question,
-    Exclamation,
-    Colon,
-    Assign,
-    AddAssign,
-    SubtractAssign,
-    MultiplyAssign,
-    DivideAssign,
-    RemainderAssign,
-    LeftShiftAssign,
-    RightShiftAssign,
-    UnsignedRightShiftAssign,
-    BitwiseAndAssign,
-    BitwiseXorAssign,
-    BitwiseOrAssign,
-    LogicalAndAssign,
-    LogicalXorAssign,
-    LogicalOrAssign,
-    /// `=>`
-    FatArrow,
-    /// `**`
-    Power,
-    /// `**=`
-    PowerAssign,
-    /// `??`
-    NullCoalescing,
-    /// `??=`
-    NullCoalescingAssign,
-    /// `?.`
-    OptionalChaining,
-
-    // Reserved words
-    As,
-    Break,
-    Case,
-    Catch,
-    Class,
-    Const,
-    Continue,
-    Default,
-    Delete,
-    Do,
-    Else,
-    Extends,
-    False,
-    Finally,
-    For,
-    Function,
-    If,
-    Implements,
-    Import,
-    In,
-    Instanceof,
-    Interface,
-    Internal,
-    Is,
-    New,
-    Null,
-    Package,
-    Private,
-    Protected,
-    Public,
-    Return,
-    Super,
-    Switch,
-    This,
-    Throw,
-    True,
-    Try,
-    Typeof,
-    Use,
-    Var,
-    Void,
-    While,
-    With,
-
-    XmlWhitespace,
-    XmlLtSlash,
-    XmlSlashGt,
-    XmlText(String),
-    XmlName(String),
-    XmlMarkup(String),
-    XmlAttributeValue(String),
-}
-
-impl ToString for Token {
-    /// Converts the token into a readable string. Refer to the source code
-    /// of this implementation for the possible return values. Updates to the
-    /// parser shall not break existing programs that rely on the return values
-    /// returned by this method.
-    fn to_string(&self) -> String {
-        (match self {
-            Token::Eof => "end of program",
-            Token::Identifier(_) => "identifier",
-            Token::StringLiteral(_) => "string",
-            Token::NumericLiteral(_) => "number",
-            Token::RegExpLiteral { .. } => "regular expression",
-
-            // Punctuators
-            Token::ColonColon => "'::'",
-            Token::Attribute => "'@'",
-            Token::Descendants => "'..'",
-            Token::Ellipsis => "'...'",
-            Token::LeftParen => "'('",
-            Token::RightParen => "')'",
-            Token::LeftBracket => "'['",
-            Token::RightBracket => "']'",
-            Token::LeftBrace => "'{'",
-            Token::RightBrace => "'}'",
-            Token::Dot => "'.'",
-            Token::Semicolon => "';'",
-            Token::Comma => "','",
-            Token::FatArrow => "=>",
-            Token::Lt => "'<'",
-            Token::Gt => "'>'",
-            Token::Le => "'<='",
-            Token::Ge => "'>='",
-            Token::Equals => "'=='",
-            Token::NotEquals => "'!='",
-            Token::StrictEquals => "'==='",
-            Token::StrictNotEquals => "'!=='",
-            Token::Plus => "'+'",
-            Token::Minus => "'-'",
-            Token::Times => "'*'",
-            Token::Div => "'/'",
-            Token::Remainder => "'%'",
-            Token::Increment => "'++'",
-            Token::Decrement => "'--'",
-            Token::LeftShift => "'<<'",
-            Token::RightShift => "'>>'",
-            Token::UnsignedRightShift => "'>>>'",
-            Token::BitwiseAnd => "'&'",
-            Token::BitwiseXor => "'^'",
-            Token::BitwiseOr => "'|'",
-            Token::BitwiseNot => "'~'",
-            Token::LogicalAnd => "'&&'",
-            Token::LogicalXor => "'^^'",
-            Token::LogicalOr => "'||'",
-            Token::Question => "'?'",
-            Token::Exclamation => "'!'",
-            Token::Colon => "':'",
-            Token::Assign => "'='",
-            Token::AddAssign => "'+='",
-            Token::SubtractAssign => "'-='",
-            Token::MultiplyAssign => "'*='",
-            Token::DivideAssign => "'/='",
-            Token::RemainderAssign => "'%='",
-            Token::LeftShiftAssign => "'<<='",
-            Token::RightShiftAssign => "'>>='",
-            Token::UnsignedRightShiftAssign => "'>>>='",
-            Token::BitwiseAndAssign => "'&='",
-            Token::BitwiseXorAssign => "'^='",
-            Token::BitwiseOrAssign => "'|='",
-            Token::LogicalAndAssign => "'&&='",
-            Token::LogicalXorAssign => "'^^='",
-            Token::LogicalOrAssign => "'||='",
-            Token::Power => "'**'",
-            Token::PowerAssign => "'**='",
-            Token::NullCoalescing => "'??'",
-            Token::NullCoalescingAssign => "'??='",
-            Token::OptionalChaining => "'?.'",
-
-            // Reserved words
-            Token::As => "'as'",
-            Token::Break => "'break'",
-            Token::Case => "'case'",
-            Token::Catch => "'catch'",
-            Token::Class => "'class'",
-            Token::Const => "'const'",
-            Token::Continue => "'continue'",
-            Token::Default => "'default'",
-            Token::Delete => "'delete'",
-            Token::Do => "'do'",
-            Token::Else => "'else'",
-            Token::Extends => "'extends'",
-            Token::False => "'false'",
-            Token::Finally => "'finally'",
-            Token::For => "'for'",
-            Token::Function => "'function'",
-            Token::If => "'if'",
-            Token::Implements => "'implements'",
-            Token::Import => "'import'",
-            Token::In => "'in'",
-            Token::Instanceof => "'instanceof'",
-            Token::Interface => "'interface'",
-            Token::Internal => "'internal'",
-            Token::Is => "'is'",
-            Token::New => "'new'",
-            Token::Null => "'null'",
-            Token::Package => "'package'",
-            Token::Private => "'private'",
-            Token::Protected => "'protected'",
-            Token::Public => "'public'",
-            Token::Return => "'return'",
-            Token::Super => "'super'",
-            Token::Switch => "'switch'",
-            Token::This => "'this'",
-            Token::Throw => "'throw'",
-            Token::True => "'true'",
-            Token::Try => "'try'",
-            Token::Typeof => "'typeof'",
-            Token::Use => "'use'",
-            Token::Var => "'var'",
-            Token::Void => "'void'",
-            Token::While => "'while'",
-            Token::With => "'with'",
-
-            Token::XmlWhitespace => "XML whitespace",
-            Token::XmlLtSlash => "'</'",
-            Token::XmlSlashGt => "'/>'",
-            Token::XmlText(_) => "XML text",
-            Token::XmlName(_) => "XML name",
-            Token::XmlMarkup(_) => "XML markup",
-            Token::XmlAttributeValue(_) => "XML attribute value",
-        }).into()
-    }
-}
-
 pub struct Tokenizer<'input> {
-    source: Rc<Source>,
+    pub source: Rc<Source>,
     current_line_number: usize,
     code_points: CodePointsReader<'input>,
 }
@@ -300,7 +26,7 @@ impl<'input> Tokenizer<'input> {
 
     /// Scans for an InputElementDiv token. If `reserved_words` is false,
     /// all reserved words are taken as identifiers.
-    pub fn scan_ie_div(&mut self, reserved_words: bool) -> Result<(Token, Location), IntolerableError> {
+    pub fn scan_ie_div(&mut self, reserved_words: bool) -> Result<(Token, Location), ParserFailure> {
         loop {
             let ch = self.code_points.peek_or_zero();
             if character_validation::is_whitespace(ch) {
@@ -692,7 +418,7 @@ impl<'input> Tokenizer<'input> {
             _ => {
                 if self.code_points.has_remaining() {
                     self.add_unexpected_error();
-                    return Err(IntolerableError);
+                    return Err(ParserFailure);
                 // Eof
                 } else {
                     return Ok((Token::Eof, start))
@@ -703,7 +429,7 @@ impl<'input> Tokenizer<'input> {
 
     /// Scans regular expression after a `/` or `/=` token has been scanned by
     /// `scan_ie_div`.
-    pub fn scan_regexp_literal(&mut self, start: Location) -> Result<(Token, Location), IntolerableError> {
+    pub fn scan_regexp_literal(&mut self, start: Location) -> Result<(Token, Location), ParserFailure> {
         let mut body = String::new();
         loop {
             let ch = self.code_points.peek_or_zero();
@@ -716,7 +442,7 @@ impl<'input> Tokenizer<'input> {
                 let ch = self.code_points.peek_or_zero();
                 if self.code_points.reached_end() {
                     self.add_unexpected_error();
-                    return Err(IntolerableError);
+                    return Err(ParserFailure);
                 } else if character_validation::is_line_terminator(ch) {
                     self.add_unexpected_error();
                 }
@@ -727,7 +453,7 @@ impl<'input> Tokenizer<'input> {
                 self.consume_line_terminator();
             } else if self.code_points.reached_end() {
                 self.add_unexpected_error();
-                return Err(IntolerableError);
+                return Err(ParserFailure);
             } else {
                 body.push(ch);
                 self.code_points.next();
@@ -786,7 +512,7 @@ impl<'input> Tokenizer<'input> {
         false
     }
 
-    fn consume_comment(&mut self) -> Result<bool, IntolerableError> {
+    fn consume_comment(&mut self) -> Result<bool, ParserFailure> {
         let ch = self.code_points.peek_or_zero();
         if ch != '/' {
             return Ok(false);
@@ -823,7 +549,7 @@ impl<'input> Tokenizer<'input> {
                     self.code_points.skip_in_place();
                 } else {
                     self.add_unexpected_error();
-                    return Err(IntolerableError);
+                    return Err(ParserFailure);
                 }
             }
 
@@ -840,7 +566,7 @@ impl<'input> Tokenizer<'input> {
         Ok(false)
     }
 
-    fn scan_identifier(&mut self, reserved_words: bool) -> Result<Option<(Token, Location)>, IntolerableError> {
+    fn scan_identifier(&mut self, reserved_words: bool) -> Result<Option<(Token, Location)>, ParserFailure> {
         let start = self.current_cursor_location();
         let mut escaped = false;
         let Some((ch, escaped_2)) = self.consume_identifier_start()? else {
@@ -863,7 +589,7 @@ impl<'input> Tokenizer<'input> {
     }
 
     /// Returns a tuple in the form (*character*, *escaped*).
-    fn consume_identifier_start(&mut self) -> Result<Option<(char, bool)>, IntolerableError> {
+    fn consume_identifier_start(&mut self) -> Result<Option<(char, bool)>, ParserFailure> {
         let ch = self.code_points.peek_or_zero();
         if character_validation::is_identifier_start(ch) {
             self.code_points.next();
@@ -877,7 +603,7 @@ impl<'input> Tokenizer<'input> {
     }
 
     /// Returns a tuple in the form (*character*, *escaped*).
-    fn consume_identifier_part(&mut self) -> Result<Option<(char, bool)>, IntolerableError> {
+    fn consume_identifier_part(&mut self) -> Result<Option<(char, bool)>, ParserFailure> {
         let ch = self.code_points.peek_or_zero();
         if character_validation::is_identifier_part(ch) {
             self.code_points.next();
@@ -891,11 +617,11 @@ impl<'input> Tokenizer<'input> {
     }
 
     /// Expects UnicodeEscapeSequence starting from `u`.
-    fn expect_unicode_escape_sequence(&mut self) -> Result<char, IntolerableError> {
+    fn expect_unicode_escape_sequence(&mut self) -> Result<char, ParserFailure> {
         let start = self.current_cursor_location();
         if self.code_points.peek_or_zero() != 'u' {
             self.add_unexpected_error();
-            return Err(IntolerableError);
+            return Err(ParserFailure);
         }
         self.code_points.next();
 
@@ -907,7 +633,7 @@ impl<'input> Tokenizer<'input> {
                 | self.expect_hex_digit()?);
             let Some(r) = r else {
                 self.source.add_diagnostic(Diagnostic::new_syntax_error(start.combine_with(self.current_cursor_location()), DiagnosticKind::UnexpectedOrInvalidToken, vec![]));
-                return Err(IntolerableError);
+                return Err(ParserFailure);
             };
             return Ok(r);
         }
@@ -915,7 +641,7 @@ impl<'input> Tokenizer<'input> {
         // Scan \u{}
         if self.code_points.peek_or_zero() != '{' {
             self.add_unexpected_error();
-            return Err(IntolerableError);
+            return Err(ParserFailure);
         }
         self.code_points.next();
         while character_validation::is_hex_digit(self.code_points.peek_or_zero()) {
@@ -923,28 +649,28 @@ impl<'input> Tokenizer<'input> {
         }
         if self.code_points.peek_or_zero() != '}' {
             self.add_unexpected_error();
-            return Err(IntolerableError);
+            return Err(ParserFailure);
         }
         self.code_points.next();
         let location = start.combine_with(self.current_cursor_location());
         let r = u32::from_str_radix(&self.source.text[(start.first_offset + 2)..(location.last_offset - 1)], 16);
         let Ok(r) = r else {
             self.source.add_diagnostic(Diagnostic::new_syntax_error(location, DiagnosticKind::UnexpectedOrInvalidToken, vec![]));
-            return Err(IntolerableError);
+            return Err(ParserFailure);
         };
         let r = char::from_u32(r);
         let Some(r) = r else {
             self.source.add_diagnostic(Diagnostic::new_syntax_error(location, DiagnosticKind::UnexpectedOrInvalidToken, vec![]));
-            return Err(IntolerableError);
+            return Err(ParserFailure);
         };
         Ok(r)
     }
 
-    fn expect_hex_digit(&mut self) -> Result<u32, IntolerableError> {
+    fn expect_hex_digit(&mut self) -> Result<u32, ParserFailure> {
         let ch = self.code_points.peek_or_zero();
         if !character_validation::is_hex_digit(ch) {
             self.add_unexpected_error();
-            return Err(IntolerableError);
+            return Err(ParserFailure);
         }
         self.code_points.next();
         Ok(
@@ -958,7 +684,7 @@ impl<'input> Tokenizer<'input> {
         )
     }
 
-    fn scan_dot_or_numeric_literal(&mut self) -> Result<Option<(Token, Location)>, IntolerableError> {
+    fn scan_dot_or_numeric_literal(&mut self) -> Result<Option<(Token, Location)>, ParserFailure> {
         let start = self.current_cursor_location();
         let ch = self.code_points.peek_or_zero();
         let mut initial_dot = false;
@@ -1016,7 +742,7 @@ impl<'input> Tokenizer<'input> {
             self.code_points.next();
             if !character_validation::is_dec_digit(self.code_points.peek_or_zero()) {
                 self.add_unexpected_error();
-                return Err(IntolerableError);
+                return Err(ParserFailure);
             }
             while character_validation::is_dec_digit(self.code_points.peek_or_zero()) {
                 self.code_points.next();
@@ -1032,7 +758,7 @@ impl<'input> Tokenizer<'input> {
             }
             if !character_validation::is_dec_digit(self.code_points.peek_or_zero()) {
                 self.add_unexpected_error();
-                return Err(IntolerableError);
+                return Err(ParserFailure);
             }
             while character_validation::is_dec_digit(self.code_points.peek_or_zero()) {
                 self.code_points.next();
@@ -1047,16 +773,16 @@ impl<'input> Tokenizer<'input> {
 
         let Ok(v) = f64::from_str(&string) else {
             self.source.add_diagnostic(Diagnostic::new_syntax_error(location, DiagnosticKind::FailedProcessingNumericLiteral, vec![]));
-            return Err(IntolerableError);
+            return Err(ParserFailure);
         };
 
         Ok(Some((Token::NumericLiteral(v), location)))
     }
 
-    fn scan_hex_literal(&mut self, start: Location) -> Result<Option<(Token, Location)>, IntolerableError> {
+    fn scan_hex_literal(&mut self, start: Location) -> Result<Option<(Token, Location)>, ParserFailure> {
         if !character_validation::is_hex_digit(self.code_points.peek_or_zero()) {
             self.add_unexpected_error();
-            return Err(IntolerableError);
+            return Err(ParserFailure);
         }
         while character_validation::is_hex_digit(self.code_points.peek_or_zero()) {
             self.code_points.next();
@@ -1074,16 +800,16 @@ impl<'input> Tokenizer<'input> {
 
         let Ok(n) = n else {
             self.source.add_diagnostic(Diagnostic::new_syntax_error(location, DiagnosticKind::FailedProcessingNumericLiteral, vec![]));
-            return Err(IntolerableError);
+            return Err(ParserFailure);
         };
 
         Ok(Some((Token::NumericLiteral(n), location)))
     }
 
-    fn scan_bin_literal(&mut self, start: Location) -> Result<Option<(Token, Location)>, IntolerableError> {
+    fn scan_bin_literal(&mut self, start: Location) -> Result<Option<(Token, Location)>, ParserFailure> {
         if !character_validation::is_bin_digit(self.code_points.peek_or_zero()) {
             self.add_unexpected_error();
-            return Err(IntolerableError);
+            return Err(ParserFailure);
         }
         while character_validation::is_bin_digit(self.code_points.peek_or_zero()) {
             self.code_points.next();
@@ -1101,42 +827,42 @@ impl<'input> Tokenizer<'input> {
 
         let Ok(n) = n else {
             self.source.add_diagnostic(Diagnostic::new_syntax_error(location, DiagnosticKind::FailedProcessingNumericLiteral, vec![]));
-            return Err(IntolerableError);
+            return Err(ParserFailure);
         };
 
         Ok(Some((Token::NumericLiteral(n), location)))
     }
 
-    fn consume_underscore_followed_by_dec_digit(&mut self) -> Result<(), IntolerableError> {
+    fn consume_underscore_followed_by_dec_digit(&mut self) -> Result<(), ParserFailure> {
         if self.code_points.peek_or_zero() == '_' {
             self.code_points.next();
             if !character_validation::is_dec_digit(self.code_points.peek_or_zero()) {
                 self.add_unexpected_error();
-                return Err(IntolerableError);
+                return Err(ParserFailure);
             }
             self.code_points.next();
         }
         Ok(())
     }
 
-    fn consume_underscore_followed_by_hex_digit(&mut self) -> Result<(), IntolerableError> {
+    fn consume_underscore_followed_by_hex_digit(&mut self) -> Result<(), ParserFailure> {
         if self.code_points.peek_or_zero() == '_' {
             self.code_points.next();
             if !character_validation::is_hex_digit(self.code_points.peek_or_zero()) {
                 self.add_unexpected_error();
-                return Err(IntolerableError);
+                return Err(ParserFailure);
             }
             self.code_points.next();
         }
         Ok(())
     }
 
-    fn consume_underscore_followed_by_bin_digit(&mut self) -> Result<(), IntolerableError> {
+    fn consume_underscore_followed_by_bin_digit(&mut self) -> Result<(), ParserFailure> {
         if self.code_points.peek_or_zero() == '_' {
             self.code_points.next();
             if !character_validation::is_bin_digit(self.code_points.peek_or_zero()) {
                 self.add_unexpected_error();
-                return Err(IntolerableError);
+                return Err(ParserFailure);
             }
             self.code_points.next();
         }
@@ -1149,7 +875,7 @@ impl<'input> Tokenizer<'input> {
         }
     }
 
-    fn scan_string_literal(&mut self) -> Result<Option<(Token, Location)>, IntolerableError> {
+    fn scan_string_literal(&mut self) -> Result<Option<(Token, Location)>, ParserFailure> {
         let delim = self.code_points.peek_or_zero();
         if !['"', '\''].contains(&delim) {
             return Ok(None);
@@ -1178,7 +904,7 @@ impl<'input> Tokenizer<'input> {
                     self.consume_line_terminator();
                 } else if !self.code_points.has_remaining() {
                     self.add_unexpected_error();
-                    return Err(IntolerableError);
+                    return Err(ParserFailure);
                 } else {
                     value.push(ch);
                     self.code_points.next();
@@ -1190,7 +916,7 @@ impl<'input> Tokenizer<'input> {
         Ok(Some((Token::StringLiteral(value), location)))
     }
 
-    fn scan_triple_string_literal(&mut self, delim: char, start: Location) -> Result<Option<(Token, Location)>, IntolerableError> {
+    fn scan_triple_string_literal(&mut self, delim: char, start: Location) -> Result<Option<(Token, Location)>, ParserFailure> {
         let mut lines: Vec<String> = vec![];
         let mut builder = String::new();
 
@@ -1211,7 +937,7 @@ impl<'input> Tokenizer<'input> {
                     self.consume_line_terminator();
                 } else if !self.code_points.has_remaining() {
                     self.add_unexpected_error();
-                    return Err(IntolerableError);
+                    return Err(ParserFailure);
                 } else {
                     builder.push(ch);
                     self.code_points.next();
@@ -1242,14 +968,14 @@ impl<'input> Tokenizer<'input> {
         Ok(Some((Token::StringLiteral(value), location)))
     }
 
-    fn consume_escape_sequence(&mut self) -> Result<Option<String>, IntolerableError> {
+    fn consume_escape_sequence(&mut self) -> Result<Option<String>, ParserFailure> {
         if self.code_points.peek_or_zero() != '\\' {
             return Ok(None);
         }
         self.code_points.next();
         if !self.code_points.has_remaining() {
             self.add_unexpected_error();
-            return Err(IntolerableError);
+            return Err(ParserFailure);
         }
         if self.consume_line_terminator() {
             return Ok(Some("".into()));
@@ -1311,7 +1037,7 @@ impl<'input> Tokenizer<'input> {
     }
 
     /// Scans for an InputElementXMLTag token.
-    pub fn scan_ie_xml_tag(&mut self) -> Result<(Token, Location), IntolerableError> {
+    pub fn scan_ie_xml_tag(&mut self) -> Result<(Token, Location), ParserFailure> {
         let start = self.current_cursor_location();
         let ch = self.code_points.peek_or_zero();
 
@@ -1357,7 +1083,7 @@ impl<'input> Tokenizer<'input> {
                 self.code_points.next();
                 if self.code_points.peek_or_zero() != '>' {
                     self.add_unexpected_error();
-                    return Err(IntolerableError);
+                    return Err(ParserFailure);
                 }
                 self.code_points.next();
                 let location = start.combine_with(self.current_cursor_location());
@@ -1375,7 +1101,7 @@ impl<'input> Tokenizer<'input> {
                 }
                 if self.code_points.reached_end() {
                     self.add_unexpected_error();
-                    return Err(IntolerableError)
+                    return Err(ParserFailure)
                 }
                 let value = self.source.text[(start.first_offset + 1)..self.current_cursor_location().first_offset].to_owned();
                 self.code_points.next();
@@ -1393,13 +1119,13 @@ impl<'input> Tokenizer<'input> {
 
             _ => {
                 self.add_unexpected_error();
-                Err(IntolerableError)
+                Err(ParserFailure)
             },
         }
     }
 
     /// Scans for an InputElementXMLContent token.
-    pub fn scan_ie_xml_content(&mut self) -> Result<(Token, Location), IntolerableError> {
+    pub fn scan_ie_xml_content(&mut self) -> Result<(Token, Location), ParserFailure> {
         let start = self.current_cursor_location();
         let ch = self.code_points.peek_or_zero();
 
@@ -1442,7 +1168,7 @@ impl<'input> Tokenizer<'input> {
                         self.consume_line_terminator();
                     } else if self.code_points.reached_end() {
                         self.add_unexpected_error();
-                        return Err(IntolerableError);
+                        return Err(ParserFailure);
                     } else {
                         self.code_points.next();
                     }
@@ -1456,7 +1182,7 @@ impl<'input> Tokenizer<'input> {
     }
 
     /// Attempts to scan a XMLMarkup token after a `<` character.
-    pub fn scan_xml_markup(&mut self, start: Location) -> Result<Option<(Token, Location)>, IntolerableError> {
+    pub fn scan_xml_markup(&mut self, start: Location) -> Result<Option<(Token, Location)>, ParserFailure> {
         // XMLComment
         if self.code_points.peek_seq(2) == "!--" {
             self.code_points.skip_count_in_place(3);
@@ -1468,7 +1194,7 @@ impl<'input> Tokenizer<'input> {
                     self.consume_line_terminator();
                 } else if self.code_points.reached_end() {
                     self.add_unexpected_error();
-                    return Err(IntolerableError);
+                    return Err(ParserFailure);
                 } else {
                     self.code_points.next();
                 }
@@ -1491,7 +1217,7 @@ impl<'input> Tokenizer<'input> {
                     self.consume_line_terminator();
                 } else if self.code_points.reached_end() {
                     self.add_unexpected_error();
-                    return Err(IntolerableError);
+                    return Err(ParserFailure);
                 } else {
                     self.code_points.next();
                 }
@@ -1514,7 +1240,7 @@ impl<'input> Tokenizer<'input> {
                     self.consume_line_terminator();
                 } else if self.code_points.reached_end() {
                     self.add_unexpected_error();
-                    return Err(IntolerableError);
+                    return Err(ParserFailure);
                 } else {
                     self.code_points.next();
                 }

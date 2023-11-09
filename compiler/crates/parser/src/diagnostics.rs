@@ -1,8 +1,10 @@
 use std::collections::HashMap;
 use maplit::hashmap;
+use crate::{Location, Token, diagnostics_defaults};
 
-use crate::{Location, diagnostics_defaults};
-
+/// Represents a source diagnostic.
+/// 
+/// Arguments are formatted using integer keys counting from one.
 #[derive(Clone)]
 pub struct Diagnostic {
     pub(crate) location: Location,
@@ -127,13 +129,19 @@ impl Diagnostic {
     fn format_argument(&self, argument: DiagnosticArgument) -> String {
         match argument {
             DiagnosticArgument::String(s) => s.clone(),
+            DiagnosticArgument::Token(t) => t.to_string(),
         }
     }
+}
+
+pub macro diagnostic_arguments {
+    ($($variant:ident($value:expr)),*) => { vec![ $(Box::new(DiagnosticArgument::$variant($value))),* ] },
 }
 
 #[derive(Clone)]
 pub enum DiagnosticArgument {
     String(String),
+    Token(Token),
 }
 
 #[repr(i32)]
@@ -144,6 +152,8 @@ pub enum DiagnosticKind {
     FailedProcessingNumericLiteral = 1026,
     UnallowedNumericSuffix = 1027,
     UnallowedLineBreak = 1028,
+    Expected = 1029,
+    ExpectedIdentifier = 1030,
 }
 
 impl DiagnosticKind {

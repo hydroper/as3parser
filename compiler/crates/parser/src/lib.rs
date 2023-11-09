@@ -1,3 +1,5 @@
+#![feature(decl_macro)]
+
 pub mod character_validation;
 pub(crate) mod compiler_options;
 pub(crate) mod comment;
@@ -7,6 +9,7 @@ pub(crate) mod errors;
 pub(crate) mod operator;
 pub(crate) mod operator_precedence;
 pub(crate) mod parser;
+pub(crate) mod token;
 pub(crate) mod tokenizer;
 pub(crate) mod location;
 pub(crate) mod source;
@@ -21,6 +24,7 @@ pub use errors::*;
 pub use operator::*;
 pub use operator_precedence::*;
 pub use parser::*;
+pub use token::*;
 pub use tokenizer::*;
 pub use location::*;
 pub use source::*;
