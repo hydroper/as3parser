@@ -1,4 +1,5 @@
 use std::rc::Rc;
+use bitflags::bitflags;
 use crate::*;
 
 pub struct QualifiedIdentifier {
@@ -459,4 +460,33 @@ pub enum DirectiveKind {
 pub enum ImportItem {
     Wildcard,
     Name(String),
+}
+
+pub struct DefinitionAnnotations {
+    pub metadata: Vec<Rc<Metadata>>,
+    pub flag_modifiers: DefinitionModifiersFlags,
+    pub access_modifier: Option<Rc<Expression>>,
+}
+
+bitflags! {
+    #[derive(Copy, Clone, PartialEq, Eq)]
+    pub struct DefinitionModifiersFlags: u32 {
+        const OVERRIDE  = 0b00000001;
+        const FINAL     = 0b00000010;
+        const DYNAMIC   = 0b00000100;
+        const NATIVE    = 0b00001000;
+        const STATIC    = 0b00010000;
+    }
+}
+
+pub struct Metadata {
+    pub location: Location,
+    /// The metadata name. The metadata name may contain a single `::` delimiter.
+    pub name: (String, Location),
+    pub entries: Vec<MetadataEntry>,
+}
+
+pub struct MetadataEntry {
+    pub key: Option<(String, Location)>,
+    pub value: (String, Location),
 }
