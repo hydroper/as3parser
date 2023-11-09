@@ -171,11 +171,17 @@ impl<'input> Parser<'input> {
     }
 
     pub fn parse_opt_expression(&mut self, context: ExpressionContext) -> Result<Option<Rc<ast::Expression>>, ParserFailure> {
-        let mut exp: Option<Rc<ast::Expression>> = self.parse_opt_primary_expression();
+        let mut exp: Option<Rc<ast::Expression>> = self.parse_opt_primary_expression(context.clone())?;
+
+        // Parse subexpressions
         if let Some(exp) = exp {
             return Ok(Some(self.parse_subexpressions(exp, context.clone())?));
         }
         Ok(None)
+    }
+
+    pub fn parse_opt_primary_expression(&mut self, context: ExpressionContext) -> Result<Option<Rc<ast::Expression>>, ParserFailure> {
+        //
     }
 }
 

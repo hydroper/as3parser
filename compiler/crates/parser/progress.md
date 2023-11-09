@@ -33,15 +33,15 @@ Syntax:
   * [ ] `protected`
   * [ ] `internal`
   * [ ] `(x)`
-    * [ ] If followed by `=>`, it is reinterpreted as an arrow function.
+    * [ ] If followed by `=>`, it is reinterpreted as an arrow function. It is done inside primary expressions and requires an operator precedence test first.
+    * [ ] If after `(` is `)` (that is, `()`) and the operator precedence includes arrow functions, parse an arrow function, carefully consuming the tokens.
   * [ ] `...x`
   * [ ] Array initializer
   * [ ] Vector initializer (`new <T> [...]`)
   * [ ] Object initializer
   * [ ] Function expression
   * [ ] Arrow function
-    * [ ] It is parsed from either a non qualified identifier or a parentheses expression.
-    * [ ] Parse empty parameters: `() => x`
+    * [ ] It is parsed from either a non qualified identifier or a parentheses expression, as described in the previous items of this list.
   * [ ] Super expression
   * [ ] New expression
   * [ ] `o.x`
