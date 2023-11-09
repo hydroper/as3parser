@@ -14,7 +14,7 @@ use as3_parser::*;
 // Tokenize `n * n`
 let _n = "n".to_owned();
 let source = Source::new(None, "n * n".into(), &CompilerOptions::new());
-let mut tokenizer = Tokenizer::new(&source, &source.text());
+let mut tokenizer = Tokenizer::new(&source);
 assert!(matches!(tokenizer.scan_ie_div(true), Ok((Token::Identifier(_n), _))));
 assert!(matches!(tokenizer.scan_ie_div(true), Ok((Token::Times, _))));
 assert!(matches!(tokenizer.scan_ie_div(true), Ok((Token::Identifier(_n), _))));

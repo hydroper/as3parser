@@ -6,11 +6,10 @@ pub struct Parser<'input> {
 }
 
 impl<'input> Parser<'input> {
-    /// Constructs a parser. The given `source_text` parameter must be the same
-    /// as `&source.text()`.
-    pub fn new(source: &Rc<Source>, source_text: &'input str) -> Self {
+    /// Constructs a parser.
+    pub fn new(source: &'input Rc<Source>) -> Self {
         Self {
-            tokenizer: Tokenizer::new(source, source_text),
+            tokenizer: Tokenizer::new(source),
         }
     }
 }
