@@ -280,12 +280,12 @@ pub enum TypeExpressionKind {
 }
 
 pub struct FunctionTypeParam {
-    pub kind: FunctionTypeParamKind,
+    pub kind: FunctionParamKind,
     pub name: (String, Location),
     pub type_annotation: Option<Rc<TypeExpression>>,
 }
 
-pub enum FunctionTypeParamKind {
+pub enum FunctionParamKind {
     Required,
     Optional,
     Rest,
