@@ -1,8 +1,3 @@
-* [x] Expressions
-* [x] Destructuring (array, record, binding)
-* [x] Statements
-* [ ] Directives
-
 # Parsing
 
 * [ ] Expressions

@@ -451,6 +451,8 @@ pub enum DirectiveKind {
     TypeDefinition(Rc<TypeDefinition>),
     ClassDefinition(Rc<ClassDefinition>),
     EnumDefinition(Rc<EnumDefinition>),
+    InterfaceDefinition(Rc<InterfaceDefinition>),
+    NamespaceDefinition(Rc<NamespaceDefinition>),
 }
 
 pub struct ClassDefinition {
@@ -462,10 +464,24 @@ pub struct ClassDefinition {
     pub block: Block,
 }
 
+pub struct InterfaceDefinition {
+    pub annotations: DefinitionAnnotations,
+    pub name: (String, Location),
+    pub generics: Generics,
+    pub extends_clause: Option<Vec<Rc<TypeExpression>>>,
+    pub block: Block,
+}
+
 pub struct EnumDefinition {
     pub annotations: DefinitionAnnotations,
     pub name: (String, Location),
     pub block: Block,
+}
+
+pub struct NamespaceDefinition {
+    pub annotations: DefinitionAnnotations,
+    pub left: (String, Location),
+    pub right: Option<Rc<Expression>>,
 }
 
 pub struct IncludeDirective {
@@ -478,10 +494,21 @@ pub struct IncludeDirective {
 /// If it is an alias with a wildcard import item,
 /// it is a package alias that opens the public namespace
 /// and aliases it.
+/// 
+/// If it is an alias with a package recursive import item,
+/// it is a package set alias that opens the public namespace of
+/// all the respective packages and aliases them into a namespace set.
 pub struct ImportDirective {
     pub alias: Option<(String, Location)>,
     pub package_name: Vec<(String, Location)>,
     pub import_item: (ImportItem, Location),
+}
+
+pub enum ImportItem {
+    Wildcard,
+    /// `**`
+    Recursive,
+    Name(String),
 }
 
 pub struct VariableDefinition {
@@ -524,11 +551,6 @@ pub struct TypeDefinition {
     pub left: (String, Location),
     pub generics: Generics,
     pub right: Rc<TypeExpression>,
-}
-
-pub enum ImportItem {
-    Wildcard,
-    Name(String),
 }
 
 pub struct DefinitionAnnotations {

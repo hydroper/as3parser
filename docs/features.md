@@ -176,27 +176,6 @@ use escaped public::y = function get() (10);
 use escaped public::y = function set(v) {};
 ```
 
-## Namespace definition
-
-The following code:
-
-```as3
-public namespace Q {
-    public const x: Number = 64;
-    public class C {}
-}
-```
-
-translates to:
-
-```as3
-public class Q_C {}
-public class Q {
-    public static const x: Number = 64;
-    public static const C: Class = Q_C;
-}
-```
-
 ## Object initializer
 
 _Shorthand_: Shorthand fields equivalent to ECMAScript shorthand fields are added.
