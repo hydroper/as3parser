@@ -154,6 +154,7 @@ pub enum DiagnosticKind {
     UnallowedLineBreak = 1028,
     Expected = 1029,
     ExpectedIdentifier = 1030,
+    ExpectedExpression = 1031,
 }
 
 impl DiagnosticKind {

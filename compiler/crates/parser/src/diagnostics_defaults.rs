@@ -12,7 +12,8 @@ lazy_static! {
         DiagnosticKind::UnallowedNumericSuffix.id() => "Unallowed numeric suffix".into(),
         DiagnosticKind::UnallowedLineBreak.id() => "Unallowed line break".into(),
         DiagnosticKind::Expected.id() => "Expected {1} before {2}".into(),
-        DiagnosticKind::ExpectedIdentifier.id() => "Expected identifier before {2}".into(),
+        DiagnosticKind::ExpectedIdentifier.id() => "Expected identifier before {1}".into(),
+        DiagnosticKind::ExpectedExpression.id() => "Expected expression before {1}".into(),
         // DiagnosticKind::K.id() => "".into(),
     };
 }

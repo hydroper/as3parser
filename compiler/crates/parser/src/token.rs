@@ -275,7 +275,14 @@ impl ToString for Token {
 }
 
 impl Token {
-    pub fn keyword_name(&self) -> Option<String> {
+    /// Indicates whether the token is a reserved word.
+    pub fn is_reserved_word(&self) -> bool {
+        self.reserved_word_name().is_some()
+    }
+
+    /// Tests whether the token is a reserved word and returns
+    /// its *IdentifierName* string.
+    pub fn reserved_word_name(&self) -> Option<String> {
         match *self {
             Token::As => Some("as".into()),
             Token::Break => Some("break".into()),

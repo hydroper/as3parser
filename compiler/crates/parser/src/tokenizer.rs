@@ -24,9 +24,8 @@ impl<'input> Tokenizer<'input> {
         }
     }
 
-    /// Scans for an InputElementDiv token. If `reserved_words` is false,
-    /// all reserved words are taken as identifiers.
-    pub fn scan_ie_div(&mut self, reserved_words: bool) -> Result<(Token, Location), ParserFailure> {
+    /// Scans for an InputElementDiv token.
+    pub fn scan_ie_div(&mut self) -> Result<(Token, Location), ParserFailure> {
         loop {
             let ch = self.code_points.peek_or_zero();
             if character_validation::is_whitespace(ch) {
@@ -37,7 +36,7 @@ impl<'input> Tokenizer<'input> {
                 break;
             }
         }
-        if let Some(result) = self.scan_identifier(reserved_words)? {
+        if let Some(result) = self.scan_identifier()? {
             return Ok(result);
         }
         if let Some(result) = self.scan_dot_or_numeric_literal()? {
@@ -566,7 +565,7 @@ impl<'input> Tokenizer<'input> {
         Ok(false)
     }
 
-    fn scan_identifier(&mut self, reserved_words: bool) -> Result<Option<(Token, Location)>, ParserFailure> {
+    fn scan_identifier(&mut self) -> Result<Option<(Token, Location)>, ParserFailure> {
         let start = self.current_cursor_location();
         let mut escaped = false;
         let Some((ch, escaped_2)) = self.consume_identifier_start()? else {
@@ -580,7 +579,7 @@ impl<'input> Tokenizer<'input> {
             name.push(ch);
         }
         let location = start.combine_with(self.current_cursor_location());
-        if reserved_words && !escaped {
+        if !escaped {
             if let Some(token) = keywords::reserved_word_token(name.as_ref()) {
                 return Ok(Some((token, location)));
             }
@@ -1265,10 +1264,10 @@ mod tests {
         let _n = "n".to_owned();
         let source = Source::new(None, "n * n".into(), &CompilerOptions::new());
         let mut tokenizer = Tokenizer::new(&source);
-        let Ok((Token::Identifier(name), _)) = tokenizer.scan_ie_div(true) else { panic!() };
+        let Ok((Token::Identifier(name), _)) = tokenizer.scan_ie_div() else { panic!() };
         assert_eq!(name, "n");
-        assert!(matches!(tokenizer.scan_ie_div(true), Ok((Token::Times, _))));
-        let Ok((Token::Identifier(name), _)) = tokenizer.scan_ie_div(true) else { panic!() };
+        assert!(matches!(tokenizer.scan_ie_div(), Ok((Token::Times, _))));
+        let Ok((Token::Identifier(name), _)) = tokenizer.scan_ie_div() else { panic!() };
         assert_eq!(name, "n");
     }
 
@@ -1280,7 +1279,7 @@ mod tests {
             /* Multi-line comment */
         ".into(), &CompilerOptions::new());
         let mut tokenizer = Tokenizer::new(&source);
-        assert!(matches!(tokenizer.scan_ie_div(true), Ok((Token::Eof, _))));
+        assert!(matches!(tokenizer.scan_ie_div(), Ok((Token::Eof, _))));
         assert_eq!(source.comments().borrow()[0].content(), " Single-line comment");
         assert_eq!(source.comments().borrow()[1].content(), " Multi-line comment ");
     }
@@ -1297,10 +1296,10 @@ mod tests {
         "###.into(), &CompilerOptions::new());
         let mut tokenizer = Tokenizer::new(&source);
 
-        let Ok((Token::StringLiteral(s), _)) = tokenizer.scan_ie_div(true) else { panic!() };
+        let Ok((Token::StringLiteral(s), _)) = tokenizer.scan_ie_div() else { panic!() };
         assert_eq!(s, "Some AAA content");
 
-        let Ok((Token::StringLiteral(s), _)) = tokenizer.scan_ie_div(true) else { panic!() };
+        let Ok((Token::StringLiteral(s), _)) = tokenizer.scan_ie_div() else { panic!() };
         assert_eq!(s, "Another\n    common\ncontent");
     }
 
@@ -1332,7 +1331,7 @@ mod tests {
         "###.into(), &CompilerOptions::new());
         let mut tokenizer = Tokenizer::new(&source);
         for n in numbers {
-            let Ok((Token::NumericLiteral(n2), _)) = tokenizer.scan_ie_div(true) else { panic!() };
+            let Ok((Token::NumericLiteral(n2), _)) = tokenizer.scan_ie_div() else { panic!() };
             assert_eq!(n, n2);
         }
     }
@@ -1346,12 +1345,12 @@ mod tests {
 
         let mut tokenizer = Tokenizer::new(&source);
 
-        let Ok((Token::Div, start)) = tokenizer.scan_ie_div(true) else { panic!() };
+        let Ok((Token::Div, start)) = tokenizer.scan_ie_div() else { panic!() };
         let Ok((Token::RegExpLiteral { body, flags }, _)) = tokenizer.scan_regexp_literal(start) else { panic!() };
         assert_eq!(body, "(?:)");
         assert_eq!(flags, "");
 
-        let Ok((Token::Div, start)) = tokenizer.scan_ie_div(true) else { panic!() };
+        let Ok((Token::Div, start)) = tokenizer.scan_ie_div() else { panic!() };
         let Ok((Token::RegExpLiteral { body, flags }, _)) = tokenizer.scan_regexp_literal(start) else { panic!() };
         assert_eq!(body, "(?:)");
         assert_eq!(flags, "gi");

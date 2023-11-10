@@ -22,6 +22,12 @@ Syntax:
   * [x] `this`
   * [x] Regular expression
   * [ ] Qualified identifier
+    * [ ] Starts with
+      * [ ] `(` (handled in the parentheses expression)
+      * [ ] Reserved namespace
+      * [x] Identifier
+      * [ ] `@`
+      * [ ] `*`
     * [ ] If followed by `=>`, it is reinterpreted as an arrow function.
     * [ ] Keywords are not reserved after `::`
     * [ ] Keywords are not reserved after `@`

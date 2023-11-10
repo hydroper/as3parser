@@ -14,7 +14,7 @@ pub struct NonAttributeQualifiedIdentifier {
 }
 
 pub enum IdentifierOrBrackets {
-    Identifier(String, Location),
+    Id(String, Location),
     Brackets(Rc<Expression>),
 }
 
