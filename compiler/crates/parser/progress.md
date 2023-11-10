@@ -14,13 +14,13 @@ Details:
 Syntax:
 
 * Expressions
-  * [ ] `null`
-  * [ ] `false`
-  * [ ] `true`
-  * [ ] Numeric
-  * [ ] String
-  * [ ] `this`
-  * [ ] Regular expression
+  * [x] `null`
+  * [x] `false`
+  * [x] `true`
+  * [x] Numeric
+  * [x] String
+  * [x] `this`
+  * [x] Regular expression
   * [ ] Qualified identifier
     * [ ] If followed by `=>`, it is reinterpreted as an arrow function.
     * [ ] Keywords are not reserved after `::`
@@ -35,6 +35,7 @@ Syntax:
   * [ ] `(x)`
     * [ ] If followed by `=>`, it is reinterpreted as an arrow function. It is done inside primary expressions and requires an operator precedence test first.
     * [ ] If after `(` is `)` (that is, `()`) and the operator precedence includes arrow functions, parse an arrow function, carefully consuming the tokens.
+    * [ ] If followed by `::` and `x` is not a list expression, it is reinterpreted as a qualified identifier.
   * [ ] `...x`
   * [ ] Array initializer
   * [ ] Vector initializer (`new <T> [...]`)

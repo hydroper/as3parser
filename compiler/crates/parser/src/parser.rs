@@ -24,6 +24,10 @@ impl<'input> Parser<'input> {
         &self.tokenizer.source
     }
 
+    fn mark_location(&mut self) {
+        self.locations.push(self.token.1.clone());
+    }
+
     fn push_location(&mut self, location: &Location) {
         self.locations.push(location.clone());
     }
@@ -56,6 +60,14 @@ impl<'input> Parser<'input> {
         self.previous_token = self.token.clone();
         self.token = self.tokenizer.scan_ie_xml_content()?;
         Ok(())
+    }
+
+    fn peek(&mut self, token: Token) -> bool {
+        self.token.0 == token
+    }
+
+    fn peek_context_keyword(&mut self, name: String) -> bool {
+        if let Token::Identifier(id) = self.token.0.clone() { id == name } else { false }
     }
 
     fn consume(&mut self, token: Token) -> Result<bool, ParserFailure> {
@@ -181,7 +193,7 @@ impl<'input> Parser<'input> {
     }
 
     pub fn parse_opt_expression(&mut self, context: ExpressionContext) -> Result<Option<Rc<ast::Expression>>, ParserFailure> {
-        let mut exp: Option<Rc<ast::Expression>> = self.parse_opt_primary_expression(context.clone())?;
+        let mut exp: Option<Rc<ast::Expression>> = self.parse_opt_start_expression(context.clone())?;
 
         // Parse subexpressions
         if let Some(exp) = exp {
@@ -190,8 +202,59 @@ impl<'input> Parser<'input> {
         Ok(None)
     }
 
-    pub fn parse_opt_primary_expression(&mut self, context: ExpressionContext) -> Result<Option<Rc<ast::Expression>>, ParserFailure> {
-        //
+    fn parse_opt_start_expression(&mut self, context: ExpressionContext) -> Result<Option<Rc<ast::Expression>>, ParserFailure> {
+        if self.peek(Token::Null) {
+            self.mark_location();
+            self.next(true);
+            Ok(Some(Rc::new(ast::Expression {
+                location: self.pop_location(),
+                kind: ast::ExpressionKind::Null,
+            })))
+        } else if self.peek(Token::False) {
+            self.mark_location();
+            self.next(true);
+            Ok(Some(Rc::new(ast::Expression {
+                location: self.pop_location(),
+                kind: ast::ExpressionKind::Boolean(false),
+            })))
+        } else if self.peek(Token::True) {
+            self.mark_location();
+            self.next(true);
+            Ok(Some(Rc::new(ast::Expression {
+                location: self.pop_location(),
+                kind: ast::ExpressionKind::Boolean(true),
+            })))
+        } else if let Token::NumericLiteral(n) = self.token.0 {
+            self.mark_location();
+            self.next(true);
+            Ok(Some(Rc::new(ast::Expression {
+                location: self.pop_location(),
+                kind: ast::ExpressionKind::Numeric(n),
+            })))
+        } else if let Token::StringLiteral(ref s) = self.token.0 {
+            self.mark_location();
+            self.next(true);
+            Ok(Some(Rc::new(ast::Expression {
+                location: self.pop_location(),
+                kind: ast::ExpressionKind::String(s.clone()),
+            })))
+        } else if self.peek(Token::This) {
+            self.mark_location();
+            self.next(true);
+            Ok(Some(Rc::new(ast::Expression {
+                location: self.pop_location(),
+                kind: ast::ExpressionKind::This,
+            })))
+        } else if let Token::RegExpLiteral { ref body, ref flags } = self.token.0 {
+            self.mark_location();
+            self.next(true);
+            Ok(Some(Rc::new(ast::Expression {
+                location: self.pop_location(),
+                kind: ast::ExpressionKind::RegExp { body: body.clone(), flags: flags.clone() },
+            })))
+        } else {
+            Ok(None)
+        }
     }
 }
 
