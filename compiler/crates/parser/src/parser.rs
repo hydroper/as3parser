@@ -327,6 +327,25 @@ impl<'input> Parser<'input> {
                 self.pop_location();
                 Ok(Some(rns))
             }
+        } else if self.peek(Token::LeftParen) {
+            let start = self.token_location();
+            if context.min_precedence.includes(&OperatorPrecedence::AssignmentAndOther) {
+                match self.parse_paren_list_expression_or_empty()? {
+                    ExpressionOrEmpty::Empty => {
+                        if !self.peek(Token::FatArrow) {
+                            self.expect(Token::FatArrow)?;
+                        }
+                        return Ok(Some(self.parse_arrow_function(start, ArrowFunctionContext {
+                            ..default()
+                        })?));
+                    },
+                    ExpressionOrEmpty::Expression(expr) => {
+                        return Ok(Some(self.finish_paren_list_expr_or_arrow_fn_or_qual_id(start, expr)?));
+                    },
+                }
+            } else {
+                return Ok(Some(self.parse_paren_list_expr_or_qual_id(start)?));
+            }
         // `*`
         } else if self.peek(Token::Times) {
             let id_location = self.token_location();
@@ -354,6 +373,28 @@ impl<'input> Parser<'input> {
         }
     }
 
+    fn finish_paren_list_expr_or_arrow_fn_or_qual_id(&mut self, start: Location, left: Rc<ast::Expression>) -> Result<Rc<ast::Expression>, ParserFailure> {
+        if self.peek(Token::FatArrow) {
+            return Ok(self.parse_arrow_function(start, ArrowFunctionContext {
+                left: Some(left),
+                ..default()
+            }));
+        }
+        if self.peek(Token::ColonColon) && !matches!(left.kind, ast::ExpressionKind::Sequence(_, _)) {
+            self.push_location(&start);
+            let id = self.finish_qualified_identifier(false, left)?;
+            return Ok(Rc::new(ast::Expression {
+                location: self.pop_location(),
+                kind: ast::ExpressionKind::Id(id),
+            }));
+        }
+        self.push_location(&start);
+        return Ok(Rc::new(ast::Expression {
+            location: self.pop_location(),
+            kind: ast::ExpressionKind::Paren(left),
+        }));
+    }
+
     fn parse_qualified_identifier(&mut self) -> Result<ast::QualifiedIdentifier, ParserFailure> {
         let attribute = self.consume(Token::Attribute)?;
         if attribute && self.peek(Token::LeftBracket) {
@@ -365,6 +406,7 @@ impl<'input> Parser<'input> {
             });
         }
 
+        // IdentifierName
         if let Token::Identifier(ref id) = self.token.0 {
             let id_location = self.token_location();
             self.next()?;
@@ -384,6 +426,31 @@ impl<'input> Parser<'input> {
                     attribute,
                     qualifier: None,
                     name: ast::IdentifierOrBrackets::Id(id.clone(), id_location),
+                };
+                return Ok(id);
+            }
+        }
+
+        // IdentifierName (from reserved word)
+        if let Some(id) = self.token.0.reserved_word_name() {
+            let id_location = self.token_location();
+            self.next()?;
+            if self.peek(Token::ColonColon) {
+                let id = ast::QualifiedIdentifier {
+                    attribute: false,
+                    qualifier: None,
+                    name: ast::IdentifierOrBrackets::Id(id, id_location),
+                };
+                let id = Rc::new(ast::Expression {
+                    location: id_location,
+                    kind: ast::ExpressionKind::Id(id),
+                });
+                return self.finish_qualified_identifier(attribute, id);
+            } else {
+                let id = ast::QualifiedIdentifier {
+                    attribute,
+                    qualifier: None,
+                    name: ast::IdentifierOrBrackets::Id(id, id_location),
                 };
                 return Ok(id);
             }
@@ -483,26 +550,58 @@ impl<'input> Parser<'input> {
     }
 
     fn parse_brackets(&mut self) -> Result<Rc<ast::Expression>, ParserFailure> {
-        self.expect(Token::LeftBracket);
+        self.expect(Token::LeftBracket)?;
         let expr = self.parse_expression(ExpressionContext {
             min_precedence: OperatorPrecedence::List,
             allow_in: true,
             ..default()
         });
-        self.expect(Token::RightBracket);
+        self.expect(Token::RightBracket)?;
         expr
     }
 
     fn parse_paren_expression(&mut self) -> Result<Rc<ast::Expression>, ParserFailure> {
-        self.expect(Token::LeftParen);
+        self.expect(Token::LeftParen)?;
         let expr = self.parse_expression(ExpressionContext {
             min_precedence: OperatorPrecedence::AssignmentAndOther,
             allow_in: true,
             ..default()
         });
-        self.expect(Token::RightParen);
+        self.expect(Token::RightParen)?;
         expr
     }
+
+    fn parse_paren_list_expression(&mut self) -> Result<Rc<ast::Expression>, ParserFailure> {
+        self.expect(Token::LeftParen)?;
+        let expr = self.parse_expression(ExpressionContext {
+            min_precedence: OperatorPrecedence::List,
+            allow_in: true,
+            ..default()
+        });
+        self.expect(Token::RightParen)?;
+        expr
+    }
+
+    /// Parses a ParenListExpression or a `()` sequence.
+    fn parse_paren_list_expression_or_empty(&mut self) -> Result<ExpressionOrEmpty, ParserFailure> {
+        self.expect(Token::LeftParen);
+        if self.peek(Token::RightParen) {
+            self.next()?;
+            return Ok(ExpressionOrEmpty::Empty);
+        }
+        let expr = self.parse_expression(ExpressionContext {
+            min_precedence: OperatorPrecedence::List,
+            allow_in: true,
+            ..default()
+        })?;
+        self.expect(Token::RightParen)?;
+        Ok(ExpressionOrEmpty::Expression(expr))
+    }
+}
+
+pub enum ExpressionOrEmpty {
+    Empty,
+    Expression(Rc<ast::Expression>),
 }
 
 /// Context used to control the parsing of an expression.
@@ -521,6 +620,19 @@ impl Default for ExpressionContext {
             allow_in: true,
             allow_assignment: true,
             with_type_annotation: true,
+        }
+    }
+}
+
+#[derive(Clone)]
+pub struct ArrowFunctionContext {
+    left: Option<Rc<ast::Expression>>,
+}
+
+impl Default for ArrowFunctionContext {
+    fn default() -> Self {
+        Self {
+            left: None,
         }
     }
 }

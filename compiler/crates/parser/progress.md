@@ -22,15 +22,13 @@ Syntax:
   * [x] `this`
   * [x] Regular expression
   * [ ] Lexical qualified identifier
-    * [ ] Starts with
-      * [ ] `(` (handled in the parentheses expression)
+    * [x] Starts with
+      * [x] `(` (handled in the parentheses expression)
       * [x] Reserved namespace
       * [x] Identifier
       * [x] `@`
       * [x] `*`
     * [ ] If followed by `=>`, it is reinterpreted as an arrow function.
-    * [ ] Keywords are not reserved after `::`
-    * [ ] Keywords are not reserved after `@`
   * [ ] XML markup
   * [ ] XML element
   * [ ] XML list
@@ -38,10 +36,10 @@ Syntax:
   * [x] `private`
   * [x] `protected`
   * [x] `internal`
-  * [ ] `(x)`
-    * [ ] If followed by `=>`, it is reinterpreted as an arrow function. It is done inside primary expressions and requires an operator precedence test first.
-    * [ ] If after `(` is `)` (that is, `()`) and the operator precedence includes arrow functions, parse an arrow function, carefully consuming the tokens.
-    * [ ] If followed by `::` and `x` is not a list expression, it is reinterpreted as a qualified identifier.
+  * [x] `(x)`
+    * [x] If followed by `=>`, it is reinterpreted as an arrow function. It is done inside primary expressions and requires an operator precedence test first.
+    * [x] If after `(` is `)` (that is, `()`) and the operator precedence includes arrow functions, parse an arrow function, carefully consuming the tokens.
+    * [x] If followed by `::` and `x` is not a list expression, it is reinterpreted as a qualified identifier.
   * [ ] `...x`
   * [ ] Array initializer
   * [ ] Vector initializer (`new <T> [...]`)
@@ -54,7 +52,6 @@ Syntax:
   * [ ] `o.x`
     * [ ] Keywords are not reserved after `.`
     * [ ] `public`, `private`, `protected`, `internal` are reserved before `::`
-    * [ ] Keywords are not reserved after `@`
   * [ ] `o?.x`
     * [ ] Keywords are not reserved after `?.`
     * [ ] `public`, `private`, `protected`, `internal` are reserved before `::`
