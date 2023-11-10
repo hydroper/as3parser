@@ -21,23 +21,23 @@ Syntax:
   * [x] String
   * [x] `this`
   * [x] Regular expression
-  * [ ] Qualified identifier
+  * [ ] Lexical qualified identifier
     * [ ] Starts with
       * [ ] `(` (handled in the parentheses expression)
-      * [ ] Reserved namespace
+      * [x] Reserved namespace
       * [x] Identifier
-      * [ ] `@`
-      * [ ] `*`
+      * [x] `@`
+      * [x] `*`
     * [ ] If followed by `=>`, it is reinterpreted as an arrow function.
     * [ ] Keywords are not reserved after `::`
     * [ ] Keywords are not reserved after `@`
   * [ ] XML markup
   * [ ] XML element
   * [ ] XML list
-  * [ ] `public`
-  * [ ] `private`
-  * [ ] `protected`
-  * [ ] `internal`
+  * [x] `public`
+  * [x] `private`
+  * [x] `protected`
+  * [x] `internal`
   * [ ] `(x)`
     * [ ] If followed by `=>`, it is reinterpreted as an arrow function. It is done inside primary expressions and requires an operator precedence test first.
     * [ ] If after `(` is `)` (that is, `()`) and the operator precedence includes arrow functions, parse an arrow function, carefully consuming the tokens.

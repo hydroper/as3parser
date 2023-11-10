@@ -32,6 +32,10 @@ impl<'input> Parser<'input> {
         self.locations.push(self.token.1.clone());
     }
 
+    fn duplicate_location(&mut self) {
+        self.locations.push(self.locations.last().unwrap().clone());
+    }
+
     fn push_location(&mut self, location: &Location) {
         self.locations.push(location.clone());
     }
@@ -296,6 +300,7 @@ impl<'input> Parser<'input> {
                 location: self.pop_location(),
                 kind: ast::ExpressionKind::RegExp { body: body.clone(), flags: flags.clone() },
             })))
+        // `@`
         } else if self.peek(Token::Attribute) {
             self.mark_location();
             let id = self.parse_qualified_identifier()?;
@@ -303,6 +308,47 @@ impl<'input> Parser<'input> {
                 location: self.pop_location(),
                 kind: ast::ExpressionKind::Id(id),
             })))
+        // `public`, `private`, `protected`, `internal`
+        } else if let Some(reserved_ns) = self.peek_reserved_namespace() {
+            self.mark_location();
+            self.duplicate_location();
+            self.next();
+            let rns = Rc::new(ast::Expression {
+                location: self.pop_location(),
+                kind: ast::ExpressionKind::ReservedNamespace(reserved_ns),
+            });
+            if self.peek(Token::ColonColon) {
+                let id = self.finish_qualified_identifier(false, rns)?;
+                Ok(Some(Rc::new(ast::Expression {
+                    location: self.pop_location(),
+                    kind: ast::ExpressionKind::Id(id),
+                })))
+            } else {
+                self.pop_location();
+                Ok(Some(rns))
+            }
+        // `*`
+        } else if self.peek(Token::Times) {
+            let id_location = self.token_location();
+            self.next()?;
+            let id = Rc::new(ast::Expression {
+                location: id_location,
+                kind: ast::ExpressionKind::Id(ast::QualifiedIdentifier {
+                    attribute: false,
+                    qualifier: None,
+                    name: ast::IdentifierOrBrackets::Id("*".into(), id_location),
+                }),
+            });
+            if self.peek(Token::ColonColon) {
+                self.push_location(&id_location);
+                let id = self.finish_qualified_identifier(false, id)?;
+                Ok(Some(Rc::new(ast::Expression {
+                    location: self.pop_location(),
+                    kind: ast::ExpressionKind::Id(id),
+                })))
+            } else {
+                Ok(Some(id))
+            }
         } else {
             Ok(None)
         }
