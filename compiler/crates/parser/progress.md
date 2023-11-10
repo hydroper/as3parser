@@ -29,7 +29,7 @@ Syntax:
       * [x] `@`
       * [x] `*`
   * [x] XML markup
-  * [ ] XML element
+  * [x] XML element
   * [x] XML list
   * [x] `public`
   * [x] `private`

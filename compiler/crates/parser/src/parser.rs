@@ -1,5 +1,6 @@
 use std::rc::Rc;
 use crate::*;
+use crate::ast::XmlElement;
 use crate::util::default;
 
 pub struct Parser<'input> {
@@ -440,7 +441,7 @@ impl<'input> Parser<'input> {
         }
 
         self.push_location(&start);
-        let element = self.parse_xml_element(start)?;
+        let element = self.parse_xml_element(start, true)?;
         return Ok(Rc::new(ast::Expression {
             location: self.pop_location(),
             kind: ast::ExpressionKind::XmlElement(element),
@@ -448,10 +449,74 @@ impl<'input> Parser<'input> {
     }
 
     /// Parses XMLElement starting from its XMLTagContent.
-    fn parse_xml_element(&mut self, start: Location) -> Result<ast::XmlElement, ParserFailure> {
+    fn parse_xml_element(&mut self, start: Location, ends_at_ie_div: bool) -> Result<ast::XmlElement, ParserFailure> {
         self.push_location(&start);
-        let opening_name = self.parse_xml_tag_name()?;
-        do_more;
+        let opening_tag_name = self.parse_xml_tag_name()?;
+        let mut attributes: Vec<ast::XmlAttributeOrExpression> = vec![];
+        while self.consume_and_ie_xml_tag(Token::XmlWhitespace)? {
+            if self.consume(Token::LeftBrace)? {
+                let expr = self.parse_expression(ExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::AssignmentAndOther, ..default() })?;
+                self.expect_and_ie_xml_tag(Token::RightBrace)?;
+                attributes.push(ast::XmlAttributeOrExpression::Expression(expr));
+            } else if matches!(self.token.0, Token::XmlName(_)) {
+                let name = self.parse_xml_name()?;
+                self.consume_and_ie_xml_tag(Token::XmlWhitespace)?;
+                self.expect_and_ie_xml_tag(Token::Assign)?;
+                self.consume_and_ie_xml_tag(Token::XmlWhitespace)?;
+                let mut value: ast::XmlAttributeValueOrExpression;
+                if self.consume(Token::LeftBrace)? {
+                    let expr = self.parse_expression(ExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::AssignmentAndOther, ..default() })?;
+                    self.expect_and_ie_xml_tag(Token::RightBrace)?;
+                    value = ast::XmlAttributeValueOrExpression::Expression(expr);
+                } else {
+                    value = ast::XmlAttributeValueOrExpression::Value(self.parse_xml_attribute_value()?);
+                }
+                attributes.push(ast::XmlAttributeOrExpression::Attribute(ast::XmlAttribute { name, value }));
+            } else {
+                break;
+            }
+        }
+
+        let mut content: Vec<ast::XmlElementContent> = vec![];
+        let mut closing_tag_name: Option<ast::XmlTagName> = None;
+
+        let mut is_empty = false;
+
+        if ends_at_ie_div {
+            is_empty = self.consume(Token::XmlSlashGt)?;
+        } else {
+            is_empty = self.consume_and_ie_xml_content(Token::XmlSlashGt)?;
+        }
+
+        if !is_empty {
+            self.expect_and_ie_xml_content(Token::Gt)?;
+            content = self.parse_xml_content()?;
+            self.expect_and_ie_xml_tag(Token::XmlLtSlash)?;
+            closing_tag_name = Some(self.parse_xml_tag_name()?);
+            if ends_at_ie_div {
+                self.expect(Token::Gt);
+            } else {
+                self.expect_and_ie_xml_content(Token::Gt)?;
+            }
+        }
+
+        Ok(XmlElement {
+            location: self.pop_location(),
+            opening_tag_name,
+            attributes,
+            content,
+            closing_tag_name,
+        })
+    }
+
+    fn parse_xml_attribute_value(&mut self) -> Result<String, ParserFailure> {
+        if let Token::XmlAttributeValue(value) = &self.token.0 {
+            self.next_ie_xml_tag()?;
+            return Ok(value.clone());
+        } else {
+            self.add_syntax_error(self.token_location(), DiagnosticKind::ExpectedXmlAttributeValue, diagnostic_arguments![Token(self.token.0.clone())]);
+            Err(ParserFailure)
+        }
     }
 
     fn parse_xml_tag_name(&mut self) -> Result<ast::XmlTagName, ParserFailure> {
@@ -462,16 +527,20 @@ impl<'input> Parser<'input> {
                 ..default()
             })?;
             self.expect_and_ie_xml_tag(Token::RightBrace)?;
-            return Ok(ast::XmlTagName::Expression(expr));
+            Ok(ast::XmlTagName::Expression(expr))
         } else {
-            if let Token::XmlName(name) = &self.token.0 {
-                let name_location = self.token_location();
-                self.next_ie_xml_tag()?;
-                return Ok(ast::XmlTagName::Name((name.clone(), name_location)));
-            } else {
-                self.add_syntax_error(self.token_location(), DiagnosticKind::ExpectedXmlName, diagnostic_arguments![Token(self.token.0.clone())]);
-                Err(ParserFailure)
-            }
+            Ok(ast::XmlTagName::Name(self.parse_xml_name()?))
+        }
+    }
+
+    fn parse_xml_name(&mut self) -> Result<(String, Location), ParserFailure> {
+        if let Token::XmlName(name) = &self.token.0 {
+            let name_location = self.token_location();
+            self.next_ie_xml_tag()?;
+            return Ok((name.clone(), name_location));
+        } else {
+            self.add_syntax_error(self.token_location(), DiagnosticKind::ExpectedXmlName, diagnostic_arguments![Token(self.token.0.clone())]);
+            Err(ParserFailure)
         }
     }
 

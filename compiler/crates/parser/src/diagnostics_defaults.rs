@@ -15,6 +15,7 @@ lazy_static! {
         DiagnosticKind::ExpectedIdentifier.id() => "Expected identifier before {1}".into(),
         DiagnosticKind::ExpectedExpression.id() => "Expected expression before {1}".into(),
         DiagnosticKind::ExpectedXmlName.id() => "Expected XML name before {1}".into(),
+        DiagnosticKind::ExpectedXmlAttributeValue.id() => "Expected XML attribute value before {1}".into(),
         // DiagnosticKind::K.id() => "".into(),
     };
 }
