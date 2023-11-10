@@ -11,7 +11,7 @@ pub struct Diagnostic {
     pub(crate) kind: DiagnosticKind,
     pub(crate) is_warning: bool,
     pub(crate) is_verify_error: bool,
-    pub(crate) arguments: Vec<Box<DiagnosticArgument>>,
+    pub(crate) arguments: Vec<DiagnosticArgument>,
 }
 
 impl Eq for Diagnostic {}
@@ -36,7 +36,7 @@ impl PartialOrd for Diagnostic {
 }
 
 impl Diagnostic {
-    pub fn new_syntax_error(location: Location, kind: DiagnosticKind, arguments: Vec<Box<DiagnosticArgument>>) -> Self {
+    pub fn new_syntax_error(location: Location, kind: DiagnosticKind, arguments: Vec<DiagnosticArgument>) -> Self {
         Self {
             location,
             kind,
@@ -46,7 +46,7 @@ impl Diagnostic {
         }
     }
 
-    pub fn new_verify_error(location: Location, kind: DiagnosticKind, arguments: Vec<Box<DiagnosticArgument>>) -> Self {
+    pub fn new_verify_error(location: Location, kind: DiagnosticKind, arguments: Vec<DiagnosticArgument>) -> Self {
         Self {
             location,
             kind,
@@ -56,7 +56,7 @@ impl Diagnostic {
         }
     }
 
-    pub fn new_warning(location: Location, kind: DiagnosticKind, arguments: Vec<Box<DiagnosticArgument>>) -> Self {
+    pub fn new_warning(location: Location, kind: DiagnosticKind, arguments: Vec<DiagnosticArgument>) -> Self {
         Self {
             location,
             kind,
@@ -82,7 +82,7 @@ impl Diagnostic {
         self.is_verify_error
     }
 
-    pub fn arguments(&self) -> Vec<Box<DiagnosticArgument>> {
+    pub fn arguments(&self) -> Vec<DiagnosticArgument> {
         self.arguments.clone()
     }
 
@@ -115,7 +115,7 @@ impl Diagnostic {
         let mut string_arguments: HashMap<String, String> = hashmap!{};
         let mut i = 1;
         for argument in &self.arguments {
-            string_arguments.insert(i.to_string(), self.format_argument(*argument.clone()));
+            string_arguments.insert(i.to_string(), self.format_argument(argument.clone()));
             i += 1;
         }
         use late_format::LateFormat;
@@ -135,7 +135,7 @@ impl Diagnostic {
 }
 
 pub macro diagnostic_arguments {
-    ($($variant:ident($value:expr)),*) => { vec![ $(Box::new(DiagnosticArgument::$variant($value))),* ] },
+    ($($variant:ident($value:expr)),*) => { vec![ $(DiagnosticArgument::$variant($value)),* ] },
 }
 
 #[derive(Clone)]

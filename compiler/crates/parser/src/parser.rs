@@ -45,11 +45,11 @@ impl<'input> Parser<'input> {
         self.locations.pop().unwrap().combine_with_start_of(self.token.1.clone())
     }
 
-    fn add_syntax_error(&self, location: Location, kind: DiagnosticKind, arguments: Vec<Box<DiagnosticArgument>>) {
+    fn add_syntax_error(&self, location: Location, kind: DiagnosticKind, arguments: Vec<DiagnosticArgument>) {
         self.source().add_diagnostic(Diagnostic::new_syntax_error(location, kind, arguments));
     }
 
-    fn add_warning(&self, location: Location, kind: DiagnosticKind, arguments: Vec<Box<DiagnosticArgument>>) {
+    fn add_warning(&self, location: Location, kind: DiagnosticKind, arguments: Vec<DiagnosticArgument>) {
         self.source().add_diagnostic(Diagnostic::new_warning(location, kind, arguments));
     }
 
@@ -493,6 +493,7 @@ impl<'input> Parser<'input> {
             content = self.parse_xml_content()?;
             self.expect_and_ie_xml_tag(Token::XmlLtSlash)?;
             closing_tag_name = Some(self.parse_xml_tag_name()?);
+            self.consume_and_ie_xml_tag(Token::XmlWhitespace)?;
             if ends_at_ie_div {
                 self.expect(Token::Gt);
             } else {
@@ -546,7 +547,29 @@ impl<'input> Parser<'input> {
 
     /// Parses XMLContent until a `</` token.
     fn parse_xml_content(&mut self) -> Result<Vec<ast::XmlElementContent>, ParserFailure> {
-        //
+        let mut content = vec![];
+        while !self.peek(Token::XmlLtSlash) {
+            if self.consume(Token::LeftBrace)? {
+                let expr = self.parse_expression(ExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::AssignmentAndOther, ..default() })?;
+                self.expect_and_ie_xml_content(Token::RightBrace)?;
+                content.push(ast::XmlElementContent::Expression(expr));
+            } else if let Token::XmlMarkup(markup) = &self.token.0 {
+                let location = self.token_location();
+                self.next_ie_xml_content()?;
+                content.push(ast::XmlElementContent::Markup(markup.clone(), location));
+            } else if let Token::XmlText(text) = &self.token.0 {
+                let location = self.token_location();
+                self.next_ie_xml_content()?;
+                content.push(ast::XmlElementContent::Text(text.clone(), location));
+            } else if self.consume_and_ie_xml_tag(Token::Lt)? {
+                let start = self.token_location();
+                let element = self.parse_xml_element(start, false)?;
+                content.push(ast::XmlElementContent::Element(element));
+            } else {
+                self.expect_and_ie_xml_content(Token::XmlLtSlash)?;
+            }
+        }
+        Ok(content)
     }
 
     fn finish_paren_list_expr_or_qual_id(&mut self, start: Location, left: Rc<ast::Expression>) -> Result<Rc<ast::Expression>, ParserFailure> {

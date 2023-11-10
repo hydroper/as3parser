@@ -146,9 +146,9 @@ pub enum ExpressionKind {
 
 pub enum XmlElementContent {
     Expression(Rc<Expression>),
-    Markup((String, Location)),
-    Text((String, Location)),
-    XmlElement(XmlElement),
+    Markup(String, Location),
+    Text(String, Location),
+    Element(XmlElement),
 }
 
 pub struct XmlElement {
