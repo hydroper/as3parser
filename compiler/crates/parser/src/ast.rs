@@ -145,7 +145,8 @@ pub enum ExpressionKind {
 }
 
 pub enum XmlElementContent {
-    Interpolation(Rc<Expression>),
+    Empty,
+    Expression(Rc<Expression>),
     Markup(String),
     Text(String),
     XmlElement(XmlElement),
@@ -153,29 +154,29 @@ pub enum XmlElementContent {
 
 pub struct XmlElement {
     pub opening_tag_name: XmlTagName,
-    pub attributes: Vec<XmlAttributeOrInterpolation>,
+    pub attributes: Vec<XmlAttributeOrExpression>,
     pub content: Vec<XmlElementContent>,
     pub closing_tag_name: Option<XmlTagName>,
 }
 
 pub enum XmlTagName {
     Name(String),
-    Interpolation(Rc<Expression>),
+    Expression(Rc<Expression>),
 }
 
-pub enum XmlAttributeOrInterpolation {
+pub enum XmlAttributeOrExpression {
     Attribute(XmlAttribute),
-    Interpolation(Rc<Expression>),
+    Expression(Rc<Expression>),
 }
 
 pub struct XmlAttribute {
     pub name: String,
-    pub value: XmlAttributeValueOrInterpolation,
+    pub value: XmlAttributeValueOrExpression,
 }
 
-pub enum XmlAttributeValueOrInterpolation {
+pub enum XmlAttributeValueOrExpression {
     Value(String),
-    Interpolation(Rc<Expression>),
+    Expression(Rc<Expression>),
 }
 
 pub enum ReservedNamespace {

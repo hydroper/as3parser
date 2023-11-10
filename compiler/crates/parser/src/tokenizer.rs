@@ -1183,7 +1183,7 @@ impl<'input> Tokenizer<'input> {
     /// Attempts to scan a XMLMarkup token after a `<` character.
     pub fn scan_xml_markup(&mut self, start: Location) -> Result<Option<(Token, Location)>, ParserFailure> {
         // XMLComment
-        if self.code_points.peek_seq(2) == "!--" {
+        if self.code_points.peek_seq(3) == "!--" {
             self.code_points.skip_count_in_place(3);
             loop {
                 if self.code_points.peek_or_zero() == '-' && self.code_points.peek_seq(3) == "-->" {

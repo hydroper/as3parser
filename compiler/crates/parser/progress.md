@@ -2,12 +2,12 @@
 
 Details:
 
-* [ ] Expressions
-  * [ ] `ExpressionContext`
-    * [ ] `min_precedence`
-    * [ ] `allow_in`
-    * [ ] `allow_assignment`
-    * [ ] `with_type_annotation`
+* [x] Expressions
+  * [x] `ExpressionContext`
+    * [x] `min_precedence`
+    * [x] `allow_in`
+    * [x] `allow_assignment`
+    * [x] `with_type_annotation`
       * Conditional
       * Miscellaneous other cases in the other language project
 
@@ -21,15 +21,14 @@ Syntax:
   * [x] String
   * [x] `this`
   * [x] Regular expression
-  * [ ] Lexical qualified identifier
+  * [x] Lexical qualified identifier
     * [x] Starts with
       * [x] `(` (handled in the parentheses expression)
       * [x] Reserved namespace
       * [x] Identifier
       * [x] `@`
       * [x] `*`
-    * [ ] If followed by `=>`, it is reinterpreted as an arrow function.
-  * [ ] XML markup
+  * [x] XML markup
   * [ ] XML element
   * [ ] XML list
   * [x] `public`
@@ -46,7 +45,7 @@ Syntax:
   * [ ] Object initializer
   * [ ] Function expression
   * [ ] Arrow function
-    * [ ] It is parsed from either a non qualified identifier or a parentheses expression, as described in the previous items of this list.
+    * [ ] Fat arrow subexpression
   * [ ] Super expression
   * [ ] New expression
   * [ ] `o.x`

@@ -340,7 +340,7 @@ impl<'input> Parser<'input> {
                         })?));
                     },
                     ExpressionOrEmpty::Expression(expr) => {
-                        return Ok(Some(self.finish_paren_list_expr_or_arrow_fn_or_qual_id(start, expr)?));
+                        return Ok(Some(self.finish_paren_list_expr_or_qual_id(start, expr)?));
                     },
                 }
             } else {
@@ -368,18 +368,35 @@ impl<'input> Parser<'input> {
             } else {
                 Ok(Some(id))
             }
+        } else if self.peek(Token::Lt) {
+            if let Some(token) = self.tokenizer.scan_xml_markup(self.token_location())? {
+                self.token = token;
+            }
+            let start = self.token_location();
+            if let Token::XmlMarkup(content) = &self.token.0 {
+                self.mark_location();
+                self.next();
+                Ok(Some(Rc::new(ast::Expression {
+                    location: self.pop_location(),
+                    kind: ast::ExpressionKind::XmlMarkup(content.clone()),
+                })))
+            } else {
+                Ok(Some(self.parse_xml_element_or_xml_list(start)))
+            }
         } else {
             Ok(None)
         }
     }
 
-    fn finish_paren_list_expr_or_arrow_fn_or_qual_id(&mut self, start: Location, left: Rc<ast::Expression>) -> Result<Rc<ast::Expression>, ParserFailure> {
-        if self.peek(Token::FatArrow) {
-            return Ok(self.parse_arrow_function(start, ArrowFunctionContext {
-                left: Some(left),
-                ..default()
-            }));
+    fn parse_xml_element_or_xml_list(&mut self, start: Location) -> Result<Rc<ast::Expression>, ParserFailure> {
+        self.next_ie_xml_tag();
+        if self.peek(Token::Gt) {
+            do_more;
         }
+        do_more;
+    }
+
+    fn finish_paren_list_expr_or_qual_id(&mut self, start: Location, left: Rc<ast::Expression>) -> Result<Rc<ast::Expression>, ParserFailure> {
         if self.peek(Token::ColonColon) && !matches!(left.kind, ast::ExpressionKind::Sequence(_, _)) {
             self.push_location(&start);
             let id = self.finish_qualified_identifier(false, left)?;
@@ -393,6 +410,12 @@ impl<'input> Parser<'input> {
             location: self.pop_location(),
             kind: ast::ExpressionKind::Paren(left),
         }));
+    }
+
+    fn parse_paren_list_expr_or_qual_id(&mut self, start: Location) -> Result<Rc<ast::Expression>, ParserFailure> {
+        let start = self.token_location();
+        let expr = self.parse_paren_list_expression()?;
+        self.finish_paren_list_expr_or_qual_id(start, expr)
     }
 
     fn parse_qualified_identifier(&mut self) -> Result<ast::QualifiedIdentifier, ParserFailure> {
