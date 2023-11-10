@@ -381,7 +381,7 @@ impl<'input> Parser<'input> {
                     kind: ast::ExpressionKind::XmlMarkup(content.clone()),
                 })))
             } else {
-                Ok(Some(self.parse_xml_element_or_xml_list(start)))
+                Ok(Some(self.parse_xml_element_or_xml_list(start)?))
             }
         } else {
             Ok(None)
@@ -389,8 +389,9 @@ impl<'input> Parser<'input> {
     }
 
     fn parse_xml_element_or_xml_list(&mut self, start: Location) -> Result<Rc<ast::Expression>, ParserFailure> {
-        self.next_ie_xml_tag();
+        self.next_ie_xml_tag()?;
         if self.peek(Token::Gt) {
+            self.next_ie_xml_content()?;
             do_more;
         }
         do_more;
