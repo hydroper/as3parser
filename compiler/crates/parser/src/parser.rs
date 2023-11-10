@@ -97,6 +97,24 @@ impl<'input> Parser<'input> {
         }
     }
 
+    fn consume_and_ie_xml_tag(&mut self, token: Token) -> Result<bool, ParserFailure> {
+        if self.token.0 == token {
+            self.next_ie_xml_tag()?;
+            Ok(true)
+        } else {
+            Ok(false)
+        }
+    }
+
+    fn consume_and_ie_xml_content(&mut self, token: Token) -> Result<bool, ParserFailure> {
+        if self.token.0 == token {
+            self.next_ie_xml_content()?;
+            Ok(true)
+        } else {
+            Ok(false)
+        }
+    }
+
     fn consume_identifier(&mut self, reserved_words: bool) -> Result<Option<(String, Location)>, ParserFailure> {
         if let Token::Identifier(id) = self.token.0.clone() {
             let location = self.token.1.clone();
@@ -133,6 +151,26 @@ impl<'input> Parser<'input> {
             Err(ParserFailure)
         } else {
             self.next()?;
+            Ok(())
+        }
+    }
+
+    fn expect_and_ie_xml_tag(&mut self, token: Token) -> Result<(), ParserFailure> {
+        if self.token.0 != token {
+            self.add_syntax_error(self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![Token(token), Token(self.token.0.clone())]);
+            Err(ParserFailure)
+        } else {
+            self.next_ie_xml_tag()?;
+            Ok(())
+        }
+    }
+
+    fn expect_and_ie_xml_content(&mut self, token: Token) -> Result<(), ParserFailure> {
+        if self.token.0 != token {
+            self.add_syntax_error(self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![Token(token), Token(self.token.0.clone())]);
+            Err(ParserFailure)
+        } else {
+            self.next_ie_xml_content()?;
             Ok(())
         }
     }
@@ -390,11 +428,56 @@ impl<'input> Parser<'input> {
 
     fn parse_xml_element_or_xml_list(&mut self, start: Location) -> Result<Rc<ast::Expression>, ParserFailure> {
         self.next_ie_xml_tag()?;
-        if self.peek(Token::Gt) {
-            self.next_ie_xml_content()?;
-            do_more;
+        if self.consume_and_ie_xml_content(Token::Gt)? {
+            self.push_location(&start);
+            let content = self.parse_xml_content()?;
+            self.expect_and_ie_xml_tag(Token::XmlLtSlash)?;
+            self.expect(Token::Gt)?;
+            return Ok(Rc::new(ast::Expression {
+                location: self.pop_location(),
+                kind: ast::ExpressionKind::XmlList(content),
+            }));
         }
+
+        self.push_location(&start);
+        let element = self.parse_xml_element(start)?;
+        return Ok(Rc::new(ast::Expression {
+            location: self.pop_location(),
+            kind: ast::ExpressionKind::XmlElement(element),
+        }));
+    }
+
+    /// Parses XMLElement starting from its XMLTagContent.
+    fn parse_xml_element(&mut self, start: Location) -> Result<ast::XmlElement, ParserFailure> {
+        self.push_location(&start);
+        let opening_name = self.parse_xml_tag_name()?;
         do_more;
+    }
+
+    fn parse_xml_tag_name(&mut self) -> Result<ast::XmlTagName, ParserFailure> {
+        if self.consume(Token::LeftBrace)? {
+            let expr = self.parse_expression(ExpressionContext {
+                allow_in: true,
+                min_precedence: OperatorPrecedence::AssignmentAndOther,
+                ..default()
+            })?;
+            self.expect_and_ie_xml_tag(Token::RightBrace)?;
+            return Ok(ast::XmlTagName::Expression(expr));
+        } else {
+            if let Token::XmlName(name) = &self.token.0 {
+                let name_location = self.token_location();
+                self.next_ie_xml_tag()?;
+                return Ok(ast::XmlTagName::Name((name.clone(), name_location)));
+            } else {
+                self.add_syntax_error(self.token_location(), DiagnosticKind::ExpectedXmlName, diagnostic_arguments![Token(self.token.0.clone())]);
+                Err(ParserFailure)
+            }
+        }
+    }
+
+    /// Parses XMLContent until a `</` token.
+    fn parse_xml_content(&mut self) -> Result<Vec<ast::XmlElementContent>, ParserFailure> {
+        //
     }
 
     fn finish_paren_list_expr_or_qual_id(&mut self, start: Location, left: Rc<ast::Expression>) -> Result<Rc<ast::Expression>, ParserFailure> {

@@ -30,7 +30,7 @@ Syntax:
       * [x] `*`
   * [x] XML markup
   * [ ] XML element
-  * [ ] XML list
+  * [x] XML list
   * [x] `public`
   * [x] `private`
   * [x] `protected`

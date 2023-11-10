@@ -155,6 +155,7 @@ pub enum DiagnosticKind {
     Expected = 1029,
     ExpectedIdentifier = 1030,
     ExpectedExpression = 1031,
+    ExpectedXmlName = 1032,
 }
 
 impl DiagnosticKind {

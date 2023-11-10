@@ -145,14 +145,14 @@ pub enum ExpressionKind {
 }
 
 pub enum XmlElementContent {
-    Empty,
     Expression(Rc<Expression>),
-    Markup(String),
-    Text(String),
+    Markup((String, Location)),
+    Text((String, Location)),
     XmlElement(XmlElement),
 }
 
 pub struct XmlElement {
+    pub location: Location,
     pub opening_tag_name: XmlTagName,
     pub attributes: Vec<XmlAttributeOrExpression>,
     pub content: Vec<XmlElementContent>,
@@ -160,7 +160,7 @@ pub struct XmlElement {
 }
 
 pub enum XmlTagName {
-    Name(String),
+    Name((String, Location)),
     Expression(Rc<Expression>),
 }
 
@@ -170,7 +170,7 @@ pub enum XmlAttributeOrExpression {
 }
 
 pub struct XmlAttribute {
-    pub name: String,
+    pub name: (String, Location),
     pub value: XmlAttributeValueOrExpression,
 }
 
