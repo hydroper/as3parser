@@ -258,6 +258,7 @@ pub enum TypeExpressionKind {
     /// `*`
     Any,
     Void,
+    Never,
     Undefined,
     Nullable(Rc<TypeExpression>),
     NonNullable(Rc<TypeExpression>),

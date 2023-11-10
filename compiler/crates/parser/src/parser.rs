@@ -366,6 +366,7 @@ impl<'input> Parser<'input> {
                 self.pop_location();
                 Ok(Some(rns))
             }
+        // Parentheses
         } else if self.peek(Token::LeftParen) {
             let start = self.token_location();
             if context.min_precedence.includes(&OperatorPrecedence::AssignmentAndOther) {
@@ -407,6 +408,7 @@ impl<'input> Parser<'input> {
             } else {
                 Ok(Some(id))
             }
+        // XMLList, XMLElement, XMLMarkup
         } else if self.peek(Token::Lt) {
             if let Some(token) = self.tokenizer.scan_xml_markup(self.token_location())? {
                 self.token = token;
@@ -414,7 +416,7 @@ impl<'input> Parser<'input> {
             let start = self.token_location();
             if let Token::XmlMarkup(content) = &self.token.0 {
                 self.mark_location();
-                self.next();
+                self.next()?;
                 Ok(Some(Rc::new(ast::Expression {
                     location: self.pop_location(),
                     kind: ast::ExpressionKind::XmlMarkup(content.clone()),
@@ -422,9 +424,57 @@ impl<'input> Parser<'input> {
             } else {
                 Ok(Some(self.parse_xml_element_or_xml_list(start)?))
             }
+        // `...`
+        } else if self.peek(Token::Ellipsis) && context.min_precedence.includes(&OperatorPrecedence::AssignmentAndOther) {
+            self.mark_location();
+            self.next()?;
+            let expr = self.parse_expression(ExpressionContext {
+                allow_in: true,
+                min_precedence: context.min_precedence.add_one().unwrap(),
+                ..default()
+            })?;
+            Ok(Some(Rc::new(ast::Expression {
+                location: self.pop_location(),
+                kind: ast::ExpressionKind::Rest(expr),
+            })))
+        // ArrayInitializer
+        } else if self.peek(Token::LeftBracket) {
+            Ok(Some(self.parse_array_initializer()?))
+        // NewExpression, VectorInitializer
+        } else if self.peek(Token::New) && context.min_precedence.includes(&OperatorPrecedence::Unary) {
+            //
         } else {
             Ok(None)
         }
+    }
+
+    fn parse_array_initializer(&mut self) -> Result<Rc<ast::Expression>, ParserFailure> {
+        self.mark_location();
+        self.expect(Token::LeftBracket)?;
+        let mut elements: Vec<Option<Rc<ast::Expression>>> = vec![];
+        while !self.peek(Token::RightBracket) {
+            let mut ellipses = false;
+            while self.consume(Token::Comma)? {
+                elements.push(None);
+                ellipses = true;
+            }
+            if !ellipses  {
+                elements.push(Some(self.parse_expression(ExpressionContext {
+                    allow_in: true,
+                    min_precedence: OperatorPrecedence::AssignmentAndOther,
+                    ..default()
+                })?));
+            }
+            if !self.consume(Token::Comma)? {
+                break;
+            }
+        }
+        self.expect(Token::RightBracket)?;
+        let type_annotation = if self.consume(Token::Colon)? { Some(self.parse_type_expression()?) } else { None };
+        Ok(Rc::new(ast::Expression {
+            location: self.pop_location(),
+            kind: ast::ExpressionKind::ArrayInitializer { elements, type_annotation },
+        }))
     }
 
     fn parse_xml_element_or_xml_list(&mut self, start: Location) -> Result<Rc<ast::Expression>, ParserFailure> {

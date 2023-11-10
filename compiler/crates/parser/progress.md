@@ -39,7 +39,7 @@ Syntax:
     * [x] If followed by `=>`, it is reinterpreted as an arrow function. It is done inside primary expressions and requires an operator precedence test first.
     * [x] If after `(` is `)` (that is, `()`) and the operator precedence includes arrow functions, parse an arrow function, carefully consuming the tokens.
     * [x] If followed by `::` and `x` is not a list expression, it is reinterpreted as a qualified identifier.
-  * [ ] `...x`
+  * [x] `...x`
   * [ ] Array initializer
   * [ ] Vector initializer (`new <T> [...]`)
   * [ ] Object initializer

@@ -461,6 +461,7 @@ A source may consist of multiple definitions in multiple packages.
 
 ```as3
 undefined
+never
 ```
 
 ## Migrations
