@@ -1,4 +1,4 @@
-use crate::Location;
+use crate::{Location, character_validation};
 
 pub struct Comment {
     pub(crate) multiline: bool,
@@ -37,5 +37,22 @@ impl Comment {
 
     pub fn set_location(&mut self, location: Location) {
         self.location = location;
+    }
+
+    /// Indicates whether the comment is an ASDoc comment preceding
+    /// a specific item.
+    pub fn is_asdoc(&self, item_location: &Location) -> bool {
+        if self.content.starts_with('*') {
+            let mut i: usize = self.location.last_offset;
+            for (i_1, ch) in self.location.source().text[i..].char_indices() {
+                i = i_1;
+                if !(character_validation::is_whitespace(ch) || character_validation::is_line_terminator(ch)) {
+                    break;
+                }
+            }
+            item_location.first_offset == i
+        } else {
+            false
+        }
     }
 }

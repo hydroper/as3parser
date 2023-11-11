@@ -40,7 +40,7 @@ Syntax:
     * [x] If after `(` is `)` (that is, `()`) and the operator precedence includes arrow functions, parse an arrow function, carefully consuming the tokens.
     * [x] If followed by `::` and `x` is not a list expression, it is reinterpreted as a qualified identifier.
   * [x] `...x`
-  * [ ] Array initializer
+  * [x] Array initializer
   * [ ] Vector initializer (`new <T> [...]`)
   * [ ] Object initializer
   * [ ] Function expression
@@ -143,3 +143,5 @@ Syntax:
   * [ ] `x`
   * [ ] `x`
   * [ ] `x`
+* [ ] ASDoc
+  * After parsing a ASDoc annotatable item, parse its ASDoc comment after checking if there is at least one comment in the Source and whether `last_comment.is_asdoc(item_location)` is true, resulting in an `AsDoc` value.

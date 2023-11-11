@@ -296,6 +296,7 @@ pub enum FunctionParamKind {
 }
 
 pub struct RecordTypeField {
+    pub asdoc: Option<AsDoc>,
     pub readonly: bool,
     pub key: Rc<(RecordTypeKey, Location)>,
     pub key_suffix: RecordTypeKeySuffix,
@@ -458,6 +459,7 @@ pub enum DirectiveKind {
 }
 
 pub struct ClassDefinition {
+    pub asdoc: Option<AsDoc>,
     pub annotations: DefinitionAnnotations,
     pub name: (String, Location),
     pub generics: Generics,
@@ -467,6 +469,7 @@ pub struct ClassDefinition {
 }
 
 pub struct InterfaceDefinition {
+    pub asdoc: Option<AsDoc>,
     pub annotations: DefinitionAnnotations,
     pub name: (String, Location),
     pub generics: Generics,
@@ -475,12 +478,14 @@ pub struct InterfaceDefinition {
 }
 
 pub struct EnumDefinition {
+    pub asdoc: Option<AsDoc>,
     pub annotations: DefinitionAnnotations,
     pub name: (String, Location),
     pub block: Block,
 }
 
 pub struct NamespaceDefinition {
+    pub asdoc: Option<AsDoc>,
     pub annotations: DefinitionAnnotations,
     pub left: (String, Location),
     pub right: Option<Rc<Expression>>,
@@ -514,6 +519,7 @@ pub enum ImportItem {
 }
 
 pub struct VariableDefinition {
+    pub asdoc: Option<AsDoc>,
     pub annotations: DefinitionAnnotations,
     pub escaped: bool,
     pub kind: VariableKind,
@@ -521,6 +527,7 @@ pub struct VariableDefinition {
 }
 
 pub struct FunctionDefinition {
+    pub asdoc: Option<AsDoc>,
     pub annotations: DefinitionAnnotations,
     pub escaped: bool,
     pub name: (String, Location),
@@ -529,12 +536,14 @@ pub struct FunctionDefinition {
 }
 
 pub struct ConstructorDefinition {
+    pub asdoc: Option<AsDoc>,
     pub annotations: DefinitionAnnotations,
     pub name: (String, Location),
     pub common: Rc<FunctionCommon>,
 }
 
 pub struct GetterDefinition {
+    pub asdoc: Option<AsDoc>,
     pub annotations: DefinitionAnnotations,
     pub escaped: bool,
     pub name: (String, Location),
@@ -542,6 +551,7 @@ pub struct GetterDefinition {
 }
 
 pub struct SetterDefinition {
+    pub asdoc: Option<AsDoc>,
     pub annotations: DefinitionAnnotations,
     pub escaped: bool,
     pub name: (String, Location),
@@ -549,6 +559,7 @@ pub struct SetterDefinition {
 }
 
 pub struct TypeDefinition {
+    pub asdoc: Option<AsDoc>,
     pub annotations: DefinitionAnnotations,
     pub left: (String, Location),
     pub generics: Generics,
@@ -573,6 +584,7 @@ bitflags! {
 }
 
 pub struct Metadata {
+    pub asdoc: Option<AsDoc>,
     pub location: Location,
     /// The metadata name. The metadata name may contain a single `::` delimiter.
     pub name: (String, Location),
@@ -628,4 +640,45 @@ bitflags! {
 pub enum FunctionBody {
     Block(Block),
     Expression(Rc<Expression>),
+}
+
+pub struct AsDoc {
+    pub main_body: String,
+    pub tags: Vec<AsDocTag>,
+}
+
+pub enum AsDocTag {
+    Copy(String),
+    Default(String),
+    EventType(Rc<TypeExpression>),
+    Example(String),
+    ExampleText(String),
+    InheritDoc,
+    Internal(String),
+    Param {
+        name: String,
+        description: String,
+    },
+    Private,
+    Return(String),
+    See {
+        reference: String,
+        display_text: Option<String>,
+    },
+    Throws {
+        class_name: Rc<TypeExpression>,
+        description: Option<String>,
+    },
+}
+
+pub struct PackageDefinition {
+    pub asdoc: Option<AsDoc>,
+    pub location: Location,
+    pub id: Vec<(String, Location)>,
+    pub block: Block,
+}
+
+pub struct Program {
+    pub packages: Vec<Rc<PackageDefinition>>,
+    pub directives: Vec<Rc<Directive>>,
 }
