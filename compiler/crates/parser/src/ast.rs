@@ -45,16 +45,15 @@ pub enum ExpressionKind {
     ArrayInitializer {
         /// Element sequence possibly containing `Rest`s and ellisions.
         elements: Vec<Option<Rc<Expression>>>,
-        type_annotation: Option<Rc<TypeExpression>>,
     },
     /// `new <T> []`
     VectorInitializer {
+        element_type: Rc<TypeExpression>,
         /// Element sequence possibly containing `Rest`s.
         elements: Vec<Rc<Expression>>,
     },
     ObjectInitializer {
-        fields: Vec<ObjectInitializerItem>,
-        type_annotation: Option<Rc<TypeExpression>>,
+        fields: Vec<ObjectField>,
     },
     Function {
         name: Option<(String, Location)>,
@@ -186,10 +185,11 @@ pub enum ReservedNamespace {
     Internal,
 }
 
-pub enum ObjectInitializerItem {
+pub enum ObjectField {
     Field {
         key: Rc<(ObjectKey, Location)>,
         /// Used when parsing an object initializer as a destructuring pattern.
+        /// This is the result of consuming the `!` punctuator.
         #[doc(hidden)]
         destructuring_non_null: bool,
         /// If `None`, this is a shorthand field.
@@ -200,8 +200,8 @@ pub enum ObjectInitializerItem {
 
 pub enum ObjectKey {
     Id(NonAttributeQualifiedIdentifier),
-    String(String),
-    Number(f64),
+    String(String, Location),
+    Number(f64, Location),
     Brackets(Rc<Expression>),
 }
 
@@ -232,8 +232,8 @@ pub struct RecordDestructuringField {
 
 pub enum RecordDestructuringKey {
     Id(QualifiedIdentifier),
-    String(String),
-    Number(f64),
+    String(String, Location),
+    Number(f64, Location),
     Brackets(Rc<Expression>),
 }
 
@@ -312,8 +312,8 @@ pub enum RecordTypeKeySuffix {
 
 pub enum RecordTypeKey {
     Id(NonAttributeQualifiedIdentifier),
-    String(String),
-    Number(f64),
+    String(String, Location),
+    Number(f64, Location),
     Brackets(Rc<Expression>),
 }
 

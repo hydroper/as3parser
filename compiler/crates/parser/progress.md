@@ -41,7 +41,7 @@ Syntax:
     * [x] If followed by `::` and `x` is not a list expression, it is reinterpreted as a qualified identifier.
   * [x] `...x`
   * [x] Array initializer
-  * [ ] Vector initializer (`new <T> [...]`)
+  * [x] Vector initializer (`new <T> [...]`)
   * [ ] Object initializer
   * [ ] Function expression
   * [ ] Arrow function

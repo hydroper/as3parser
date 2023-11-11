@@ -163,17 +163,14 @@ class C.<T> {}
 
 ## Keywords
 
-_Dot tokens_: Keywords are valid identifiers after dot and `?.`.
+Keywords are valid identifiers after dot, `?.`, `::` and `@` at property operators and lexical references.
 
-_`::` tokens_: Keywords are valid identifiers after `::`.
-
-_Escaped definitions_: The language introduces the context word `escaped` to allow defining names that are reserved words. Use the meta-data `[ReadOnly]` to define constants and `[Modifiers("m1", ..."mN")]` to add modifiers. It allows defining variable definitions, getters, setters and function definitions.
+An identifier may be used as a valid reserved word by using the prefix `escaped#`.
 
 ```as3
-use escaped public::x = 10;
-
-use escaped public::y = function get() (10);
-use escaped public::y = function set(v) {};
+public function escaped#for(): void {
+    // "for" function
+}
 ```
 
 ## Object initializer

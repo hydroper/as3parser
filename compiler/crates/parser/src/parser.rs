@@ -430,7 +430,7 @@ impl<'input> Parser<'input> {
             self.next()?;
             let expr = self.parse_expression(ExpressionContext {
                 allow_in: true,
-                min_precedence: context.min_precedence.add_one().unwrap(),
+                min_precedence: OperatorPrecedence::AssignmentAndOther.add_one().unwrap(),
                 ..default()
             })?;
             Ok(Some(Rc::new(ast::Expression {
@@ -442,10 +442,91 @@ impl<'input> Parser<'input> {
             Ok(Some(self.parse_array_initializer()?))
         // NewExpression, VectorInitializer
         } else if self.peek(Token::New) && context.min_precedence.includes(&OperatorPrecedence::Unary) {
-            //
+            let start = self.token_location();
+            self.next();
+            if self.peek(Token::Lt) {
+                Ok(Some(self.parse_vector_initializer(start)?))
+            } else {
+                Ok(Some(self.parse_new_expression(start)?))
+            }
+        } else if self.peek(Token::LeftBrace) {
+            Ok(Some(self.parse_object_initializer()?))
         } else {
             Ok(None)
         }
+    }
+
+    fn parse_object_initializer(&mut self) -> Result<Rc<ast::Expression>, ParserFailure> {
+        self.mark_location();
+        self.expect(Token::LeftBrace)?;
+        let mut fields: Vec<ast::ObjectField> = vec![];
+        while !self.peek(Token::RightBrace) {
+            fields.push(self.parse_object_field()?);
+            if !self.consume(Token::Comma)? {
+                break;
+            }
+        }
+        self.expect(Token::RightBrace)?;
+
+        Ok(Rc::new(ast::Expression {
+            location: self.pop_location(),
+            kind: ast::ExpressionKind::ObjectInitializer { fields },
+        }))
+    }
+
+    fn parse_object_field(&mut self) -> Result<Rc<ast::ObjectField>, ParserFailure> {
+        // Parse the key
+        let mut key: ast::ObjectKey;
+        if let Token::StringLiteral(value) = &self.token.0 {
+            let location = self.token_location();
+            self.next()?;
+            key = ast::ObjectKey::String(value.clone(), location);
+        } else if let Token::NumericLiteral(value) = &self.token.0 {
+            let location = self.token_location();
+            self.next()?;
+            key = ast::ObjectKey::Number(value.clone(), location);
+        } else if self.peek(Token::LeftBracket) {
+            self.next();
+            let key_expr = self.parse_expression(ExpressionContext {
+                allow_in: true,
+                min_precedence: OperatorPrecedence::AssignmentAndOther,
+                ..default()
+            })?;
+            self.expect(Token::RightBracket)?;
+            key = ast::ObjectKey::Brackets(key_expr);
+        } else {
+            key = ast::ObjectKey::Id(self.parse_non_attribute_qualified_identifier()?);
+        }
+
+        ()
+    }
+
+    fn parse_vector_initializer(&mut self, start: Location) -> Result<Rc<ast::Expression>, ParserFailure> {
+        self.push_location(&start);
+        self.expect(Token::Lt)?;
+        let element_type = self.parse_type_expression()?;
+        self.expect_generics_gt()?;
+
+        let mut elements: Vec<Rc<ast::Expression>> = vec![];
+        while !self.peek(Token::RightBracket) {
+            elements.push(self.parse_expression(ExpressionContext {
+                allow_in: true,
+                min_precedence: OperatorPrecedence::AssignmentAndOther,
+                ..default()
+            })?);
+            if !self.consume(Token::Comma)? {
+                break;
+            }
+        }
+        self.expect(Token::RightBracket)?;
+        Ok(Rc::new(ast::Expression {
+            location: self.pop_location(),
+            kind: ast::ExpressionKind::VectorInitializer { element_type, elements },
+        }))
+    }
+
+    fn parse_new_expression(&mut self, start: Location) -> Result<Rc<ast::Expression>, ParserFailure> {
+        //
     }
 
     fn parse_array_initializer(&mut self) -> Result<Rc<ast::Expression>, ParserFailure> {
@@ -470,10 +551,9 @@ impl<'input> Parser<'input> {
             }
         }
         self.expect(Token::RightBracket)?;
-        let type_annotation = if self.consume(Token::Colon)? { Some(self.parse_type_expression()?) } else { None };
         Ok(Rc::new(ast::Expression {
             location: self.pop_location(),
-            kind: ast::ExpressionKind::ArrayInitializer { elements, type_annotation },
+            kind: ast::ExpressionKind::ArrayInitializer { elements },
         }))
     }
 
@@ -751,6 +831,99 @@ impl<'input> Parser<'input> {
         Err(ParserFailure)
     }
 
+    fn parse_non_attribute_qualified_identifier(&mut self) -> Result<ast::NonAttributeQualifiedIdentifier, ParserFailure> {
+        // IdentifierName
+        if let Token::Identifier(ref id) = self.token.0 {
+            let id_location = self.token_location();
+            self.next()?;
+            if self.peek(Token::ColonColon) {
+                let id = ast::NonAttributeQualifiedIdentifier {
+                    qualifier: None,
+                    name: ast::IdentifierOrBrackets::Id(id.clone(), id_location),
+                };
+                let id = Rc::new(ast::Expression {
+                    location: id_location,
+                    kind: ast::ExpressionKind::Id(id),
+                });
+                return self.finish_non_attribute_qualified_identifier(id);
+            } else {
+                let id = ast::NonAttributeQualifiedIdentifier {
+                    qualifier: None,
+                    name: ast::IdentifierOrBrackets::Id(id.clone(), id_location),
+                };
+                return Ok(id);
+            }
+        }
+
+        // IdentifierName (from reserved word)
+        if let Some(id) = self.token.0.reserved_word_name() {
+            let id_location = self.token_location();
+            self.next()?;
+            if self.peek(Token::ColonColon) {
+                let id = ast::QualifiedIdentifier {
+                    attribute: false,
+                    qualifier: None,
+                    name: ast::IdentifierOrBrackets::Id(id, id_location),
+                };
+                let id = Rc::new(ast::Expression {
+                    location: id_location,
+                    kind: ast::ExpressionKind::Id(id),
+                });
+                return self.finish_non_attribute_qualified_identifier(id);
+            } else {
+                let id = ast::NonAttributeQualifiedIdentifier {
+                    qualifier: None,
+                    name: ast::IdentifierOrBrackets::Id(id, id_location),
+                };
+                return Ok(id);
+            }
+        }
+
+        // `public`, `private`, `protected`, `internal` followed by `::`
+        if let Some(reserved_ns) = self.peek_reserved_namespace() {
+            let q_location = self.token_location();
+            self.next()?;
+            let id = Rc::new(ast::Expression {
+                location: q_location,
+                kind: ast::ExpressionKind::ReservedNamespace(reserved_ns),
+            });
+            return self.finish_non_attribute_qualified_identifier(id);
+        }
+
+        // (q)::x
+        if self.peek(Token::LeftParen) {
+            let qual = self.parse_paren_expression()?;
+            return self.finish_non_attribute_qualified_identifier(qual);
+        }
+
+        // `*`
+        if self.peek(Token::Times) {
+            let id_location = self.token_location();
+            self.next()?;
+            if self.peek(Token::ColonColon) {
+                let id = ast::QualifiedIdentifier {
+                    attribute: false,
+                    qualifier: None,
+                    name: ast::IdentifierOrBrackets::Id("*".into(), id_location),
+                };
+                let id = Rc::new(ast::Expression {
+                    location: id_location,
+                    kind: ast::ExpressionKind::Id(id),
+                });
+                return self.finish_non_attribute_qualified_identifier(id);
+            } else {
+                let id = ast::NonAttributeQualifiedIdentifier {
+                    qualifier: None,
+                    name: ast::IdentifierOrBrackets::Id("*".into(), id_location),
+                };
+                return Ok(id);
+            }
+        }
+
+        self.add_syntax_error(self.token_location(), DiagnosticKind::ExpectedIdentifier, diagnostic_arguments![Token(self.token.0.clone())]);
+        Err(ParserFailure)
+    }
+
     /// Expects a colon-colon and finishes a qualified identifier.
     fn finish_qualified_identifier(&mut self, attribute: bool, qual: Rc<ast::Expression>) -> Result<ast::QualifiedIdentifier, ParserFailure> {
         self.expect(Token::ColonColon)?;
@@ -789,6 +962,49 @@ impl<'input> Parser<'input> {
             let brackets = self.parse_brackets()?;
             Ok(ast::QualifiedIdentifier {
                 attribute,
+                qualifier: Some(qual),
+                name: ast::IdentifierOrBrackets::Brackets(brackets),
+            })
+        } else {
+            self.add_syntax_error(self.token_location(), DiagnosticKind::ExpectedIdentifier, diagnostic_arguments![Token(self.token.0.clone())]);
+            Err(ParserFailure)
+        }
+    }
+
+    /// Expects a colon-colon and finishes a non attribute qualified identifier.
+    fn finish_non_attribute_qualified_identifier(&mut self, qual: Rc<ast::Expression>) -> Result<ast::NonAttributeQualifiedIdentifier, ParserFailure> {
+        self.expect(Token::ColonColon)?;
+
+        // `::` may be followed by one of { IdentifierName, `*`, Brackets }
+
+        // IdentifierName
+        if let Token::Identifier(ref id) = self.token.0 {
+            let id_location = self.token_location();
+            self.next()?;
+            Ok(ast::NonAttributeQualifiedIdentifier {
+                qualifier: Some(qual),
+                name: ast::IdentifierOrBrackets::Id(id.clone(), id_location),
+            })
+        // IdentifierName (from reserved word)
+        } else if let Some(id) = self.token.0.reserved_word_name() {
+            let id_location = self.token_location();
+            self.next()?;
+            Ok(ast::NonAttributeQualifiedIdentifier {
+                qualifier: Some(qual),
+                name: ast::IdentifierOrBrackets::Id(id, id_location),
+            })
+        // `*`
+        } else if self.peek(Token::Times) {
+            let id_location = self.token_location();
+            self.next()?;
+            Ok(ast::NonAttributeQualifiedIdentifier {
+                qualifier: Some(qual),
+                name: ast::IdentifierOrBrackets::Id("*".into(), id_location),
+            })
+        // Brackets
+        } else if self.peek(Token::LeftBracket) {
+            let brackets = self.parse_brackets()?;
+            Ok(ast::NonAttributeQualifiedIdentifier {
                 qualifier: Some(qual),
                 name: ast::IdentifierOrBrackets::Brackets(brackets),
             })
