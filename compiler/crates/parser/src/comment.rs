@@ -42,7 +42,7 @@ impl Comment {
     /// Indicates whether the comment is an ASDoc comment preceding
     /// a specific item.
     pub fn is_asdoc(&self, item_location: &Location) -> bool {
-        if self.content.starts_with('*') {
+        if self.multiline && self.content.starts_with('*') {
             let mut i: usize = self.location.last_offset;
             for (i_1, ch) in self.location.source().text[i..].char_indices() {
                 i = i_1;
