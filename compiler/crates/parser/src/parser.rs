@@ -461,6 +461,9 @@ impl<'input> Parser<'input> {
             Ok(Some(self.parse_object_initializer()?))
         } else if self.peek(Token::Function) {
             Ok(Some(self.parse_function_expression()?))
+        // SuperExpression
+        } else if self.peek(Token::Super) && context.min_precedence.includes(&OperatorPrecedence::Postfix) {
+            Ok(Some(self.parse_super_expression_followed_by_property_operator()?))
         } else {
             Ok(None)
         }
@@ -556,12 +559,19 @@ impl<'input> Parser<'input> {
 
     fn parse_new_expression(&mut self, start: Location) -> Result<Rc<ast::Expression>, ParserFailure> {
         self.push_location(&start);
-        let mut base = self.parse_full_new_subexpression()?;
+        let mut base = self.parse_new_subexpression()?;
+        let arguments = if self.peek(Token::LeftParen) { Some(self.parse_arguments()?) } else { None };
+        Ok(Rc::new(ast::Expression {
+            location: self.pop_location(),
+            kind: ast::ExpressionKind::New { base, arguments },
+        }))
     }
 
     fn parse_new_expression_start(&mut self) -> Result<Rc<ast::Expression>, ParserFailure> {
         if self.peek(Token::New) {
-            self.parse_full_new_expression()
+            let start = self.token_location();
+            self.next()?;
+            self.parse_new_expression(start)
         } else if self.peek(Token::Super) {
             self.parse_super_expression_followed_by_property_operator()
         } else {
@@ -571,16 +581,71 @@ impl<'input> Parser<'input> {
 
     fn parse_super_expression_followed_by_property_operator(&mut self) -> Result<Rc<ast::Expression>, ParserFailure> {
         self.mark_location();
+        self.duplicate_location();
         self.next()?;
+        let arguments = if self.peek(Token::LeftParen) { Some(self.parse_arguments()?) } else { None };
+        let super_expr = Rc::new(ast::Expression {
+            location: self.pop_location(),
+            kind: ast::ExpressionKind::Super(arguments),
+        });
+
+        if self.consume(Token::LeftBracket)? {
+            let key = self.parse_expression(ExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
+            self.expect(Token::RightBracket)?;
+            Ok(Rc::new(ast::Expression {
+                location: self.pop_location(),
+                kind: ast::ExpressionKind::BracketsMember { base: super_expr, key },
+            }))
+        } else {
+            self.expect(Token::Dot)?;
+            let id = self.parse_qualified_identifier()?;
+            Ok(Rc::new(ast::Expression {
+                location: self.pop_location(),
+                kind: ast::ExpressionKind::DotMember { base: super_expr, id },
+            }))
+        }
     }
 
-    fn parse_full_new_expression(&mut self) -> Result<Rc<ast::Expression>, ParserFailure> {
-        do_more;
+    fn parse_arguments(&mut self) -> Result<Vec<Rc<ast::Expression>>, ParserFailure> {
+        self.expect(Token::LeftParen)?;
+        let mut arguments = vec![];
+        while !self.peek(Token::RightParen) {
+            arguments.push(self.parse_expression(ExpressionContext {
+                allow_in: true,
+                min_precedence: OperatorPrecedence::AssignmentAndOther,
+                ..default()
+            })?);
+            if !self.consume(Token::Comma)? {
+                break;
+            }
+        }
+        self.expect(Token::RightParen)?;
+        Ok(arguments)
     }
 
-    fn parse_full_new_subexpression(&mut self) -> Result<Rc<ast::Expression>, ParserFailure> {
+    fn parse_new_subexpression(&mut self) -> Result<Rc<ast::Expression>, ParserFailure> {
         let mut base = self.parse_new_expression_start()?;
-        do_more;
+        loop {
+            if self.consume(Token::LeftBracket)? {
+                self.push_location(&base.location);
+                let key = self.parse_expression(ExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
+                self.expect(Token::RightBracket)?;
+                base = Rc::new(ast::Expression {
+                    location: self.pop_location(),
+                    kind: ast::ExpressionKind::BracketsMember { base, key },
+                });
+            } else if self.consume(Token::Dot)? {
+                self.push_location(&base.location);
+                let id = self.parse_qualified_identifier()?;
+                base = Rc::new(ast::Expression {
+                    location: self.pop_location(),
+                    kind: ast::ExpressionKind::DotMember { base, id },
+                });
+            } else {
+                break;
+            }
+        }
+        Ok(base)
     }
 
     fn parse_primary_expression(&mut self) -> Result<Rc<ast::Expression>, ParserFailure> {

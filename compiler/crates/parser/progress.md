@@ -46,8 +46,8 @@ Syntax:
   * [ ] Function expression
   * [ ] Arrow function
     * [ ] Fat arrow subexpression
-  * [ ] Super expression
-  * [ ] New expression
+  * [x] Super expression
+  * [x] New expression
   * [ ] `o.x`
     * [ ] Keywords are not reserved after `.`
     * [ ] `public`, `private`, `protected`, `internal` are reserved before `::`

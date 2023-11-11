@@ -63,7 +63,7 @@ pub enum ExpressionKind {
     Super(Option<Vec<Rc<Expression>>>),
     New {
         base: Rc<Expression>,
-        arguments: Option<Vec<Expression>>,
+        arguments: Option<Vec<Rc<Expression>>>,
     },
     /// The `o.x` expression.
     DotMember {
