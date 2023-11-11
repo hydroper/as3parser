@@ -579,12 +579,14 @@ impl<'input> Tokenizer<'input> {
             name.push(ch);
         }
 
+        /*
         if self.code_points.peek_or_zero() == '#' && name == "escaped" && !escaped {
             self.code_points.next();
             let (name_2, escaped_2) = self.scan_escaped_identifier()?;
             name = name_2;
             escaped = true;
         }
+        */
 
         let location = start.combine_with(self.current_cursor_location());
         if !escaped {
@@ -595,6 +597,7 @@ impl<'input> Tokenizer<'input> {
         Ok(Some((Token::Identifier(name), location)))
     }
 
+    /*
     fn scan_escaped_identifier(&mut self) -> Result<(String, bool), ParserFailure> {
         let mut escaped = false;
         let Some((ch, escaped_2)) = self.consume_identifier_start()? else {
@@ -610,6 +613,7 @@ impl<'input> Tokenizer<'input> {
         }
         Ok((name, escaped))
     }
+    */
 
     /// Returns a tuple in the form (*character*, *escaped*).
     fn consume_identifier_start(&mut self) -> Result<Option<(char, bool)>, ParserFailure> {

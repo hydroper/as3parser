@@ -80,6 +80,9 @@ Syntax:
   * [ ] `x: T`
     * WithTypeAnnotation is parsed in postfix precedence
   * [x] Embed expression
+* Reserved words
+  * [ ] Reserved words are valid identifiers in destructuring patterns from variable bindings
+  * [ ] Reserved words are valid identifiers in function definition names, including regular functions, getters and setters
 * FunctionCommon
   * [ ] Call `validate_function_parameter_list`
 * Statements

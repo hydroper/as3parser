@@ -356,7 +356,75 @@ impl<'input> Parser<'input> {
     }
 
     fn exp_to_destructuring(&mut self, exp: Rc<ast::Expression>) -> Result<Rc<ast::Destructuring>, ParserFailure> {
-        //
+        if let ast::ExpressionKind::WithTypeAnnotation { base, type_annotation } = exp.kind {
+            self.exp_to_destructuring_1(Rc::clone(&base), Some(type_annotation), exp.location.clone())
+        } else {
+            self.exp_to_destructuring_1(exp, None, exp.location.clone())
+        }
+    }
+
+    fn exp_to_destructuring_1(&mut self, exp: Rc<ast::Expression>, type_annotation: Option<Rc<ast::TypeExpression>>, location: Location) -> Result<Rc<ast::Destructuring>, ParserFailure> {
+        if let ast::ExpressionKind::Unary { base, operator } = exp.kind {
+            if operator == Operator::NonNull {
+                return self.exp_to_destructuring_2(Rc::clone(&base), true, type_annotation, location);
+            }
+        }
+        self.exp_to_destructuring_2(Rc::clone(&exp), false, type_annotation, location)
+    }
+
+    fn exp_to_destructuring_2(&mut self, exp: Rc<ast::Expression>, non_null: bool, type_annotation: Option<Rc<ast::TypeExpression>>, location: Location) -> Result<Rc<ast::Destructuring>, ParserFailure> {
+        let mut destructuring_kind: ast::DestructuringKind;
+        match exp.kind {
+            ast::ExpressionKind::Id(id) => {
+                if let Some(name) = id.to_identifier() {
+                    destructuring_kind = ast::DestructuringKind::Binding { name };
+                } else {
+                    self.add_syntax_error(exp.location.clone(), DiagnosticKind::MalformedDestructuring, vec![]);
+                    return Err(ParserFailure);
+                }
+            },
+            ast::ExpressionKind::ArrayInitializer { elements } => {
+                destructuring_kind = self.array_initializer_to_destructuring_kind(elements)?;
+            },
+            ast::ExpressionKind::ObjectInitializer { fields } => {
+                destructuring_kind = self.object_initializer_to_destructuring_kind(fields)?;
+            },
+            _ => {
+                self.add_syntax_error(exp.location.clone(), DiagnosticKind::MalformedDestructuring, vec![]);
+                return Err(ParserFailure);
+            },
+        }
+        Ok(Rc::new(ast::Destructuring {
+            location: location,
+            kind: destructuring_kind,
+            non_null,
+            type_annotation,
+        }))
+    }
+
+    fn array_initializer_to_destructuring_kind(&mut self, elements: Vec<Option<Rc<ast::Expression>>>) -> Result<ast::DestructuringKind, ParserFailure> {
+        let mut result_items: Vec<Option<ast::ArrayDestructuringItem>> = vec![];
+        for element in elements {
+            if element.is_none() {
+                result_items.push(None);
+                continue;
+            }
+            let element = element.unwrap();
+            if let ast::ExpressionKind::Rest(subexp) = element.kind {
+                result_items.push(Some(ast::ArrayDestructuringItem::Rest(self.exp_to_destructuring(subexp)?, element.location.clone())));
+                continue;
+            }
+            result_items.push(Some(ast::ArrayDestructuringItem::Pattern(self.exp_to_destructuring(element)?)));
+        }
+        Ok(ast::DestructuringKind::Array(result_items))
+    }
+
+    fn object_initializer_to_destructuring_kind(&mut self, fields: Vec<Rc<ast::ObjectField>>) -> Result<ast::DestructuringKind, ParserFailure> {
+        let mut result_fields: Vec<Rc<ast::RecordDestructuringField>> = vec![];
+        for field in fields {
+            //
+        }
+        Ok(ast::DestructuringKind::Record(result_fields))
     }
 
     /// Ensures the parameter list consists of zero or more required parameters followed by

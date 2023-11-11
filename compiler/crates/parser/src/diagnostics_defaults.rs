@@ -19,6 +19,7 @@ lazy_static! {
         DiagnosticKind::MalformedArrowFunctionElement.id() => "Malformed arrow function element".into(),
         DiagnosticKind::WrongParameterPosition.id() => "Wrong parameter position".into(),
         DiagnosticKind::DuplicateRestParameter.id() => "Duplicate rest parameter".into(),
+        DiagnosticKind::MalformedDestructuring.id() => "Malformed destructuring".into(),
         // DiagnosticKind::K.id() => "".into(),
     };
 }

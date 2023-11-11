@@ -160,6 +160,7 @@ pub enum DiagnosticKind {
     MalformedArrowFunctionElement = 1034,
     WrongParameterPosition = 1035,
     DuplicateRestParameter = 1036,
+    MalformedDestructuring = 1037,
 }
 
 impl DiagnosticKind {

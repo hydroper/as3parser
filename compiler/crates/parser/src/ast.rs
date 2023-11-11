@@ -9,6 +9,19 @@ pub struct QualifiedIdentifier {
     pub name: IdentifierOrBrackets,
 }
 
+impl QualifiedIdentifier {
+    pub fn to_identifier(&self) -> Option<(String, Location)> {
+        if self.attribute || self.qualifier.is_some() {
+            return None;
+        }
+        if let IdentifierOrBrackets::Id(id, location) = self.name {
+            if id != "*" { Some((id, location.clone())) } else { None }
+        } else {
+            None
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct NonAttributeQualifiedIdentifier {
     pub qualifier: Option<Rc<Expression>>,
@@ -239,7 +252,7 @@ pub enum DestructuringKind {
         name: (String, Location),
     },
     Record(Vec<Rc<RecordDestructuringField>>),
-    Array(Vec<Rc<ArrayDestructuringItem>>),
+    Array(Vec<Option<ArrayDestructuringItem>>),
 }
 
 #[derive(Clone)]

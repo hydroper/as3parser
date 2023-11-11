@@ -161,14 +161,14 @@ A type or function may be generic. Type parameters in the output bytecode are si
 class C.<T> {}
 ```
 
-## Keywords
+## Reserved words
 
-Keywords are valid identifiers after dot, `?.`, `::` and `@` at property operators and lexical references.
+Reserved words are valid identifiers after dot, `?.`, `::` and `@` at property operators and lexical references.
 
-An identifier may be used as a valid reserved word by using the prefix `escaped#`.
+An identifier may be used as a valid reserved word in destructuring patterns from variable definitions, in function definition names, in an object initializer's fields, and in a record type's fields.
 
 ```as3
-public function escaped#for(): void {
+public function for(): void {
     // "for" function
 }
 ```
