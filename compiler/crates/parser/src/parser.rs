@@ -289,7 +289,39 @@ impl<'input> Parser<'input> {
     }
 
     fn parse_dot_subexpression(&mut self, base: Rc<ast::Expression>) -> Result<Rc<ast::Expression>, ParserFailure> {
-        //
+        self.push_location(&base.location);
+        if self.peek(Token::LeftParen) {
+            let paren_exp = self.parse_paren_list_expression()?;
+            if !matches!(paren_exp.kind, ast::ExpressionKind::Sequence(_, _)) && self.peek(Token::ColonColon) {
+                let id = self.finish_qualified_identifier(false, Rc::clone(&paren_exp))?;
+                Ok(Rc::new(ast::Expression {
+                    location: self.pop_location(),
+                    kind: ast::ExpressionKind::DotMember { base, id }
+                }))
+            } else {
+                Ok(Rc::new(ast::Expression {
+                    location: self.pop_location(),
+                    kind: ast::ExpressionKind::Filter { base, condition: paren_exp }
+                }))
+            }
+        } else if self.consume(Token::Lt)? {
+            let mut arguments = vec![];
+            arguments.push(self.parse_type_expression()?);
+            while self.consume(Token::Comma)? {
+                arguments.push(self.parse_type_expression()?);
+            }
+            self.expect_generics_gt()?;
+            Ok(Rc::new(ast::Expression {
+                location: self.pop_location(),
+                kind: ast::ExpressionKind::WithTypeArguments { base, arguments }
+            }))
+        } else {
+            let id = self.parse_qualified_identifier()?;
+            Ok(Rc::new(ast::Expression {
+                location: self.pop_location(),
+                kind: ast::ExpressionKind::DotMember { base, id }
+            }))
+        }
     }
 
     fn parse_arrow_function(&mut self, start: Location, context: ArrowFunctionContext) -> Result<Rc<ast::Expression>, ParserFailure> {

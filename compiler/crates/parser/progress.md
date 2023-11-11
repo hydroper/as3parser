@@ -47,14 +47,14 @@ Syntax:
   * [x] Arrow function
   * [x] Super expression
   * [x] New expression
-  * [ ] `o.x`
+  * [x] `o.x`
   * [ ] `o?.x`
   * [ ] `o?.[k]`
   * [ ] `o?.(...)`
   * [ ] `o[k]`
-  * [ ] `o.<...>`
-  * [ ] `o.(condition)`
-    * [ ] If it is followed by `::` and condition is not a list expression, it is reinterpreted as a qualified identifier.
+  * [x] `o.<...>`
+  * [x] `o.(condition)`
+    * [x] If it is followed by `::` and condition is not a list expression, it is reinterpreted as a qualified identifier.
   * [ ] `o..x`
     * [ ] Keywords are not reserved after `..`
   * [ ] `f()`
@@ -76,7 +76,8 @@ Syntax:
   * [ ] `pattern = v`
   * [ ] `x, y`
   * [ ] `x: T`
-    * WithTypeAnnotation is parsed in postfix precedence
+    * [ ] WithTypeAnnotation is only parsed if `allow_assignment == true`
+    * [ ] WithTypeAnnotation is only parsed in postfix precedence
   * [x] Embed expression
 * Reserved words
   * [ ] Reserved words are valid identifiers in destructuring patterns from variable bindings
