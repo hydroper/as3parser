@@ -272,6 +272,14 @@ impl<'input> Parser<'input> {
         if let Token::Identifier(ref id) = self.token.0 {
             let id_location = self.token_location();
             self.next()?;
+
+            // EmbedExpression
+            if let Token::StringLiteral(string_value) = &self.token.0 {
+                if id == "embed" && self.previous_token.1.character_count() == "embed".len() {
+                    return Ok(Some(self.finish_embed_expression(id_location, string_value.clone())?));
+                }
+            }
+
             let id = Rc::new(ast::Expression {
                 location: id_location,
                 kind: ast::ExpressionKind::Id(ast::QualifiedIdentifier {
@@ -451,6 +459,8 @@ impl<'input> Parser<'input> {
             }
         } else if self.peek(Token::LeftBrace) {
             Ok(Some(self.parse_object_initializer()?))
+        } else if self.peek(Token::Function) {
+            Ok(Some(self.parse_function_expression()?))
         } else {
             Ok(None)
         }
@@ -459,7 +469,7 @@ impl<'input> Parser<'input> {
     fn parse_object_initializer(&mut self) -> Result<Rc<ast::Expression>, ParserFailure> {
         self.mark_location();
         self.expect(Token::LeftBrace)?;
-        let mut fields: Vec<ast::ObjectField> = vec![];
+        let mut fields: Vec<Rc<ast::ObjectField>> = vec![];
         while !self.peek(Token::RightBrace) {
             fields.push(self.parse_object_field()?);
             if !self.consume(Token::Comma)? {
@@ -475,6 +485,7 @@ impl<'input> Parser<'input> {
     }
 
     fn parse_object_field(&mut self) -> Result<Rc<ast::ObjectField>, ParserFailure> {
+        self.mark_location();
         // Parse the key
         let mut key: ast::ObjectKey;
         if let Token::StringLiteral(value) = &self.token.0 {
@@ -497,8 +508,26 @@ impl<'input> Parser<'input> {
         } else {
             key = ast::ObjectKey::Id(self.parse_non_attribute_qualified_identifier()?);
         }
+        let key_location = self.pop_location();
 
-        ()
+        let destructuring_non_null = self.consume(Token::Exclamation)?;
+        let mut value = None;
+
+        if self.consume(Token::Colon)? {
+            value = Some(self.parse_expression(ExpressionContext {
+                allow_in: true,
+                min_precedence: OperatorPrecedence::AssignmentAndOther,
+                ..default()
+            })?);
+        } else if !matches!(key, ast::ObjectKey::Id(_)) {
+            self.expect(Token::Colon)?;
+        }
+
+        Ok(Rc::new(ast::ObjectField::Field {
+            key: (key, key_location),
+            destructuring_non_null,
+            value,
+        }))
     }
 
     fn parse_vector_initializer(&mut self, start: Location) -> Result<Rc<ast::Expression>, ParserFailure> {
@@ -526,7 +555,210 @@ impl<'input> Parser<'input> {
     }
 
     fn parse_new_expression(&mut self, start: Location) -> Result<Rc<ast::Expression>, ParserFailure> {
-        //
+        self.push_location(&start);
+        let mut base = self.parse_full_new_subexpression()?;
+    }
+
+    fn parse_new_expression_start(&mut self) -> Result<Rc<ast::Expression>, ParserFailure> {
+        if self.peek(Token::New) {
+            self.parse_full_new_expression()
+        } else if self.peek(Token::Super) {
+            self.parse_super_expression_followed_by_property_operator()
+        } else {
+            self.parse_primary_expression()
+        }
+    }
+
+    fn parse_super_expression_followed_by_property_operator(&mut self) -> Result<Rc<ast::Expression>, ParserFailure> {
+        self.mark_location();
+        self.next()?;
+    }
+
+    fn parse_full_new_expression(&mut self) -> Result<Rc<ast::Expression>, ParserFailure> {
+        do_more;
+    }
+
+    fn parse_full_new_subexpression(&mut self) -> Result<Rc<ast::Expression>, ParserFailure> {
+        let mut base = self.parse_new_expression_start()?;
+        do_more;
+    }
+
+    fn parse_primary_expression(&mut self) -> Result<Rc<ast::Expression>, ParserFailure> {
+        if let Token::Identifier(ref id) = self.token.0 {
+            let id_location = self.token_location();
+            self.next()?;
+
+            // EmbedExpression
+            if let Token::StringLiteral(string_value) = &self.token.0 {
+                if id == "embed" && self.previous_token.1.character_count() == "embed".len() {
+                    return self.finish_embed_expression(id_location, string_value.clone());
+                }
+            }
+
+            let id = Rc::new(ast::Expression {
+                location: id_location,
+                kind: ast::ExpressionKind::Id(ast::QualifiedIdentifier {
+                    attribute: false,
+                    qualifier: None,
+                    name: ast::IdentifierOrBrackets::Id(id.clone(), id_location),
+                }),
+            });
+            if self.peek(Token::ColonColon) {
+                self.push_location(&id_location);
+                let id = self.finish_qualified_identifier(false, id)?;
+                Ok(Rc::new(ast::Expression {
+                    location: self.pop_location(),
+                    kind: ast::ExpressionKind::Id(id),
+                }))
+            } else {
+                Ok(id)
+            }
+        } else if self.peek(Token::Null) {
+            self.mark_location();
+            self.next();
+            Ok(Rc::new(ast::Expression {
+                location: self.pop_location(),
+                kind: ast::ExpressionKind::Null,
+            }))
+        } else if self.peek(Token::False) {
+            self.mark_location();
+            self.next();
+            Ok(Rc::new(ast::Expression {
+                location: self.pop_location(),
+                kind: ast::ExpressionKind::Boolean(false),
+            }))
+        } else if self.peek(Token::True) {
+            self.mark_location();
+            self.next();
+            Ok(Rc::new(ast::Expression {
+                location: self.pop_location(),
+                kind: ast::ExpressionKind::Boolean(true),
+            }))
+        } else if let Token::NumericLiteral(n) = self.token.0 {
+            self.mark_location();
+            self.next();
+            Ok(Rc::new(ast::Expression {
+                location: self.pop_location(),
+                kind: ast::ExpressionKind::Numeric(n),
+            }))
+        } else if let Token::StringLiteral(ref s) = self.token.0 {
+            self.mark_location();
+            self.next();
+            Ok(Rc::new(ast::Expression {
+                location: self.pop_location(),
+                kind: ast::ExpressionKind::String(s.clone()),
+            }))
+        } else if self.peek(Token::This) {
+            self.mark_location();
+            self.next();
+            Ok(Rc::new(ast::Expression {
+                location: self.pop_location(),
+                kind: ast::ExpressionKind::This,
+            }))
+        } else if let Token::RegExpLiteral { ref body, ref flags } = self.token.0 {
+            self.mark_location();
+            self.next();
+            Ok(Rc::new(ast::Expression {
+                location: self.pop_location(),
+                kind: ast::ExpressionKind::RegExp { body: body.clone(), flags: flags.clone() },
+            }))
+        // `@`
+        } else if self.peek(Token::Attribute) {
+            self.mark_location();
+            let id = self.parse_qualified_identifier()?;
+            Ok(Rc::new(ast::Expression {
+                location: self.pop_location(),
+                kind: ast::ExpressionKind::Id(id),
+            }))
+        // `public`, `private`, `protected`, `internal`
+        } else if let Some(reserved_ns) = self.peek_reserved_namespace() {
+            self.mark_location();
+            self.duplicate_location();
+            self.next();
+            let rns = Rc::new(ast::Expression {
+                location: self.pop_location(),
+                kind: ast::ExpressionKind::ReservedNamespace(reserved_ns),
+            });
+            if self.peek(Token::ColonColon) {
+                let id = self.finish_qualified_identifier(false, rns)?;
+                Ok(Rc::new(ast::Expression {
+                    location: self.pop_location(),
+                    kind: ast::ExpressionKind::Id(id),
+                }))
+            } else {
+                self.pop_location();
+                Ok(rns)
+            }
+        // Parentheses
+        } else if self.peek(Token::LeftParen) {
+            let start = self.token_location();
+            Ok(self.parse_paren_list_expr_or_qual_id(start)?)
+        // `*`
+        } else if self.peek(Token::Times) {
+            let id_location = self.token_location();
+            self.next()?;
+            let id = Rc::new(ast::Expression {
+                location: id_location,
+                kind: ast::ExpressionKind::Id(ast::QualifiedIdentifier {
+                    attribute: false,
+                    qualifier: None,
+                    name: ast::IdentifierOrBrackets::Id("*".into(), id_location),
+                }),
+            });
+            if self.peek(Token::ColonColon) {
+                self.push_location(&id_location);
+                let id = self.finish_qualified_identifier(false, id)?;
+                Ok(Rc::new(ast::Expression {
+                    location: self.pop_location(),
+                    kind: ast::ExpressionKind::Id(id),
+                }))
+            } else {
+                Ok(id)
+            }
+        // XMLList, XMLElement, XMLMarkup
+        } else if self.peek(Token::Lt) {
+            if let Some(token) = self.tokenizer.scan_xml_markup(self.token_location())? {
+                self.token = token;
+            }
+            let start = self.token_location();
+            if let Token::XmlMarkup(content) = &self.token.0 {
+                self.mark_location();
+                self.next()?;
+                Ok(Rc::new(ast::Expression {
+                    location: self.pop_location(),
+                    kind: ast::ExpressionKind::XmlMarkup(content.clone()),
+                }))
+            } else {
+                Ok(self.parse_xml_element_or_xml_list(start)?)
+            }
+        // ArrayInitializer
+        } else if self.peek(Token::LeftBracket) {
+            Ok(self.parse_array_initializer()?)
+        } else if self.peek(Token::LeftBrace) {
+            Ok(self.parse_object_initializer()?)
+        } else if self.peek(Token::Function) {
+            Ok(self.parse_function_expression()?)
+        } else {
+            self.add_syntax_error(self.token_location(), DiagnosticKind::ExpectedExpression, diagnostic_arguments![Token(self.token.0.clone())]);
+            Err(ParserFailure)
+        }
+    }
+
+    fn finish_embed_expression(&mut self, start: Location, source: String) -> Result<Rc<ast::Expression>, ParserFailure> {
+        self.push_location(&start);
+        self.next();
+        let type_annotation = if self.consume(Token::Colon)? {
+            Some(self.parse_type_expression()?)
+        } else {
+            None
+        };
+        return Ok(Rc::new(ast::Expression {
+            location: self.pop_location(),
+            kind: ast::ExpressionKind::Embed {
+                source,
+                type_annotation,
+            },
+        }));
     }
 
     fn parse_array_initializer(&mut self) -> Result<Rc<ast::Expression>, ParserFailure> {

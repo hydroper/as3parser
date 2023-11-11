@@ -42,7 +42,7 @@ Syntax:
   * [x] `...x`
   * [x] Array initializer
   * [x] Vector initializer (`new <T> [...]`)
-  * [ ] Object initializer
+  * [x] Object initializer
   * [ ] Function expression
   * [ ] Arrow function
     * [ ] Fat arrow subexpression
@@ -77,7 +77,7 @@ Syntax:
   * [ ] `pattern = v`
   * [ ] `x, y`
   * [ ] `x: T`
-  * [ ] Embed expression
+  * [x] Embed expression
 * Statements
   * [ ] `x`
   * [ ] `x`

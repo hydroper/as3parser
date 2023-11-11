@@ -157,4 +157,16 @@ impl Location {
         }
         i
     }
+
+    pub fn character_count(&self) -> usize {
+        let mut count = 0;
+        let j = self.last_offset;
+        for (i, _) in self.source.text[self.first_offset..].char_indices() {
+            if i >= j {
+                break;
+            }
+            count += 1;
+        }
+        count
+    }
 }

@@ -53,7 +53,7 @@ pub enum ExpressionKind {
         elements: Vec<Rc<Expression>>,
     },
     ObjectInitializer {
-        fields: Vec<ObjectField>,
+        fields: Vec<Rc<ObjectField>>,
     },
     Function {
         name: Option<(String, Location)>,
@@ -187,7 +187,7 @@ pub enum ReservedNamespace {
 
 pub enum ObjectField {
     Field {
-        key: Rc<(ObjectKey, Location)>,
+        key: (ObjectKey, Location),
         /// Used when parsing an object initializer as a destructuring pattern.
         /// This is the result of consuming the `!` punctuator.
         #[doc(hidden)]
@@ -225,7 +225,7 @@ pub enum DestructuringKind {
 
 pub struct RecordDestructuringField {
     pub location: Location,
-    pub key: Rc<(RecordDestructuringKey, Location)>,
+    pub key: (RecordDestructuringKey, Location),
     pub non_null: bool,
     pub alias: Option<Rc<Destructuring>>,
 }
@@ -254,7 +254,7 @@ pub enum TypeExpressionKind {
         member: QualifiedIdentifier,
     },
     Tuple(Vec<Rc<TypeExpression>>),
-    Record(Vec<RecordTypeField>),
+    Record(Vec<Rc<RecordTypeField>>),
     /// `*`
     Any,
     Void,
@@ -298,7 +298,7 @@ pub enum FunctionParamKind {
 pub struct RecordTypeField {
     pub asdoc: Option<AsDoc>,
     pub readonly: bool,
-    pub key: Rc<(RecordTypeKey, Location)>,
+    pub key: (RecordTypeKey, Location),
     pub key_suffix: RecordTypeKeySuffix,
     pub type_annotation: Option<Rc<TypeExpression>>,
 }
