@@ -43,9 +43,10 @@ Syntax:
   * [x] Array initializer
   * [x] Vector initializer (`new <T> [...]`)
   * [x] Object initializer
-  * [ ] Function expression
+  * [x] Function expression
   * [ ] Arrow function
-    * [ ] Fat arrow subexpression
+    * [ ] Construct from `ast::ExpressionKind::EmptyParen`
+    * [*] Fat arrow subexpression
   * [x] Super expression
   * [x] New expression
   * [ ] `o.x`
@@ -63,7 +64,9 @@ Syntax:
   * [ ] `o..x`
     * [ ] Keywords are not reserved after `..`
   * [ ] `f()`
-  * [ ] Unary operators
+  * [ ] Unary operators~
+    * [ ] `await`
+    * [ ] `yield`
     * [ ] Postfix
       * [ ] `!`
       * [ ] `++`
