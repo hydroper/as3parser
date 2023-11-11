@@ -278,6 +278,8 @@ impl<'input> Parser<'input> {
                     right_context: context.clone(),
                     ..default()
                 })?;
+            } else if self.consume(Token::Dot)? {
+                base = self.parse_dot_subexpression(base)?;
             } else {
                 break;
             }
@@ -286,7 +288,12 @@ impl<'input> Parser<'input> {
         Ok(base)
     }
 
+    fn parse_dot_subexpression(&mut self, base: Rc<ast::Expression>) -> Result<Rc<ast::Expression>, ParserFailure> {
+        //
+    }
+
     fn parse_arrow_function(&mut self, start: Location, context: ArrowFunctionContext) -> Result<Rc<ast::Expression>, ParserFailure> {
+        self.expect(Token::FatArrow)?;
         self.push_location(&start);
         self.activations.push(Activation::new());
         let mut params: Vec<ast::FunctionParam> = vec![];
