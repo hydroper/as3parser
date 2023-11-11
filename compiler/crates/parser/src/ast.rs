@@ -213,6 +213,17 @@ pub enum ReservedNamespace {
     Internal,
 }
 
+impl ToString for ReservedNamespace {
+    fn to_string(&self) -> String {
+        match self {
+            Self::Public => "public".into(),
+            Self::Private => "private".into(),
+            Self::Protected => "protected".into(),
+            Self::Internal => "internal".into(),
+        }
+    }
+}
+
 #[derive(Clone)]
 pub enum ObjectField {
     Field {

@@ -48,11 +48,7 @@ Syntax:
   * [x] Super expression
   * [x] New expression
   * [ ] `o.x`
-    * [ ] Keywords are not reserved after `.`
-    * [ ] `public`, `private`, `protected`, `internal` are reserved before `::`
   * [ ] `o?.x`
-    * [ ] Keywords are not reserved after `?.`
-    * [ ] `public`, `private`, `protected`, `internal` are reserved before `::`
   * [ ] `o?.[k]`
   * [ ] `o?.(...)`
   * [ ] `o[k]`
@@ -64,7 +60,9 @@ Syntax:
   * [ ] `f()`
   * [ ] Unary operators~
     * [ ] `await`
+      * [ ] Contribute flag to activation
     * [ ] `yield`
+      * [ ] Contribute flag to activation
     * [ ] Postfix
       * [ ] `!`
       * [ ] `++`

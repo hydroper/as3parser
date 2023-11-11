@@ -1,4 +1,4 @@
-use std::{cell::Cell, rc::Rc};
+use std::rc::Rc;
 use crate::*;
 use crate::ast::XmlElement;
 use crate::util::default;
@@ -1299,6 +1299,25 @@ impl<'input> Parser<'input> {
             }
         }
 
+        // `public`, `private`, `protected`, `internal` followed by `::`
+        if let Some(reserved_ns) = self.peek_reserved_namespace() {
+            let q_location = self.token_location();
+            self.next()?;
+            if !self.peek(Token::ColonColon) {
+                let id = ast::QualifiedIdentifier {
+                    attribute,
+                    qualifier: None,
+                    name: ast::IdentifierOrBrackets::Id(reserved_ns.to_string(), q_location),
+                };
+                return Ok(id);
+            }
+            let id = Rc::new(ast::Expression {
+                location: q_location,
+                kind: ast::ExpressionKind::ReservedNamespace(reserved_ns),
+            });
+            return self.finish_qualified_identifier(attribute, id);
+        }
+
         // IdentifierName (from reserved word)
         if let Some(id) = self.token.0.reserved_word_name() {
             let id_location = self.token_location();
@@ -1322,17 +1341,6 @@ impl<'input> Parser<'input> {
                 };
                 return Ok(id);
             }
-        }
-
-        // `public`, `private`, `protected`, `internal` followed by `::`
-        if let Some(reserved_ns) = self.peek_reserved_namespace() {
-            let q_location = self.token_location();
-            self.next()?;
-            let id = Rc::new(ast::Expression {
-                location: q_location,
-                kind: ast::ExpressionKind::ReservedNamespace(reserved_ns),
-            });
-            return self.finish_qualified_identifier(attribute, id);
         }
 
         // (q)::x
@@ -1395,6 +1403,24 @@ impl<'input> Parser<'input> {
             }
         }
 
+        // `public`, `private`, `protected`, `internal` followed by `::`
+        if let Some(reserved_ns) = self.peek_reserved_namespace() {
+            let q_location = self.token_location();
+            self.next()?;
+            if !self.peek(Token::ColonColon) {
+                let id = ast::NonAttributeQualifiedIdentifier {
+                    qualifier: None,
+                    name: ast::IdentifierOrBrackets::Id(reserved_ns.to_string(), q_location),
+                };
+                return Ok(id);
+            }
+            let id = Rc::new(ast::Expression {
+                location: q_location,
+                kind: ast::ExpressionKind::ReservedNamespace(reserved_ns),
+            });
+            return self.finish_non_attribute_qualified_identifier(id);
+        }
+
         // IdentifierName (from reserved word)
         if let Some(id) = self.token.0.reserved_word_name() {
             let id_location = self.token_location();
@@ -1417,17 +1443,6 @@ impl<'input> Parser<'input> {
                 };
                 return Ok(id);
             }
-        }
-
-        // `public`, `private`, `protected`, `internal` followed by `::`
-        if let Some(reserved_ns) = self.peek_reserved_namespace() {
-            let q_location = self.token_location();
-            self.next()?;
-            let id = Rc::new(ast::Expression {
-                location: q_location,
-                kind: ast::ExpressionKind::ReservedNamespace(reserved_ns),
-            });
-            return self.finish_non_attribute_qualified_identifier(id);
         }
 
         // (q)::x
