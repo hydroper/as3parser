@@ -521,7 +521,6 @@ pub enum ImportItem {
 pub struct VariableDefinition {
     pub asdoc: Option<AsDoc>,
     pub annotations: DefinitionAnnotations,
-    pub escaped: bool,
     pub kind: VariableKind,
     pub bindings: Vec<VariableBinding>,
 }
@@ -529,7 +528,6 @@ pub struct VariableDefinition {
 pub struct FunctionDefinition {
     pub asdoc: Option<AsDoc>,
     pub annotations: DefinitionAnnotations,
-    pub escaped: bool,
     pub name: (String, Location),
     pub generics: Generics,
     pub common: Rc<FunctionCommon>,
@@ -545,7 +543,6 @@ pub struct ConstructorDefinition {
 pub struct GetterDefinition {
     pub asdoc: Option<AsDoc>,
     pub annotations: DefinitionAnnotations,
-    pub escaped: bool,
     pub name: (String, Location),
     pub common: Rc<FunctionCommon>,
 }
@@ -553,7 +550,6 @@ pub struct GetterDefinition {
 pub struct SetterDefinition {
     pub asdoc: Option<AsDoc>,
     pub annotations: DefinitionAnnotations,
-    pub escaped: bool,
     pub name: (String, Location),
     pub common: Rc<FunctionCommon>,
 }

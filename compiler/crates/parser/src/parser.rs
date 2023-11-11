@@ -486,7 +486,7 @@ impl<'input> Parser<'input> {
             self.next()?;
             key = ast::ObjectKey::Number(value.clone(), location);
         } else if self.peek(Token::LeftBracket) {
-            self.next();
+            self.next()?;
             let key_expr = self.parse_expression(ExpressionContext {
                 allow_in: true,
                 min_precedence: OperatorPrecedence::AssignmentAndOther,
