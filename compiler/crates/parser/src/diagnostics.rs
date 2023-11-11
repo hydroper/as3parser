@@ -161,6 +161,7 @@ pub enum DiagnosticKind {
     WrongParameterPosition = 1035,
     DuplicateRestParameter = 1036,
     MalformedDestructuring = 1037,
+    UnsupportedDestructuringRest = 1038,
 }
 
 impl DiagnosticKind {

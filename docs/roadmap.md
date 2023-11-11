@@ -8,8 +8,10 @@ Work in progress.
 
 Not initiated.
 
+* Verification only occurs if there are no syntax errors.
+
 ## Language Server
 
 Not initiated. Plans:
 
-* Fatal syntax errors do not overwrite the previous semantic data from the verifier.
+* Syntax errors do not overwrite the previous semantic data built by the verifier.

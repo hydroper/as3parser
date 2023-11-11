@@ -44,7 +44,7 @@ Syntax:
   * [x] Vector initializer (`new <T> [...]`)
   * [x] Object initializer
   * [x] Function expression
-  * [ ] Arrow function
+  * [x] Arrow function
   * [x] Super expression
   * [x] New expression
   * [ ] `o.x`
@@ -84,6 +84,7 @@ Syntax:
   * [ ] Reserved words are valid identifiers in destructuring patterns from variable bindings
   * [ ] Reserved words are valid identifiers in function definition names, including regular functions, getters and setters
 * FunctionCommon
+  * [ ] When parsing it, push and pop from the `activations` stack
   * [ ] Call `validate_function_parameter_list`
 * Statements
   * [ ] `x`

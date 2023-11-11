@@ -224,7 +224,22 @@ pub enum ObjectField {
         /// If `None`, this is a shorthand field.
         value: Option<Rc<Expression>>,
     },
-    Rest(Rc<Expression>),
+    Rest(Rc<Expression>, Location),
+}
+
+impl ObjectField {
+    pub fn location(&self) -> Location {
+        match self {
+            Self::Field { key, value, .. } => {
+                if let Some(value) = value {
+                    key.1.combine_with(value.location.clone())
+                } else {
+                    key.1.clone()
+                }
+            },
+            Self::Rest(_, location) => location.clone(),
+        }
+    }
 }
 
 #[derive(Clone)]
@@ -233,6 +248,17 @@ pub enum ObjectKey {
     String(String, Location),
     Number(f64, Location),
     Brackets(Rc<Expression>),
+}
+
+impl ObjectKey {
+    pub fn to_record_destructuring_key(&self) -> RecordDestructuringKey {
+        match self {
+            Self::Id(id) => RecordDestructuringKey::Id(id.clone()),
+            Self::String(string, location) => RecordDestructuringKey::String(string.clone(), location.clone()),
+            Self::Number(number, location) => RecordDestructuringKey::Number(*number, location.clone()),
+            Self::Brackets(exp) => RecordDestructuringKey::Brackets(Rc::clone(&exp)),
+        }
+    }
 }
 
 #[derive(Clone)]
@@ -265,7 +291,7 @@ pub struct RecordDestructuringField {
 
 #[derive(Clone)]
 pub enum RecordDestructuringKey {
-    Id(QualifiedIdentifier),
+    Id(NonAttributeQualifiedIdentifier),
     String(String, Location),
     Number(f64, Location),
     Brackets(Rc<Expression>),

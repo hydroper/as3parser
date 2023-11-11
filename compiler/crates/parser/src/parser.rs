@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::{cell::Cell, rc::Rc};
 use crate::*;
 use crate::ast::XmlElement;
 use crate::util::default;
@@ -8,6 +8,7 @@ pub struct Parser<'input> {
     previous_token: (Token, Location),
     token: (Token, Location),
     locations: Vec<Location>,
+    activations: Vec<Activation>,
 }
 
 impl<'input> Parser<'input> {
@@ -18,6 +19,7 @@ impl<'input> Parser<'input> {
             previous_token: (Token::Eof, Location::with_line_and_offset(&source, 1, 0)),
             token: (Token::Eof, Location::with_line_and_offset(&source, 1, 0)),
             locations: vec![],
+            activations: vec![],
         }
     }
 
@@ -273,6 +275,7 @@ impl<'input> Parser<'input> {
             if self.peek(Token::FatArrow) && context.min_precedence.includes(&OperatorPrecedence::AssignmentAndOther) {
                 base = self.parse_arrow_function(base.location.clone(), ArrowFunctionContext {
                     left: Some(base),
+                    right_context: context.clone(),
                     ..default()
                 })?;
             } else {
@@ -285,6 +288,7 @@ impl<'input> Parser<'input> {
 
     fn parse_arrow_function(&mut self, start: Location, context: ArrowFunctionContext) -> Result<Rc<ast::Expression>, ParserFailure> {
         self.push_location(&start);
+        self.activations.push(Activation::new());
         let mut params: Vec<ast::FunctionParam> = vec![];
         let mut return_annotation: Option<Rc<ast::TypeExpression>> = None;
         if let Some(left) = context.left {
@@ -297,7 +301,25 @@ impl<'input> Parser<'input> {
         }
         self.validate_function_parameter_list(&params)?;
         self.expect(Token::FatArrow)?;
-        do_more
+        let body: ast::FunctionBody = if self.peek(Token::LeftBrace) {
+            ast::FunctionBody::Block(self.parse_block())
+        } else {
+            ast::FunctionBody::Expression(self.parse_expression(ExpressionContext {
+                min_precedence: OperatorPrecedence::AssignmentAndOther,
+                ..context.right_context
+            })?)
+        };
+        let activation = self.activations.pop().unwrap();
+        Ok(Rc::new(ast::Expression {
+            location: self.pop_location(),
+            kind: ast::ExpressionKind::ArrowFunction(Rc::new(ast::FunctionCommon {
+                flags: if activation.uses_yield { ast::FunctionFlags::YIELD } else { ast::FunctionFlags::empty() }
+                    | if activation.uses_await { ast::FunctionFlags::AWAIT } else { ast::FunctionFlags::empty() },
+                params,
+                return_annotation,
+                body: Some(body),
+            })),
+        }))
     }
 
     fn exp_to_function_params(&mut self, exp: Rc<ast::Expression>) -> Result<Vec<ast::FunctionParam>, ParserFailure> {
@@ -422,7 +444,18 @@ impl<'input> Parser<'input> {
     fn object_initializer_to_destructuring_kind(&mut self, fields: Vec<Rc<ast::ObjectField>>) -> Result<ast::DestructuringKind, ParserFailure> {
         let mut result_fields: Vec<Rc<ast::RecordDestructuringField>> = vec![];
         for field in fields {
-            //
+            let ast::ObjectField::Field { key, destructuring_non_null, value } = *field else {
+                self.add_syntax_error(field.location(), DiagnosticKind::UnsupportedDestructuringRest, vec![]);
+                continue;
+            };
+            let key = (key.0.to_record_destructuring_key(), key.1);
+            let alias = if let Some(v) = value { Some(self.exp_to_destructuring(v)?) } else { None };
+            result_fields.push(Rc::new(ast::RecordDestructuringField {
+                location: field.location(),
+                key,
+                non_null: destructuring_non_null,
+                alias,
+            }));
         }
         Ok(ast::DestructuringKind::Record(result_fields))
     }
@@ -671,6 +704,16 @@ impl<'input> Parser<'input> {
 
     fn parse_object_field(&mut self) -> Result<Rc<ast::ObjectField>, ParserFailure> {
         self.mark_location();
+
+        if self.consume(Token::Ellipsis)? {
+            let subexp = self.parse_expression(ExpressionContext {
+                allow_in: true,
+                min_precedence: OperatorPrecedence::AssignmentAndOther.add_one().unwrap(),
+                ..default()
+            })?;
+            return Ok(Rc::new(ast::ObjectField::Rest(subexp, self.pop_location())));
+        }
+
         // Parse the key
         let mut key: ast::ObjectKey;
         if let Token::StringLiteral(value) = &self.token.0 {
@@ -1568,12 +1611,29 @@ impl Default for ExpressionContext {
 #[derive(Clone)]
 pub struct ArrowFunctionContext {
     left: Option<Rc<ast::Expression>>,
+    right_context: ExpressionContext,
 }
 
 impl Default for ArrowFunctionContext {
     fn default() -> Self {
         Self {
             left: None,
+            right_context: default(),
+        }
+    }
+}
+
+#[derive(Clone)]
+pub struct Activation {
+    uses_yield: bool,
+    uses_await: bool,
+}
+
+impl Activation {
+    pub fn new() -> Self {
+        Self {
+            uses_yield: false,
+            uses_await: false,
         }
     }
 }
