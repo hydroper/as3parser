@@ -157,6 +157,9 @@ pub enum DiagnosticKind {
     ExpectedExpression = 1031,
     ExpectedXmlName = 1032,
     ExpectedXmlAttributeValue = 1033,
+    MalformedArrowFunctionElement = 1034,
+    WrongParameterPosition = 1035,
+    DuplicateRestParameter = 1036,
 }
 
 impl DiagnosticKind {

@@ -45,8 +45,6 @@ Syntax:
   * [x] Object initializer
   * [x] Function expression
   * [ ] Arrow function
-    * [ ] Construct from `ast::ExpressionKind::EmptyParen`
-    * [*] Fat arrow subexpression
   * [x] Super expression
   * [x] New expression
   * [ ] `o.x`
@@ -80,7 +78,10 @@ Syntax:
   * [ ] `pattern = v`
   * [ ] `x, y`
   * [ ] `x: T`
+    * WithTypeAnnotation is parsed in postfix precedence
   * [x] Embed expression
+* FunctionCommon
+  * [ ] Call `validate_function_parameter_list`
 * Statements
   * [ ] `x`
   * [ ] `x`

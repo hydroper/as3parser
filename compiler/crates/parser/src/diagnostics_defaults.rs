@@ -16,6 +16,9 @@ lazy_static! {
         DiagnosticKind::ExpectedExpression.id() => "Expected expression before {1}".into(),
         DiagnosticKind::ExpectedXmlName.id() => "Expected XML name before {1}".into(),
         DiagnosticKind::ExpectedXmlAttributeValue.id() => "Expected XML attribute value before {1}".into(),
+        DiagnosticKind::MalformedArrowFunctionElement.id() => "Malformed arrow function element".into(),
+        DiagnosticKind::WrongParameterPosition.id() => "Wrong parameter position".into(),
+        DiagnosticKind::DuplicateRestParameter.id() => "Duplicate rest parameter".into(),
         // DiagnosticKind::K.id() => "".into(),
     };
 }

@@ -43,7 +43,7 @@ pub enum ExpressionKind {
     XmlElement(XmlElement),
     XmlList(Vec<XmlElementContent>),
     ReservedNamespace(ReservedNamespace),
-    /// `()`
+    /// `()`. Used solely internally for arrow functions.
     EmptyParen,
     Paren(Rc<Expression>),
     /// Present as part of an array initializer only.
@@ -121,9 +121,10 @@ pub enum ExpressionKind {
         right: Rc<Expression>,
     },
     /// The `x, y` expression.
-    Sequence(Vec<Rc<Expression>>, Vec<Rc<Expression>>),
+    Sequence(Rc<Expression>, Rc<Expression>),
 
-    /// Expression used internally only.
+    /// Expression used internally only. It is used for parsing
+    /// arrow functions with typed parameters and return annotation.
     WithTypeAnnotation {
         base: Rc<Expression>,
         type_annotation: Rc<TypeExpression>,
@@ -313,10 +314,17 @@ pub struct FunctionTypeParam {
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(u32)]
 pub enum FunctionParamKind {
-    Required,
-    Optional,
-    Rest,
+    Required = 1,
+    Optional = 2,
+    Rest = 3,
+}
+
+impl FunctionParamKind {
+    pub fn may_be_followed_by(&self, other: Self) -> bool {
+        (*self as u32) <= (other as u32)
+    }
 }
 
 #[derive(Clone)]
@@ -682,6 +690,7 @@ pub struct FunctionCommon {
 
 #[derive(Clone)]
 pub struct FunctionParam {
+    pub location: Location,
     pub kind: FunctionParamKind,
     pub binding: VariableBinding,
 }

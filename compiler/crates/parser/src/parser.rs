@@ -76,7 +76,7 @@ impl<'input> Parser<'input> {
     }
 
     fn peek_context_keyword(&self, name: String) -> bool {
-        if let Token::Identifier(id) = self.token.0.clone() { id == name } else { false }
+        if let Token::Identifier(id) = self.token.0.clone() { id == name && self.token.1.character_count() == name.len() } else { false }
     }
 
     fn peek_reserved_namespace(&self) -> Option<ast::ReservedNamespace> {
@@ -135,7 +135,7 @@ impl<'input> Parser<'input> {
 
     fn consume_context_keyword(&mut self, name: String) -> Result<bool, ParserFailure> {
         if let Token::Identifier(id) = self.token.0.clone() {
-            if id == name {
+            if id == name && self.token.1.character_count() == name.len() {
                 self.next()?;
                 Ok(true)
             } else {
@@ -196,7 +196,7 @@ impl<'input> Parser<'input> {
 
     fn expect_context_keyword(&mut self, name: String) -> Result<(), ParserFailure> {
         if let Token::Identifier(id) = self.token.0.clone() {
-            if id == name {
+            if id == name && self.token.1.character_count() == name.len() {
                 self.next()?;
                 return Ok(());
             }
@@ -289,22 +289,92 @@ impl<'input> Parser<'input> {
         let mut return_annotation: Option<Rc<ast::TypeExpression>> = None;
         if let Some(left) = context.left {
             if let ast::ExpressionKind::WithTypeAnnotation { base, type_annotation } = left.kind {
-                params = self.reinterpret_exp_as_function_params(Rc::clone(&base))?;
+                params = self.exp_to_function_params(Rc::clone(&base))?;
                 return_annotation = Some(type_annotation.clone());
             } else {
-                params = self.reinterpret_exp_as_function_params(Rc::clone(&left))?;
+                params = self.exp_to_function_params(Rc::clone(&left))?;
             }
         }
+        self.validate_function_parameter_list(&params)?;
         self.expect(Token::FatArrow)?;
         do_more
     }
 
-    fn reinterpret_exp_as_function_params(&mut self, exp: Rc<ast::Expression>) -> Result<Vec<ast::FunctionParam>, ParserFailure> {
+    fn exp_to_function_params(&mut self, exp: Rc<ast::Expression>) -> Result<Vec<ast::FunctionParam>, ParserFailure> {
         if let ast::ExpressionKind::EmptyParen = exp.kind {
             Ok(vec![])
+        } else if let ast::ExpressionKind::Paren(exp) = exp.kind {
+            self.seq_exp_to_function_params(exp)
         } else {
-            //
+            self.seq_exp_to_function_params(exp)
         }
+    }
+
+    fn seq_exp_to_function_params(&mut self, exp: Rc<ast::Expression>) -> Result<Vec<ast::FunctionParam>, ParserFailure> {
+        if let ast::ExpressionKind::Sequence(left, right) = exp.kind {
+            let mut params = self.seq_exp_to_function_params(Rc::clone(&left))?;
+            params.push(self.exp_to_function_param(Rc::clone(&right))?);
+            Ok(params)
+        } else {
+            Ok(vec![self.exp_to_function_param(Rc::clone(&exp))?])
+        }
+    }
+
+    fn exp_to_function_param(&mut self, exp: Rc<ast::Expression>) -> Result<ast::FunctionParam, ParserFailure> {
+        if let ast::ExpressionKind::Rest(subexp) = exp.kind {
+            Ok(ast::FunctionParam {
+                location: exp.location.clone(),
+                kind: ast::FunctionParamKind::Rest,
+                binding: ast::VariableBinding {
+                    pattern: self.exp_to_destructuring(Rc::clone(&subexp))?,
+                    init: None,
+                },
+            })
+        } else if let ast::ExpressionKind::Assignment { left, compound, right } = exp.kind {
+            if compound.is_some() {
+                self.add_syntax_error(exp.location.clone(), DiagnosticKind::MalformedArrowFunctionElement, vec![]);
+                return Err(ParserFailure);
+            }
+            Ok(ast::FunctionParam {
+                location: exp.location.clone(),
+                kind: ast::FunctionParamKind::Optional,
+                binding: ast::VariableBinding {
+                    pattern: left,
+                    init: Some(Rc::clone(&right)),
+                },
+            })
+        } else {
+            Ok(ast::FunctionParam {
+                location: exp.location.clone(),
+                kind: ast::FunctionParamKind::Required,
+                binding: ast::VariableBinding {
+                    pattern: self.exp_to_destructuring(Rc::clone(&exp))?,
+                    init: None,
+                },
+            })
+        }
+    }
+
+    fn exp_to_destructuring(&mut self, exp: Rc<ast::Expression>) -> Result<Rc<ast::Destructuring>, ParserFailure> {
+        //
+    }
+
+    /// Ensures the parameter list consists of zero or more required parameters followed by
+    /// zero or more optional parameters optionally followed by a rest parameter.
+    fn validate_function_parameter_list(&mut self, params: &Vec<ast::FunctionParam>) -> Result<(), ParserFailure> {
+        let mut least_kind = ast::FunctionParamKind::Required; 
+        let mut has_rest = false;
+        for param in params {
+            if !least_kind.may_be_followed_by(param.kind) {
+                self.add_syntax_error(param.location, DiagnosticKind::WrongParameterPosition, vec![]);
+            }
+            least_kind = param.kind;
+            if param.kind == ast::FunctionParamKind::Rest && has_rest {
+                self.add_syntax_error(param.location, DiagnosticKind::DuplicateRestParameter, vec![]);
+            }
+            has_rest = param.kind == ast::FunctionParamKind::Rest;
+        }
+        Ok(())
     }
 
     fn parse_opt_start_expression(&mut self, context: ExpressionContext) -> Result<Option<Rc<ast::Expression>>, ParserFailure> {
