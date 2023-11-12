@@ -69,7 +69,7 @@ Syntax:
     * [ ] `not in`
     * [ ] `not instanceof`
     * [ ] `is not`
-    * [ ] `??`
+    * [x] `??`
   * [ ] Conditional
   * [ ] `pattern = v`
     * Only parse assignment if `allow_assignment` is true

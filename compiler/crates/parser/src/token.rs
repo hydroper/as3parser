@@ -338,7 +338,7 @@ impl Token {
     }
 
     pub fn compound_assignment(&self) -> Option<Operator> {
-        match *self {
+        match self {
             Self::AddAssign => Some(Operator::Add),
             Self::SubtractAssign => Some(Operator::Subtract),
             Self::MultiplyAssign => Some(Operator::Multiply),
@@ -356,6 +356,41 @@ impl Token {
             Self::LogicalOrAssign => Some(Operator::LogicalOr),
             Self::NullCoalescingAssign => Some(Operator::NullCoalescing),
             _ => None,
+        }
+    }
+
+    /// Converts this token into a binary operator, excluding
+    /// `not instanceof`, `not in`, and `is not`.
+    pub fn to_binary_operator(&self) -> Option<Operator> {
+        match self {
+            Self::Times => Some(Operator::Multiply),
+            Self::Div => Some(Operator::Divide),
+            Self::Remainder => Some(Operator::Remainder),
+            Self::Plus => Some(Operator::Add),
+            Self::Minus => Some(Operator::Subtract),
+            Self::LeftShift => Some(Operator::ShiftLeft),
+            Self::RightShift => Some(Operator::ShiftRight),
+            Self::UnsignedRightShift => Some(Operator::ShiftRightUnsigned),
+            Self::Lt => Some(Operator::Lt),
+            Self::Gt => Some(Operator::Gt),
+            Self::Le => Some(Operator::Le),
+            Self::Ge => Some(Operator::Ge),
+            Self::In => Some(Operator::In),
+            Self::Instanceof => Some(Operator::Instanceof),
+            Self::Is => Some(Operator::Is),
+            Self::Equals => Some(Operator::Equals),
+            Self::NotEquals => Some(Operator::NotEquals),
+            Self::StrictEquals => Some(Operator::StrictEquals),
+            Self::StrictNotEquals => Some(Operator::StrictNotEquals),
+            Self::BitwiseAnd => Some(Operator::BitwiseAnd),
+            Self::BitwiseXor => Some(Operator::BitwiseXor),
+            Self::BitwiseOr => Some(Operator::BitwiseOr),
+            Self::LogicalAnd => Some(Operator::LogicalAnd),
+            Self::LogicalXor => Some(Operator::LogicalXor),
+            Self::LogicalOr => Some(Operator::LogicalOr),
+            Self::NullCoalescing => Some(Operator::NullCoalescing),
+            Self::Power => Some(Operator::Power),
+            _  => None,
         }
     }
 }

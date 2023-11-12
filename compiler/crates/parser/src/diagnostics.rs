@@ -163,6 +163,7 @@ pub enum DiagnosticKind {
     MalformedDestructuring = 1037,
     UnsupportedDestructuringRest = 1038,
     NotAllowedHere = 1039,
+    IllegalNullishCoalescingLeftOperand = 140,
 }
 
 impl DiagnosticKind {

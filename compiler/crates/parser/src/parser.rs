@@ -326,11 +326,54 @@ impl<'input> Parser<'input> {
                     kind: ast::ExpressionKind::Unary { base, operator: Operator::NonNull },
                 });
             } else {
-                break;
+                if let Some((required_precedence, operator, right_precedence)) = self.check_binary_operator() {
+                    if context.min_precedence.includes(&required_precedence) {
+                        base = self.parse_misc_binary_operators(base, required_precedence, operator, right_precedence)?;
+                    } else {
+                        break;
+                    }
+                } else {
+                    break;
+                }
             }
         }
 
         Ok(base)
+    }
+
+    fn parse_misc_binary_operators(&mut self, base: Rc<ast::Expression>, required_precedence: OperatorPrecedence, operator: Operator, right_precedence: OperatorPrecedence) -> Result<Rc<ast::Expression>, ParserFailure> {
+        // The left operand of a null-coalescing operation must not be
+        // a logical AND, XOR or OR operation.
+        if operator == Operator::NullCoalescing {
+            if let ast::ExpressionKind::Unary { base, operator } = base.kind {
+                if [Operator::LogicalAnd, Operator::LogicalXor, Operator::LogicalOr].contains(&operator) {
+                    self.add_syntax_error(base.location.clone(), DiagnosticKind::IllegalNullishCoalescingLeftOperand, vec![]);
+                }
+            }
+        }
+
+        ()
+    }
+
+    /// Returns either None or Some((required_precedence, operator, right_precedence))
+    fn check_binary_operator(&self) -> Option<(OperatorPrecedence, Operator, OperatorPrecedence)> {
+        if let Some(operator) = self.token.0.to_binary_operator() {
+            let (precedence, associativity) = operator.binary_position().unwrap();
+            // If associativity is left-to-right, right precedence is `required_precedence` plus one
+            let mut right_precedence = precedence;
+            if associativity == BinaryAssociativity::LeftToRight {
+                right_precedence = right_precedence.add_one().unwrap();
+            }
+
+            // Right precedence is bitwise OR for nullish coalescing
+            if operator == Operator::NullCoalescing {
+                right_precedence = OperatorPrecedence::BitwiseOr;
+            }
+
+            Some((precedence, operator, right_precedence))
+        } else {
+            None
+        }
     }
 
     fn parse_optional_chaining_subexpression(&mut self, base: Rc<ast::Expression>) -> Result<Rc<ast::Expression>, ParserFailure> {

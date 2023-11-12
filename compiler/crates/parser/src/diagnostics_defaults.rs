@@ -22,6 +22,7 @@ lazy_static! {
         DiagnosticKind::MalformedDestructuring.id() => "Malformed destructuring".into(),
         DiagnosticKind::UnsupportedDestructuringRest.id() => "Unsupported destructuring rest operation".into(),
         DiagnosticKind::NotAllowedHere.id() => "{1} not allowed here".into(),
+        DiagnosticKind::IllegalNullishCoalescingLeftOperand.id() => "Illegal nullish coalescing left operand".into(),
         // DiagnosticKind::K.id() => "".into(),
     };
 }
