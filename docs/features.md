@@ -155,10 +155,10 @@ The tuple type is equivalent to an `Array` with additional compile-time type che
 A type or function may be generic. Type parameters in the output bytecode are simply the any type.
 
 - `.<P1, ...Pn>`
-- Use the `[Where("T", constraint = "SomeType")]` meta-data for constraints on classes and functions.
+- Use the context keyword `where` to add generic constraints. In a function definition, `where` may appear after the return annotation.
 
 ```as3
-class C.<T> {}
+class C.<T> where T: S + M {}
 ```
 
 ## Reserved words

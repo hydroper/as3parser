@@ -568,7 +568,7 @@ impl<'input> Parser<'input> {
         self.validate_function_parameter_list(&params)?;
         self.expect(Token::FatArrow)?;
         let body: ast::FunctionBody = if self.peek(Token::LeftBrace) {
-            ast::FunctionBody::Block(self.parse_block())
+            ast::FunctionBody::Block(self.parse_block(DirectiveContext::Default))
         } else {
             ast::FunctionBody::Expression(self.parse_expression(ExpressionContext {
                 min_precedence: OperatorPrecedence::AssignmentAndOther,
@@ -1016,7 +1016,48 @@ impl<'input> Parser<'input> {
     }
 
     fn parse_function_common(&mut self, function_expr: bool) -> Result<(Rc<ast::FunctionCommon>, Option<ast::GenericsWhere>), ParserFailure> {
-        //
+        self.expect(Token::LeftParen)?;
+        let mut params: Vec<ast::FunctionParam> = vec![];
+        while self.peek(Token::RightParen) {
+            self.mark_location();
+            let rest = self.consume(Token::Ellipsis)?;
+            let binding = self.parse_variable_binding(true)?;
+            let location = self.pop_location();
+            if rest && binding.init.is_some() {
+                self.add_syntax_error(location.clone(), DiagnosticKind::MalformedRestParameter, vec![]);
+            }
+            let param = ast::FunctionParam {
+                location,
+                binding,
+                kind: if rest {
+                    ast::FunctionParamKind::Rest
+                } else if binding.init.is_some() {
+                    ast::FunctionParamKind::Optional
+                } else {
+                    ast::FunctionParamKind::Required
+                },
+            };
+            params.push(param);
+            if self.consume(Token::Comma)? {
+                break;
+            }
+        }
+        self.expect(Token::RightParen)?;
+        self.validate_function_parameter_list(&params);
+
+        let return_annotation = if self.consume(Token::Colon)? { Some(self.parse_type_expression()?) } else { None };
+        let where_clause = if !function_expr { self.parse_generics_where_clause()? } else { None };
+
+        self.activations.push(Activation::new());
+        let body = ast::FunctionBody::Block(self.parse_block(DirectiveContext::Default)?);
+        let activation = self.activations.pop().unwrap();
+        Ok((Rc::new(ast::FunctionCommon {
+            flags: if activation.uses_yield { ast::FunctionFlags::YIELD } else { ast::FunctionFlags::empty() }
+                | if activation.uses_await { ast::FunctionFlags::AWAIT } else { ast::FunctionFlags::empty() },
+            params,
+            return_annotation,
+            body: Some(body),
+        }), where_clause))
     }
 
     fn parse_object_initializer(&mut self) -> Result<Rc<ast::Expression>, ParserFailure> {
@@ -2263,6 +2304,20 @@ impl<'input> Parser<'input> {
         }))
     }
 
+    fn parse_variable_binding(&mut self, allow_in: bool) -> Result<ast::VariableBinding, ParserFailure> {
+        let pattern = self.parse_destructuring()?;
+        let init = if self.consume(Token::Assign)? {
+            Some(self.parse_expression(ExpressionContext {
+                allow_in,
+                min_precedence: OperatorPrecedence::AssignmentAndOther,
+                ..default()
+            })?)
+        } else {
+            None
+        };
+        Ok(ast::VariableBinding { pattern, init })
+    }
+
     fn parse_destructuring(&mut self) -> Result<Rc<ast::Destructuring>, ParserFailure> {
         self.mark_location();
         let kind = self.parse_destructuring_kind()?;
@@ -2315,7 +2370,7 @@ impl<'input> Parser<'input> {
     fn parse_record_destructuring(&mut self) -> Result<ast::DestructuringKind, ParserFailure> {
         let mut fields: Vec<Rc<ast::RecordDestructuringField>> = vec![];
         while !self.peek(Token::RightBrace) {
-            fields.push(self.parse_record_destructuring_field());
+            fields.push(self.parse_record_destructuring_field()?);
             if !self.consume(Token::Comma)? {
                 break;
             }
@@ -2324,17 +2379,43 @@ impl<'input> Parser<'input> {
         Ok(ast::DestructuringKind::Record(fields))
     }
 
-    fn parse_record_destructuring_field(&mut self) -> Result<ast::RecordDestructuringField, ParserFailure> {
+    fn parse_record_destructuring_field(&mut self) -> Result<Rc<ast::RecordDestructuringField>, ParserFailure> {
         self.mark_location();
         let key = self.parse_object_key()?;
         let non_null = self.consume(Token::Exclamation)?;
         let alias = if self.consume(Token::Colon)? { Some(self.parse_destructuring()?) } else { None };
-        Ok(ast::RecordDestructuringField {
+        Ok(Rc::new(ast::RecordDestructuringField {
             location: self.pop_location(),
             key,
             non_null,
             alias,
-        })
+        }))
+    }
+
+    fn parse_generics_where_clause(&mut self) -> Result<Option<ast::GenericsWhere>, ParserFailure> {
+        if !self.peek_context_keyword("where") {
+            return Ok(None);
+        }
+        self.next()?;
+        let mut constraints: Vec<ast::GenericsWhereConstraint> = vec![];
+        loop {
+            let name = self.expect_identifier(false)?;
+            self.expect(Token::Colon)?;
+            let mut constraints_1 = vec![self.parse_type_expression()?];
+            while self.consume(Token::Plus)? {
+                constraints_1.push(self.parse_type_expression()?);
+            }
+            constraints.push(ast::GenericsWhereConstraint {
+                name,
+                constraints: constraints_1,
+            });
+            if !self.consume(Token::Comma)? {
+                break;
+            }
+        }
+        Ok(Some(ast::GenericsWhere {
+            constraints,
+        }))
     }
 
     fn parse_asdoc(&mut self) -> Result<Option<ast::AsDoc>, ParserFailure> {
@@ -2397,4 +2478,12 @@ impl Activation {
             uses_await: false,
         }
     }
+}
+
+#[derive(Clone)]
+pub enum DirectiveContext {
+    Default,
+    Constructor {
+        name: String,
+    },
 }

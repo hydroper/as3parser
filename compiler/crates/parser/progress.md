@@ -107,8 +107,8 @@ Syntax:
   * [ ] Reserved words are valid identifiers in destructuring patterns from variable bindings
   * [ ] Reserved words are valid identifiers in function definition names, including regular functions, getters and setters
 * FunctionCommon
-  * [ ] When parsing it, push and pop from the `activations` stack
-  * [ ] Call `validate_function_parameter_list`
+  * [x] When parsing it, push and pop from the `activations` stack
+  * [x] Call `validate_function_parameter_list`
 * Statements
   * [ ] `x`
   * [ ] `x`

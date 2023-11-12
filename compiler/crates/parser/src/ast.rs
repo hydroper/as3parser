@@ -780,7 +780,7 @@ pub struct GenericsWhere {
 #[derive(Clone)]
 pub struct GenericsWhereConstraint {
     pub name: (String, Location),
-    pub constraint: Rc<TypeExpression>,
+    pub constraints: Vec<Rc<TypeExpression>>,
 }
 
 #[derive(Clone)]
