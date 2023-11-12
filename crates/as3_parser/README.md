@@ -1,8 +1,8 @@
 # ActionScript 3 parser
 
-> **NOTICE:** Only the tokenizer of this crate is done. The rest is a work-in-progress.
+> **NOTICE:** The parser is almost finishing (excluding tests). A verifier will be futurely implemented.
 
-An ActionScript 3 parser and verifier written in the Rust language.
+An ActionScript 3 parser written in the Rust language.
 
 ## Requirements
 

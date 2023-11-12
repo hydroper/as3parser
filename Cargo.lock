@@ -13,7 +13,7 @@ dependencies = [
 
 [[package]]
 name = "as3_parser"
-version = "0.1.3"
+version = "0.1.5"
 dependencies = [
  "bitflags",
  "by_address",
