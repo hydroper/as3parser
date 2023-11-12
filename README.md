@@ -13,11 +13,15 @@ Handwritten ActionScript 3 parser in the Rust language.
 
 ## Status
 
-It is almost finished; just missing statements and diretives ([progress tracker](crates/parser/progress.md)).
+It is almost finished; just missing statements and diretives ([progress tracker](crates/as3_parser/progress.md)).
 
 ## Getting started
 
 Install it in your Cargo project with `cargo add as3_parser`.
+
+```rust
+use as3_parser::{ast, Parser};
+```
 
 ## Features
 
