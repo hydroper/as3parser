@@ -519,7 +519,10 @@ pub enum StatementKind {
         catch_clauses: Vec<CatchClause>,
         finally_clause: FinallyClause,
     },
-    Expression(Rc<Expression>),
+    Expression {
+        asdoc: Option<AsDoc>,
+        expression: Rc<Expression>,
+    },
     Labeled {
         label: (String, Location),
         statement: Rc<Statement>,
