@@ -280,12 +280,97 @@ impl<'input> Parser<'input> {
                 })?;
             } else if self.consume(Token::Dot)? {
                 base = self.parse_dot_subexpression(base)?;
+            } else if self.consume(Token::OptionalChaining)? {
+                base = self.parse_optional_chaining_subexpression(base)?;
+            } else if self.consume(Token::LeftBracket)? {
+                self.push_location(&base.location);
+                let key = self.parse_expression(ExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
+                self.expect(Token::RightBracket)?;
+                base = Rc::new(ast::Expression {
+                    location: self.pop_location(),
+                    kind: ast::ExpressionKind::BracketsMember { base, key }
+                });
+            } else if self.consume(Token::Descendants)? {
+                self.push_location(&base.location);
+                let id = self.parse_qualified_identifier()?;
+                base = Rc::new(ast::Expression {
+                    location: self.pop_location(),
+                    kind: ast::ExpressionKind::Descendants { base, id },
+                });
+            } else if self.peek(Token::LeftParen) {
+                self.push_location(&base.location);
+                let arguments = self.parse_arguments()?;
+                base = Rc::new(ast::Expression {
+                    location: self.pop_location(),
+                    kind: ast::ExpressionKind::Call { base, arguments },
+                });
+            } else if self.peek(Token::Increment) && !self.previous_token.1.line_break(&self.token.1) {
+                self.push_location(&base.location);
+                self.next()?;
+                base = Rc::new(ast::Expression {
+                    location: self.pop_location(),
+                    kind: ast::ExpressionKind::Unary { base, operator: Operator::PostIncrement },
+                });
+            } else if self.peek(Token::Decrement) && !self.previous_token.1.line_break(&self.token.1) {
+                self.push_location(&base.location);
+                self.next()?;
+                base = Rc::new(ast::Expression {
+                    location: self.pop_location(),
+                    kind: ast::ExpressionKind::Unary { base, operator: Operator::PostDecrement },
+                });
+            } else if self.peek(Token::Exclamation) && !self.previous_token.1.line_break(&self.token.1) {
+                self.push_location(&base.location);
+                self.next()?;
+                base = Rc::new(ast::Expression {
+                    location: self.pop_location(),
+                    kind: ast::ExpressionKind::Unary { base, operator: Operator::NonNull },
+                });
             } else {
                 break;
             }
         }
 
         Ok(base)
+    }
+
+    fn parse_optional_chaining_subexpression(&mut self, base: Rc<ast::Expression>) -> Result<Rc<ast::Expression>, ParserFailure> {
+        self.push_location(&base.location);
+        self.duplicate_location();
+        let mut operation = Rc::new(ast::Expression {
+            location: base.location.clone(),
+            kind: ast::ExpressionKind::OptionalChainingHost,
+        });
+        if self.peek(Token::LeftParen) {
+            let arguments = self.parse_arguments()?;
+            operation = Rc::new(ast::Expression {
+                location: self.pop_location(),
+                kind: ast::ExpressionKind::Call { base: operation, arguments }
+            });
+        } else if self.consume(Token::LeftBracket)? {
+            let key = self.parse_expression(ExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
+            self.expect(Token::RightBracket)?;
+            operation = Rc::new(ast::Expression {
+                location: self.pop_location(),
+                kind: ast::ExpressionKind::BracketsMember { base: operation, key }
+            });
+        } else {
+            let id = self.parse_qualified_identifier()?;
+            operation = Rc::new(ast::Expression {
+                location: self.pop_location(),
+                kind: ast::ExpressionKind::DotMember { base: operation, id }
+            });
+        }
+
+        // Parse postfix subexpressions
+        operation = self.parse_subexpressions(operation, ExpressionContext {
+            min_precedence: OperatorPrecedence::Postfix,
+            ..default()
+        })?;
+
+        Ok(Rc::new(ast::Expression {
+            location: self.pop_location(),
+            kind: ast::ExpressionKind::OptionalChaining { base, operations: operation },
+        }))
     }
 
     fn parse_dot_subexpression(&mut self, base: Rc<ast::Expression>) -> Result<Rc<ast::Expression>, ParserFailure> {
@@ -696,8 +781,74 @@ impl<'input> Parser<'input> {
         // SuperExpression
         } else if self.peek(Token::Super) && context.min_precedence.includes(&OperatorPrecedence::Postfix) {
             Ok(Some(self.parse_super_expression_followed_by_property_operator()?))
+        // AwaitExpression
+        } else if self.peek(Token::Await) && context.min_precedence.includes(&OperatorPrecedence::Postfix) {
+            self.mark_location();
+            let operator_token = self.token.clone();
+            self.next()?;
+            let base = self.parse_expression(ExpressionContext {
+                allow_in: true,
+                min_precedence: OperatorPrecedence::Unary,
+                ..default()
+            })?;
+            if let Some(activation) = self.activations.last_mut() {
+                activation.uses_await = true;
+            } else {
+                self.add_syntax_error(operator_token.1, DiagnosticKind::NotAllowedHere, diagnostic_arguments![Token(operator_token.0)]);
+            }
+            Ok(Some(Rc::new(ast::Expression {
+                location: self.pop_location(),
+                kind: ast::ExpressionKind::Unary { base, operator: Operator::Await }
+            })))
+        // YieldExpression
+        } else if self.peek(Token::Yield) && context.min_precedence.includes(&OperatorPrecedence::AssignmentAndOther) {
+            self.mark_location();
+            let operator_token = self.token.clone();
+            self.next()?;
+            let base = self.parse_expression(ExpressionContext {
+                allow_in: true,
+                min_precedence: OperatorPrecedence::AssignmentAndOther,
+                ..default()
+            })?;
+            if let Some(activation) = self.activations.last_mut() {
+                activation.uses_yield = true;
+            } else {
+                self.add_syntax_error(operator_token.1, DiagnosticKind::NotAllowedHere, diagnostic_arguments![Token(operator_token.0)]);
+            }
+            Ok(Some(Rc::new(ast::Expression {
+                location: self.pop_location(),
+                kind: ast::ExpressionKind::Unary { base, operator: Operator::Yield }
+            })))
+        // Miscellaneous prefix unary expressions
+        } else if let Some((operator, subexp_precedence)) = self.check_prefix_operator() {
+            if context.min_precedence.includes(&OperatorPrecedence::Postfix) {
+                self.mark_location();
+                self.next();
+                let base = self.parse_expression(ExpressionContext { min_precedence: subexp_precedence, ..default() })?;
+                Ok(Some(Rc::new(ast::Expression {
+                    location: self.pop_location(),
+                    kind: ast::ExpressionKind::Unary { base, operator }
+                })))
+            } else {
+                Ok(None)
+            }
         } else {
             Ok(None)
+        }
+    }
+
+    fn check_prefix_operator(&self) -> Option<(Operator, OperatorPrecedence)> {
+        match self.token.0 {
+            Token::Delete => Some((Operator::Delete, OperatorPrecedence::Postfix)),
+            Token::Void => Some((Operator::Void, OperatorPrecedence::Unary)),
+            Token::Typeof => Some((Operator::Typeof, OperatorPrecedence::Unary)),
+            Token::Increment => Some((Operator::PreIncrement, OperatorPrecedence::Postfix)),
+            Token::Decrement => Some((Operator::PreDecrement, OperatorPrecedence::Postfix)),
+            Token::Plus => Some((Operator::Positive, OperatorPrecedence::Unary)),
+            Token::Minus => Some((Operator::Negative, OperatorPrecedence::Unary)),
+            Token::BitwiseNot => Some((Operator::BitwiseNot, OperatorPrecedence::Unary)),
+            Token::Exclamation => Some((Operator::LogicalNot, OperatorPrecedence::Unary)),
+            _ => None,
         }
     }
 

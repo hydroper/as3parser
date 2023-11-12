@@ -21,6 +21,7 @@ lazy_static! {
         DiagnosticKind::DuplicateRestParameter.id() => "Duplicate rest parameter".into(),
         DiagnosticKind::MalformedDestructuring.id() => "Malformed destructuring".into(),
         DiagnosticKind::UnsupportedDestructuringRest.id() => "Unsupported destructuring rest operation".into(),
+        DiagnosticKind::NotAllowedHere.id() => "{1} not allowed here".into(),
         // DiagnosticKind::K.id() => "".into(),
     };
 }

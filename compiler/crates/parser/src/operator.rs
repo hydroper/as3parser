@@ -6,6 +6,8 @@ pub enum Operator {
     Delete,
     Void,
     Typeof,
+    Await,
+    Yield,
     PreIncrement,
     PreDecrement,
     Positive,

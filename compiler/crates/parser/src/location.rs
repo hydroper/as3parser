@@ -169,4 +169,10 @@ impl Location {
         }
         count
     }
+    
+    /// Indicates whether a previous location and a next location
+    /// have a line break in between.
+    pub fn line_break(&self, other: &Self) -> bool {
+        self.last_line_number != other.first_line_number
+    }
 }

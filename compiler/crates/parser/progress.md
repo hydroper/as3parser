@@ -48,25 +48,23 @@ Syntax:
   * [x] Super expression
   * [x] New expression
   * [x] `o.x`
-  * [ ] `o?.x`
-  * [ ] `o?.[k]`
-  * [ ] `o?.(...)`
-  * [ ] `o[k]`
+  * [x] `o?.x`
+  * [x] `o?.[k]`
+  * [x] `o?.(...)`
+  * [x] `o[k]`
   * [x] `o.<...>`
   * [x] `o.(condition)`
     * [x] If it is followed by `::` and condition is not a list expression, it is reinterpreted as a qualified identifier.
-  * [ ] `o..x`
-    * [ ] Keywords are not reserved after `..`
-  * [ ] `f()`
-  * [ ] Unary operators~
-    * [ ] `await`
-      * [ ] Contribute flag to activation
-    * [ ] `yield`
-      * [ ] Contribute flag to activation
-    * [ ] Postfix
-      * [ ] `!`
-      * [ ] `++`
-      - [ ] `--`
+  * [x] `o..x`
+  * [x] `f()`
+  * [ ] Unary operators
+    * [x] `await`
+    * [x] `yield`
+    * [x] Prefix
+    * [x] Postfix
+      * [x] `!`
+      * [x] `++`
+      - [x] `--`
   * [ ] Binary operators
     * [ ] `not in`
     * [ ] `not instanceof`
@@ -74,9 +72,10 @@ Syntax:
     * [ ] `??`
   * [ ] Conditional
   * [ ] `pattern = v`
+    * Only parse assignment if `allow_assignment` is true
   * [ ] `x, y`
   * [ ] `x: T`
-    * [ ] WithTypeAnnotation is only parsed if `allow_assignment == true`
+    * [ ] WithTypeAnnotation is only parsed if `with_type_annotation` is true
     * [ ] WithTypeAnnotation is only parsed in postfix precedence
   * [x] Embed expression
 * Reserved words

@@ -89,6 +89,7 @@ pub enum Token {
 
     // Reserved words
     As,
+    Await,
     Break,
     Case,
     Catch,
@@ -131,6 +132,7 @@ pub enum Token {
     Void,
     While,
     With,
+    Yield,
 
     XmlWhitespace,
     XmlLtSlash,
@@ -220,6 +222,7 @@ impl ToString for Token {
 
             // Reserved words
             Token::As => "'as'",
+            Token::Await => "'await'",
             Token::Break => "'break'",
             Token::Case => "'case'",
             Token::Catch => "'catch'",
@@ -262,6 +265,7 @@ impl ToString for Token {
             Token::Void => "'void'",
             Token::While => "'while'",
             Token::With => "'with'",
+            Token::Yield => "'yield'",
 
             Token::XmlWhitespace => "XML whitespace",
             Token::XmlLtSlash => "'</'",
@@ -285,6 +289,7 @@ impl Token {
     pub fn reserved_word_name(&self) -> Option<String> {
         match *self {
             Token::As => Some("as".into()),
+            Token::Await => Some("await".into()),
             Token::Break => Some("break".into()),
             Token::Case => Some("case".into()),
             Token::Catch => Some("catch".into()),
@@ -327,6 +332,7 @@ impl Token {
             Token::Void => Some("void".into()),
             Token::While => Some("while".into()),
             Token::With => Some("with".into()),
+            Token::Yield => Some("yield".into()),
             _ => None,
         }
     }
