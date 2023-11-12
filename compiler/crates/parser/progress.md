@@ -79,6 +79,25 @@ Syntax:
     * [x] WithTypeAnnotation is only parsed if `with_type_annotation` is true
     * [x] WithTypeAnnotation is only parsed in postfix precedence
   * [x] Embed expression
+* Type expressions
+  * [ ] Identifier
+  * [ ] `o.x`
+  * [ ] Tuple
+  * [ ] Record
+  * [ ] Any
+  * [ ] Void
+  * [ ] Never
+  * [ ] Undefined
+  * [ ] `T?`
+  * [ ] `?T`
+  * [ ] `T!`
+  * [ ] Function (`(...) => T`)
+  * [ ] String literal
+  * [ ] Numeric literal
+  * [ ] `m1 | m2` (... `| mN`)
+  * [ ] `| x`
+  * [ ] `x & y`
+  * [ ] `o.<T1, ...TN>`
 * Reserved words
   * [ ] Reserved words are valid identifiers in destructuring patterns from variable bindings
   * [ ] Reserved words are valid identifiers in function definition names, including regular functions, getters and setters
