@@ -20,7 +20,8 @@ It is almost finished; just missing statements and directives ([progress tracker
 Install it in your Cargo project with `cargo add as3_parser`.
 
 ```rust
-use as3_parser::{ast, Parser};
+use as3_parser::ast;
+// `Parser` will be exposed once the parser is finished.
 ```
 
 ## Features
