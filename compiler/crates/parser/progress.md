@@ -83,10 +83,9 @@ Syntax:
   * [x] Identifier
   * [x] `(x)`
     * If followed by `=>`, reinterpret it as a function type
-      * [ ] If `(` is followed by `)`, it is a function type
-      * [ ] If subexpression is an identifier token and it is followed by either `:` or `?`, it is a function type
-      * [ ] If subexpression is followed by `,`, it is a function type
-      * [ ] If subexpression is followed by `...`, it is a function type
+      * [x] If `(` is followed by `)`, it is a function type
+      * [ ] If `(` is followed by `...`, it is a function type
+      * [ ] If subexpression is an identifier token or an `idToken?` type expression and it is followed by either `:` or `,`, it is a function type
   * [ ] `o.x`
   * [ ] Tuple
   * [ ] Record

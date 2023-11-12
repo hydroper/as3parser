@@ -10,6 +10,7 @@ pub struct QualifiedIdentifier {
 }
 
 impl QualifiedIdentifier {
+    /// Converts the qualified identifier to an Identifier token.
     pub fn to_identifier(&self) -> Option<(String, Location)> {
         if self.attribute || self.qualifier.is_some() {
             return None;
@@ -31,6 +32,7 @@ pub struct NonAttributeQualifiedIdentifier {
 
 
 impl NonAttributeQualifiedIdentifier {
+    /// Converts the qualified identifier to an Identifier token.
     pub fn to_identifier(&self) -> Option<(String, Location)> {
         if self.qualifier.is_some() {
             return None;
@@ -42,6 +44,7 @@ impl NonAttributeQualifiedIdentifier {
         }
     }
 
+    /// Converts the qualified identifier to an Identifier token or a wildcard (`*`) token.
     pub fn to_identifier_or_wildcard(&self) -> Option<(String, Location)> {
         if self.qualifier.is_some() {
             return None;
@@ -359,6 +362,41 @@ pub enum ArrayDestructuringItem {
 pub struct TypeExpression {
     pub location: Location,
     pub kind: TypeExpressionKind,
+}
+
+impl TypeExpression {
+    pub(crate) fn to_function_type_param(&self) -> Option<FunctionTypeParam> {
+        match self.kind {
+            TypeExpressionKind::Id(id) => {
+                if let Some(name) = id.to_identifier() {
+                    Some(FunctionTypeParam {
+                        kind: FunctionParamKind::Required,
+                        name,
+                        type_annotation: None,
+                    })
+                } else {
+                    None
+                }
+            },
+            TypeExpressionKind::Nullable(subexp) => {
+                match subexp.kind {
+                    TypeExpressionKind::Id(id) => {
+                        if let Some(name) = id.to_identifier() {
+                            Some(FunctionTypeParam {
+                                kind: FunctionParamKind::Optional,
+                                name,
+                                type_annotation: None,
+                            })
+                        } else {
+                            None
+                        }
+                    },
+                    _ => None,
+                }
+            },
+            _ => None,
+        }
+    }
 }
 
 #[derive(Clone)]

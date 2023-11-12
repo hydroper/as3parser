@@ -1950,14 +1950,7 @@ impl<'input> Parser<'input> {
     fn parse_type_expression_start(&mut self) -> Result<Rc<ast::TypeExpression>, ParserFailure> {
         // Parenthesized
         if self.peek(Token::LeftParen) {
-            self.mark_location();
-            self.next()?;
-            let subexp = self.parse_type_expression()?;
-            self.expect(Token::RightParen)?;
-            Ok(Rc::new(ast::TypeExpression {
-                location: self.pop_location(),
-                kind: ast::TypeExpressionKind::Paren(subexp),
-            }))
+            self.parse_paren_type_expression()
         // `void`
         } else if self.peek(Token::Void) {
             self.mark_location();
@@ -2014,6 +2007,76 @@ impl<'input> Parser<'input> {
                 kind: ast::TypeExpressionKind::Id(id),
             }))
         }
+    }
+
+    fn parse_paren_type_expression(&mut self) -> Result<Rc<ast::TypeExpression>, ParserFailure> {
+        self.mark_location();
+        self.next()?;
+
+        // If `(` is followed by `)`, parse a function type
+        if self.consume(Token::RightParen)? {
+            self.expect(Token::FatArrow)?;
+            let return_annotation = self.parse_type_expression()?;
+            return Ok(Rc::new(ast::TypeExpression {
+                location: self.pop_location(),
+                kind: ast::TypeExpressionKind::Function { params: vec![], return_annotation },
+            }));
+        }
+
+        // If `(` is followed by `...`, parse a function type
+        if self.consume(Token::Ellipsis)? {
+            let name = self.expect_identifier(false)?;
+            let type_annotation = if self.consume(Token::Colon)? { Some(self.parse_type_expression()?) } else { None };
+            let rest_param = ast::FunctionTypeParam {
+                kind: ast::FunctionParamKind::Rest,
+                name,
+                type_annotation,
+            };
+            self.expect(Token::RightParen)?;
+            self.expect(Token::FatArrow)?;
+            let return_annotation = self.parse_type_expression()?;
+            return Ok(Rc::new(ast::TypeExpression {
+                location: self.pop_location(),
+                kind: ast::TypeExpressionKind::Function { params: vec![rest_param], return_annotation },
+            }));
+        }
+
+        let subexp = self.parse_type_expression()?;
+
+        // If subexpression is an identifier token or an `idToken?`
+        // type expression and it is followed by either `:` or `,`, parse a function type
+        if let Some(mut param) = subexp.to_function_type_param() {
+            let mut parse_function_type = false;
+            if self.consume(Token::Colon)? {
+                parse_function_type = true;
+                param.type_annotation = Some(self.parse_type_expression()?);
+            } else if self.peek(Token::Comma) {
+                parse_function_type = true;
+            }
+            
+            if parse_function_type {
+                let mut params = vec![param];
+                let mut least_param_kind = param.kind;
+
+                while self.consume(Token::Comma)? {
+                    do_more;
+                }
+
+                self.expect(Token::RightParen)?;
+                self.expect(Token::FatArrow)?;
+                let return_annotation = self.parse_type_expression()?;
+                return Ok(Rc::new(ast::TypeExpression {
+                    location: self.pop_location(),
+                    kind: ast::TypeExpressionKind::Function { params, return_annotation },
+                }));
+            }
+        }
+
+        self.expect(Token::RightParen)?;
+        Ok(Rc::new(ast::TypeExpression {
+            location: self.pop_location(),
+            kind: ast::TypeExpressionKind::Paren(subexp),
+        }))
     }
 }
 
