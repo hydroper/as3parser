@@ -28,6 +28,32 @@ pub struct NonAttributeQualifiedIdentifier {
     pub name: IdentifierOrBrackets,
 }
 
+
+
+impl NonAttributeQualifiedIdentifier {
+    pub fn to_identifier(&self) -> Option<(String, Location)> {
+        if self.qualifier.is_some() {
+            return None;
+        }
+        if let IdentifierOrBrackets::Id(id, location) = self.name {
+            if id != "*" { Some((id, location.clone())) } else { None }
+        } else {
+            None
+        }
+    }
+
+    pub fn to_identifier_or_wildcard(&self) -> Option<(String, Location)> {
+        if self.qualifier.is_some() {
+            return None;
+        }
+        if let IdentifierOrBrackets::Id(id, location) = self.name {
+            Some((id, location.clone()))
+        } else {
+            None
+        }
+    }
+}
+
 #[derive(Clone)]
 pub enum IdentifierOrBrackets {
     Id(String, Location),
@@ -98,7 +124,7 @@ pub enum ExpressionKind {
     /// `base.<T1, Tn>`
     WithTypeArguments {
         base: Rc<Expression>,
-        arguments: Vec<Rc<Expression>>,
+        arguments: Vec<Rc<TypeExpression>>,
     },
     /// The `o.(condition)` expression.
     Filter {
@@ -337,13 +363,15 @@ pub struct TypeExpression {
 
 #[derive(Clone)]
 pub enum TypeExpressionKind {
-    Id(QualifiedIdentifier),
+    Id(NonAttributeQualifiedIdentifier),
     DotMember {
         base: Rc<TypeExpression>,
         member: QualifiedIdentifier,
     },
     Tuple(Vec<Rc<TypeExpression>>),
     Record(Vec<Rc<RecordTypeField>>),
+    /// `(x)`
+    Paren(Rc<TypeExpression>),
     /// `*`
     Any,
     Void,
@@ -356,7 +384,7 @@ pub enum TypeExpressionKind {
         return_annotation: Rc<TypeExpression>,
     },
     StringLiteral(String),
-    NumberLiteral(f64),
+    NumericLiteral(f64),
     /// `|`
     Union(Vec<Rc<TypeExpression>>),
     /// `&`

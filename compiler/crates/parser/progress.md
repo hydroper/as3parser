@@ -80,20 +80,26 @@ Syntax:
     * [x] WithTypeAnnotation is only parsed in postfix precedence
   * [x] Embed expression
 * Type expressions
-  * [ ] Identifier
+  * [x] Identifier
+  * [x] `(x)`
+    * If followed by `=>`, reinterpret it as a function type
+      * [ ] If `(` is followed by `)`, it is a function type
+      * [ ] If subexpression is an identifier token and it is followed by either `:` or `?`, it is a function type
+      * [ ] If subexpression is followed by `,`, it is a function type
+      * [ ] If subexpression is followed by `...`, it is a function type
   * [ ] `o.x`
   * [ ] Tuple
   * [ ] Record
-  * [ ] Any
-  * [ ] Void
-  * [ ] Never
-  * [ ] Undefined
+  * [x] Any
+  * [x] Void
+  * [x] Never
+  * [x] Undefined
   * [ ] `T?`
   * [ ] `?T`
   * [ ] `T!`
   * [ ] Function (`(...) => T`)
-  * [ ] String literal
-  * [ ] Numeric literal
+  * [x] String literal
+  * [x] Numeric literal
   * [ ] `m1 | m2` (... `| mN`)
   * [ ] `| x`
   * [ ] `x & y`

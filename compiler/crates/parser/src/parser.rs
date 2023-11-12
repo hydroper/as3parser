@@ -1935,6 +1935,86 @@ impl<'input> Parser<'input> {
         self.expect(Token::RightParen)?;
         expr
     }
+
+    fn parse_type_expression(&mut self) -> Result<Rc<ast::TypeExpression>, ParserFailure> {
+        let mut base = self.parse_type_expression_start()?;
+
+        loop {
+           do_more;
+           // break
+        }
+
+        Ok(base)
+    }
+
+    fn parse_type_expression_start(&mut self) -> Result<Rc<ast::TypeExpression>, ParserFailure> {
+        // Parenthesized
+        if self.peek(Token::LeftParen) {
+            self.mark_location();
+            self.next()?;
+            let subexp = self.parse_type_expression()?;
+            self.expect(Token::RightParen)?;
+            Ok(Rc::new(ast::TypeExpression {
+                location: self.pop_location(),
+                kind: ast::TypeExpressionKind::Paren(subexp),
+            }))
+        // `void`
+        } else if self.peek(Token::Void) {
+            self.mark_location();
+            self.next()?;
+            Ok(Rc::new(ast::TypeExpression {
+                location: self.pop_location(),
+                kind: ast::TypeExpressionKind::Void,
+            }))
+        // StringLiteral
+        } else if let Token::StringLiteral(value) = &self.token.0 {
+            self.mark_location();
+            self.next()?;
+            Ok(Rc::new(ast::TypeExpression {
+                location: self.pop_location(),
+                kind: ast::TypeExpressionKind::StringLiteral(value.clone()),
+            }))
+        // NumericLiteral
+        } else if let Token::NumericLiteral(value) = self.token.0 {
+            self.mark_location();
+            self.next()?;
+            Ok(Rc::new(ast::TypeExpression {
+                location: self.pop_location(),
+                kind: ast::TypeExpressionKind::NumericLiteral(value),
+            }))
+        // NonAttributeQualifiedIdentifier
+        } else {
+            self.mark_location();
+            let id = self.parse_non_attribute_qualified_identifier()?;
+            if let Some(id_token_or_wildcard) = id.to_identifier_or_wildcard() {
+                match id_token_or_wildcard.0.as_ref() {
+                    "*" => {
+                        return Ok(Rc::new(ast::TypeExpression {
+                            location: self.pop_location(),
+                            kind: ast::TypeExpressionKind::Any,
+                        }));
+                    },
+                    "never" => {
+                        return Ok(Rc::new(ast::TypeExpression {
+                            location: self.pop_location(),
+                            kind: ast::TypeExpressionKind::Never,
+                        }));
+                    },
+                    "undefined" => {
+                        return Ok(Rc::new(ast::TypeExpression {
+                            location: self.pop_location(),
+                            kind: ast::TypeExpressionKind::Undefined,
+                        }));
+                    },
+                    _ => {},
+                }
+            }
+            Ok(Rc::new(ast::TypeExpression {
+                location: self.pop_location(),
+                kind: ast::TypeExpressionKind::Id(id),
+            }))
+        }
+    }
 }
 
 /// Context used to control the parsing of an expression.
