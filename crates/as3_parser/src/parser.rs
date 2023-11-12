@@ -2451,7 +2451,7 @@ impl Default for ExpressionContext {
 }
 
 #[derive(Clone)]
-pub struct ArrowFunctionContext {
+struct ArrowFunctionContext {
     left: Option<Rc<ast::Expression>>,
     right_context: ExpressionContext,
 }
@@ -2466,7 +2466,7 @@ impl Default for ArrowFunctionContext {
 }
 
 #[derive(Clone)]
-pub struct Activation {
+struct Activation {
     uses_yield: bool,
     uses_await: bool,
 }

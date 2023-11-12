@@ -24,6 +24,24 @@ use as3_parser::ast;
 // `Parser` will be exposed once the parser is finished.
 ```
 
+What the parser currently looks like:
+
+```rust
+use as3_parser::*;
+let source = Source::new(None, "x ** y".into(), &CompilerOptions::new());
+let mut parser = Parser::new(&source);
+let exp = parser.parse_expression(ExpressionContext {
+    ..default()
+}).ok();
+if exp.is_some() {
+    parser.expect_eof();
+}
+if !source.invalidated() {
+    let exp = exp.unwrap();
+    // exp: Rc<ast::Expression>
+}
+```
+
 ## Features
 
 This ActionScript 3 parser adds several syntax constructs from TypeScript, ECMAScript 4 and Apache Royale Compiler. See [Features](docs/features.md) for full details.
