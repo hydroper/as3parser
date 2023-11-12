@@ -77,7 +77,7 @@ impl<'input> Parser<'input> {
         self.token.0 == token
     }
 
-    fn peek_context_keyword(&self, name: String) -> bool {
+    fn peek_context_keyword(&self, name: &str) -> bool {
         if let Token::Identifier(id) = self.token.0.clone() { id == name && self.token.1.character_count() == name.len() } else { false }
     }
 
@@ -135,7 +135,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn consume_context_keyword(&mut self, name: String) -> Result<bool, ParserFailure> {
+    fn consume_context_keyword(&mut self, name: &str) -> Result<bool, ParserFailure> {
         if let Token::Identifier(id) = self.token.0.clone() {
             if id == name && self.token.1.character_count() == name.len() {
                 self.next()?;
@@ -196,14 +196,14 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn expect_context_keyword(&mut self, name: String) -> Result<(), ParserFailure> {
+    fn expect_context_keyword(&mut self, name: &str) -> Result<(), ParserFailure> {
         if let Token::Identifier(id) = self.token.0.clone() {
             if id == name && self.token.1.character_count() == name.len() {
                 self.next()?;
                 return Ok(());
             }
         }
-        self.add_syntax_error(self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![String(name), Token(self.token.0.clone())]);
+        self.add_syntax_error(self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![String(name.into()), Token(self.token.0.clone())]);
         Err(ParserFailure)
     }
 
@@ -325,23 +325,88 @@ impl<'input> Parser<'input> {
                     location: self.pop_location(),
                     kind: ast::ExpressionKind::Unary { base, operator: Operator::NonNull },
                 });
-            } else {
-                if let Some((required_precedence, operator, right_precedence)) = self.check_binary_operator() {
-                    if context.min_precedence.includes(&required_precedence) {
-                        base = self.parse_misc_binary_operators(base, required_precedence, operator, right_precedence)?;
-                    } else {
-                        break;
-                    }
+            // `not in`, `not instanceof`
+            } else if self.peek_context_keyword("not") && context.min_precedence.includes(&OperatorPrecedence::Relational) && !self.previous_token.1.line_break(&self.token.1) {
+                self.push_location(&base.location);
+                self.next()?;
+                if self.consume(Token::Instanceof)? {
+                    base = self.parse_binary_operator(base, Operator::NotInstanceof, OperatorPrecedence::Relational.add_one().unwrap(), context)?;
+                } else {
+                    self.expect(Token::In)?;
+                    base = self.parse_binary_operator(base, Operator::NotIn, OperatorPrecedence::Relational.add_one().unwrap(), context)?;
+                }
+            // ConditionalExpression
+            } else if self.peek(Token::Question) && context.min_precedence.includes(&OperatorPrecedence::AssignmentAndOther) {
+                self.push_location(&base.location);
+                self.next()?;
+                let consequent = self.parse_expression(ExpressionContext {
+                    min_precedence: OperatorPrecedence::AssignmentAndOther,
+                    with_type_annotation: false,
+                    ..context
+                })?;
+                self.expect(Token::Colon)?;
+                let alternative = self.parse_expression(ExpressionContext {
+                    min_precedence: OperatorPrecedence::AssignmentAndOther,
+                    with_type_annotation: true,
+                    ..context
+                })?;
+                base = Rc::new(ast::Expression {
+                    location: self.pop_location(),
+                    kind: ast::ExpressionKind::Conditional { test: base, consequent, alternative },
+                });
+            } else if let Some((required_precedence, operator, right_precedence)) = self.check_binary_operator() {
+                if context.min_precedence.includes(&required_precedence) {
+                    self.next()?;
+                    base = self.parse_binary_operator(base, operator, right_precedence, context)?;
                 } else {
                     break;
                 }
+            } else if self.peek(Token::Assign) && context.min_precedence.includes(&OperatorPrecedence::AssignmentAndOther) && context.allow_assignment {
+                self.push_location(&base.location);
+                self.next()?;
+                let left = if matches!(base.kind, ast::ExpressionKind::ArrayInitializer { .. }) || matches!(base.kind, ast::ExpressionKind::ObjectInitializer { .. }) {
+                    ast::AssignmentLeft::Destructuring(self.exp_to_destructuring(base)?)
+                } else {
+                    ast::AssignmentLeft::Expression(base)
+                };
+                let right = self.parse_expression(ExpressionContext {
+                    min_precedence: OperatorPrecedence::AssignmentAndOther,
+                    ..context
+                })?;
+                base = Rc::new(ast::Expression {
+                    location: self.pop_location(),
+                    kind: ast::ExpressionKind::Assignment { left, compound: None, right },
+                });
+            // CompoundAssignment and LogicalAssignment
+            } else if let Some(compound) = self.token.0.compound_assignment() {
+                if context.min_precedence.includes(&OperatorPrecedence::AssignmentAndOther) && context.allow_assignment {
+                    self.push_location(&base.location);
+                    self.next()?;
+                    let left = if matches!(base.kind, ast::ExpressionKind::ArrayInitializer { .. }) || matches!(base.kind, ast::ExpressionKind::ObjectInitializer { .. }) {
+                        ast::AssignmentLeft::Destructuring(self.exp_to_destructuring(base)?)
+                    } else {
+                        ast::AssignmentLeft::Expression(base)
+                    };
+                    let right = self.parse_expression(ExpressionContext {
+                        min_precedence: OperatorPrecedence::AssignmentAndOther,
+                        ..context
+                    })?;
+                    base = Rc::new(ast::Expression {
+                        location: self.pop_location(),
+                        kind: ast::ExpressionKind::Assignment { left, compound: Some(compound), right },
+                    });
+                } else {
+                    break;
+                }
+            } else {
+                break;
             }
         }
 
         Ok(base)
     }
 
-    fn parse_misc_binary_operators(&mut self, base: Rc<ast::Expression>, required_precedence: OperatorPrecedence, operator: Operator, right_precedence: OperatorPrecedence) -> Result<Rc<ast::Expression>, ParserFailure> {
+    fn parse_binary_operator(&mut self, base: Rc<ast::Expression>, mut operator: Operator, right_precedence: OperatorPrecedence, context: ExpressionContext) -> Result<Rc<ast::Expression>, ParserFailure> {
         // The left operand of a null-coalescing operation must not be
         // a logical AND, XOR or OR operation.
         if operator == Operator::NullCoalescing {
@@ -352,7 +417,19 @@ impl<'input> Parser<'input> {
             }
         }
 
-        ()
+        if operator == Operator::Is && self.consume_context_keyword("not")? {
+            operator = Operator::IsNot;
+        }
+
+        self.push_location(&base.location);
+        let right = self.parse_expression(ExpressionContext {
+            min_precedence: right_precedence,
+            ..context
+        })?;
+        Ok(Rc::new(ast::Expression {
+            location: self.pop_location(),
+            kind: ast::ExpressionKind::Binary { left: base, operator, right },
+        }))
     }
 
     /// Returns either None or Some((required_precedence, operator, right_precedence))

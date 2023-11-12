@@ -129,7 +129,7 @@ pub enum ExpressionKind {
         alternative: Rc<Expression>,
     },
     Assignment {
-        left: Rc<Destructuring>,
+        left: AssignmentLeft,
         compound: Option<Operator>,
         right: Rc<Expression>,
     },
@@ -162,6 +162,12 @@ pub enum ExpressionKind {
     /// follow in an [`ExpressionKind::OptionalChaining`] expression
     /// inside the `operations` field.
     OptionalChainingHost,
+}
+
+#[derive(Clone)]
+pub enum AssignmentLeft {
+    Expression(Rc<Expression>),
+    Destructuring(Rc<Destructuring>),
 }
 
 #[derive(Clone)]

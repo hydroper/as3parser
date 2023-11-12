@@ -337,6 +337,7 @@ impl Token {
         }
     }
 
+    /// Converts a compound assignment, a logical assignment, or a nullish coalescing assignment to an operator.
     pub fn compound_assignment(&self) -> Option<Operator> {
         match self {
             Self::AddAssign => Some(Operator::Add),

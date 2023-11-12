@@ -64,15 +64,16 @@ Syntax:
     * [x] Postfix
       * [x] `!`
       * [x] `++`
-      - [x] `--`
-  * [ ] Binary operators
-    * [ ] `not in`
-    * [ ] `not instanceof`
-    * [ ] `is not`
+      * [x] `--`
+  * [x] Binary operators
+    * [x] `not in`
+    * [x] `not instanceof`
+    * [x] `is not`
     * [x] `??`
-  * [ ] Conditional
-  * [ ] `pattern = v`
+  * [x] Conditional
+  * [x] `pattern = v`
     * Only parse assignment if `allow_assignment` is true
+  * [x] `pattern compound= v`
   * [ ] `x, y`
   * [ ] `x: T`
     * [ ] WithTypeAnnotation is only parsed if `with_type_annotation` is true
