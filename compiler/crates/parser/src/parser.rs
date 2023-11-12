@@ -361,6 +361,7 @@ impl<'input> Parser<'input> {
                 } else {
                     break;
                 }
+            // AssignmentExpression
             } else if self.peek(Token::Assign) && context.min_precedence.includes(&OperatorPrecedence::AssignmentAndOther) && context.allow_assignment {
                 self.push_location(&base.location);
                 self.next()?;
@@ -398,6 +399,25 @@ impl<'input> Parser<'input> {
                 } else {
                     break;
                 }
+            } else if self.peek(Token::Comma) && context.min_precedence.includes(&OperatorPrecedence::List) {
+                self.push_location(&base.location);
+                self.next()?;
+                let right = self.parse_expression(ExpressionContext {
+                    min_precedence: OperatorPrecedence::AssignmentAndOther,
+                    ..context
+                })?;
+                base = Rc::new(ast::Expression {
+                    location: self.pop_location(),
+                    kind: ast::ExpressionKind::Sequence(base, right),
+                });
+            } else if self.peek(Token::Colon) && context.with_type_annotation && context.min_precedence.includes(&OperatorPrecedence::Postfix) {
+                self.push_location(&base.location);
+                self.next()?;
+                let type_annotation = self.parse_type_expression()?;
+                base = Rc::new(ast::Expression {
+                    location: self.pop_location(),
+                    kind: ast::ExpressionKind::WithTypeAnnotation { base, type_annotation },
+                });
             } else {
                 break;
             }
@@ -597,6 +617,10 @@ impl<'input> Parser<'input> {
                 },
             })
         } else if let ast::ExpressionKind::Assignment { left, compound, right } = exp.kind {
+            let left = match left {
+                ast::AssignmentLeft::Destructuring(destructuring) => Rc::clone(&destructuring),
+                ast::AssignmentLeft::Expression(exp) => self.exp_to_destructuring(exp)?,
+            };
             if compound.is_some() {
                 self.add_syntax_error(exp.location.clone(), DiagnosticKind::MalformedArrowFunctionElement, vec![]);
                 return Err(ParserFailure);

@@ -170,6 +170,15 @@ pub enum AssignmentLeft {
     Destructuring(Rc<Destructuring>),
 }
 
+impl AssignmentLeft {
+    pub fn location(&self) -> Location {
+        match self {
+            Self::Expression(exp) => exp.location.clone(),
+            Self::Destructuring(destr) => destr.location.clone(),
+        }
+    }
+}
+
 #[derive(Clone)]
 pub enum XmlElementContent {
     Expression(Rc<Expression>),

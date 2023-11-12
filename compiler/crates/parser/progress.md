@@ -57,7 +57,7 @@ Syntax:
     * [x] If it is followed by `::` and condition is not a list expression, it is reinterpreted as a qualified identifier.
   * [x] `o..x`
   * [x] `f()`
-  * [ ] Unary operators
+  * [x] Unary operators
     * [x] `await`
     * [x] `yield`
     * [x] Prefix
@@ -74,10 +74,10 @@ Syntax:
   * [x] `pattern = v`
     * Only parse assignment if `allow_assignment` is true
   * [x] `pattern compound= v`
-  * [ ] `x, y`
-  * [ ] `x: T`
-    * [ ] WithTypeAnnotation is only parsed if `with_type_annotation` is true
-    * [ ] WithTypeAnnotation is only parsed in postfix precedence
+  * [x] `x, y`
+  * [x] `x: T`
+    * [x] WithTypeAnnotation is only parsed if `with_type_annotation` is true
+    * [x] WithTypeAnnotation is only parsed in postfix precedence
   * [x] Embed expression
 * Reserved words
   * [ ] Reserved words are valid identifiers in destructuring patterns from variable bindings
