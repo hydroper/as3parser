@@ -106,11 +106,8 @@ Syntax:
 * Reserved words
   * [x] Reserved words are valid identifiers in destructuring patterns from variable bindings
   * [ ] Reserved words are valid identifiers in function definition names, including regular functions, getters and setters
-* FunctionCommon
-  * [x] When parsing it, push and pop from the `activations` stack
-  * [x] Call `validate_function_parameter_list`
 * Statements
-  * Parsing statement returns (*node*, *semicolon_inserted*)
+  * Parsing statement returns (*node*, *semicolonInserted*)
   * [ ] Empty
   * [ ] Super
   * [ ] Block
