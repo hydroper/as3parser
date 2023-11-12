@@ -104,62 +104,48 @@ Syntax:
   * [x] `x & y`
   * [x] `o.<T1, ...TN>`
 * Reserved words
-  * [ ] Reserved words are valid identifiers in destructuring patterns from variable bindings
+  * [x] Reserved words are valid identifiers in destructuring patterns from variable bindings
   * [ ] Reserved words are valid identifiers in function definition names, including regular functions, getters and setters
 * FunctionCommon
   * [x] When parsing it, push and pop from the `activations` stack
   * [x] Call `validate_function_parameter_list`
 * Statements
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
+  * Parsing statement returns (*node*, *semicolon_inserted*)
+  * [ ] Empty
+  * [ ] Super
+  * [ ] Block
+  * [ ] If
+  * [ ] Switch
+  * [ ] Switch type
+  * [ ] Do
+  * [ ] While
+  * [ ] For
+  * [ ] For in
+  * [ ] With
+  * [ ] Continue
+  * [ ] Break
+  * [ ] Return
+  * [ ] Throw
+  * [ ] Try
+  * [ ] Expression statement
+  * [ ] Labeled statement
+  * [ ] Default XML namespace
+  * Substatement
+    * [ ] Simple variable declaration
 * Directives
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
+  * [ ] Include
+  * [ ] Import
+  * [ ] Use namespace
+  * [ ] Variable definition
+  * [ ] Function definition
+    * [ ] Constructor
+    * [ ] Getter
+    * [ ] Setter
+  * [ ] Type definition
+  * [ ] Class definition
+  * [ ] Enum definition
+  * [ ] Interface definition
+  * [ ] Namespace definition
 * [ ] ASDoc
   * [ ] `parse_asdoc`
     * Checks if there is at least one comment in the Source and whether `last_comment.is_asdoc(item_location)` is true, parsing the comment as an `AsDoc` value.
