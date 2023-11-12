@@ -718,7 +718,6 @@ impl<'input> Parser<'input> {
                 self.add_syntax_error(field.location(), DiagnosticKind::UnsupportedDestructuringRest, vec![]);
                 continue;
             };
-            let key = (key.0.to_record_destructuring_key(), key.1);
             let alias = if let Some(v) = value { Some(self.exp_to_destructuring(v)?) } else { None };
             result_fields.push(Rc::new(ast::RecordDestructuringField {
                 location: field.location(),
@@ -1051,28 +1050,7 @@ impl<'input> Parser<'input> {
         }
 
         // Parse the key
-        let mut key: ast::ObjectKey;
-        if let Token::StringLiteral(value) = &self.token.0 {
-            let location = self.token_location();
-            self.next()?;
-            key = ast::ObjectKey::String(value.clone(), location);
-        } else if let Token::NumericLiteral(value) = &self.token.0 {
-            let location = self.token_location();
-            self.next()?;
-            key = ast::ObjectKey::Number(value.clone(), location);
-        } else if self.peek(Token::LeftBracket) {
-            self.next()?;
-            let key_expr = self.parse_expression(ExpressionContext {
-                allow_in: true,
-                min_precedence: OperatorPrecedence::AssignmentAndOther,
-                ..default()
-            })?;
-            self.expect(Token::RightBracket)?;
-            key = ast::ObjectKey::Brackets(key_expr);
-        } else {
-            key = ast::ObjectKey::Id(self.parse_non_attribute_qualified_identifier()?);
-        }
-        let key_location = self.pop_location();
+        let key = self.parse_object_key()?;
 
         let destructuring_non_null = self.consume(Token::Exclamation)?;
         let mut value = None;
@@ -1083,12 +1061,12 @@ impl<'input> Parser<'input> {
                 min_precedence: OperatorPrecedence::AssignmentAndOther,
                 ..default()
             })?);
-        } else if !matches!(key, ast::ObjectKey::Id(_)) {
+        } else if !matches!(key.0, ast::ObjectKey::Id(_)) {
             self.expect(Token::Colon)?;
         }
 
         Ok(Rc::new(ast::ObjectField::Field {
-            key: (key, key_location),
+            key,
             destructuring_non_null,
             value,
         }))
@@ -2124,12 +2102,12 @@ impl<'input> Parser<'input> {
     fn parse_record_type_field(&mut self) -> Result<Rc<ast::RecordTypeField>, ParserFailure> {
         let asdoc = self.parse_asdoc()?;
         let mut readonly = false;
-        let mut key: (ast::RecordTypeKey, Location) = self.parse_record_type_key()?;
-        if let ast::RecordTypeKey::Id(id) = key.0 {
+        let mut key: (ast::ObjectKey, Location) = self.parse_object_key()?;
+        if let ast::ObjectKey::Id(id) = key.0 {
             if let Some(id) = id.to_identifier() {
                 if self.record_type_field_readonly(id) {
                     readonly = true;
-                    key = self.parse_record_type_key()?;
+                    key = self.parse_object_key()?;
                 }
             }
         }
@@ -2161,15 +2139,15 @@ impl<'input> Parser<'input> {
         )
     }
 
-    fn parse_record_type_key(&mut self) -> Result<(ast::RecordTypeKey, Location), ParserFailure> {
+    fn parse_object_key(&mut self) -> Result<(ast::ObjectKey, Location), ParserFailure> {
         if let Token::StringLiteral(value) = &self.token.0 {
             let location = self.token_location();
             self.next()?;
-            Ok((ast::RecordTypeKey::String(value.clone(), location), location))
+            Ok((ast::ObjectKey::String(value.clone(), location), location))
         } else if let Token::NumericLiteral(value) = &self.token.0 {
             let location = self.token_location();
             self.next()?;
-            Ok((ast::RecordTypeKey::Number(value.clone(), location), location))
+            Ok((ast::ObjectKey::Number(value.clone(), location), location))
         } else if self.peek(Token::LeftBracket) {
             self.mark_location();
             self.next()?;
@@ -2180,12 +2158,12 @@ impl<'input> Parser<'input> {
             })?;
             self.expect(Token::RightBracket)?;
             let location = self.pop_location();
-            Ok((ast::RecordTypeKey::Brackets(key_expr), location))
+            Ok((ast::ObjectKey::Brackets(key_expr), location))
         } else {
             self.mark_location();
             let id = self.parse_non_attribute_qualified_identifier()?;
             let location = self.pop_location();
-            Ok((ast::RecordTypeKey::Id(id), location))
+            Ok((ast::ObjectKey::Id(id), location))
         }
     }
 
@@ -2283,6 +2261,80 @@ impl<'input> Parser<'input> {
             location: self.pop_location(),
             kind: ast::TypeExpressionKind::Paren(subexp),
         }))
+    }
+
+    fn parse_destructuring(&mut self) -> Result<Rc<ast::Destructuring>, ParserFailure> {
+        self.mark_location();
+        let kind = self.parse_destructuring_kind()?;
+        let non_null = self.consume(Token::Exclamation)?;
+        let type_annotation = if self.consume(Token::Colon)? { Some(self.parse_type_expression()?) } else { None };
+        Ok(Rc::new(ast::Destructuring {
+            location: self.pop_location(),
+            kind,
+            non_null,
+            type_annotation,
+        }))
+    }
+
+    fn parse_destructuring_kind(&mut self) -> Result<ast::DestructuringKind, ParserFailure> {
+        if self.consume(Token::LeftBracket)? {
+            self.parse_array_destructuring()
+        } else if self.consume(Token::LeftBrace)? {
+            self.parse_record_destructuring()
+        } else {
+            Ok(ast::DestructuringKind::Binding { name: self.expect_identifier(true)? })
+        }
+    }
+
+    fn parse_array_destructuring(&mut self) -> Result<ast::DestructuringKind, ParserFailure> {
+        let mut items: Vec<Option<ast::ArrayDestructuringItem>> = vec![];
+        while !self.peek(Token::RightBracket) {
+            let mut ellipses = false;
+            while self.consume(Token::Comma)? {
+                items.push(None);
+                ellipses = true;
+            }
+            if !ellipses  {
+                if self.peek(Token::Ellipsis) {
+                    self.mark_location();
+                    self.next()?;
+                    let subdestructuring = self.parse_destructuring()?;
+                    items.push(Some(ast::ArrayDestructuringItem::Rest(subdestructuring, self.pop_location())));
+                } else {
+                    items.push(Some(ast::ArrayDestructuringItem::Pattern(self.parse_destructuring()?)));
+                }
+            }
+            if !self.consume(Token::Comma)? {
+                break;
+            }
+        }
+        self.expect(Token::RightBracket)?;
+        Ok(ast::DestructuringKind::Array(items))
+    }
+
+    fn parse_record_destructuring(&mut self) -> Result<ast::DestructuringKind, ParserFailure> {
+        let mut fields: Vec<Rc<ast::RecordDestructuringField>> = vec![];
+        while !self.peek(Token::RightBrace) {
+            fields.push(self.parse_record_destructuring_field());
+            if !self.consume(Token::Comma)? {
+                break;
+            }
+        }
+        self.expect(Token::RightBrace)?;
+        Ok(ast::DestructuringKind::Record(fields))
+    }
+
+    fn parse_record_destructuring_field(&mut self) -> Result<ast::RecordDestructuringField, ParserFailure> {
+        self.mark_location();
+        let key = self.parse_object_key()?;
+        let non_null = self.consume(Token::Exclamation)?;
+        let alias = if self.consume(Token::Colon)? { Some(self.parse_destructuring()?) } else { None };
+        Ok(ast::RecordDestructuringField {
+            location: self.pop_location(),
+            key,
+            non_null,
+            alias,
+        })
     }
 
     fn parse_asdoc(&mut self) -> Result<Option<ast::AsDoc>, ParserFailure> {

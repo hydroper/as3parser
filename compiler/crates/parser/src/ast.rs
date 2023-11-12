@@ -307,17 +307,6 @@ pub enum ObjectKey {
     Brackets(Rc<Expression>),
 }
 
-impl ObjectKey {
-    pub fn to_record_destructuring_key(&self) -> RecordDestructuringKey {
-        match self {
-            Self::Id(id) => RecordDestructuringKey::Id(id.clone()),
-            Self::String(string, location) => RecordDestructuringKey::String(string.clone(), location.clone()),
-            Self::Number(number, location) => RecordDestructuringKey::Number(*number, location.clone()),
-            Self::Brackets(exp) => RecordDestructuringKey::Brackets(Rc::clone(&exp)),
-        }
-    }
-}
-
 #[derive(Clone)]
 pub struct Destructuring {
     pub location: Location,
@@ -341,17 +330,9 @@ pub enum DestructuringKind {
 #[derive(Clone)]
 pub struct RecordDestructuringField {
     pub location: Location,
-    pub key: (RecordDestructuringKey, Location),
+    pub key: (ObjectKey, Location),
     pub non_null: bool,
     pub alias: Option<Rc<Destructuring>>,
-}
-
-#[derive(Clone)]
-pub enum RecordDestructuringKey {
-    Id(NonAttributeQualifiedIdentifier),
-    String(String, Location),
-    Number(f64, Location),
-    Brackets(Rc<Expression>),
 }
 
 #[derive(Clone)]
@@ -461,7 +442,7 @@ impl FunctionParamKind {
 pub struct RecordTypeField {
     pub asdoc: Option<AsDoc>,
     pub readonly: bool,
-    pub key: (RecordTypeKey, Location),
+    pub key: (ObjectKey, Location),
     pub nullability: FieldNullability,
     pub type_annotation: Rc<TypeExpression>,
 }
@@ -471,14 +452,6 @@ pub enum FieldNullability {
     Unspecified,
     NonNullable,
     Nullable,
-}
-
-#[derive(Clone)]
-pub enum RecordTypeKey {
-    Id(NonAttributeQualifiedIdentifier),
-    String(String, Location),
-    Number(f64, Location),
-    Brackets(Rc<Expression>),
 }
 
 #[derive(Clone)]
