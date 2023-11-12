@@ -22,3 +22,4 @@ lazy-regex = "3.0.2"
 lazy_static = "1.4.0"
 unicode-general-category = "0.6.0"
 by_address = "1.1.0"
+serde = { version = "1.0.192", features = ["rc", "derive"] }
