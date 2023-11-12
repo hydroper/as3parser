@@ -2418,11 +2418,19 @@ impl<'input> Parser<'input> {
         }))
     }
 
+    fn parse_substatement(&mut self) -> Result<(Rc<ast::Statement>, bool), ParserFailure> {
+        //
+    }
+
+    fn parse_opt_statement(&mut self) -> Result<Option<(Rc<ast::Statement>, bool)>, ParserFailure> {
+        //
+    }
+
     fn parse_asdoc(&mut self) -> Result<Option<ast::AsDoc>, ParserFailure> {
         let last_comment = self.source().comments.borrow().last();
         Ok(last_comment.and_then(|comment| {
             if comment.is_asdoc(&self.token.1) {
-                Some(())
+                Some(ast::AsDoc {})
             } else {
                 None
             }
