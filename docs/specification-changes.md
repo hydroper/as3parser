@@ -23,10 +23,11 @@ This document is incomplete yet.
   - `not`
   - `readonly`
   - `type`
+  - `where`
 - Added literals:
   - Triple string literal
     - Line breaks produce `\n`
-    - Features a particular indentation handling
+    - Features a particular indentation handling based on ECMAScript 4
 - Added escapes:
   - Unicode scalar escape (`\u{}`), present in string literals and identifiers
 - String literal
@@ -37,3 +38,7 @@ This document is incomplete yet.
 - Previously undocumented expression: `new <T>[]`
 - Optional chaining
   - Creates a base node from which postfix operators may execute.
+
+## Miscellaneous
+
+- Destructuring
