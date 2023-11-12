@@ -92,6 +92,7 @@ pub enum ExpressionKind {
     /// This expression is not valid in other contexts.
     Rest(Rc<Expression>),
     ArrayInitializer {
+        metadata_asdoc: Option<AsDoc>,
         /// Element sequence possibly containing `Rest`s and ellisions.
         elements: Vec<Option<Rc<Expression>>>,
     },
@@ -122,6 +123,7 @@ pub enum ExpressionKind {
     /// The `o[k]` expression.
     BracketsMember {
         base: Rc<Expression>,
+        metadata_asdoc: Option<AsDoc>,
         key: Rc<Expression>,
     },
     /// `base.<T1, Tn>`
@@ -404,7 +406,7 @@ pub enum TypeExpressionKind {
     Id(NonAttributeQualifiedIdentifier),
     DotMember {
         base: Rc<TypeExpression>,
-        member: QualifiedIdentifier,
+        id: NonAttributeQualifiedIdentifier,
     },
     Tuple(Vec<Rc<TypeExpression>>),
     Record(Vec<Rc<RecordTypeField>>),
@@ -426,10 +428,7 @@ pub enum TypeExpressionKind {
     /// `|`
     Union(Vec<Rc<TypeExpression>>),
     /// `&`
-    Complement {
-        base: Rc<TypeExpression>,
-        complement: Rc<TypeExpression>,
-    },
+    Complement(Rc<TypeExpression>, Rc<TypeExpression>),
     /// `base.<T1, Tn>`
     WithTypeArguments {
         base: Rc<TypeExpression>,
@@ -463,13 +462,13 @@ pub struct RecordTypeField {
     pub asdoc: Option<AsDoc>,
     pub readonly: bool,
     pub key: (RecordTypeKey, Location),
-    pub key_suffix: RecordTypeKeySuffix,
-    pub type_annotation: Option<Rc<TypeExpression>>,
+    pub nullability: FieldNullability,
+    pub type_annotation: Rc<TypeExpression>,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
-pub enum RecordTypeKeySuffix {
-    None,
+pub enum FieldNullability {
+    Unspecified,
     NonNullable,
     Nullable,
 }

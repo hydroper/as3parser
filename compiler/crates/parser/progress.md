@@ -84,25 +84,25 @@ Syntax:
   * [x] `(x)`
     * If followed by `=>`, reinterpret it as a function type
       * [x] If `(` is followed by `)`, it is a function type
-      * [ ] If `(` is followed by `...`, it is a function type
-      * [ ] If subexpression is an identifier token or an `idToken?` type expression and it is followed by either `:` or `,`, it is a function type
-  * [ ] `o.x`
-  * [ ] Tuple
-  * [ ] Record
+      * [x] If `(` is followed by `...`, it is a function type
+      * [x] If subexpression is an identifier token or an `idToken?` type expression and it is followed by either `:` or `,`, it is a function type
+  * [x] `o.x`
+  * [x] Tuple
+  * [x] Record
   * [x] Any
   * [x] Void
   * [x] Never
   * [x] Undefined
-  * [ ] `T?`
-  * [ ] `?T`
-  * [ ] `T!`
-  * [ ] Function (`(...) => T`)
+  * [x] `T?`
+  * [x] `?T`
+  * [x] `T!`
+  * [x] Function (`(...) => T`)
   * [x] String literal
   * [x] Numeric literal
-  * [ ] `m1 | m2` (... `| mN`)
-  * [ ] `| x`
-  * [ ] `x & y`
-  * [ ] `o.<T1, ...TN>`
+  * [x] `m1 | m2` (... `| mN`)
+  * [x] `|` prefix
+  * [x] `x & y`
+  * [x] `o.<T1, ...TN>`
 * Reserved words
   * [ ] Reserved words are valid identifiers in destructuring patterns from variable bindings
   * [ ] Reserved words are valid identifiers in function definition names, including regular functions, getters and setters
@@ -110,20 +110,6 @@ Syntax:
   * [ ] When parsing it, push and pop from the `activations` stack
   * [ ] Call `validate_function_parameter_list`
 * Statements
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
-  * [ ] `x`
   * [ ] `x`
   * [ ] `x`
   * [ ] `x`
@@ -175,4 +161,5 @@ Syntax:
   * [ ] `x`
   * [ ] `x`
 * [ ] ASDoc
-  * After parsing a ASDoc annotatable item, parse its ASDoc comment after checking if there is at least one comment in the Source and whether `last_comment.is_asdoc(item_location)` is true, resulting in an `AsDoc` value.
+  * [ ] `parse_asdoc`
+    * Checks if there is at least one comment in the Source and whether `last_comment.is_asdoc(item_location)` is true, parsing the comment as an `AsDoc` value.

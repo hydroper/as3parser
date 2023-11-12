@@ -282,13 +282,15 @@ impl<'input> Parser<'input> {
                 base = self.parse_dot_subexpression(base)?;
             } else if self.consume(Token::OptionalChaining)? {
                 base = self.parse_optional_chaining_subexpression(base)?;
-            } else if self.consume(Token::LeftBracket)? {
+            } else if self.peek(Token::LeftBracket) {
+                let metadata_asdoc = self.parse_asdoc()?;
+                self.next()?;
                 self.push_location(&base.location);
                 let key = self.parse_expression(ExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
                 self.expect(Token::RightBracket)?;
                 base = Rc::new(ast::Expression {
                     location: self.pop_location(),
-                    kind: ast::ExpressionKind::BracketsMember { base, key }
+                    kind: ast::ExpressionKind::BracketsMember { base, key, metadata_asdoc }
                 });
             } else if self.consume(Token::Descendants)? {
                 self.push_location(&base.location);
@@ -491,7 +493,7 @@ impl<'input> Parser<'input> {
             self.expect(Token::RightBracket)?;
             operation = Rc::new(ast::Expression {
                 location: self.pop_location(),
-                kind: ast::ExpressionKind::BracketsMember { base: operation, key }
+                kind: ast::ExpressionKind::BracketsMember { base: operation, key, metadata_asdoc: None }
             });
         } else {
             let id = self.parse_qualified_identifier()?;
@@ -673,7 +675,7 @@ impl<'input> Parser<'input> {
                     return Err(ParserFailure);
                 }
             },
-            ast::ExpressionKind::ArrayInitializer { elements } => {
+            ast::ExpressionKind::ArrayInitializer { elements, metadata_asdoc: _ } => {
                 destructuring_kind = self.array_initializer_to_destructuring_kind(elements)?;
             },
             ast::ExpressionKind::ObjectInitializer { fields } => {
@@ -1153,7 +1155,7 @@ impl<'input> Parser<'input> {
             self.expect(Token::RightBracket)?;
             Ok(Rc::new(ast::Expression {
                 location: self.pop_location(),
-                kind: ast::ExpressionKind::BracketsMember { base: super_expr, key },
+                kind: ast::ExpressionKind::BracketsMember { base: super_expr, key, metadata_asdoc: None },
             }))
         } else {
             self.expect(Token::Dot)?;
@@ -1191,7 +1193,7 @@ impl<'input> Parser<'input> {
                 self.expect(Token::RightBracket)?;
                 base = Rc::new(ast::Expression {
                     location: self.pop_location(),
-                    kind: ast::ExpressionKind::BracketsMember { base, key },
+                    kind: ast::ExpressionKind::BracketsMember { base, key, metadata_asdoc: None },
                 });
             } else if self.consume(Token::Dot)? {
                 self.push_location(&base.location);
@@ -1386,6 +1388,7 @@ impl<'input> Parser<'input> {
 
     fn parse_array_initializer(&mut self) -> Result<Rc<ast::Expression>, ParserFailure> {
         self.mark_location();
+        let metadata_asdoc = self.parse_asdoc()?;
         self.expect(Token::LeftBracket)?;
         let mut elements: Vec<Option<Rc<ast::Expression>>> = vec![];
         while !self.peek(Token::RightBracket) {
@@ -1408,7 +1411,7 @@ impl<'input> Parser<'input> {
         self.expect(Token::RightBracket)?;
         Ok(Rc::new(ast::Expression {
             location: self.pop_location(),
-            kind: ast::ExpressionKind::ArrayInitializer { elements },
+            kind: ast::ExpressionKind::ArrayInitializer { elements, metadata_asdoc },
         }))
     }
 
@@ -1937,44 +1940,136 @@ impl<'input> Parser<'input> {
     }
 
     fn parse_type_expression(&mut self) -> Result<Rc<ast::TypeExpression>, ParserFailure> {
-        let mut base = self.parse_type_expression_start()?;
+        self.parse_type_expression_with_context(false)
+    }
+
+    fn parse_type_expression_with_context(&mut self, between_union: bool) -> Result<Rc<ast::TypeExpression>, ParserFailure> {
+        // Allow a `|` prefix
+        if !between_union {
+            self.consume(Token::BitwiseOr)?;
+        }
+
+        let start = self.token_location();
+        let (mut base, wrap_nullable) = self.parse_type_expression_start()?;
 
         loop {
-           do_more;
-           // break
+            if self.consume(Token::Dot)? {
+                self.push_location(&base.location);
+                if self.consume(Token::Lt)? {
+                    let mut arguments = vec![self.parse_type_expression()?];
+                    while self.consume(Token::Comma)? {
+                        arguments.push(self.parse_type_expression()?);
+                    }
+                    self.expect_generics_gt()?;
+                    base = Rc::new(ast::TypeExpression {
+                        location: self.pop_location(),
+                        kind: ast::TypeExpressionKind::WithTypeArguments { base, arguments },
+                    });
+                } else {
+                    let id = self.parse_non_attribute_qualified_identifier()?;
+                    base = Rc::new(ast::TypeExpression {
+                        location: self.pop_location(),
+                        kind: ast::TypeExpressionKind::DotMember { base, id },
+                    });
+                }
+            } else if self.consume(Token::Question)? {
+                self.push_location(&base.location);
+                base = Rc::new(ast::TypeExpression {
+                    location: self.pop_location(),
+                    kind: ast::TypeExpressionKind::Nullable(base),
+                });
+            } else if self.consume(Token::Exclamation)? {
+                self.push_location(&base.location);
+                base = Rc::new(ast::TypeExpression {
+                    location: self.pop_location(),
+                    kind: ast::TypeExpressionKind::NonNullable(base),
+                });
+            } else if self.peek(Token::BitwiseOr) && !between_union {
+                self.push_location(&base.location);
+                let mut members = vec![base];
+                while self.consume(Token::BitwiseOr)? {
+                    members.push(self.parse_type_expression_with_context(true)?);
+                }
+                base = Rc::new(ast::TypeExpression {
+                    location: self.pop_location(),
+                    kind: ast::TypeExpressionKind::Union(members),
+                });
+            } else if self.consume(Token::BitwiseAnd)? {
+                self.push_location(&base.location);
+                let right = self.parse_type_expression_with_context(false)?;
+                base = Rc::new(ast::TypeExpression {
+                    location: self.pop_location(),
+                    kind: ast::TypeExpressionKind::Complement(base, right),
+                });
+            } else {
+                break;
+            }
+        }
+
+        if wrap_nullable {
+            self.push_location(&start);
+            base = Rc::new(ast::TypeExpression {
+                location: self.pop_location(),
+                kind: ast::TypeExpressionKind::Nullable(base),
+            });
         }
 
         Ok(base)
     }
 
-    fn parse_type_expression_start(&mut self) -> Result<Rc<ast::TypeExpression>, ParserFailure> {
+    fn parse_type_expression_start(&mut self) -> Result<(Rc<ast::TypeExpression>, bool), ParserFailure> {
+        // Allow a `?` prefix to wrap a type into nullable.
+        let wrap_nullable = self.consume(Token::Question)?;
+
         // Parenthesized
         if self.peek(Token::LeftParen) {
-            self.parse_paren_type_expression()
+            Ok((self.parse_paren_type_expression()?, wrap_nullable))
         // `void`
         } else if self.peek(Token::Void) {
             self.mark_location();
             self.next()?;
-            Ok(Rc::new(ast::TypeExpression {
+            Ok((Rc::new(ast::TypeExpression {
                 location: self.pop_location(),
                 kind: ast::TypeExpressionKind::Void,
-            }))
+            }), wrap_nullable))
         // StringLiteral
         } else if let Token::StringLiteral(value) = &self.token.0 {
             self.mark_location();
             self.next()?;
-            Ok(Rc::new(ast::TypeExpression {
+            Ok((Rc::new(ast::TypeExpression {
                 location: self.pop_location(),
                 kind: ast::TypeExpressionKind::StringLiteral(value.clone()),
-            }))
+            }), wrap_nullable))
         // NumericLiteral
         } else if let Token::NumericLiteral(value) = self.token.0 {
             self.mark_location();
             self.next()?;
-            Ok(Rc::new(ast::TypeExpression {
+            Ok((Rc::new(ast::TypeExpression {
                 location: self.pop_location(),
                 kind: ast::TypeExpressionKind::NumericLiteral(value),
-            }))
+            }), wrap_nullable))
+        // [T1, T2, ...Tn]
+        } else if self.peek(Token::LeftBracket) {
+            let mut elements = vec![];
+            self.mark_location();
+            self.next()?;
+            elements.push(self.parse_type_expression()?);
+            self.expect(Token::Comma)?;
+            elements.push(self.parse_type_expression()?);
+            while self.consume(Token::Comma)? {
+                if self.peek(Token::RightBracket) {
+                    break;
+                }
+                elements.push(self.parse_type_expression()?);
+            }
+            self.expect(Token::RightBracket)?;
+            Ok((Rc::new(ast::TypeExpression {
+                location: self.pop_location(),
+                kind: ast::TypeExpressionKind::Tuple(elements),
+            }), wrap_nullable))
+        // {...}
+        } else if self.peek(Token::LeftBrace) {
+            Ok((self.parse_record_type_expression()?, wrap_nullable))
         // NonAttributeQualifiedIdentifier
         } else {
             self.mark_location();
@@ -1982,30 +2077,115 @@ impl<'input> Parser<'input> {
             if let Some(id_token_or_wildcard) = id.to_identifier_or_wildcard() {
                 match id_token_or_wildcard.0.as_ref() {
                     "*" => {
-                        return Ok(Rc::new(ast::TypeExpression {
+                        return Ok((Rc::new(ast::TypeExpression {
                             location: self.pop_location(),
                             kind: ast::TypeExpressionKind::Any,
-                        }));
+                        }), wrap_nullable));
                     },
                     "never" => {
-                        return Ok(Rc::new(ast::TypeExpression {
+                        return Ok((Rc::new(ast::TypeExpression {
                             location: self.pop_location(),
                             kind: ast::TypeExpressionKind::Never,
-                        }));
+                        }), wrap_nullable));
                     },
                     "undefined" => {
-                        return Ok(Rc::new(ast::TypeExpression {
+                        return Ok((Rc::new(ast::TypeExpression {
                             location: self.pop_location(),
                             kind: ast::TypeExpressionKind::Undefined,
-                        }));
+                        }), wrap_nullable));
                     },
                     _ => {},
                 }
             }
-            Ok(Rc::new(ast::TypeExpression {
+            Ok((Rc::new(ast::TypeExpression {
                 location: self.pop_location(),
                 kind: ast::TypeExpressionKind::Id(id),
-            }))
+            }), wrap_nullable))
+        }
+    }
+
+    fn parse_record_type_expression(&mut self) -> Result<Rc<ast::TypeExpression>, ParserFailure> {
+        self.mark_location();
+        self.next()?;
+        let mut fields = vec![];
+        while !self.peek(Token::RightBrace) {
+            fields.push(self.parse_record_type_field()?);
+            if !self.consume(Token::Comma)? {
+                break;
+            }
+        }
+        self.expect(Token::RightBrace)?;
+        Ok(Rc::new(ast::TypeExpression {
+            location: self.pop_location(),
+            kind: ast::TypeExpressionKind::Record(fields),
+        }))
+    }
+
+    fn parse_record_type_field(&mut self) -> Result<Rc<ast::RecordTypeField>, ParserFailure> {
+        let asdoc = self.parse_asdoc()?;
+        let mut readonly = false;
+        let mut key: (ast::RecordTypeKey, Location) = self.parse_record_type_key()?;
+        if let ast::RecordTypeKey::Id(id) = key.0 {
+            if let Some(id) = id.to_identifier() {
+                if self.record_type_field_readonly(id) {
+                    readonly = true;
+                    key = self.parse_record_type_key()?;
+                }
+            }
+        }
+        let nullability = if self.consume(Token::Exclamation)? {
+            ast::FieldNullability::NonNullable
+        } else if self.consume(Token::Question)? {
+            ast::FieldNullability::Nullable
+        } else {
+            ast::FieldNullability::Unspecified
+        };
+        self.expect(Token::Colon)?;
+        let type_annotation = self.parse_type_expression()?;
+        Ok(Rc::new(ast::RecordTypeField {
+            asdoc,
+            readonly,
+            key,
+            nullability,
+            type_annotation,
+        }))
+    }
+
+    fn record_type_field_readonly(&self, id: (String, Location)) -> bool {
+        id.0 == "readonly" && id.1.character_count() == "readonly".len() && !(
+            self.peek(Token::Colon) ||
+            self.peek(Token::Comma) ||
+            self.peek(Token::Question) ||
+            self.peek(Token::RightBrace) ||
+            self.peek(Token::Exclamation)
+        )
+    }
+
+    fn parse_record_type_key(&mut self) -> Result<(ast::RecordTypeKey, Location), ParserFailure> {
+        if let Token::StringLiteral(value) = &self.token.0 {
+            let location = self.token_location();
+            self.next()?;
+            Ok((ast::RecordTypeKey::String(value.clone(), location), location))
+        } else if let Token::NumericLiteral(value) = &self.token.0 {
+            let location = self.token_location();
+            self.next()?;
+            Ok((ast::RecordTypeKey::Number(value.clone(), location), location))
+        } else if self.peek(Token::LeftBracket) {
+            self.mark_location();
+            self.next()?;
+            let key_expr = self.parse_expression(ExpressionContext {
+                allow_in: true,
+                min_precedence: OperatorPrecedence::AssignmentAndOther,
+                ..default()
+            })?;
+            self.expect(Token::RightBracket)?;
+            let location = self.pop_location();
+            Ok((ast::RecordTypeKey::Brackets(key_expr), location))
+        } else {
+            self.mark_location();
+            let id = self.parse_non_attribute_qualified_identifier()?;
+            let location = self.pop_location();
+            Ok((ast::RecordTypeKey::Id(id), location))
         }
     }
 
@@ -2056,10 +2236,36 @@ impl<'input> Parser<'input> {
             
             if parse_function_type {
                 let mut params = vec![param];
-                let mut least_param_kind = param.kind;
+                let mut req_params_allowed = param.kind == ast::FunctionParamKind::Required;
 
                 while self.consume(Token::Comma)? {
-                    do_more;
+                    if self.consume(Token::Ellipsis)? {
+                        let name = self.expect_identifier(false)?;
+                        let type_annotation = if self.consume(Token::Colon)? { Some(self.parse_type_expression()?) } else { None };
+                        params.push(ast::FunctionTypeParam {
+                            kind: ast::FunctionParamKind::Rest,
+                            name,
+                            type_annotation,
+                        });
+                        break;
+                    } else {
+                        let name = self.expect_identifier(false)?;
+                        let optional = if req_params_allowed {
+                            self.consume(Token::Question)?
+                        } else {
+                            self.expect(Token::Question)?;
+                            true
+                        };
+                        if optional {
+                            req_params_allowed = false;
+                        }
+                        let type_annotation = if self.consume(Token::Colon)? { Some(self.parse_type_expression()?) } else { None };
+                        params.push(ast::FunctionTypeParam {
+                            kind: if optional { ast::FunctionParamKind::Optional } else { ast::FunctionParamKind::Required },
+                            name,
+                            type_annotation,
+                        });
+                    }
                 }
 
                 self.expect(Token::RightParen)?;
@@ -2076,6 +2282,17 @@ impl<'input> Parser<'input> {
         Ok(Rc::new(ast::TypeExpression {
             location: self.pop_location(),
             kind: ast::TypeExpressionKind::Paren(subexp),
+        }))
+    }
+
+    fn parse_asdoc(&mut self) -> Result<Option<ast::AsDoc>, ParserFailure> {
+        let last_comment = self.source().comments.borrow().last();
+        Ok(last_comment.and_then(|comment| {
+            if comment.is_asdoc(&self.token.1) {
+                Some(())
+            } else {
+                None
+            }
         }))
     }
 }

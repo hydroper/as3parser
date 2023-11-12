@@ -40,8 +40,8 @@ impl Comment {
     }
 
     /// Indicates whether the comment is an ASDoc comment preceding
-    /// a specific item.
-    pub fn is_asdoc(&self, item_location: &Location) -> bool {
+    /// a specific location.
+    pub fn is_asdoc(&self, location_to_precede: &Location) -> bool {
         if self.multiline && self.content.starts_with('*') {
             let mut i: usize = self.location.last_offset;
             for (i_1, ch) in self.location.source().text[i..].char_indices() {
@@ -50,7 +50,7 @@ impl Comment {
                     break;
                 }
             }
-            item_location.first_offset == i
+            location_to_precede.first_offset == i
         } else {
             false
         }
