@@ -44,13 +44,11 @@ if parser.next().is_ok() {
 }
 ```
 
-A `ParserFacade` will be provided to allow parsing different constructs with a single method call.
-
-The following will parse an expression and expect end-of-file.
+A `ParserFacade` allows parsing different constructs with a single method call. The following parses an expression and expects end-of-file.
 
 ```rust
 let source = Source::new(None, "x ** y".into(), &CompilerOptions::new());
-if let Some(exp) = ParserFacade::parse_expression(source) {
+if let Some(exp) = parser_facade::parse_expression(&source) {
     // exp: Rc<ast::Expression>
 }
 ```

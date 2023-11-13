@@ -768,13 +768,12 @@ pub struct TypeDefinition {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct DefinitionAnnotations {
     pub metadata: Vec<Rc<Metadata>>,
-    #[serde(skip)]
     pub flag_modifiers: DefinitionModifiersFlags,
     pub access_modifier: Option<Rc<Expression>>,
 }
 
 bitflags! {
-    #[derive(Copy, Clone, PartialEq, Eq)]
+    #[derive(Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
     pub struct DefinitionModifiersFlags: u32 {
         const OVERRIDE  = 0b00000001;
         const FINAL     = 0b00000010;
@@ -832,7 +831,6 @@ pub struct GenericsWhereConstraint {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct FunctionCommon {
-    #[serde(skip)]
     pub flags: FunctionFlags,
     pub params: Vec<FunctionParam>,
     pub return_annotation: Option<Rc<TypeExpression>>,
@@ -847,7 +845,7 @@ pub struct FunctionParam {
 }
 
 bitflags! {
-    #[derive(Copy, Clone, PartialEq, Eq)]
+    #[derive(Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
     pub struct FunctionFlags: u32 {
         const AWAIT     = 0b00000001;
         const YIELD     = 0b00000010;

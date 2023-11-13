@@ -156,4 +156,7 @@ Syntax:
 * [ ] ASDoc
   * [ ] `parse_asdoc`
     * Checks if there is at least one comment in the Source and whether `last_comment.is_asdoc(item_location)` is true, parsing the comment as an `AsDoc` value.
-* [ ] `ParserFacade`
+* `parser_facade`
+  * [x] `parse_expression`
+  * [x] `parse_type_expression`
+  * [ ] `parse_program`

@@ -3363,6 +3363,7 @@ impl<'input> Parser<'input> {
         let last_comment = self.source().comments.borrow().last();
         Ok(last_comment.and_then(|comment| {
             if comment.is_asdoc(&self.token.1) {
+                let content = &comment.content[1..];
                 Some(ast::AsDoc {})
             } else {
                 None
@@ -3513,4 +3514,41 @@ impl DirectiveContext {
 struct ControlContext {
     breakable: bool,
     iteration: bool,
+}
+
+/// Parser facade.
+pub mod parser_facade {
+    pub use crate::*;
+    pub use crate::util::default;
+    pub use std::rc::Rc;
+
+    /// Parses `ListExpression^allowIn` and expects end-of-file.
+    pub fn parse_expression(source: &Rc<Source>) -> Option<Rc<ast::Expression>> {
+        let mut parser = Parser::new(source);
+        if parser.next().is_ok() {
+            let exp = parser.parse_expression(ExpressionContext {
+                ..default()
+            }).ok();
+            if exp.is_some() {
+                let _ = parser.expect_eof();
+            }
+            if source.invalidated() { None } else { exp }
+        } else {
+            None
+        }
+    }
+
+    /// Parses `TypeExpression` and expects end-of-file.
+    pub fn parse_type_expression(source: &Rc<Source>) -> Option<Rc<ast::TypeExpression>> {
+        let mut parser = Parser::new(source);
+        if parser.next().is_ok() {
+            let exp = parser.parse_type_expression().ok();
+            if exp.is_some() {
+                let _ = parser.expect_eof();
+            }
+            if source.invalidated() { None } else { exp }
+        } else {
+            None
+        }
+    }
 }
