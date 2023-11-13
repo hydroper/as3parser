@@ -2485,6 +2485,9 @@ impl<'input> Parser<'input> {
         // IfStatement
         } else if self.peek(Token::If) {
             self.parse_if_statement(context)
+        // SwitchStatement
+        } else if self.peek(Token::Switch) {
+            self.parse_switch_statement(context)
         // ExpressionStatement
         } else {
             self.mark_location();
@@ -2526,9 +2529,7 @@ impl<'input> Parser<'input> {
         self.mark_location();
         self.next()?;
         self.expect(Token::LeftParen)?;
-        let test = self.parse_expression(ExpressionContext {
-            allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
-        })?;
+        let test = self.parse_expression(ExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
         self.expect(Token::RightParen)?;
         let mut semicolon_inserted = false;
         let (consequent, semicolon_inserted_1) = self.parse_substatement(context)?;
@@ -2544,6 +2545,113 @@ impl<'input> Parser<'input> {
             location: self.pop_location(),
             kind: ast::StatementKind::If { condition: test, consequent, alternative },
         }), semicolon_inserted))
+    }
+
+    fn parse_switch_statement(&mut self, context: DirectiveContext) -> Result<(Rc<ast::Statement>, bool), ParserFailure> {
+        let context = context.clone_control_only();
+        self.mark_location();
+        self.next()?;
+        if self.consume_context_keyword("type")? {
+            return self.parse_switch_type_statement(context);
+        }
+        let context = context.override_control_context(ControlContext {
+            iteration: false,
+        });
+        self.expect(Token::LeftParen)?;
+        let discriminant = self.parse_expression(ExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
+        self.expect(Token::RightParen)?;
+        let cases = self.parse_switch_block(context)?;
+        Ok((Rc::new(ast::Statement {
+            location: self.pop_location(),
+            kind: ast::StatementKind::Switch { discriminant, cases },
+        }), true))
+    }
+
+    fn parse_switch_block(&mut self, context: DirectiveContext) -> Result<Vec<ast::SwitchCase>, ParserFailure> {
+        self.expect(Token::LeftBrace)?;
+        let mut cases = vec![];
+        let mut semicolon_inserted = false;
+        while !self.peek(Token::RightBrace) {
+            if !cases.is_empty() && !semicolon_inserted {
+                self.expect(Token::Semicolon)?;
+            }
+            if self.consume(Token::Default)? {
+                self.expect(Token::Colon)?;
+                let mut directives = vec![];
+                semicolon_inserted = false;
+                while !(self.peek(Token::RightBrace) || self.peek(Token::Case) || self.peek(Token::Default)) {
+                    if !directives.is_empty() && !semicolon_inserted {
+                        self.expect(Token::Semicolon)?;
+                    }
+                    let (directive, semicolon_inserted_1) = self.parse_directive(context.clone())?;
+                    directives.push(directive);
+                    semicolon_inserted = semicolon_inserted_1;
+                }
+                cases.push(ast::SwitchCase {
+                    expression: None,
+                    consequent: directives,
+                });
+            } else {
+                self.expect(Token::Case)?;
+                let expression = Some(self.parse_expression(ExpressionContext {
+                    allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
+                })?);
+                self.expect(Token::Colon)?;
+                let mut directives = vec![];
+                semicolon_inserted = false;
+                while !(self.peek(Token::RightBrace) || self.peek(Token::Case) || self.peek(Token::Default)) {
+                    if !directives.is_empty() && !semicolon_inserted {
+                        self.expect(Token::Semicolon)?;
+                    }
+                    let (directive, semicolon_inserted_1) = self.parse_directive(context.clone())?;
+                    directives.push(directive);
+                    semicolon_inserted = semicolon_inserted_1;
+                }
+                cases.push(ast::SwitchCase {
+                    expression,
+                    consequent: directives,
+                });
+            }
+        }
+        self.expect(Token::RightBrace)?;
+        Ok(cases)
+    }
+
+    fn parse_switch_type_statement(&mut self, context: DirectiveContext) -> Result<(Rc<ast::Statement>, bool), ParserFailure> {
+        self.expect(Token::LeftParen)?;
+        let discriminant = self.parse_expression(ExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
+        self.expect(Token::RightParen)?;
+        let cases = self.parse_switch_type_block(context)?;
+        Ok((Rc::new(ast::Statement {
+            location: self.pop_location(),
+            kind: ast::StatementKind::SwitchType { discriminant, cases },
+        }), true))
+    }
+
+    fn parse_switch_type_block(&mut self, context: DirectiveContext) -> Result<Vec<ast::SwitchTypeCase>, ParserFailure> {
+        self.expect(Token::LeftBrace)?;
+        let mut cases = vec![];
+        while !self.peek(Token::RightBrace) {
+            if self.consume(Token::Default)? {
+                let block = self.parse_block(context.clone())?;
+                cases.push(ast::SwitchTypeCase {
+                    pattern: None,
+                    block,
+                });
+            } else {
+                self.expect(Token::Case)?;
+                self.expect(Token::LeftParen)?;
+                let pattern = Some(self.parse_destructuring()?);
+                self.expect(Token::RightParen)?;
+                let block = self.parse_block(context.clone())?;
+                cases.push(ast::SwitchTypeCase {
+                    pattern,
+                    block,
+                });
+            }
+        }
+        self.expect(Token::RightBrace)?;
+        Ok(cases)
     }
 
     fn parse_directive(&mut self, context: DirectiveContext) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
@@ -2631,6 +2739,14 @@ impl DirectiveContext {
             Self::WithControl { .. } => *self,
             _ => Self::Default,
         }
+    }
+
+    fn override_control_context(&self, context: ControlContext) -> Self {
+        let labels = match self {
+            Self::WithControl { control_context: _, labels } => labels.clone(),
+            _ => HashMap::new(),
+        };
+        Self::WithControl { control_context: context, labels }
     }
 }
 

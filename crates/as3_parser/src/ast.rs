@@ -574,13 +574,13 @@ pub enum VariableKind {
 
 #[derive(Clone)]
 pub struct SwitchCase {
-    pub test: Option<Rc<Expression>>,
+    pub expression: Option<Rc<Expression>>,
     pub consequent: Vec<Rc<Directive>>,
 }
 
 #[derive(Clone)]
 pub struct SwitchTypeCase {
-    pub pattern: Rc<Destructuring>,
+    pub pattern: Option<Rc<Destructuring>>,
     pub block: Rc<Block>,
 }
 

@@ -112,8 +112,8 @@ Syntax:
   * [x] Super
   * [x] Block
   * [x] If
-  * [ ] Switch
-  * [ ] Switch type
+  * [x] Switch
+  * [x] Switch type
   * [ ] Do
   * [ ] While
   * [ ] For
