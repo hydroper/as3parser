@@ -167,6 +167,11 @@ pub enum DiagnosticKind {
     MalformedRestParameter = 141,
     IllegalForInInitializer = 142,
     MultipleForInBindings = 143,
+    IllegalBreak = 144,
+    IllegalContinue = 145,
+    UndefinedLabel = 146,
+    ExpressionMustNotFollowLineBreak = 147,
+    TokenMustNotFollowLineBreak = 148,
 }
 
 impl DiagnosticKind {

@@ -26,6 +26,11 @@ lazy_static! {
         DiagnosticKind::MalformedRestParameter.id() => "Malformed rest parameter".into(),
         DiagnosticKind::IllegalForInInitializer.id() => "Illegal for..in initializer".into(),
         DiagnosticKind::MultipleForInBindings.id() => "Multiple for..in bindings".into(),
+        DiagnosticKind::IllegalBreak.id() => "Illegal break statement".into(),
+        DiagnosticKind::IllegalContinue.id() => "Illegal continue statement".into(),
+        DiagnosticKind::UndefinedLabel.id() => "Undefined label {1}".into(),
+        DiagnosticKind::ExpressionMustNotFollowLineBreak.id() => "Expression must not follow line break".into(),
+        DiagnosticKind::TokenMustNotFollowLineBreak.id() => "Token must not follow line break".into(),
         // DiagnosticKind::K.id() => "".into(),
     };
 }

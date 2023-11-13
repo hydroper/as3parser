@@ -517,7 +517,7 @@ pub enum StatementKind {
     Try {
         block: Rc<Block>,
         catch_clauses: Vec<CatchClause>,
-        finally_clause: FinallyClause,
+        finally_clause: Option<FinallyClause>,
     },
     Expression {
         asdoc: Option<AsDoc>,
@@ -538,9 +538,7 @@ pub struct CatchClause {
 }
 
 #[derive(Clone)]
-pub struct FinallyClause {
-    pub block: Rc<Block>,
-}
+pub struct FinallyClause(pub Rc<Block>);
 
 #[derive(Clone)]
 pub enum ForInit {

@@ -120,15 +120,15 @@ Syntax:
     * [x] `for`
     * [x] `for..in`
     * [x] `for each`
-  * [ ] With
-  * [ ] Continue
-  * [ ] Break
-  * [ ] Return
-  * [ ] Throw
-  * [ ] Try
+  * [x] With
+  * [x] Continue
+  * [x] Break
+  * [x] Return
+  * [x] Throw
+  * [x] Try
   * [x] Expression statement
-  * [ ] Labeled statement
-  * [ ] Default XML namespace
+  * [x] Labeled statement
+  * [x] Default XML namespace
   * Substatement
     * [ ] Simple variable declaration
 * Directives
