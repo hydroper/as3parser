@@ -114,10 +114,12 @@ Syntax:
   * [x] If
   * [x] Switch
   * [x] Switch type
-  * [ ] Do
-  * [ ] While
-  * [ ] For
-  * [ ] For in
+  * [x] Do
+  * [x] While
+  * [x] For
+    * [x] `for`
+    * [x] `for..in`
+    * [x] `for each`
   * [ ] With
   * [ ] Continue
   * [ ] Break

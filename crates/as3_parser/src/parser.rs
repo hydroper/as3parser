@@ -2486,8 +2486,20 @@ impl<'input> Parser<'input> {
         } else if self.peek(Token::If) {
             self.parse_if_statement(context)
         // SwitchStatement
+        // `switch type`
         } else if self.peek(Token::Switch) {
             self.parse_switch_statement(context)
+        // DoStatement
+        } else if self.peek(Token::Do) {
+            self.parse_do_statement(context)
+        // WhileStatement
+        } else if self.peek(Token::While) {
+            self.parse_while_statement(context)
+        // ForStatement
+        // `for..in`
+        // `for each`
+        } else if self.peek(Token::For) {
+            self.parse_for_statement(context)
         // ExpressionStatement
         } else {
             self.mark_location();
@@ -2525,7 +2537,10 @@ impl<'input> Parser<'input> {
     }
 
     fn parse_if_statement(&mut self, context: DirectiveContext) -> Result<(Rc<ast::Statement>, bool), ParserFailure> {
-        let context = context.clone_control_only();
+        let context = context.override_control_context(ControlContext {
+            breakable: false,
+            iteration: false,
+        });
         self.mark_location();
         self.next()?;
         self.expect(Token::LeftParen)?;
@@ -2534,7 +2549,11 @@ impl<'input> Parser<'input> {
         let mut semicolon_inserted = false;
         let (consequent, semicolon_inserted_1) = self.parse_substatement(context)?;
         let mut alternative = None;
-        if self.consume(Token::Else)? {
+        if self.peek(Token::Else) {
+            if !semicolon_inserted_1 {
+                self.expect(Token::Semicolon)?;
+            }
+            self.next()?;
             let (alternative_2, semicolon_inserted_2) = self.parse_substatement(context)?;
             alternative = Some(alternative_2);
             semicolon_inserted = semicolon_inserted_2;
@@ -2548,13 +2567,13 @@ impl<'input> Parser<'input> {
     }
 
     fn parse_switch_statement(&mut self, context: DirectiveContext) -> Result<(Rc<ast::Statement>, bool), ParserFailure> {
-        let context = context.clone_control_only();
         self.mark_location();
         self.next()?;
         if self.consume_context_keyword("type")? {
             return self.parse_switch_type_statement(context);
         }
         let context = context.override_control_context(ControlContext {
+            breakable: true,
             iteration: false,
         });
         self.expect(Token::LeftParen)?;
@@ -2618,6 +2637,10 @@ impl<'input> Parser<'input> {
     }
 
     fn parse_switch_type_statement(&mut self, context: DirectiveContext) -> Result<(Rc<ast::Statement>, bool), ParserFailure> {
+        let context = context.override_control_context(ControlContext {
+            breakable: false,
+            iteration: false,
+        });
         self.expect(Token::LeftParen)?;
         let discriminant = self.parse_expression(ExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
         self.expect(Token::RightParen)?;
@@ -2652,6 +2675,234 @@ impl<'input> Parser<'input> {
         }
         self.expect(Token::RightBrace)?;
         Ok(cases)
+    }
+
+    fn parse_do_statement(&mut self, context: DirectiveContext) -> Result<(Rc<ast::Statement>, bool), ParserFailure> {
+        let context = context.clone_control_only();
+        let context = context.override_control_context(ControlContext {
+            breakable: true,
+            iteration: true,
+        });
+        self.mark_location();
+        self.next()?;
+
+        // Body
+        let (body, semicolon_inserted_1) = self.parse_substatement(context)?;
+        if !semicolon_inserted_1 {
+            self.expect(Token::Semicolon)?;
+        }
+
+        self.expect(Token::While)?;
+
+        // Test
+        self.expect(Token::LeftParen)?;
+        let test = self.parse_expression(ExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
+        self.expect(Token::RightParen)?;
+
+        let semicolon_inserted = self.parse_semicolon()?;
+        Ok((Rc::new(ast::Statement {
+            location: self.pop_location(),
+            kind: ast::StatementKind::Do { body, test },
+        }), semicolon_inserted))
+    }
+
+    fn parse_while_statement(&mut self, context: DirectiveContext) -> Result<(Rc<ast::Statement>, bool), ParserFailure> {
+        let context = context.clone_control_only();
+        let context = context.override_control_context(ControlContext {
+            breakable: true,
+            iteration: true,
+        });
+        self.mark_location();
+        self.next()?;
+
+        // Test
+        self.expect(Token::LeftParen)?;
+        let test = self.parse_expression(ExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
+        self.expect(Token::RightParen)?;
+
+        // Body
+        let (body, semicolon_inserted) = self.parse_substatement(context)?;
+
+        Ok((Rc::new(ast::Statement {
+            location: self.pop_location(),
+            kind: ast::StatementKind::While { test, body },
+        }), semicolon_inserted))
+    }
+
+    /// Parses `for`, `for..in` or `for each`.
+    fn parse_for_statement(&mut self, context: DirectiveContext) -> Result<(Rc<ast::Statement>, bool), ParserFailure> {
+        let context = context.clone_control_only();
+        let context = context.override_control_context(ControlContext {
+            breakable: true,
+            iteration: true,
+        });
+        self.mark_location();
+        self.next()?;
+
+        // `for each`
+        if self.consume_context_keyword("each")? {
+            return self.parse_for_each_statement(context);
+        }
+
+        self.expect(Token::LeftParen)?;
+
+        let init_variable = if self.peek(Token::Var) || self.peek(Token::Const) {
+            Some(self.parse_simple_variable_declaration(false)?)
+        } else {
+            None
+        };
+
+        if init_variable.is_some() && self.consume(Token::In)? {
+            return self.parse_for_in_statement_with_left_variable(context, init_variable.unwrap());
+        }
+
+        let mut init_exp = if init_variable.is_none() && !self.peek(Token::Semicolon) {
+            self.parse_opt_expression(ExpressionContext {
+                allow_in: false,
+                min_precedence: OperatorPrecedence::Postfix,
+                ..default()
+            })?
+        } else {
+            None
+        };
+
+        if init_exp.is_some() && self.consume(Token::In)? {
+            return self.parse_for_in_statement_with_left_exp(context, init_exp.unwrap());
+        }
+
+        if init_exp.is_none() && init_variable.is_none() && !self.peek(Token::Semicolon) {
+            init_exp = Some(self.parse_expression(ExpressionContext {
+                allow_in: false, min_precedence: OperatorPrecedence::List, ..default()
+            })?);
+        } else if let Some(exp) = init_exp.as_ref() {
+            init_exp = Some(self.parse_subexpressions(exp.clone(), ExpressionContext {
+                allow_in: false, min_precedence: OperatorPrecedence::List, ..default()
+            })?);
+        }
+
+        let init = if let Some(exp) = init_exp.as_ref() {
+            Some(ast::ForInit::Expression(exp.clone()))
+        } else if let Some(variable) = init_variable.as_ref() {
+            Some(ast::ForInit::Variable(variable.clone()))
+        } else {
+            None
+        };
+
+        self.expect(Token::Semicolon)?;
+        let test = if self.peek(Token::Semicolon) {
+            None
+        } else {
+            Some(self.parse_expression(ExpressionContext {
+                allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
+            })?)
+        };
+        self.expect(Token::Semicolon)?;
+        let update = if self.peek(Token::RightParen) {
+            None
+        } else {
+            Some(self.parse_expression(ExpressionContext {
+                allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
+            })?)
+        };
+        self.expect(Token::RightParen)?;
+
+        // Body
+        let (body, semicolon_inserted) = self.parse_substatement(context)?;
+
+        Ok((Rc::new(ast::Statement {
+            location: self.pop_location(),
+            kind: ast::StatementKind::For { init, test, update, body },
+        }), semicolon_inserted))
+    }
+
+    fn parse_for_each_statement(&mut self, context: DirectiveContext) -> Result<(Rc<ast::Statement>, bool), ParserFailure> {
+        self.expect(Token::LeftParen)?;
+        let left = if self.peek(Token::Var) || self.peek(Token::Const) {
+            let kind = if self.peek(Token::Var) { ast::VariableKind::Var } else { ast::VariableKind::Const };
+            self.next()?;
+            let binding = self.parse_variable_binding(false)?;
+            if let Some(init) = &binding.init {
+                self.add_syntax_error(init.location.clone(), DiagnosticKind::IllegalForInInitializer, vec![]);
+            }
+            ast::ForInLeft::Variable(kind, binding)
+        } else {
+            ast::ForInLeft::Expression(self.parse_expression(ExpressionContext {
+                allow_in: false, min_precedence: OperatorPrecedence::Postfix, ..default()
+            })?)
+        };
+        self.expect(Token::In)?;
+        let right = self.parse_expression(ExpressionContext {
+            allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
+        })?;
+        self.expect(Token::RightParen)?;
+
+        // Body
+        let (body, semicolon_inserted) = self.parse_substatement(context)?;
+
+        Ok((Rc::new(ast::Statement {
+            location: self.pop_location(),
+            kind: ast::StatementKind::ForIn { each: true, left, right, body },
+        }), semicolon_inserted))
+    }
+
+    fn parse_for_in_statement_with_left_variable(&mut self, context: DirectiveContext, left: ast::SimpleVariableDeclaration) -> Result<(Rc<ast::Statement>, bool), ParserFailure> {
+        let variable_kind = left.kind.0;
+        let variable_binding = left.bindings[0].clone();
+
+        if let Some(init) = &variable_binding.init {
+            self.add_syntax_error(init.location.clone(), DiagnosticKind::IllegalForInInitializer, vec![]);
+        }
+
+        if left.bindings.len() > 1 {
+            self.add_syntax_error(left.kind.1.clone(), DiagnosticKind::MultipleForInBindings, vec![]);
+        }
+
+        let right = self.parse_expression(ExpressionContext {
+            allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
+        })?;
+        self.expect(Token::RightParen)?;
+
+        // Body
+        let (body, semicolon_inserted) = self.parse_substatement(context)?;
+
+        Ok((Rc::new(ast::Statement {
+            location: self.pop_location(),
+            kind: ast::StatementKind::ForIn { each: false, left: ast::ForInLeft::Variable(variable_kind, variable_binding), right, body },
+        }), semicolon_inserted))
+    }
+
+    fn parse_for_in_statement_with_left_exp(&mut self, context: DirectiveContext, left: Rc<ast::Expression>) -> Result<(Rc<ast::Statement>, bool), ParserFailure> {
+        let right = self.parse_expression(ExpressionContext {
+            allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
+        })?;
+        self.expect(Token::RightParen)?;
+
+        // Body
+        let (body, semicolon_inserted) = self.parse_substatement(context)?;
+
+        Ok((Rc::new(ast::Statement {
+            location: self.pop_location(),
+            kind: ast::StatementKind::ForIn { each: false, left: ast::ForInLeft::Expression(left), right, body },
+        }), semicolon_inserted))
+    }
+
+    fn parse_simple_variable_declaration(&mut self, allow_in: bool) -> Result<ast::SimpleVariableDeclaration, ParserFailure> {
+        let mut kind: ast::VariableKind;
+        let kind_location = self.token_location();
+        if self.consume(Token::Const)? {
+            kind = ast::VariableKind::Const;
+        } else {
+            self.expect(Token::Var)?;
+            kind = ast::VariableKind::Var;
+        }
+        let mut bindings = vec![self.parse_variable_binding(allow_in)?];
+        while self.consume(Token::Comma)? {
+            bindings.push(self.parse_variable_binding(allow_in)?);
+        }
+        Ok(ast::SimpleVariableDeclaration {
+            kind: (kind, kind_location),
+            bindings,
+        })
     }
 
     fn parse_directive(&mut self, context: DirectiveContext) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
@@ -2728,6 +2979,7 @@ pub enum DirectiveContext {
         super_statement_found: Cell<bool>,
     },
     WithControl {
+        to_be_labeled: Option<String>,
         control_context: ControlContext,
         labels: HashMap<String, ControlContext>,
     },
@@ -2742,15 +2994,41 @@ impl DirectiveContext {
     }
 
     fn override_control_context(&self, context: ControlContext) -> Self {
-        let labels = match self {
-            Self::WithControl { control_context: _, labels } => labels.clone(),
+        let mut label = None;
+        let mut labels = match self {
+            Self::WithControl { control_context: _, labels, to_be_labeled: label1 } => {
+                label = label1.clone();
+                labels.clone()
+            },
             _ => HashMap::new(),
         };
-        Self::WithControl { control_context: context, labels }
+        if let Some(label) = label.clone() {
+            labels[&label] = context.clone();
+        }
+        Self::WithControl { control_context: context, labels, to_be_labeled: None }
+    }
+
+    fn put_label(&self, label: String) -> Self {
+        match self {
+            Self::WithControl { control_context, labels, to_be_labeled: _ } => Self::WithControl {
+                to_be_labeled: Some(label),
+                control_context: control_context.clone(),
+                labels: labels.clone(),
+            },
+            _ => Self::WithControl {
+                to_be_labeled: Some(label),
+                control_context: ControlContext {
+                    breakable: false,
+                    iteration: false,
+                },
+                labels: HashMap::new(),
+            },
+        }
     }
 }
 
 #[derive(Clone)]
 struct ControlContext {
+    breakable: bool,
     iteration: bool,
 }

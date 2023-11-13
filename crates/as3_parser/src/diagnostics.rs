@@ -165,6 +165,8 @@ pub enum DiagnosticKind {
     NotAllowedHere = 1039,
     IllegalNullishCoalescingLeftOperand = 140,
     MalformedRestParameter = 141,
+    IllegalForInInitializer = 142,
+    MultipleForInBindings = 143,
 }
 
 impl DiagnosticKind {

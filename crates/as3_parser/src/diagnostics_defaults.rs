@@ -24,6 +24,8 @@ lazy_static! {
         DiagnosticKind::NotAllowedHere.id() => "{1} not allowed here".into(),
         DiagnosticKind::IllegalNullishCoalescingLeftOperand.id() => "Illegal nullish coalescing left operand".into(),
         DiagnosticKind::MalformedRestParameter.id() => "Malformed rest parameter".into(),
+        DiagnosticKind::IllegalForInInitializer.id() => "Illegal for..in initializer".into(),
+        DiagnosticKind::MultipleForInBindings.id() => "Multiple for..in bindings".into(),
         // DiagnosticKind::K.id() => "".into(),
     };
 }

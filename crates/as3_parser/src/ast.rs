@@ -550,7 +550,7 @@ pub enum ForInit {
 
 #[derive(Clone)]
 pub enum ForInLeft {
-    Variable(SimpleVariableDeclaration),
+    Variable(VariableKind, VariableBinding),
     Expression(Rc<Expression>),
 }
 
