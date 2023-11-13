@@ -464,7 +464,7 @@ pub struct Statement {
 pub enum StatementKind {
     Empty,
     Super(Vec<Rc<Expression>>),
-    Block(Block),
+    Block(Rc<Block>),
     If {
         condition: Rc<Expression>,
         consequent: Rc<Statement>,
@@ -515,7 +515,7 @@ pub enum StatementKind {
         expression: Rc<Expression>,
     },
     Try {
-        block: Block,
+        block: Rc<Block>,
         catch_clauses: Vec<CatchClause>,
         finally_clause: FinallyClause,
     },
@@ -534,12 +534,12 @@ pub enum StatementKind {
 #[derive(Clone)]
 pub struct CatchClause {
     pub pattern: Rc<Destructuring>,
-    pub block: Block,
+    pub block: Rc<Block>,
 }
 
 #[derive(Clone)]
 pub struct FinallyClause {
-    pub block: Block,
+    pub block: Rc<Block>,
 }
 
 #[derive(Clone)]
@@ -581,7 +581,7 @@ pub struct SwitchCase {
 #[derive(Clone)]
 pub struct SwitchTypeCase {
     pub pattern: Rc<Destructuring>,
-    pub block: Block,
+    pub block: Rc<Block>,
 }
 
 #[derive(Clone)]
@@ -619,7 +619,7 @@ pub struct ClassDefinition {
     pub generics: Generics,
     pub extends_clause: Option<Rc<TypeExpression>>,
     pub implements_clause: Option<Vec<Rc<TypeExpression>>>,
-    pub block: Block,
+    pub block: Rc<Block>,
 }
 
 #[derive(Clone)]
@@ -629,7 +629,7 @@ pub struct InterfaceDefinition {
     pub name: (String, Location),
     pub generics: Generics,
     pub extends_clause: Option<Vec<Rc<TypeExpression>>>,
-    pub block: Block,
+    pub block: Rc<Block>,
 }
 
 #[derive(Clone)]
@@ -637,7 +637,7 @@ pub struct EnumDefinition {
     pub asdoc: Option<AsDoc>,
     pub annotations: DefinitionAnnotations,
     pub name: (String, Location),
-    pub block: Block,
+    pub block: Rc<Block>,
 }
 
 #[derive(Clone)]
@@ -811,7 +811,7 @@ bitflags! {
 
 #[derive(Clone)]
 pub enum FunctionBody {
-    Block(Block),
+    Block(Rc<Block>),
     /// The function body is allowed to be an expression
     /// in arrow functions.
     Expression(Rc<Expression>),
@@ -853,7 +853,7 @@ pub struct PackageDefinition {
     pub asdoc: Option<AsDoc>,
     pub location: Location,
     pub id: Vec<(String, Location)>,
-    pub block: Block,
+    pub block: Rc<Block>,
 }
 
 #[derive(Clone)]

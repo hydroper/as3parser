@@ -108,8 +108,8 @@ Syntax:
   * [ ] Reserved words are valid identifiers in function definition names, including regular functions, getters and setters
 * Statements
   * Parsing statement returns (*node*, *semicolonInserted*)
-  * [ ] Empty
-  * [ ] Super
+  * [x] Empty
+  * [x] Super
   * [ ] Block
   * [ ] If
   * [ ] Switch
@@ -124,7 +124,7 @@ Syntax:
   * [ ] Return
   * [ ] Throw
   * [ ] Try
-  * [ ] Expression statement
+  * [x] Expression statement
   * [ ] Labeled statement
   * [ ] Default XML namespace
   * Substatement

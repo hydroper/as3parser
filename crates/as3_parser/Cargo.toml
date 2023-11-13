@@ -4,7 +4,7 @@ version = "0.1.5"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 authors = ["hydroper <matheusdiasdesouzads@gmail.com>"]
-repository = "https://github.com/hydroper/as3"
+repository = "https://github.com/hydroper/as3_parser"
 keywords = ["actionscript", "parser"]
 description = "ActionScript 3 parser and verifier"
 

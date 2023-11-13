@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::{cell::Cell, rc::Rc};
 use crate::*;
 use crate::ast::XmlElement;
 use crate::util::default;
@@ -2418,11 +2418,83 @@ impl<'input> Parser<'input> {
         }))
     }
 
-    fn parse_substatement(&mut self) -> Result<(Rc<ast::Statement>, bool), ParserFailure> {
+    fn parse_semicolon(&mut self) -> Result<bool, ParserFailure> {
+        Ok(self.consume(Token::Semicolon)? || self.peek(Token::RightBrace) || self.previous_token.1.line_break(&self.token.1))
+    }
+
+    fn parse_substatement(&mut self, context: DirectiveContext) -> Result<(Rc<ast::Statement>, bool), ParserFailure> {
         //
     }
 
-    fn parse_opt_statement(&mut self) -> Result<Option<(Rc<ast::Statement>, bool)>, ParserFailure> {
+    fn parse_statement(&mut self, context: DirectiveContext) -> Result<(Rc<ast::Statement>, bool), ParserFailure> {
+        // SuperStatement or ExpressionStatement with `super`
+        if self.peek(Token::Super) {
+            self.mark_location();
+            self.next()?;
+            let arguments = if self.peek(Token::LeftParen) { Some(self.parse_arguments()?) } else { None };
+            let mut semicolon_inserted = false;
+            if arguments.is_some() {
+                semicolon_inserted = self.parse_semicolon()?;
+            }
+            if arguments.is_none() || (!semicolon_inserted && (self.peek(Token::Dot) || self.peek(Token::LeftBracket))) {
+                if !(self.peek(Token::Dot) || self.peek(Token::LeftBracket)) {
+                    self.expect(Token::Dot)?;
+                }
+                self.duplicate_location();
+                // ExpressionStatement (`super`...)
+                let mut expr = Rc::new(ast::Expression {
+                    location: self.pop_location(),
+                    kind: ast::ExpressionKind::Super(arguments),
+                });
+                expr = self.parse_subexpressions(expr, ExpressionContext {
+                    allow_in: true,
+                    min_precedence: OperatorPrecedence::List,
+                    ..default()
+                })?;
+                let semicolon_inserted = self.parse_semicolon()?;
+                Ok((Rc::new(ast::Statement {
+                    location: self.pop_location(),
+                    kind: ast::StatementKind::Expression {
+                        asdoc: None,
+                        expression: expr,
+                    },
+                }), semicolon_inserted))
+            } else {
+                // SuperStatement
+                Ok((Rc::new(ast::Statement {
+                    location: self.pop_location(),
+                    kind: ast::StatementKind::Super(arguments.unwrap()),
+                }), semicolon_inserted))
+            }
+        // EmptyStatement
+        } else if self.peek(Token::Semicolon) {
+            self.mark_location();
+            self.next()?;
+            Ok((Rc::new(ast::Statement {
+                location: self.pop_location(),
+                kind: ast::StatementKind::Empty,
+            }), true))
+        // ExpressionStatement
+        } else {
+            self.mark_location();
+            let asdoc = self.parse_asdoc()?;
+            let exp = self.parse_expression(ExpressionContext {
+                allow_in: true,
+                min_precedence: OperatorPrecedence::List,
+                ..default()
+            })?;
+            let semicolon_inserted = self.parse_semicolon()?;
+            Ok((Rc::new(ast::Statement {
+                location: self.pop_location(),
+                kind: ast::StatementKind::Expression {
+                    asdoc,
+                    expression: exp,
+                },
+            }), semicolon_inserted))
+        }
+    }
+
+    fn parse_block(&mut self, context: DirectiveContext) -> Result<Rc<ast::Block>, ParserFailure> {
         //
     }
 
@@ -2491,7 +2563,8 @@ impl Activation {
 #[derive(Clone)]
 pub enum DirectiveContext {
     Default,
-    Constructor {
+    ClassBlock {
         name: String,
+        super_statement_found: Cell<bool>,
     },
 }
