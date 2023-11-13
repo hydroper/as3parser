@@ -110,8 +110,8 @@ Syntax:
   * Parsing statement returns (*node*, *semicolonInserted*)
   * [x] Empty
   * [x] Super
-  * [ ] Block
-  * [ ] If
+  * [x] Block
+  * [x] If
   * [ ] Switch
   * [ ] Switch type
   * [ ] Do

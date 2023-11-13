@@ -1,4 +1,4 @@
-use std::{cell::Cell, rc::Rc};
+use std::{cell::Cell, collections::HashMap, rc::Rc};
 use crate::*;
 use crate::ast::XmlElement;
 use crate::util::default;
@@ -2474,6 +2474,17 @@ impl<'input> Parser<'input> {
                 location: self.pop_location(),
                 kind: ast::StatementKind::Empty,
             }), true))
+        // Block
+        } else if self.peek(Token::LeftBrace) {
+            self.mark_location();
+            let block = self.parse_block(context)?;
+            Ok((Rc::new(ast::Statement {
+                location: self.pop_location(),
+                kind: ast::StatementKind::Block(block),
+            }), true))
+        // IfStatement
+        } else if self.peek(Token::If) {
+            self.parse_if_statement(context)
         // ExpressionStatement
         } else {
             self.mark_location();
@@ -2495,6 +2506,47 @@ impl<'input> Parser<'input> {
     }
 
     fn parse_block(&mut self, context: DirectiveContext) -> Result<Rc<ast::Block>, ParserFailure> {
+        self.expect(Token::LeftBrace)?;
+        let mut directives = vec![];
+        let mut semicolon_inserted = false;
+        while !self.peek(Token::RightBrace) {
+            if !directives.is_empty() && !semicolon_inserted {
+                self.expect(Token::Semicolon)?;
+            }
+            let (directive, semicolon_inserted_1) = self.parse_directive(context.clone())?;
+            directives.push(directive);
+            semicolon_inserted = semicolon_inserted_1;
+        }
+        self.expect(Token::RightBrace)?;
+        Ok(Rc::new(ast::Block(directives)))
+    }
+
+    fn parse_if_statement(&mut self, context: DirectiveContext) -> Result<(Rc<ast::Statement>, bool), ParserFailure> {
+        let context = context.clone_control_only();
+        self.mark_location();
+        self.next()?;
+        self.expect(Token::LeftParen)?;
+        let test = self.parse_expression(ExpressionContext {
+            allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
+        })?;
+        self.expect(Token::RightParen)?;
+        let mut semicolon_inserted = false;
+        let (consequent, semicolon_inserted_1) = self.parse_substatement(context)?;
+        let mut alternative = None;
+        if self.consume(Token::Else)? {
+            let (alternative_2, semicolon_inserted_2) = self.parse_substatement(context)?;
+            alternative = Some(alternative_2);
+            semicolon_inserted = semicolon_inserted_2;
+        } else {
+            semicolon_inserted = semicolon_inserted_1;
+        }
+        Ok((Rc::new(ast::Statement {
+            location: self.pop_location(),
+            kind: ast::StatementKind::If { condition: test, consequent, alternative },
+        }), semicolon_inserted))
+    }
+
+    fn parse_directive(&mut self, context: DirectiveContext) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
         //
     }
 
@@ -2567,4 +2619,22 @@ pub enum DirectiveContext {
         name: String,
         super_statement_found: Cell<bool>,
     },
+    WithControl {
+        control_context: ControlContext,
+        labels: HashMap<String, ControlContext>,
+    },
+}
+
+impl DirectiveContext {
+    fn clone_control_only(&self) -> Self {
+        match self {
+            Self::WithControl { .. } => *self,
+            _ => Self::Default,
+        }
+    }
+}
+
+#[derive(Clone)]
+struct ControlContext {
+    iteration: bool,
 }
