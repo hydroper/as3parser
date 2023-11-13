@@ -3364,6 +3364,8 @@ impl<'input> Parser<'input> {
         Ok(last_comment.and_then(|comment| {
             if comment.is_asdoc(&self.token.1) {
                 let content = &comment.content[1..];
+                let lines: Vec<&str> = lazy_regex::regex!(r"\n|\r\n?").split(content).collect();
+                
                 Some(ast::AsDoc {})
             } else {
                 None
