@@ -2423,13 +2423,24 @@ impl<'input> Parser<'input> {
     }
 
     fn parse_substatement(&mut self, context: DirectiveContext) -> Result<(Rc<ast::Statement>, bool), ParserFailure> {
-        //
+        if self.peek(Token::Var) || self.peek(Token::Const) {
+            self.mark_location();
+            let declaration = self.parse_simple_variable_declaration(true)?;
+            let semicolon_inserted = self.parse_semicolon()?;
+            let node = Rc::new(ast::Statement {
+                location: self.pop_location(),
+                kind: ast::StatementKind::SimpleVariableDeclaration(declaration),
+            });
+            Ok((node, semicolon_inserted))
+        } else {
+            self.parse_statement(context)
+        }
     }
 
     fn parse_statement(&mut self, context: DirectiveContext) -> Result<(Rc<ast::Statement>, bool), ParserFailure> {
         // ExpressionStatement or LabeledStatement
         if matches!(self.token.0, Token::Identifier(_)) {
-            parse_expression_statement_or_labeled_statement(context)
+            self.parse_expression_statement_or_labeled_statement(context)
         // SuperStatement or ExpressionStatement with `super`
         } else if self.peek(Token::Super) {
             self.mark_location();

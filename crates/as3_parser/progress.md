@@ -130,7 +130,7 @@ Syntax:
   * [x] Labeled statement
   * [x] Default XML namespace
   * Substatement
-    * [ ] Simple variable declaration
+    * [x] Simple variable declaration
 * Directives
   * [ ] Include
   * [ ] Import
