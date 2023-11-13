@@ -46,7 +46,7 @@ if parser.next().is_ok() {
 
 A `ParserFacade` will be provided to allow parsing different constructs with a single method call.
 
-The following will parse an expression and wait for end-of-file.
+The following will parse an expression and expect end-of-file.
 
 ```rust
 let source = Source::new(None, "x ** y".into(), &CompilerOptions::new());

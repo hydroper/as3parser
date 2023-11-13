@@ -1,12 +1,14 @@
 use std::rc::Rc;
 use std::cmp::Ordering;
+use serde::{Serialize, Deserialize};
 use crate::source::Source;
 
 /// Represents a source location. This location includes
 /// spanning lines and columns and the reference source.
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Location {
     /// The source file that this location belongs to.
+    #[serde(skip)]
     pub(crate) source: Rc<Source>,
 
     /// First line number, counted from one.

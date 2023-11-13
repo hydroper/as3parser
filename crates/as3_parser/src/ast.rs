@@ -1,8 +1,9 @@
 use std::rc::Rc;
 use bitflags::bitflags;
+use serde::{Serialize, Deserialize};
 use crate::*;
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct QualifiedIdentifier {
     pub attribute: bool,
     pub qualifier: Option<Rc<Expression>>,
@@ -23,7 +24,7 @@ impl QualifiedIdentifier {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct NonAttributeQualifiedIdentifier {
     pub qualifier: Option<Rc<Expression>>,
     pub name: IdentifierOrBrackets,
@@ -57,13 +58,13 @@ impl NonAttributeQualifiedIdentifier {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum IdentifierOrBrackets {
     Id(String, Location),
     Brackets(Rc<Expression>),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Expression {
     pub location: Location,
     pub kind: ExpressionKind,
@@ -83,7 +84,7 @@ impl Expression {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum ExpressionKind {
     Null,
     Boolean(bool),
@@ -209,7 +210,7 @@ pub enum ExpressionKind {
     OptionalChainingHost,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum AssignmentLeft {
     Expression(Rc<Expression>),
     Destructuring(Rc<Destructuring>),
@@ -224,7 +225,7 @@ impl AssignmentLeft {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum XmlElementContent {
     Expression(Rc<Expression>),
     Markup(String, Location),
@@ -232,7 +233,7 @@ pub enum XmlElementContent {
     Element(XmlElement),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct XmlElement {
     pub location: Location,
     pub opening_tag_name: XmlTagName,
@@ -241,31 +242,31 @@ pub struct XmlElement {
     pub closing_tag_name: Option<XmlTagName>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum XmlTagName {
     Name((String, Location)),
     Expression(Rc<Expression>),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum XmlAttributeOrExpression {
     Attribute(XmlAttribute),
     Expression(Rc<Expression>),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct XmlAttribute {
     pub name: (String, Location),
     pub value: XmlAttributeValueOrExpression,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum XmlAttributeValueOrExpression {
     Value(String),
     Expression(Rc<Expression>),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum ReservedNamespace {
     Public,
     Private,
@@ -284,7 +285,7 @@ impl ToString for ReservedNamespace {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum ObjectField {
     Field {
         key: (ObjectKey, Location),
@@ -313,7 +314,7 @@ impl ObjectField {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum ObjectKey {
     Id(NonAttributeQualifiedIdentifier),
     String(String, Location),
@@ -321,7 +322,7 @@ pub enum ObjectKey {
     Brackets(Rc<Expression>),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Destructuring {
     pub location: Location,
     pub kind: DestructuringKind,
@@ -332,7 +333,7 @@ pub struct Destructuring {
     pub type_annotation: Option<Rc<TypeExpression>>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum DestructuringKind {
     Binding {
         name: (String, Location),
@@ -341,7 +342,7 @@ pub enum DestructuringKind {
     Array(Vec<Option<ArrayDestructuringItem>>),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct RecordDestructuringField {
     pub location: Location,
     pub key: (ObjectKey, Location),
@@ -349,13 +350,13 @@ pub struct RecordDestructuringField {
     pub alias: Option<Rc<Destructuring>>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum ArrayDestructuringItem {
     Pattern(Rc<Destructuring>),
     Rest(Rc<Destructuring>, Location),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct TypeExpression {
     pub location: Location,
     pub kind: TypeExpressionKind,
@@ -396,7 +397,7 @@ impl TypeExpression {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum TypeExpressionKind {
     Id(NonAttributeQualifiedIdentifier),
     DotMember {
@@ -431,14 +432,14 @@ pub enum TypeExpressionKind {
     },
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct FunctionTypeParam {
     pub kind: FunctionParamKind,
     pub name: (String, Location),
     pub type_annotation: Option<Rc<TypeExpression>>,
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
 #[repr(u32)]
 pub enum FunctionParamKind {
     Required = 1,
@@ -452,7 +453,7 @@ impl FunctionParamKind {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct RecordTypeField {
     pub asdoc: Option<AsDoc>,
     pub readonly: bool,
@@ -461,14 +462,14 @@ pub struct RecordTypeField {
     pub type_annotation: Rc<TypeExpression>,
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
 pub enum FieldNullability {
     Unspecified,
     NonNullable,
     Nullable,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Statement {
     pub location: Location,
     pub kind: StatementKind,
@@ -496,7 +497,7 @@ impl Statement {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum StatementKind {
     Empty,
     Super(Vec<Rc<Expression>>),
@@ -567,67 +568,67 @@ pub enum StatementKind {
     SimpleVariableDeclaration(SimpleVariableDeclaration),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct CatchClause {
     pub pattern: Rc<Destructuring>,
     pub block: Rc<Block>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct FinallyClause(pub Rc<Block>);
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum ForInit {
     Variable(SimpleVariableDeclaration),
     Expression(Rc<Expression>),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum ForInLeft {
     Variable(VariableKind, VariableBinding),
     Expression(Rc<Expression>),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct SimpleVariableDeclaration {
     pub kind: (VariableKind, Location),
     pub bindings: Vec<VariableBinding>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct VariableBinding {
     pub pattern: Rc<Destructuring>,
     pub init: Option<Rc<Expression>>,
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
 pub enum VariableKind {
     Var,
     Const,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct SwitchCase {
     pub expression: Option<Rc<Expression>>,
     pub consequent: Vec<Rc<Directive>>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct SwitchTypeCase {
     pub pattern: Option<Rc<Destructuring>>,
     pub block: Rc<Block>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Block(pub Vec<Rc<Directive>>);
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Directive {
     pub location: Location,
     pub kind: DirectiveKind,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum DirectiveKind {
     Statement(Rc<Statement>),
     Include(Rc<IncludeDirective>),
@@ -645,7 +646,7 @@ pub enum DirectiveKind {
     NamespaceDefinition(Rc<NamespaceDefinition>),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct ClassDefinition {
     pub asdoc: Option<AsDoc>,
     pub annotations: DefinitionAnnotations,
@@ -656,7 +657,7 @@ pub struct ClassDefinition {
     pub block: Rc<Block>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct InterfaceDefinition {
     pub asdoc: Option<AsDoc>,
     pub annotations: DefinitionAnnotations,
@@ -666,7 +667,7 @@ pub struct InterfaceDefinition {
     pub block: Rc<Block>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct EnumDefinition {
     pub asdoc: Option<AsDoc>,
     pub annotations: DefinitionAnnotations,
@@ -674,7 +675,7 @@ pub struct EnumDefinition {
     pub block: Rc<Block>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct NamespaceDefinition {
     pub asdoc: Option<AsDoc>,
     pub annotations: DefinitionAnnotations,
@@ -682,10 +683,11 @@ pub struct NamespaceDefinition {
     pub right: Option<Rc<Expression>>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct IncludeDirective {
     pub source: String,
     pub replaced_by: Vec<Rc<Directive>>,
+    #[serde(skip)]
     pub replaced_by_source: Rc<Source>,
 }
 
@@ -698,14 +700,14 @@ pub struct IncludeDirective {
 /// If it is an alias with a package recursive import item,
 /// it is a package set alias that opens the public namespace of
 /// all the respective packages and aliases them into a namespace set.
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct ImportDirective {
     pub alias: Option<(String, Location)>,
     pub package_name: Vec<(String, Location)>,
     pub import_item: (ImportItem, Location),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum ImportItem {
     Wildcard,
     /// `**`
@@ -713,7 +715,7 @@ pub enum ImportItem {
     Name(String, Location),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct VariableDefinition {
     pub asdoc: Option<AsDoc>,
     pub annotations: DefinitionAnnotations,
@@ -721,7 +723,7 @@ pub struct VariableDefinition {
     pub bindings: Vec<VariableBinding>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct FunctionDefinition {
     pub asdoc: Option<AsDoc>,
     pub annotations: DefinitionAnnotations,
@@ -730,7 +732,7 @@ pub struct FunctionDefinition {
     pub common: Rc<FunctionCommon>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct ConstructorDefinition {
     pub asdoc: Option<AsDoc>,
     pub annotations: DefinitionAnnotations,
@@ -738,7 +740,7 @@ pub struct ConstructorDefinition {
     pub common: Rc<FunctionCommon>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct GetterDefinition {
     pub asdoc: Option<AsDoc>,
     pub annotations: DefinitionAnnotations,
@@ -746,7 +748,7 @@ pub struct GetterDefinition {
     pub common: Rc<FunctionCommon>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct SetterDefinition {
     pub asdoc: Option<AsDoc>,
     pub annotations: DefinitionAnnotations,
@@ -754,7 +756,7 @@ pub struct SetterDefinition {
     pub common: Rc<FunctionCommon>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct TypeDefinition {
     pub asdoc: Option<AsDoc>,
     pub annotations: DefinitionAnnotations,
@@ -763,9 +765,10 @@ pub struct TypeDefinition {
     pub right: Rc<TypeExpression>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct DefinitionAnnotations {
     pub metadata: Vec<Rc<Metadata>>,
+    #[serde(skip)]
     pub flag_modifiers: DefinitionModifiersFlags,
     pub access_modifier: Option<Rc<Expression>>,
 }
@@ -781,7 +784,13 @@ bitflags! {
     }
 }
 
-#[derive(Clone)]
+impl Default for DefinitionModifiersFlags {
+    fn default() -> Self {
+        Self::empty()
+    }
+}
+
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Metadata {
     pub asdoc: Option<AsDoc>,
     pub location: Location,
@@ -790,19 +799,19 @@ pub struct Metadata {
     pub entries: Vec<MetadataEntry>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct MetadataEntry {
     pub key: Option<(String, Location)>,
     pub value: (String, Location),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Generics {
     pub params: Option<Vec<Rc<GenericParam>>>,
     pub where_clause: Option<GenericsWhere>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct GenericParam {
     pub location: Location,
     pub name: (String, Location),
@@ -810,26 +819,27 @@ pub struct GenericParam {
     pub default_type: Option<Rc<TypeExpression>>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct GenericsWhere {
     pub constraints: Vec<GenericsWhereConstraint>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct GenericsWhereConstraint {
     pub name: (String, Location),
     pub constraints: Vec<Rc<TypeExpression>>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct FunctionCommon {
+    #[serde(skip)]
     pub flags: FunctionFlags,
     pub params: Vec<FunctionParam>,
     pub return_annotation: Option<Rc<TypeExpression>>,
     pub body: Option<FunctionBody>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct FunctionParam {
     pub location: Location,
     pub kind: FunctionParamKind,
@@ -844,7 +854,13 @@ bitflags! {
     }
 }
 
-#[derive(Clone)]
+impl Default for FunctionFlags {
+    fn default() -> Self {
+        Self::empty()
+    }
+}
+
+#[derive(Clone, Serialize, Deserialize)]
 pub enum FunctionBody {
     Block(Rc<Block>),
     /// The function body is allowed to be an expression
@@ -852,13 +868,13 @@ pub enum FunctionBody {
     Expression(Rc<Expression>),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct AsDoc {
     pub main_body: String,
     pub tags: Vec<AsDocTag>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum AsDocTag {
     Copy(String),
     Default(String),
@@ -883,7 +899,7 @@ pub enum AsDocTag {
     },
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct PackageDefinition {
     pub asdoc: Option<AsDoc>,
     pub location: Location,
@@ -891,7 +907,7 @@ pub struct PackageDefinition {
     pub block: Rc<Block>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Program {
     pub packages: Vec<Rc<PackageDefinition>>,
     pub directives: Vec<Rc<Directive>>,

@@ -17,6 +17,24 @@ pub struct Source {
     pub(crate) subsources: RefCell<Vec<Rc<Source>>>,
 }
 
+impl Default for Source {
+    fn default() -> Self {
+        Self {
+            file_path: None,
+            text: "".into(),
+            line_number_offsets: RefCell::new(vec![0, 0]),
+            already_tokenized: Cell::new(false),
+            diagnostics: RefCell::new(vec![]),
+            invalidated: Cell::new(false),
+            error_count: Cell::new(0),
+            warning_count: Cell::new(0),
+            compiler_options: CompilerOptions::new(),
+            comments: RefCell::new(vec![]),
+            subsources: RefCell::new(vec![]),
+        }
+    }
+}
+
 impl Source {
     /// Constructs a source file in unparsed and non verified state.
     pub fn new(file_path: Option<String>, text: String, compiler_options: &Rc<CompilerOptions>) -> Rc<Self> {

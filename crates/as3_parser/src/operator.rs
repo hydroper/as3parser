@@ -1,6 +1,7 @@
 use crate::*;
+use serde::{Serialize, Deserialize};
 
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub enum Operator {
     PostIncrement,
     PostDecrement,
