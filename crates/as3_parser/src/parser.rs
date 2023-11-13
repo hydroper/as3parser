@@ -3185,7 +3185,9 @@ impl<'input> Parser<'input> {
 
     fn parse_directive(&mut self, context: DirectiveContext) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
         if self.peek(Token::Import) {
-            self.parse_import_directive()
+            self.parse_import_directive(context)
+        } else if self.peek(Token::Use) {
+            self.parse_use_directive(context)
         } else {
             let start = self.token_location();
             let (statement, semicolon_inserted) = self.parse_statement(context)?;
@@ -3204,9 +3206,73 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn parse_include_directive(&mut self, context: DirectiveContext) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
+    fn parse_use_directive(&mut self, context: DirectiveContext) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
         self.mark_location();
-        ()
+        self.next()?;
+        self.expect_context_keyword("namespace")?;
+        let expression = self.parse_expression(ExpressionContext {
+            allow_in: true,
+            min_precedence: OperatorPrecedence::List,
+            ..default()
+        })?;
+        let semicolon_inserted = self.parse_semicolon()?;
+
+        let node = Rc::new(ast::Directive {
+            location: self.pop_location(),
+            kind: ast::DirectiveKind::UseNamespace(expression),
+        });
+
+        Ok((node, semicolon_inserted))
+    }
+
+    fn parse_import_directive(&mut self, context: DirectiveContext) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
+        self.mark_location();
+        self.next()?;
+        let mut alias: Option<(String, Location)> = None;
+        let mut package_name: Vec<(String, Location)> = vec![];
+        let mut import_item = (ast::ImportItem::Wildcard, self.token_location());
+        let id1 = self.expect_identifier(false)?;
+        if self.consume(Token::Assign)? {
+            alias = Some(id1.clone());
+            package_name.push(self.expect_identifier(false)?);
+        } else {
+            package_name.push(id1);
+        }
+
+        if !self.peek(Token::Dot) {
+            self.expect(Token::Dot)?;
+        }
+
+        while self.consume(Token::Dot)? {
+            if self.peek(Token::Times) {
+                import_item = (ast::ImportItem::Wildcard, self.token_location());
+                self.next()?;
+                break;
+            } else if self.peek(Token::Power) {
+                import_item = (ast::ImportItem::Recursive, self.token_location());
+                self.next()?;
+                break;
+            } else {
+                let id1 = self.expect_identifier(true)?;
+                if !self.peek(Token::Dot) {
+                    import_item = (ast::ImportItem::Name(id1.0, id1.1.clone()), id1.1.clone());
+                    break;
+                }
+            }
+        }
+
+        let semicolon_inserted = self.parse_semicolon()?;
+
+        let node = Rc::new(ast::Directive {
+            location: self.pop_location(),
+            kind: ast::DirectiveKind::Import(Rc::new(ast::ImportDirective {
+                alias,
+                package_name,
+                import_item,
+            })),
+        });
+
+        Ok((node, semicolon_inserted))
     }
 
     fn parse_include_directive(&mut self, context: DirectiveContext, start: Location) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {

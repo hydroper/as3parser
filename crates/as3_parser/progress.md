@@ -133,8 +133,8 @@ Syntax:
     * [x] Simple variable declaration
 * Directives
   * [x] Include
-  * [ ] Import
-  * [ ] Use namespace
+  * [x] Import
+  * [x] Use namespace
   * Parse annotatable definitions from
     * [ ] Meta data (`statement.list_meta_data_expressions()` and postprocessing)
     * [ ] Modifiers
@@ -150,6 +150,9 @@ Syntax:
   * [ ] Enum definition
   * [ ] Interface definition
   * [ ] Namespace definition
+* [ ] Program
+  * [ ] Packages
+  * [ ] Top level directives
 * [ ] ASDoc
   * [ ] `parse_asdoc`
     * Checks if there is at least one comment in the Source and whether `last_comment.is_asdoc(item_location)` is true, parsing the comment as an `AsDoc` value.

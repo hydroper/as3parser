@@ -710,7 +710,7 @@ pub enum ImportItem {
     Wildcard,
     /// `**`
     Recursive,
-    Name(String),
+    Name(String, Location),
 }
 
 #[derive(Clone)]
