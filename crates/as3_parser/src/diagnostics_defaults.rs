@@ -31,6 +31,8 @@ lazy_static! {
         DiagnosticKind::UndefinedLabel.id() => "Undefined label {1}".into(),
         DiagnosticKind::ExpressionMustNotFollowLineBreak.id() => "Expression must not follow line break".into(),
         DiagnosticKind::TokenMustNotFollowLineBreak.id() => "Token must not follow line break".into(),
+        DiagnosticKind::ParentSourceIsNotAFile.id() => "Parent source is not a file".into(),
+        DiagnosticKind::FailedToIncludeFile.id() => "Failed to include file".into(),
         // DiagnosticKind::K.id() => "".into(),
     };
 }

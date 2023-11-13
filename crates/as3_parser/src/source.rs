@@ -14,6 +14,7 @@ pub struct Source {
     pub(crate) invalidated: Cell<bool>,
     pub(crate) compiler_options: Rc<CompilerOptions>,
     pub(crate) comments: RefCell<Vec<Comment>>,
+    pub(crate) subsources: RefCell<Vec<Rc<Source>>>,
 }
 
 impl Source {
@@ -30,6 +31,7 @@ impl Source {
             warning_count: Cell::new(0),
             compiler_options: Rc::clone(compiler_options),
             comments: RefCell::new(vec![]),
+            subsources: RefCell::new(vec![]),
         })
     }
 
@@ -55,6 +57,16 @@ impl Source {
         &self.comments
     }
 
+    /// Returns source files belonging to include directives
+    /// of this source.
+    pub fn subsources(&self) -> Vec<Rc<Source>> {
+        let mut result = vec![];
+        for source in self.subsources.borrow().iter() {
+            result.push(Rc::clone(&source));
+        }
+        result
+    }
+
     /// Diagnostics of the source file after parsing and/or
     /// verification.
     pub fn diagnostics(&self) -> Vec<Diagnostic> {
@@ -63,6 +75,9 @@ impl Source {
 
     pub fn sort_diagnostics(&self) {
         self.diagnostics.borrow_mut().sort();
+        for subsource in self.subsources.borrow().iter() {
+            subsource.sort_diagnostics();
+        }
     }
 
     pub fn add_diagnostic(&self, diagnostic: Diagnostic) {

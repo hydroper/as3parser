@@ -69,6 +69,20 @@ pub struct Expression {
     pub kind: ExpressionKind,
 }
 
+impl Expression {
+    pub(crate) fn list_metadata_expressions(self: &Rc<Self>) -> Option<Vec<Rc<Self>>> {
+        match self.kind {
+            ExpressionKind::ArrayInitializer { .. } => Some(vec![Rc::clone(self)]),
+            ExpressionKind::BracketsMember { base, key, .. } => {
+                let mut result = base.list_metadata_expressions()?;
+                result.push(Rc::clone(&key));
+                Some(result)
+            },
+            _ => None,
+        }
+    }
+}
+
 #[derive(Clone)]
 pub enum ExpressionKind {
     Null,
@@ -460,6 +474,28 @@ pub struct Statement {
     pub kind: StatementKind,
 }
 
+impl Statement {
+    pub(crate) fn to_identifier(&self) -> Option<(String, Location)> {
+        if let StatementKind::Expression { expression, .. } = &self.kind {
+            if let ExpressionKind::Id(id) = &expression.kind {
+                id.to_identifier()
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    }
+
+    pub(crate) fn list_metadata_expressions(&self) -> Option<Vec<Rc<Expression>>> {
+        if let StatementKind::Expression { expression, .. } = &self.kind {
+            expression.list_metadata_expressions()
+        } else {
+            None
+        }
+    }
+}
+
 #[derive(Clone)]
 pub enum StatementKind {
     Empty,
@@ -650,6 +686,7 @@ pub struct NamespaceDefinition {
 pub struct IncludeDirective {
     pub source: String,
     pub replaced_by: Vec<Rc<Directive>>,
+    pub replaced_by_source: Rc<Source>,
 }
 
 /// An import directive.

@@ -30,14 +30,27 @@ What the parser currently looks like:
 use as3_parser::*;
 let source = Source::new(None, "x ** y".into(), &CompilerOptions::new());
 let mut parser = Parser::new(&source);
-let exp = parser.parse_expression(ExpressionContext {
-    ..default()
-}).ok();
-if exp.is_some() {
-    parser.expect_eof();
+if parser.next().is_ok() {
+    let exp = parser.parse_expression(ExpressionContext {
+        ..default()
+    }).ok();
+    if exp.is_some() {
+        let _ = parser.expect_eof();
+    }
+    if !source.invalidated() {
+        let exp = exp.unwrap();
+        // exp: Rc<ast::Expression>
+    }
 }
-if !source.invalidated() {
-    let exp = exp.unwrap();
+```
+
+A `ParserFacade` will be provided to allow parsing different constructs with a single method call.
+
+The following will parse an expression and wait for end-of-file.
+
+```rust
+let source = Source::new(None, "x ** y".into(), &CompilerOptions::new());
+if let Some(exp) = ParserFacade::parse_expression(source) {
     // exp: Rc<ast::Expression>
 }
 ```

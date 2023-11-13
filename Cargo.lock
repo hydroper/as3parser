@@ -64,9 +64,9 @@ checksum = "ef8ae57c4978a2acd8b869ce6b9ca1dfe817bff704c220209fdef2c0b75a01b9"
 
 [[package]]
 name = "file_paths"
-version = "0.1.2"
+version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "29d8ab237e56d61d866204d981374b344ee83e84e0ab337b0ba53ce8e62a293b"
+checksum = "6655a548f719048f152b0349acf5f1b0fa7ce430acb49d4afc1d42513f160549"
 dependencies = [
  "lazy-regex",
 ]

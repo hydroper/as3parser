@@ -19,9 +19,9 @@ use as3_parser::*;
 let _n = "n".to_owned();
 let source = Source::new(None, "n * n".into(), &CompilerOptions::new());
 let mut tokenizer = Tokenizer::new(&source);
-assert!(matches!(tokenizer.scan_ie_div(true), Ok((Token::Identifier(_n), _))));
-assert!(matches!(tokenizer.scan_ie_div(true), Ok((Token::Times, _))));
-assert!(matches!(tokenizer.scan_ie_div(true), Ok((Token::Identifier(_n), _))));
+assert!(matches!(tokenizer.scan_ie_div(), Ok((Token::Identifier(_n), _))));
+assert!(matches!(tokenizer.scan_ie_div(), Ok((Token::Times, _))));
+assert!(matches!(tokenizer.scan_ie_div(), Ok((Token::Identifier(_n), _))));
 ```
 
 *Parsing*: not available yet.

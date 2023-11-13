@@ -568,7 +568,7 @@ impl<'input> Parser<'input> {
         self.validate_function_parameter_list(&params)?;
         self.expect(Token::FatArrow)?;
         let body: ast::FunctionBody = if self.peek(Token::LeftBrace) {
-            ast::FunctionBody::Block(self.parse_block(DirectiveContext::Default))
+            ast::FunctionBody::Block(self.parse_block(DirectiveContext::Default)?)
         } else {
             ast::FunctionBody::Expression(self.parse_expression(ExpressionContext {
                 min_precedence: OperatorPrecedence::AssignmentAndOther,
@@ -3184,7 +3184,113 @@ impl<'input> Parser<'input> {
     }
 
     fn parse_directive(&mut self, context: DirectiveContext) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
+        if self.peek(Token::Import) {
+            self.parse_import_directive()
+        } else {
+            let start = self.token_location();
+            let (statement, semicolon_inserted) = self.parse_statement(context)?;
+
+            let id = statement.to_identifier();
+            if let Some(id) = id {
+                if id.0 == "include" && id.1.character_count() == "include".len() && matches!(self.token.0, Token::StringLiteral(_)) && !semicolon_inserted {
+                    return self.parse_include_directive(context, start.clone());
+                }
+            }
+
+            Ok((Rc::new(ast::Directive {
+                location: self.pop_location(),
+                kind: ast::DirectiveKind::Statement(Rc::clone(&statement)),
+            }), semicolon_inserted))
+        }
+    }
+
+    fn parse_include_directive(&mut self, context: DirectiveContext) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
+        self.mark_location();
         ()
+    }
+
+    fn parse_include_directive(&mut self, context: DirectiveContext, start: Location) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
+        self.push_location(&start);
+        let source_path_location = self.token_location();
+        let Token::StringLiteral(source) = &self.token.0 else {
+            panic!();
+        };
+        let source = source.clone();
+        self.next()?;
+        let semicolon_inserted = self.parse_semicolon()?;
+
+        let mut replaced_by_source: Option<Rc<Source>> = None;
+
+        // Select origin file path
+        let origin_file_path = if let Some(file_path) = self.tokenizer.source.file_path.clone() {
+            Some(file_path)
+        } else {
+            std::env::current_dir().ok().map(|d| d.to_string_lossy().into_owned())
+        };
+
+        // Resolve source
+        if let Some(origin_file_path) = origin_file_path {
+            let sub_file_path = file_paths::FlexPath::from_n_native([origin_file_path.as_ref(), source.as_ref()]).to_string_with_flex_separator();
+            if let Ok(content) = std::fs::read_to_string(&sub_file_path) {
+                replaced_by_source = Some(Source::new(Some(sub_file_path.clone()), content, &self.tokenizer.source.compiler_options));
+            } else {
+                self.add_syntax_error(source_path_location.clone(), DiagnosticKind::FailedToIncludeFile, vec![]);
+            }
+        } else {
+            self.add_syntax_error(source_path_location.clone(), DiagnosticKind::ParentSourceIsNotAFile, vec![]);
+        }
+
+        // If source was not resolved successfully, use a placeholder
+        if replaced_by_source.is_none() {
+            replaced_by_source = Some(Source::new(None, "".into(), &self.tokenizer.source.compiler_options));
+        }
+
+        let replaced_by_source = replaced_by_source.unwrap();
+
+        // Add subsource to super source
+        self.tokenizer.source.subsources.borrow_mut().push(Rc::clone(&replaced_by_source));
+
+        // Parse directives from replacement source
+        let replaced_by = Self::parse_include_directive_source(&replaced_by_source, context);
+
+        // Delegate subsource errors to super source
+        if replaced_by_source.invalidated() {
+            self.tokenizer.source.invalidated.set(true);
+        }
+
+        let node = Rc::new(ast::Directive {
+            location: self.pop_location(),
+            kind: ast::DirectiveKind::Include(Rc::new(ast::IncludeDirective {
+                source,
+                replaced_by,
+                replaced_by_source: Rc::clone(&replaced_by_source),
+            })),
+        });
+
+        Ok((node, semicolon_inserted))
+    }
+
+    fn parse_include_directive_source(replaced_by_source: &Rc<Source>, context: DirectiveContext) -> Vec<Rc<ast::Directive>> {
+        let mut parser = Self::new(replaced_by_source);
+        if parser.next().is_ok() {
+            parser.parse_directives(context).unwrap_or(vec![])
+        } else {
+            vec![]
+        }
+    }
+
+    fn parse_directives(&mut self, context: DirectiveContext) -> Result<Vec<Rc<ast::Directive>>, ParserFailure> {
+        let mut directives = vec![];
+        let mut semicolon_inserted = false;
+        while !self.peek(Token::Eof) {
+            if !directives.is_empty() && !semicolon_inserted {
+                self.expect(Token::Semicolon)?;
+            }
+            let (directive, semicolon_inserted_1) = self.parse_directive(context.clone())?;
+            directives.push(directive);
+            semicolon_inserted = semicolon_inserted_1;
+        }
+        Ok(directives)
     }
 
     fn parse_asdoc(&mut self) -> Result<Option<ast::AsDoc>, ParserFailure> {

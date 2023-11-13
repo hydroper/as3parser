@@ -12,7 +12,7 @@ description = "ActionScript 3 parser and verifier"
 
 [dependencies]
 bitflags = "2.4.1"
-file_paths = "0.1.2"
+file_paths = "1.0.0"
 conv = "0.3.3"
 late_format = "1.0.0"
 maplit = "1.0.2"

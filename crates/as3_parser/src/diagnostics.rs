@@ -172,6 +172,8 @@ pub enum DiagnosticKind {
     UndefinedLabel = 146,
     ExpressionMustNotFollowLineBreak = 147,
     TokenMustNotFollowLineBreak = 148,
+    ParentSourceIsNotAFile = 149,
+    FailedToIncludeFile = 150,
 }
 
 impl DiagnosticKind {
