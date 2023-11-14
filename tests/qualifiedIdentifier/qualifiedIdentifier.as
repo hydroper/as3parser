@@ -1,5 +1,3 @@
-o.public::x
-/*
 *
 public::x
 ; (q)::x
@@ -10,4 +8,3 @@ o.(q)::x
 o.q::x
 o.q::[k]
 o.@x;
-*/

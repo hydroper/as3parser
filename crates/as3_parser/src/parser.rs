@@ -2560,7 +2560,6 @@ impl<'input> Parser<'input> {
         self.mark_location();
         let asdoc = self.parse_asdoc()?;
         let id = self.expect_identifier(false)?;
-        self.next()?;
 
         // LabeledStatement
         if self.consume(Token::Colon)? {

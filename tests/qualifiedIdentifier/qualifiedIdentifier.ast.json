@@ -1,1 +1,812 @@
-{}
+{
+  "location": {
+    "first_line_number": 1,
+    "last_line_number": 10,
+    "first_offset": 0,
+    "last_offset": 0
+  },
+  "packages": [],
+  "directives": [
+    {
+      "location": {
+        "first_line_number": 1,
+        "last_line_number": 2,
+        "first_offset": 0,
+        "last_offset": 3
+      },
+      "kind": {
+        "Statement": {
+          "location": {
+            "first_line_number": 1,
+            "last_line_number": 2,
+            "first_offset": 0,
+            "last_offset": 3
+          },
+          "kind": {
+            "Expression": {
+              "asdoc": null,
+              "expression": {
+                "location": {
+                  "first_line_number": 1,
+                  "last_line_number": 1,
+                  "first_offset": 0,
+                  "last_offset": 1
+                },
+                "kind": {
+                  "Id": {
+                    "attribute": false,
+                    "qualifier": null,
+                    "name": {
+                      "Id": [
+                        "*",
+                        {
+                          "first_line_number": 1,
+                          "last_line_number": 1,
+                          "first_offset": 0,
+                          "last_offset": 1
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "location": {
+        "first_line_number": 2,
+        "last_line_number": 3,
+        "first_offset": 3,
+        "last_offset": 16
+      },
+      "kind": {
+        "Statement": {
+          "location": {
+            "first_line_number": 2,
+            "last_line_number": 3,
+            "first_offset": 3,
+            "last_offset": 16
+          },
+          "kind": {
+            "Expression": {
+              "asdoc": null,
+              "expression": {
+                "location": {
+                  "first_line_number": 2,
+                  "last_line_number": 3,
+                  "first_offset": 3,
+                  "last_offset": 14
+                },
+                "kind": {
+                  "Id": {
+                    "attribute": false,
+                    "qualifier": {
+                      "location": {
+                        "first_line_number": 2,
+                        "last_line_number": 2,
+                        "first_offset": 3,
+                        "last_offset": 9
+                      },
+                      "kind": {
+                        "ReservedNamespace": "Public"
+                      }
+                    },
+                    "name": {
+                      "Id": [
+                        "x",
+                        {
+                          "first_line_number": 2,
+                          "last_line_number": 2,
+                          "first_offset": 11,
+                          "last_offset": 12
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "location": {
+        "first_line_number": 3,
+        "last_line_number": 4,
+        "first_offset": 16,
+        "last_offset": 24
+      },
+      "kind": {
+        "Statement": {
+          "location": {
+            "first_line_number": 3,
+            "last_line_number": 4,
+            "first_offset": 16,
+            "last_offset": 24
+          },
+          "kind": {
+            "Expression": {
+              "asdoc": null,
+              "expression": {
+                "location": {
+                  "first_line_number": 3,
+                  "last_line_number": 4,
+                  "first_offset": 16,
+                  "last_offset": 24
+                },
+                "kind": {
+                  "Id": {
+                    "attribute": false,
+                    "qualifier": {
+                      "location": {
+                        "first_line_number": 3,
+                        "last_line_number": 3,
+                        "first_offset": 17,
+                        "last_offset": 18
+                      },
+                      "kind": {
+                        "Id": {
+                          "attribute": false,
+                          "qualifier": null,
+                          "name": {
+                            "Id": [
+                              "q",
+                              {
+                                "first_line_number": 3,
+                                "last_line_number": 3,
+                                "first_offset": 17,
+                                "last_offset": 18
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "name": {
+                      "Id": [
+                        "x",
+                        {
+                          "first_line_number": 3,
+                          "last_line_number": 3,
+                          "first_offset": 21,
+                          "last_offset": 22
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "location": {
+        "first_line_number": 4,
+        "last_line_number": 5,
+        "first_offset": 24,
+        "last_offset": 29
+      },
+      "kind": {
+        "Statement": {
+          "location": {
+            "first_line_number": 4,
+            "last_line_number": 5,
+            "first_offset": 24,
+            "last_offset": 29
+          },
+          "kind": {
+            "Expression": {
+              "asdoc": null,
+              "expression": {
+                "location": {
+                  "first_line_number": 4,
+                  "last_line_number": 5,
+                  "first_offset": 24,
+                  "last_offset": 29
+                },
+                "kind": {
+                  "DotMember": {
+                    "base": {
+                      "location": {
+                        "first_line_number": 4,
+                        "last_line_number": 4,
+                        "first_offset": 24,
+                        "last_offset": 25
+                      },
+                      "kind": {
+                        "Id": {
+                          "attribute": false,
+                          "qualifier": null,
+                          "name": {
+                            "Id": [
+                              "o",
+                              {
+                                "first_line_number": 4,
+                                "last_line_number": 4,
+                                "first_offset": 24,
+                                "last_offset": 25
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "id": {
+                      "attribute": false,
+                      "qualifier": null,
+                      "name": {
+                        "Id": [
+                          "*",
+                          {
+                            "first_line_number": 4,
+                            "last_line_number": 4,
+                            "first_offset": 26,
+                            "last_offset": 27
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "location": {
+        "first_line_number": 5,
+        "last_line_number": 6,
+        "first_offset": 29,
+        "last_offset": 39
+      },
+      "kind": {
+        "Statement": {
+          "location": {
+            "first_line_number": 5,
+            "last_line_number": 6,
+            "first_offset": 29,
+            "last_offset": 39
+          },
+          "kind": {
+            "Expression": {
+              "asdoc": null,
+              "expression": {
+                "location": {
+                  "first_line_number": 5,
+                  "last_line_number": 6,
+                  "first_offset": 29,
+                  "last_offset": 39
+                },
+                "kind": {
+                  "DotMember": {
+                    "base": {
+                      "location": {
+                        "first_line_number": 5,
+                        "last_line_number": 5,
+                        "first_offset": 29,
+                        "last_offset": 30
+                      },
+                      "kind": {
+                        "Id": {
+                          "attribute": false,
+                          "qualifier": null,
+                          "name": {
+                            "Id": [
+                              "o",
+                              {
+                                "first_line_number": 5,
+                                "last_line_number": 5,
+                                "first_offset": 29,
+                                "last_offset": 30
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "id": {
+                      "attribute": false,
+                      "qualifier": null,
+                      "name": {
+                        "Id": [
+                          "public",
+                          {
+                            "first_line_number": 5,
+                            "last_line_number": 5,
+                            "first_offset": 31,
+                            "last_offset": 37
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "location": {
+        "first_line_number": 6,
+        "last_line_number": 7,
+        "first_offset": 39,
+        "last_offset": 52
+      },
+      "kind": {
+        "Statement": {
+          "location": {
+            "first_line_number": 6,
+            "last_line_number": 7,
+            "first_offset": 39,
+            "last_offset": 52
+          },
+          "kind": {
+            "Expression": {
+              "asdoc": null,
+              "expression": {
+                "location": {
+                  "first_line_number": 6,
+                  "last_line_number": 7,
+                  "first_offset": 39,
+                  "last_offset": 52
+                },
+                "kind": {
+                  "DotMember": {
+                    "base": {
+                      "location": {
+                        "first_line_number": 6,
+                        "last_line_number": 6,
+                        "first_offset": 39,
+                        "last_offset": 40
+                      },
+                      "kind": {
+                        "Id": {
+                          "attribute": false,
+                          "qualifier": null,
+                          "name": {
+                            "Id": [
+                              "o",
+                              {
+                                "first_line_number": 6,
+                                "last_line_number": 6,
+                                "first_offset": 39,
+                                "last_offset": 40
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "id": {
+                      "attribute": false,
+                      "qualifier": {
+                        "location": {
+                          "first_line_number": 6,
+                          "last_line_number": 6,
+                          "first_offset": 41,
+                          "last_offset": 47
+                        },
+                        "kind": {
+                          "ReservedNamespace": "Public"
+                        }
+                      },
+                      "name": {
+                        "Id": [
+                          "x",
+                          {
+                            "first_line_number": 6,
+                            "last_line_number": 6,
+                            "first_offset": 49,
+                            "last_offset": 50
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "location": {
+        "first_line_number": 7,
+        "last_line_number": 8,
+        "first_offset": 52,
+        "last_offset": 62
+      },
+      "kind": {
+        "Statement": {
+          "location": {
+            "first_line_number": 7,
+            "last_line_number": 8,
+            "first_offset": 52,
+            "last_offset": 62
+          },
+          "kind": {
+            "Expression": {
+              "asdoc": null,
+              "expression": {
+                "location": {
+                  "first_line_number": 7,
+                  "last_line_number": 8,
+                  "first_offset": 52,
+                  "last_offset": 62
+                },
+                "kind": {
+                  "DotMember": {
+                    "base": {
+                      "location": {
+                        "first_line_number": 7,
+                        "last_line_number": 7,
+                        "first_offset": 52,
+                        "last_offset": 53
+                      },
+                      "kind": {
+                        "Id": {
+                          "attribute": false,
+                          "qualifier": null,
+                          "name": {
+                            "Id": [
+                              "o",
+                              {
+                                "first_line_number": 7,
+                                "last_line_number": 7,
+                                "first_offset": 52,
+                                "last_offset": 53
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "id": {
+                      "attribute": false,
+                      "qualifier": {
+                        "location": {
+                          "first_line_number": 7,
+                          "last_line_number": 7,
+                          "first_offset": 55,
+                          "last_offset": 56
+                        },
+                        "kind": {
+                          "Id": {
+                            "attribute": false,
+                            "qualifier": null,
+                            "name": {
+                              "Id": [
+                                "q",
+                                {
+                                  "first_line_number": 7,
+                                  "last_line_number": 7,
+                                  "first_offset": 55,
+                                  "last_offset": 56
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      "name": {
+                        "Id": [
+                          "x",
+                          {
+                            "first_line_number": 7,
+                            "last_line_number": 7,
+                            "first_offset": 59,
+                            "last_offset": 60
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "location": {
+        "first_line_number": 8,
+        "last_line_number": 9,
+        "first_offset": 62,
+        "last_offset": 70
+      },
+      "kind": {
+        "Statement": {
+          "location": {
+            "first_line_number": 8,
+            "last_line_number": 9,
+            "first_offset": 62,
+            "last_offset": 70
+          },
+          "kind": {
+            "Expression": {
+              "asdoc": null,
+              "expression": {
+                "location": {
+                  "first_line_number": 8,
+                  "last_line_number": 9,
+                  "first_offset": 62,
+                  "last_offset": 70
+                },
+                "kind": {
+                  "DotMember": {
+                    "base": {
+                      "location": {
+                        "first_line_number": 8,
+                        "last_line_number": 8,
+                        "first_offset": 62,
+                        "last_offset": 63
+                      },
+                      "kind": {
+                        "Id": {
+                          "attribute": false,
+                          "qualifier": null,
+                          "name": {
+                            "Id": [
+                              "o",
+                              {
+                                "first_line_number": 8,
+                                "last_line_number": 8,
+                                "first_offset": 62,
+                                "last_offset": 63
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "id": {
+                      "attribute": false,
+                      "qualifier": {
+                        "location": {
+                          "first_line_number": 8,
+                          "last_line_number": 8,
+                          "first_offset": 64,
+                          "last_offset": 65
+                        },
+                        "kind": {
+                          "Id": {
+                            "attribute": false,
+                            "qualifier": null,
+                            "name": {
+                              "Id": [
+                                "q",
+                                {
+                                  "first_line_number": 8,
+                                  "last_line_number": 8,
+                                  "first_offset": 64,
+                                  "last_offset": 65
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      "name": {
+                        "Id": [
+                          "x",
+                          {
+                            "first_line_number": 8,
+                            "last_line_number": 8,
+                            "first_offset": 67,
+                            "last_offset": 68
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "location": {
+        "first_line_number": 9,
+        "last_line_number": 10,
+        "first_offset": 70,
+        "last_offset": 80
+      },
+      "kind": {
+        "Statement": {
+          "location": {
+            "first_line_number": 9,
+            "last_line_number": 10,
+            "first_offset": 70,
+            "last_offset": 80
+          },
+          "kind": {
+            "Expression": {
+              "asdoc": null,
+              "expression": {
+                "location": {
+                  "first_line_number": 9,
+                  "last_line_number": 10,
+                  "first_offset": 70,
+                  "last_offset": 80
+                },
+                "kind": {
+                  "DotMember": {
+                    "base": {
+                      "location": {
+                        "first_line_number": 9,
+                        "last_line_number": 9,
+                        "first_offset": 70,
+                        "last_offset": 71
+                      },
+                      "kind": {
+                        "Id": {
+                          "attribute": false,
+                          "qualifier": null,
+                          "name": {
+                            "Id": [
+                              "o",
+                              {
+                                "first_line_number": 9,
+                                "last_line_number": 9,
+                                "first_offset": 70,
+                                "last_offset": 71
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "id": {
+                      "attribute": false,
+                      "qualifier": {
+                        "location": {
+                          "first_line_number": 9,
+                          "last_line_number": 9,
+                          "first_offset": 72,
+                          "last_offset": 73
+                        },
+                        "kind": {
+                          "Id": {
+                            "attribute": false,
+                            "qualifier": null,
+                            "name": {
+                              "Id": [
+                                "q",
+                                {
+                                  "first_line_number": 9,
+                                  "last_line_number": 9,
+                                  "first_offset": 72,
+                                  "last_offset": 73
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      "name": {
+                        "Brackets": {
+                          "location": {
+                            "first_line_number": 9,
+                            "last_line_number": 9,
+                            "first_offset": 76,
+                            "last_offset": 77
+                          },
+                          "kind": {
+                            "Id": {
+                              "attribute": false,
+                              "qualifier": null,
+                              "name": {
+                                "Id": [
+                                  "k",
+                                  {
+                                    "first_line_number": 9,
+                                    "last_line_number": 9,
+                                    "first_offset": 76,
+                                    "last_offset": 77
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "location": {
+        "first_line_number": 10,
+        "last_line_number": 10,
+        "first_offset": 80,
+        "last_offset": 0
+      },
+      "kind": {
+        "Statement": {
+          "location": {
+            "first_line_number": 10,
+            "last_line_number": 10,
+            "first_offset": 80,
+            "last_offset": 0
+          },
+          "kind": {
+            "Expression": {
+              "asdoc": null,
+              "expression": {
+                "location": {
+                  "first_line_number": 10,
+                  "last_line_number": 10,
+                  "first_offset": 80,
+                  "last_offset": 84
+                },
+                "kind": {
+                  "DotMember": {
+                    "base": {
+                      "location": {
+                        "first_line_number": 10,
+                        "last_line_number": 10,
+                        "first_offset": 80,
+                        "last_offset": 81
+                      },
+                      "kind": {
+                        "Id": {
+                          "attribute": false,
+                          "qualifier": null,
+                          "name": {
+                            "Id": [
+                              "o",
+                              {
+                                "first_line_number": 10,
+                                "last_line_number": 10,
+                                "first_offset": 80,
+                                "last_offset": 81
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "id": {
+                      "attribute": true,
+                      "qualifier": null,
+                      "name": {
+                        "Id": [
+                          "x",
+                          {
+                            "first_line_number": 10,
+                            "last_line_number": 10,
+                            "first_offset": 83,
+                            "last_offset": 84
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
