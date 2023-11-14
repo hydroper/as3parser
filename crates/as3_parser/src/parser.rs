@@ -28,7 +28,7 @@ impl<'input> Parser<'input> {
         &self.tokenizer.source
     }
 
-    fn token_location(&mut self) -> Location {
+    fn token_location(&self) -> Location {
         self.token.1.clone()
     }
 
@@ -262,7 +262,7 @@ impl<'input> Parser<'input> {
     }
 
     pub fn parse_opt_expression(&mut self, context: ExpressionContext) -> Result<Option<Rc<ast::Expression>>, ParserFailure> {
-        let mut exp: Option<Rc<ast::Expression>> = self.parse_opt_start_expression(context.clone())?;
+        let exp: Option<Rc<ast::Expression>> = self.parse_opt_start_expression(context.clone())?;
 
         // Parse subexpressions
         if let Some(exp) = exp {
@@ -333,10 +333,10 @@ impl<'input> Parser<'input> {
                 self.push_location(&base.location);
                 self.next()?;
                 if self.consume(Token::Instanceof)? {
-                    base = self.parse_binary_operator(base, Operator::NotInstanceof, OperatorPrecedence::Relational.add_one().unwrap(), context)?;
+                    base = self.parse_binary_operator(base, Operator::NotInstanceof, OperatorPrecedence::Relational.add_one().unwrap(), context.clone())?;
                 } else {
                     self.expect(Token::In)?;
-                    base = self.parse_binary_operator(base, Operator::NotIn, OperatorPrecedence::Relational.add_one().unwrap(), context)?;
+                    base = self.parse_binary_operator(base, Operator::NotIn, OperatorPrecedence::Relational.add_one().unwrap(), context.clone())?;
                 }
             // ConditionalExpression
             } else if self.peek(Token::Question) && context.min_precedence.includes(&OperatorPrecedence::AssignmentAndOther) {
@@ -345,13 +345,13 @@ impl<'input> Parser<'input> {
                 let consequent = self.parse_expression(ExpressionContext {
                     min_precedence: OperatorPrecedence::AssignmentAndOther,
                     with_type_annotation: false,
-                    ..context
+                    ..context.clone()
                 })?;
                 self.expect(Token::Colon)?;
                 let alternative = self.parse_expression(ExpressionContext {
                     min_precedence: OperatorPrecedence::AssignmentAndOther,
                     with_type_annotation: true,
-                    ..context
+                    ..context.clone()
                 })?;
                 base = Rc::new(ast::Expression {
                     location: self.pop_location(),
@@ -360,7 +360,7 @@ impl<'input> Parser<'input> {
             } else if let Some((required_precedence, operator, right_precedence)) = self.check_binary_operator() {
                 if context.min_precedence.includes(&required_precedence) {
                     self.next()?;
-                    base = self.parse_binary_operator(base, operator, right_precedence, context)?;
+                    base = self.parse_binary_operator(base, operator, right_precedence, context.clone())?;
                 } else {
                     break;
                 }
@@ -375,7 +375,7 @@ impl<'input> Parser<'input> {
                 };
                 let right = self.parse_expression(ExpressionContext {
                     min_precedence: OperatorPrecedence::AssignmentAndOther,
-                    ..context
+                    ..context.clone()
                 })?;
                 base = Rc::new(ast::Expression {
                     location: self.pop_location(),
@@ -393,7 +393,7 @@ impl<'input> Parser<'input> {
                     };
                     let right = self.parse_expression(ExpressionContext {
                         min_precedence: OperatorPrecedence::AssignmentAndOther,
-                        ..context
+                        ..context.clone()
                     })?;
                     base = Rc::new(ast::Expression {
                         location: self.pop_location(),
@@ -407,7 +407,7 @@ impl<'input> Parser<'input> {
                 self.next()?;
                 let right = self.parse_expression(ExpressionContext {
                     min_precedence: OperatorPrecedence::AssignmentAndOther,
-                    ..context
+                    ..context.clone()
                 })?;
                 base = Rc::new(ast::Expression {
                     location: self.pop_location(),
@@ -433,7 +433,7 @@ impl<'input> Parser<'input> {
         // The left operand of a null-coalescing operation must not be
         // a logical AND, XOR or OR operation.
         if operator == Operator::NullCoalescing {
-            if let ast::ExpressionKind::Unary { base, operator } = base.kind {
+            if let ast::ExpressionKind::Unary { base, operator } = &base.kind {
                 if [Operator::LogicalAnd, Operator::LogicalXor, Operator::LogicalOr].contains(&operator) {
                     self.add_syntax_error(base.location.clone(), DiagnosticKind::IllegalNullishCoalescingLeftOperand, vec![]);
                 }
@@ -559,7 +559,7 @@ impl<'input> Parser<'input> {
         let mut params: Vec<ast::FunctionParam> = vec![];
         let mut return_annotation: Option<Rc<ast::TypeExpression>> = None;
         if let Some(left) = context.left {
-            if let ast::ExpressionKind::WithTypeAnnotation { base, type_annotation } = left.kind {
+            if let ast::ExpressionKind::WithTypeAnnotation { base, type_annotation } = &left.kind {
                 params = self.exp_to_function_params(Rc::clone(&base))?;
                 return_annotation = Some(type_annotation.clone());
             } else {
@@ -592,15 +592,15 @@ impl<'input> Parser<'input> {
     fn exp_to_function_params(&mut self, exp: Rc<ast::Expression>) -> Result<Vec<ast::FunctionParam>, ParserFailure> {
         if let ast::ExpressionKind::EmptyParen = exp.kind {
             Ok(vec![])
-        } else if let ast::ExpressionKind::Paren(exp) = exp.kind {
-            self.seq_exp_to_function_params(exp)
+        } else if let ast::ExpressionKind::Paren(exp) = &exp.kind {
+            self.seq_exp_to_function_params(Rc::clone(&exp))
         } else {
-            self.seq_exp_to_function_params(exp)
+            self.seq_exp_to_function_params(Rc::clone(&exp))
         }
     }
 
     fn seq_exp_to_function_params(&mut self, exp: Rc<ast::Expression>) -> Result<Vec<ast::FunctionParam>, ParserFailure> {
-        if let ast::ExpressionKind::Sequence(left, right) = exp.kind {
+        if let ast::ExpressionKind::Sequence(left, right) = &exp.kind {
             let mut params = self.seq_exp_to_function_params(Rc::clone(&left))?;
             params.push(self.exp_to_function_param(Rc::clone(&right))?);
             Ok(params)
@@ -610,7 +610,7 @@ impl<'input> Parser<'input> {
     }
 
     fn exp_to_function_param(&mut self, exp: Rc<ast::Expression>) -> Result<ast::FunctionParam, ParserFailure> {
-        if let ast::ExpressionKind::Rest(subexp) = exp.kind {
+        if let ast::ExpressionKind::Rest(subexp) = &exp.kind {
             Ok(ast::FunctionParam {
                 location: exp.location.clone(),
                 kind: ast::FunctionParamKind::Rest,
@@ -619,10 +619,10 @@ impl<'input> Parser<'input> {
                     init: None,
                 },
             })
-        } else if let ast::ExpressionKind::Assignment { left, compound, right } = exp.kind {
+        } else if let ast::ExpressionKind::Assignment { left, compound, right } = &exp.kind {
             let left = match left {
                 ast::AssignmentLeft::Destructuring(destructuring) => Rc::clone(&destructuring),
-                ast::AssignmentLeft::Expression(exp) => self.exp_to_destructuring(exp)?,
+                ast::AssignmentLeft::Expression(exp) => self.exp_to_destructuring(Rc::clone(&exp))?,
             };
             if compound.is_some() {
                 self.add_syntax_error(exp.location.clone(), DiagnosticKind::MalformedArrowFunctionElement, vec![]);
@@ -649,16 +649,16 @@ impl<'input> Parser<'input> {
     }
 
     fn exp_to_destructuring(&mut self, exp: Rc<ast::Expression>) -> Result<Rc<ast::Destructuring>, ParserFailure> {
-        if let ast::ExpressionKind::WithTypeAnnotation { base, type_annotation } = exp.kind {
-            self.exp_to_destructuring_1(Rc::clone(&base), Some(type_annotation), exp.location.clone())
+        if let ast::ExpressionKind::WithTypeAnnotation { base, type_annotation } = &exp.kind {
+            self.exp_to_destructuring_1(Rc::clone(&base), Some(Rc::clone(&type_annotation)), exp.location.clone())
         } else {
-            self.exp_to_destructuring_1(exp, None, exp.location.clone())
+            self.exp_to_destructuring_1(Rc::clone(&exp), None, exp.location.clone())
         }
     }
 
     fn exp_to_destructuring_1(&mut self, exp: Rc<ast::Expression>, type_annotation: Option<Rc<ast::TypeExpression>>, location: Location) -> Result<Rc<ast::Destructuring>, ParserFailure> {
-        if let ast::ExpressionKind::Unary { base, operator } = exp.kind {
-            if operator == Operator::NonNull {
+        if let ast::ExpressionKind::Unary { base, operator } = &exp.kind {
+            if *operator == Operator::NonNull {
                 return self.exp_to_destructuring_2(Rc::clone(&base), true, type_annotation, location);
             }
         }
@@ -666,8 +666,8 @@ impl<'input> Parser<'input> {
     }
 
     fn exp_to_destructuring_2(&mut self, exp: Rc<ast::Expression>, non_null: bool, type_annotation: Option<Rc<ast::TypeExpression>>, location: Location) -> Result<Rc<ast::Destructuring>, ParserFailure> {
-        let mut destructuring_kind: ast::DestructuringKind;
-        match exp.kind {
+        let destructuring_kind: ast::DestructuringKind;
+        match &exp.kind {
             ast::ExpressionKind::Id(id) => {
                 if let Some(name) = id.to_identifier() {
                     destructuring_kind = ast::DestructuringKind::Binding { name };
@@ -677,10 +677,10 @@ impl<'input> Parser<'input> {
                 }
             },
             ast::ExpressionKind::ArrayInitializer { elements, metadata_asdoc: _ } => {
-                destructuring_kind = self.array_initializer_to_destructuring_kind(elements)?;
+                destructuring_kind = self.array_initializer_to_destructuring_kind(elements.clone())?;
             },
             ast::ExpressionKind::ObjectInitializer { fields } => {
-                destructuring_kind = self.object_initializer_to_destructuring_kind(fields)?;
+                destructuring_kind = self.object_initializer_to_destructuring_kind(fields.clone())?;
             },
             _ => {
                 self.add_syntax_error(exp.location.clone(), DiagnosticKind::MalformedDestructuring, vec![]);
@@ -688,7 +688,7 @@ impl<'input> Parser<'input> {
             },
         }
         Ok(Rc::new(ast::Destructuring {
-            location: location,
+            location,
             kind: destructuring_kind,
             non_null,
             type_annotation,
@@ -703,11 +703,11 @@ impl<'input> Parser<'input> {
                 continue;
             }
             let element = element.unwrap();
-            if let ast::ExpressionKind::Rest(subexp) = element.kind {
-                result_items.push(Some(ast::ArrayDestructuringItem::Rest(self.exp_to_destructuring(subexp)?, element.location.clone())));
+            if let ast::ExpressionKind::Rest(subexp) = &element.kind {
+                result_items.push(Some(ast::ArrayDestructuringItem::Rest(self.exp_to_destructuring(Rc::clone(&subexp))?, element.location.clone())));
                 continue;
             }
-            result_items.push(Some(ast::ArrayDestructuringItem::Pattern(self.exp_to_destructuring(element)?)));
+            result_items.push(Some(ast::ArrayDestructuringItem::Pattern(self.exp_to_destructuring(Rc::clone(&element))?)));
         }
         Ok(ast::DestructuringKind::Array(result_items))
     }
@@ -715,14 +715,14 @@ impl<'input> Parser<'input> {
     fn object_initializer_to_destructuring_kind(&mut self, fields: Vec<Rc<ast::ObjectField>>) -> Result<ast::DestructuringKind, ParserFailure> {
         let mut result_fields: Vec<Rc<ast::RecordDestructuringField>> = vec![];
         for field in fields {
-            let ast::ObjectField::Field { key, destructuring_non_null, value } = *field else {
+            let ast::ObjectField::Field { ref key, destructuring_non_null, ref value } = *field else {
                 self.add_syntax_error(field.location(), DiagnosticKind::UnsupportedDestructuringRest, vec![]);
                 continue;
             };
-            let alias = if let Some(v) = value { Some(self.exp_to_destructuring(v)?) } else { None };
+            let alias = if let Some(v) = value { Some(self.exp_to_destructuring(Rc::clone(&v))?) } else { None };
             result_fields.push(Rc::new(ast::RecordDestructuringField {
                 location: field.location(),
-                key,
+                key: key.clone(),
                 non_null: destructuring_non_null,
                 alias,
             }));
@@ -737,11 +737,11 @@ impl<'input> Parser<'input> {
         let mut has_rest = false;
         for param in params {
             if !least_kind.may_be_followed_by(param.kind) {
-                self.add_syntax_error(param.location, DiagnosticKind::WrongParameterPosition, vec![]);
+                self.add_syntax_error(param.location.clone(), DiagnosticKind::WrongParameterPosition, vec![]);
             }
             least_kind = param.kind;
             if param.kind == ast::FunctionParamKind::Rest && has_rest {
-                self.add_syntax_error(param.location, DiagnosticKind::DuplicateRestParameter, vec![]);
+                self.add_syntax_error(param.location.clone(), DiagnosticKind::DuplicateRestParameter, vec![]);
             }
             has_rest = param.kind == ast::FunctionParamKind::Rest;
         }
@@ -749,7 +749,7 @@ impl<'input> Parser<'input> {
     }
 
     fn parse_opt_start_expression(&mut self, context: ExpressionContext) -> Result<Option<Rc<ast::Expression>>, ParserFailure> {
-        if let Token::Identifier(ref id) = self.token.0 {
+        if let Token::Identifier(id) = self.token.0.clone() {
             let id_location = self.token_location();
             self.next()?;
 
@@ -761,15 +761,15 @@ impl<'input> Parser<'input> {
             }
 
             let id = Rc::new(ast::Expression {
-                location: id_location,
+                location: id_location.clone(),
                 kind: ast::ExpressionKind::Id(ast::QualifiedIdentifier {
                     attribute: false,
                     qualifier: None,
-                    name: ast::IdentifierOrBrackets::Id(id.clone(), id_location),
+                    name: ast::IdentifierOrBrackets::Id(id, id_location.clone()),
                 }),
             });
             if self.peek(Token::ColonColon) {
-                self.push_location(&id_location);
+                self.push_location(&id_location.clone());
                 let id = self.finish_qualified_identifier(false, id)?;
                 Ok(Some(Rc::new(ast::Expression {
                     location: self.pop_location(),
@@ -806,7 +806,7 @@ impl<'input> Parser<'input> {
                 location: self.pop_location(),
                 kind: ast::ExpressionKind::Numeric(n),
             })))
-        } else if let Token::StringLiteral(ref s) = self.token.0 {
+        } else if let Token::StringLiteral(ref s) = self.token.0.clone() {
             self.mark_location();
             self.next();
             Ok(Some(Rc::new(ast::Expression {
@@ -820,7 +820,7 @@ impl<'input> Parser<'input> {
                 location: self.pop_location(),
                 kind: ast::ExpressionKind::This,
             })))
-        } else if let Token::RegExpLiteral { ref body, ref flags } = self.token.0 {
+        } else if let Token::RegExpLiteral { ref body, ref flags } = self.token.0.clone() {
             self.mark_location();
             self.next();
             Ok(Some(Rc::new(ast::Expression {
@@ -862,15 +862,15 @@ impl<'input> Parser<'input> {
             let id_location = self.token_location();
             self.next()?;
             let id = Rc::new(ast::Expression {
-                location: id_location,
+                location: id_location.clone(),
                 kind: ast::ExpressionKind::Id(ast::QualifiedIdentifier {
                     attribute: false,
                     qualifier: None,
-                    name: ast::IdentifierOrBrackets::Id("*".into(), id_location),
+                    name: ast::IdentifierOrBrackets::Id("*".into(), id_location.clone()),
                 }),
             });
             if self.peek(Token::ColonColon) {
-                self.push_location(&id_location);
+                self.push_location(&id_location.clone());
                 let id = self.finish_qualified_identifier(false, id)?;
                 Ok(Some(Rc::new(ast::Expression {
                     location: self.pop_location(),
@@ -885,7 +885,7 @@ impl<'input> Parser<'input> {
                 self.token = token;
             }
             let start = self.token_location();
-            if let Token::XmlMarkup(content) = &self.token.0 {
+            if let Token::XmlMarkup(content) = &self.token.0.clone() {
                 self.mark_location();
                 self.next()?;
                 Ok(Some(Rc::new(ast::Expression {
@@ -1002,8 +1002,8 @@ impl<'input> Parser<'input> {
         self.mark_location();
         self.next()?;
         let mut name = None;
-        if let Token::Identifier(id) = &self.token.0 {
-            name = Some((id.clone(), self.token.1.clone()));
+        if let Token::Identifier(id) = self.token.0.clone() {
+            name = Some((id, self.token.1.clone()));
             self.next()?;
         }
         let (common, _) = self.parse_function_common(true)?;
@@ -1023,8 +1023,9 @@ impl<'input> Parser<'input> {
             self.mark_location();
             let rest = self.consume(Token::Ellipsis)?;
             let binding = self.parse_variable_binding(true)?;
+            let has_initializer = binding.init.is_some();
             let location = self.pop_location();
-            if rest && binding.init.is_some() {
+            if rest && has_initializer {
                 self.add_syntax_error(location.clone(), DiagnosticKind::MalformedRestParameter, vec![]);
             }
             let param = ast::FunctionParam {
@@ -1032,7 +1033,7 @@ impl<'input> Parser<'input> {
                 binding,
                 kind: if rest {
                     ast::FunctionParamKind::Rest
-                } else if binding.init.is_some() {
+                } else if has_initializer {
                     ast::FunctionParamKind::Optional
                 } else {
                     ast::FunctionParamKind::Required
@@ -1140,7 +1141,7 @@ impl<'input> Parser<'input> {
 
     fn parse_new_expression(&mut self, start: Location) -> Result<Rc<ast::Expression>, ParserFailure> {
         self.push_location(&start);
-        let mut base = self.parse_new_subexpression()?;
+        let base = self.parse_new_subexpression()?;
         let arguments = if self.peek(Token::LeftParen) { Some(self.parse_arguments()?) } else { None };
         Ok(Rc::new(ast::Expression {
             location: self.pop_location(),
@@ -1230,27 +1231,27 @@ impl<'input> Parser<'input> {
     }
 
     fn parse_primary_expression(&mut self) -> Result<Rc<ast::Expression>, ParserFailure> {
-        if let Token::Identifier(ref id) = self.token.0 {
+        if let Token::Identifier(id) = self.token.0.clone() {
             let id_location = self.token_location();
             self.next()?;
 
             // EmbedExpression
-            if let Token::StringLiteral(string_value) = &self.token.0 {
+            if let Token::StringLiteral(string_value) = &self.token.0.clone() {
                 if id == "embed" && self.previous_token.1.character_count() == "embed".len() {
                     return self.finish_embed_expression(id_location, string_value.clone());
                 }
             }
 
             let id = Rc::new(ast::Expression {
-                location: id_location,
+                location: id_location.clone(),
                 kind: ast::ExpressionKind::Id(ast::QualifiedIdentifier {
                     attribute: false,
                     qualifier: None,
-                    name: ast::IdentifierOrBrackets::Id(id.clone(), id_location),
+                    name: ast::IdentifierOrBrackets::Id(id, id_location.clone()),
                 }),
             });
             if self.peek(Token::ColonColon) {
-                self.push_location(&id_location);
+                self.push_location(&id_location.clone());
                 let id = self.finish_qualified_identifier(false, id)?;
                 Ok(Rc::new(ast::Expression {
                     location: self.pop_location(),
@@ -1280,14 +1281,14 @@ impl<'input> Parser<'input> {
                 location: self.pop_location(),
                 kind: ast::ExpressionKind::Boolean(true),
             }))
-        } else if let Token::NumericLiteral(n) = self.token.0 {
+        } else if let Token::NumericLiteral(n) = self.token.0.clone() {
             self.mark_location();
             self.next();
             Ok(Rc::new(ast::Expression {
                 location: self.pop_location(),
                 kind: ast::ExpressionKind::Numeric(n),
             }))
-        } else if let Token::StringLiteral(ref s) = self.token.0 {
+        } else if let Token::StringLiteral(ref s) = self.token.0.clone() {
             self.mark_location();
             self.next();
             Ok(Rc::new(ast::Expression {
@@ -1301,7 +1302,7 @@ impl<'input> Parser<'input> {
                 location: self.pop_location(),
                 kind: ast::ExpressionKind::This,
             }))
-        } else if let Token::RegExpLiteral { ref body, ref flags } = self.token.0 {
+        } else if let Token::RegExpLiteral { ref body, ref flags } = self.token.0.clone() {
             self.mark_location();
             self.next();
             Ok(Rc::new(ast::Expression {
@@ -1343,15 +1344,15 @@ impl<'input> Parser<'input> {
             let id_location = self.token_location();
             self.next()?;
             let id = Rc::new(ast::Expression {
-                location: id_location,
+                location: id_location.clone(),
                 kind: ast::ExpressionKind::Id(ast::QualifiedIdentifier {
                     attribute: false,
                     qualifier: None,
-                    name: ast::IdentifierOrBrackets::Id("*".into(), id_location),
+                    name: ast::IdentifierOrBrackets::Id("*".into(), id_location.clone()),
                 }),
             });
             if self.peek(Token::ColonColon) {
-                self.push_location(&id_location);
+                self.push_location(&id_location.clone());
                 let id = self.finish_qualified_identifier(false, id)?;
                 Ok(Rc::new(ast::Expression {
                     location: self.pop_location(),
@@ -1366,7 +1367,7 @@ impl<'input> Parser<'input> {
                 self.token = token;
             }
             let start = self.token_location();
-            if let Token::XmlMarkup(content) = &self.token.0 {
+            if let Token::XmlMarkup(content) = &self.token.0.clone() {
                 self.mark_location();
                 self.next()?;
                 Ok(Rc::new(ast::Expression {
@@ -1471,7 +1472,7 @@ impl<'input> Parser<'input> {
                 self.consume_and_ie_xml_tag(Token::XmlWhitespace)?;
                 self.expect_and_ie_xml_tag(Token::Assign)?;
                 self.consume_and_ie_xml_tag(Token::XmlWhitespace)?;
-                let mut value: ast::XmlAttributeValueOrExpression;
+                let value: ast::XmlAttributeValueOrExpression;
                 if self.consume(Token::LeftBrace)? {
                     let expr = self.parse_expression(ExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::AssignmentAndOther, ..default() })?;
                     self.expect_and_ie_xml_tag(Token::RightBrace)?;
@@ -1488,7 +1489,7 @@ impl<'input> Parser<'input> {
         let mut content: Vec<ast::XmlElementContent> = vec![];
         let mut closing_tag_name: Option<ast::XmlTagName> = None;
 
-        let mut is_empty = false;
+        let is_empty;
 
         if ends_at_ie_div {
             is_empty = self.consume(Token::XmlSlashGt)?;
@@ -1519,9 +1520,9 @@ impl<'input> Parser<'input> {
     }
 
     fn parse_xml_attribute_value(&mut self) -> Result<String, ParserFailure> {
-        if let Token::XmlAttributeValue(value) = &self.token.0 {
+        if let Token::XmlAttributeValue(value) = self.token.0.clone() {
             self.next_ie_xml_tag()?;
-            return Ok(value.clone());
+            return Ok(value);
         } else {
             self.add_syntax_error(self.token_location(), DiagnosticKind::ExpectedXmlAttributeValue, diagnostic_arguments![Token(self.token.0.clone())]);
             Err(ParserFailure)
@@ -1543,10 +1544,10 @@ impl<'input> Parser<'input> {
     }
 
     fn parse_xml_name(&mut self) -> Result<(String, Location), ParserFailure> {
-        if let Token::XmlName(name) = &self.token.0 {
+        if let Token::XmlName(name) = self.token.0.clone() {
             let name_location = self.token_location();
             self.next_ie_xml_tag()?;
-            return Ok((name.clone(), name_location));
+            return Ok((name, name_location));
         } else {
             self.add_syntax_error(self.token_location(), DiagnosticKind::ExpectedXmlName, diagnostic_arguments![Token(self.token.0.clone())]);
             Err(ParserFailure)
@@ -1561,14 +1562,14 @@ impl<'input> Parser<'input> {
                 let expr = self.parse_expression(ExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::AssignmentAndOther, ..default() })?;
                 self.expect_and_ie_xml_content(Token::RightBrace)?;
                 content.push(ast::XmlElementContent::Expression(expr));
-            } else if let Token::XmlMarkup(markup) = &self.token.0 {
+            } else if let Token::XmlMarkup(markup) = self.token.0.clone() {
                 let location = self.token_location();
                 self.next_ie_xml_content()?;
-                content.push(ast::XmlElementContent::Markup(markup.clone(), location));
-            } else if let Token::XmlText(text) = &self.token.0 {
+                content.push(ast::XmlElementContent::Markup(markup, location));
+            } else if let Token::XmlText(text) = self.token.0.clone() {
                 let location = self.token_location();
                 self.next_ie_xml_content()?;
-                content.push(ast::XmlElementContent::Text(text.clone(), location));
+                content.push(ast::XmlElementContent::Text(text, location));
             } else if self.consume_and_ie_xml_tag(Token::Lt)? {
                 let start = self.token_location();
                 let element = self.parse_xml_element(start, false)?;
@@ -1632,17 +1633,17 @@ impl<'input> Parser<'input> {
         }
 
         // IdentifierName
-        if let Token::Identifier(ref id) = self.token.0 {
+        if let Token::Identifier(id) = self.token.0.clone() {
             let id_location = self.token_location();
             self.next()?;
             if self.peek(Token::ColonColon) {
                 let id = ast::QualifiedIdentifier {
                     attribute: false,
                     qualifier: None,
-                    name: ast::IdentifierOrBrackets::Id(id.clone(), id_location),
+                    name: ast::IdentifierOrBrackets::Id(id, id_location.clone()),
                 };
                 let id = Rc::new(ast::Expression {
-                    location: id_location,
+                    location: id_location.clone(),
                     kind: ast::ExpressionKind::Id(id),
                 });
                 return self.finish_qualified_identifier(attribute, id);
@@ -1650,7 +1651,7 @@ impl<'input> Parser<'input> {
                 let id = ast::QualifiedIdentifier {
                     attribute,
                     qualifier: None,
-                    name: ast::IdentifierOrBrackets::Id(id.clone(), id_location),
+                    name: ast::IdentifierOrBrackets::Id(id, id_location.clone()),
                 };
                 return Ok(id);
             }
@@ -1683,10 +1684,10 @@ impl<'input> Parser<'input> {
                 let id = ast::QualifiedIdentifier {
                     attribute: false,
                     qualifier: None,
-                    name: ast::IdentifierOrBrackets::Id(id, id_location),
+                    name: ast::IdentifierOrBrackets::Id(id, id_location.clone()),
                 };
                 let id = Rc::new(ast::Expression {
-                    location: id_location,
+                    location: id_location.clone(),
                     kind: ast::ExpressionKind::Id(id),
                 });
                 return self.finish_qualified_identifier(attribute, id);
@@ -1694,7 +1695,7 @@ impl<'input> Parser<'input> {
                 let id = ast::QualifiedIdentifier {
                     attribute,
                     qualifier: None,
-                    name: ast::IdentifierOrBrackets::Id(id, id_location),
+                    name: ast::IdentifierOrBrackets::Id(id, id_location.clone()),
                 };
                 return Ok(id);
             }
@@ -1714,10 +1715,10 @@ impl<'input> Parser<'input> {
                 let id = ast::QualifiedIdentifier {
                     attribute: false,
                     qualifier: None,
-                    name: ast::IdentifierOrBrackets::Id("*".into(), id_location),
+                    name: ast::IdentifierOrBrackets::Id("*".into(), id_location.clone()),
                 };
                 let id = Rc::new(ast::Expression {
-                    location: id_location,
+                    location: id_location.clone(),
                     kind: ast::ExpressionKind::Id(id),
                 });
                 return self.finish_qualified_identifier(attribute, id);
@@ -1725,7 +1726,7 @@ impl<'input> Parser<'input> {
                 let id = ast::QualifiedIdentifier {
                     attribute,
                     qualifier: None,
-                    name: ast::IdentifierOrBrackets::Id("*".into(), id_location),
+                    name: ast::IdentifierOrBrackets::Id("*".into(), id_location.clone()),
                 };
                 return Ok(id);
             }
@@ -1737,24 +1738,24 @@ impl<'input> Parser<'input> {
 
     fn parse_non_attribute_qualified_identifier(&mut self) -> Result<ast::NonAttributeQualifiedIdentifier, ParserFailure> {
         // IdentifierName
-        if let Token::Identifier(ref id) = self.token.0 {
+        if let Token::Identifier(id) = self.token.0.clone() {
             let id_location = self.token_location();
             self.next()?;
             if self.peek(Token::ColonColon) {
                 let id = ast::QualifiedIdentifier {
                     attribute: false,
                     qualifier: None,
-                    name: ast::IdentifierOrBrackets::Id(id.clone(), id_location),
+                    name: ast::IdentifierOrBrackets::Id(id, id_location.clone()),
                 };
                 let id = Rc::new(ast::Expression {
-                    location: id_location,
+                    location: id_location.clone(),
                     kind: ast::ExpressionKind::Id(id),
                 });
                 return self.finish_non_attribute_qualified_identifier(id);
             } else {
                 let id = ast::NonAttributeQualifiedIdentifier {
                     qualifier: None,
-                    name: ast::IdentifierOrBrackets::Id(id.clone(), id_location),
+                    name: ast::IdentifierOrBrackets::Id(id, id_location.clone()),
                 };
                 return Ok(id);
             }
@@ -1786,17 +1787,17 @@ impl<'input> Parser<'input> {
                 let id = ast::QualifiedIdentifier {
                     attribute: false,
                     qualifier: None,
-                    name: ast::IdentifierOrBrackets::Id(id, id_location),
+                    name: ast::IdentifierOrBrackets::Id(id, id_location.clone()),
                 };
                 let id = Rc::new(ast::Expression {
-                    location: id_location,
+                    location: id_location.clone(),
                     kind: ast::ExpressionKind::Id(id),
                 });
                 return self.finish_non_attribute_qualified_identifier(id);
             } else {
                 let id = ast::NonAttributeQualifiedIdentifier {
                     qualifier: None,
-                    name: ast::IdentifierOrBrackets::Id(id, id_location),
+                    name: ast::IdentifierOrBrackets::Id(id, id_location.clone()),
                 };
                 return Ok(id);
             }
@@ -1816,17 +1817,17 @@ impl<'input> Parser<'input> {
                 let id = ast::QualifiedIdentifier {
                     attribute: false,
                     qualifier: None,
-                    name: ast::IdentifierOrBrackets::Id("*".into(), id_location),
+                    name: ast::IdentifierOrBrackets::Id("*".into(), id_location.clone()),
                 };
                 let id = Rc::new(ast::Expression {
-                    location: id_location,
+                    location: id_location.clone(),
                     kind: ast::ExpressionKind::Id(id),
                 });
                 return self.finish_non_attribute_qualified_identifier(id);
             } else {
                 let id = ast::NonAttributeQualifiedIdentifier {
                     qualifier: None,
-                    name: ast::IdentifierOrBrackets::Id("*".into(), id_location),
+                    name: ast::IdentifierOrBrackets::Id("*".into(), id_location.clone()),
                 };
                 return Ok(id);
             }
@@ -1843,13 +1844,13 @@ impl<'input> Parser<'input> {
         // `::` may be followed by one of { IdentifierName, `*`, Brackets }
 
         // IdentifierName
-        if let Token::Identifier(ref id) = self.token.0 {
+        if let Token::Identifier(id) = self.token.0.clone() {
             let id_location = self.token_location();
             self.next()?;
             Ok(ast::QualifiedIdentifier {
                 attribute,
                 qualifier: Some(qual),
-                name: ast::IdentifierOrBrackets::Id(id.clone(), id_location),
+                name: ast::IdentifierOrBrackets::Id(id, id_location),
             })
         // IdentifierName (from reserved word)
         } else if let Some(id) = self.token.0.reserved_word_name() {
@@ -1890,12 +1891,12 @@ impl<'input> Parser<'input> {
         // `::` may be followed by one of { IdentifierName, `*`, Brackets }
 
         // IdentifierName
-        if let Token::Identifier(ref id) = self.token.0 {
+        if let Token::Identifier(id) = self.token.0.clone() {
             let id_location = self.token_location();
             self.next()?;
             Ok(ast::NonAttributeQualifiedIdentifier {
                 qualifier: Some(qual),
-                name: ast::IdentifierOrBrackets::Id(id.clone(), id_location),
+                name: ast::IdentifierOrBrackets::Id(id, id_location),
             })
         // IdentifierName (from reserved word)
         } else if let Some(id) = self.token.0.reserved_word_name() {
@@ -2053,7 +2054,7 @@ impl<'input> Parser<'input> {
                 kind: ast::TypeExpressionKind::Void,
             }), wrap_nullable))
         // StringLiteral
-        } else if let Token::StringLiteral(value) = &self.token.0 {
+        } else if let Token::StringLiteral(value) = &self.token.0.clone() {
             self.mark_location();
             self.next()?;
             Ok((Rc::new(ast::TypeExpression {
@@ -2061,7 +2062,7 @@ impl<'input> Parser<'input> {
                 kind: ast::TypeExpressionKind::StringLiteral(value.clone()),
             }), wrap_nullable))
         // NumericLiteral
-        } else if let Token::NumericLiteral(value) = self.token.0 {
+        } else if let Token::NumericLiteral(value) = self.token.0.clone() {
             self.mark_location();
             self.next()?;
             Ok((Rc::new(ast::TypeExpression {
@@ -2145,7 +2146,7 @@ impl<'input> Parser<'input> {
         let asdoc = self.parse_asdoc()?;
         let mut readonly = false;
         let mut key: (ast::ObjectKey, Location) = self.parse_object_key()?;
-        if let ast::ObjectKey::Id(id) = key.0 {
+        if let ast::ObjectKey::Id(id) = &key.0 {
             if let Some(id) = id.to_identifier() {
                 if self.record_type_field_readonly(id) {
                     readonly = true;
@@ -2182,14 +2183,14 @@ impl<'input> Parser<'input> {
     }
 
     fn parse_object_key(&mut self) -> Result<(ast::ObjectKey, Location), ParserFailure> {
-        if let Token::StringLiteral(value) = &self.token.0 {
+        if let Token::StringLiteral(value) = &self.token.0.clone() {
             let location = self.token_location();
             self.next()?;
-            Ok((ast::ObjectKey::String(value.clone(), location), location))
-        } else if let Token::NumericLiteral(value) = &self.token.0 {
+            Ok((ast::ObjectKey::String(value.clone(), location.clone()), location))
+        } else if let Token::NumericLiteral(value) = &self.token.0.clone() {
             let location = self.token_location();
             self.next()?;
-            Ok((ast::ObjectKey::Number(value.clone(), location), location))
+            Ok((ast::ObjectKey::Number(value.clone(), location.clone()), location))
         } else if self.peek(Token::LeftBracket) {
             self.mark_location();
             self.next()?;
@@ -2255,8 +2256,8 @@ impl<'input> Parser<'input> {
             }
             
             if parse_function_type {
-                let mut params = vec![param];
                 let mut req_params_allowed = param.kind == ast::FunctionParamKind::Required;
+                let mut params = vec![param];
 
                 while self.consume(Token::Comma)? {
                     if self.consume(Token::Ellipsis)? {
@@ -2578,7 +2579,7 @@ impl<'input> Parser<'input> {
         let mut initiated_as_embed = false;
 
         // EmbedExpression
-        if let Token::StringLiteral(string_value) = &self.token.0 {
+        if let Token::StringLiteral(string_value) = &self.token.0.clone() {
             if id.0 == "embed" && self.previous_token.1.character_count() == "embed".len() {
                 exp = Some(self.finish_embed_expression(id.1.clone(), string_value.clone())?);
                 initiated_as_embed = true;
@@ -2588,7 +2589,7 @@ impl<'input> Parser<'input> {
         // QualifiedIdentifier
         if !initiated_as_embed {
             let id = Rc::new(ast::Expression {
-                location: id.1,
+                location: id.1.clone(),
                 kind: ast::ExpressionKind::Id(ast::QualifiedIdentifier {
                     attribute: false,
                     qualifier: None,
@@ -2644,7 +2645,7 @@ impl<'input> Parser<'input> {
         self.expect(Token::LeftParen)?;
         let test = self.parse_expression(ExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
         self.expect(Token::RightParen)?;
-        let mut semicolon_inserted = false;
+        let semicolon_inserted;
         let (consequent, semicolon_inserted_1) = self.parse_substatement(context.clone())?;
         let mut alternative = None;
         if self.peek(Token::Else) {
@@ -2982,7 +2983,7 @@ impl<'input> Parser<'input> {
     }
 
     fn parse_simple_variable_declaration(&mut self, allow_in: bool) -> Result<ast::SimpleVariableDeclaration, ParserFailure> {
-        let mut kind: ast::VariableKind;
+        let kind: ast::VariableKind;
         let kind_location = self.token_location();
         if self.consume(Token::Const)? {
             kind = ast::VariableKind::Const;
@@ -3027,14 +3028,14 @@ impl<'input> Parser<'input> {
         self.next()?;
 
         let label = if self.previous_token.1.line_break(&self.token.1) { None } else { self.consume_identifier(false)? };
-        let label_location = label.map(|label| label.1.clone());
+        let label_location = label.clone().map(|label| label.1.clone());
         let label = label.map(|label| label.0.clone());
 
         let semicolon_inserted = self.parse_semicolon()?;
 
         let node = Rc::new(ast::Statement {
             location: self.pop_location(),
-            kind: ast::StatementKind::Break { label },
+            kind: ast::StatementKind::Break { label: label.clone() },
         });
 
         if label.is_some() && !context.is_label_defined(label.clone().unwrap()) {
@@ -3051,14 +3052,14 @@ impl<'input> Parser<'input> {
         self.next()?;
 
         let label = if self.previous_token.1.line_break(&self.token.1) { None } else { self.consume_identifier(false)? };
-        let label_location = label.map(|label| label.1.clone());
+        let label_location = label.clone().map(|label| label.1.clone());
         let label = label.map(|label| label.0.clone());
 
         let semicolon_inserted = self.parse_semicolon()?;
 
         let node = Rc::new(ast::Statement {
             location: self.pop_location(),
-            kind: ast::StatementKind::Continue { label },
+            kind: ast::StatementKind::Continue { label: label.clone() },
         });
 
         if label.is_some() && !context.is_label_defined(label.clone().unwrap()) {
@@ -3070,7 +3071,7 @@ impl<'input> Parser<'input> {
         Ok((node, semicolon_inserted))
     }
 
-    fn parse_return_statement(&mut self, context: DirectiveContext) -> Result<(Rc<ast::Statement>, bool), ParserFailure> {
+    fn parse_return_statement(&mut self, _context: DirectiveContext) -> Result<(Rc<ast::Statement>, bool), ParserFailure> {
         self.mark_location();
         self.next()?;
 
@@ -3092,7 +3093,7 @@ impl<'input> Parser<'input> {
         Ok((node, semicolon_inserted))
     }
 
-    fn parse_throw_statement(&mut self, context: DirectiveContext) -> Result<(Rc<ast::Statement>, bool), ParserFailure> {
+    fn parse_throw_statement(&mut self, _context: DirectiveContext) -> Result<(Rc<ast::Statement>, bool), ParserFailure> {
         self.mark_location();
         self.next()?;
 
@@ -3279,7 +3280,7 @@ impl<'input> Parser<'input> {
     fn parse_include_directive(&mut self, context: DirectiveContext, start: Location) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
         self.push_location(&start);
         let source_path_location = self.token_location();
-        let Token::StringLiteral(source) = &self.token.0 else {
+        let Token::StringLiteral(source) = &self.token.0.clone() else {
             panic!();
         };
         let source = source.clone();

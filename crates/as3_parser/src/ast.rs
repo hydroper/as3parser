@@ -16,8 +16,8 @@ impl QualifiedIdentifier {
         if self.attribute || self.qualifier.is_some() {
             return None;
         }
-        if let IdentifierOrBrackets::Id(id, location) = self.name {
-            if id != "*" { Some((id, location.clone())) } else { None }
+        if let IdentifierOrBrackets::Id(id, location) = &self.name {
+            if id != "*" { Some((id.clone(), location.clone())) } else { None }
         } else {
             None
         }
@@ -38,8 +38,8 @@ impl NonAttributeQualifiedIdentifier {
         if self.qualifier.is_some() {
             return None;
         }
-        if let IdentifierOrBrackets::Id(id, location) = self.name {
-            if id != "*" { Some((id, location.clone())) } else { None }
+        if let IdentifierOrBrackets::Id(id, location) = &self.name {
+            if id != "*" { Some((id.clone(), location.clone())) } else { None }
         } else {
             None
         }
@@ -50,8 +50,8 @@ impl NonAttributeQualifiedIdentifier {
         if self.qualifier.is_some() {
             return None;
         }
-        if let IdentifierOrBrackets::Id(id, location) = self.name {
-            Some((id, location.clone()))
+        if let IdentifierOrBrackets::Id(id, location) = &self.name {
+            Some((id.clone(), location.clone()))
         } else {
             None
         }
@@ -72,7 +72,7 @@ pub struct Expression {
 
 impl Expression {
     pub(crate) fn list_metadata_expressions(self: &Rc<Self>) -> Option<Vec<Rc<Self>>> {
-        match self.kind {
+        match &self.kind {
             ExpressionKind::ArrayInitializer { .. } => Some(vec![Rc::clone(self)]),
             ExpressionKind::BracketsMember { base, key, .. } => {
                 let mut result = base.list_metadata_expressions()?;
@@ -364,7 +364,7 @@ pub struct TypeExpression {
 
 impl TypeExpression {
     pub(crate) fn to_function_type_param(&self) -> Option<FunctionTypeParam> {
-        match self.kind {
+        match &self.kind {
             TypeExpressionKind::Id(id) => {
                 if let Some(name) = id.to_identifier() {
                     Some(FunctionTypeParam {
@@ -377,7 +377,7 @@ impl TypeExpression {
                 }
             },
             TypeExpressionKind::Nullable(subexp) => {
-                match subexp.kind {
+                match &subexp.kind {
                     TypeExpressionKind::Id(id) => {
                         if let Some(name) = id.to_identifier() {
                             Some(FunctionTypeParam {
