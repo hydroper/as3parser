@@ -3444,6 +3444,36 @@ impl<'input> Parser<'input> {
         *building_content_tag_name = None;
         building_content.clear();
     }
+
+    pub fn parse_program(&mut self) -> Result<Rc<ast::Program>, ParserFailure> {
+        self.mark_location();
+        let mut packages = vec![];
+        while self.peek(Token::Package) {
+            self.mark_location();
+            let asdoc = self.parse_asdoc()?;
+            self.next()?;
+            let mut id = vec![];
+            if let Some(id1) = self.consume_identifier(false)? {
+                id.push(id1.clone());
+                while self.consume(Token::Dot)? {
+                    id.push(self.expect_identifier(true)?);
+                }
+            }
+            let block = self.parse_block(DirectiveContext::Default)?;
+            packages.push(Rc::new(ast::PackageDefinition {
+                location: self.pop_location(),
+                asdoc,
+                id,
+                block,
+            }));
+        }
+        let directives = self.parse_directives(DirectiveContext::Default)?;
+        Ok(Rc::new(ast::Program {
+            location: self.pop_location(),
+            packages,
+            directives,
+        }))
+    }
 }
 
 fn parse_include_directive_source(replaced_by_source: Rc<Source>, context: DirectiveContext) -> Vec<Rc<ast::Directive>> {
@@ -3604,6 +3634,17 @@ pub mod parser_facade {
     pub use crate::*;
     pub use crate::util::default;
     pub use std::rc::Rc;
+
+    /// Parses `Program`.
+    pub fn parse_program(source: &Rc<Source>) -> Option<Rc<ast::Program>> {
+        let mut parser = Parser::new(source);
+        if parser.next().is_ok() {
+            let program = parser.parse_program().ok();
+            if source.invalidated() { None } else { program }
+        } else {
+            None
+        }
+    }
 
     /// Parses `ListExpression^allowIn` and expects end-of-file.
     pub fn parse_expression(source: &Rc<Source>) -> Option<Rc<ast::Expression>> {

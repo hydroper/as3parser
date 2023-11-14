@@ -150,9 +150,9 @@ Syntax:
   * [ ] Enum definition
   * [ ] Interface definition
   * [ ] Namespace definition
-* [ ] Program
-  * [ ] Packages
-  * [ ] Top level directives
+* [x] Program
+  * [x] Packages
+  * [x] Top level directives
 * [ ] ASDoc
   * [ ] `parse_asdoc`
     * [ ] All tags (`parse_asdoc_tag_or_main_content`)

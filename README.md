@@ -15,41 +15,21 @@ Handwritten ActionScript 3 parser in the Rust language.
 
 It is almost finished; just missing annotatable definitions ([progress tracker](crates/as3_parser/progress.md)).
 
+Specifics:
+
+* Annotatable definitions: class definition and miscellaneous and their meta data and modifiers
+* ASDoc: recognize tags in https://airsdk.dev/docs/development/asdoc-comments#supported-tags
+
 ## Getting started
 
 Install it in your Cargo project with `cargo add as3_parser`.
 
 ```rust
-use as3_parser::ast;
-// `Parser` will be exposed once the parser is finished.
-```
-
-What the parser currently looks like:
-
-```rust
 use as3_parser::*;
-let source = Source::new(None, "x ** y".into(), &CompilerOptions::new());
-let mut parser = Parser::new(&source);
-if parser.next().is_ok() {
-    let exp = parser.parse_expression(ExpressionContext {
-        ..default()
-    }).ok();
-    if exp.is_some() {
-        let _ = parser.expect_eof();
-    }
-    if !source.invalidated() {
-        let exp = exp.unwrap();
-        // exp: Rc<ast::Expression>
-    }
-}
-```
 
-A `ParserFacade` allows parsing different constructs with a single method call. The following parses an expression and expects end-of-file.
-
-```rust
 let source = Source::new(None, "x ** y".into(), &CompilerOptions::new());
-if let Some(exp) = parser_facade::parse_expression(&source) {
-    // exp: Rc<ast::Expression>
+if let Some(program) = parser_facade::parse_program(&source) {
+    // program: Rc<ast::Program>
 }
 ```
 
