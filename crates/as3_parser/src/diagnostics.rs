@@ -175,6 +175,7 @@ pub enum DiagnosticKind {
     ParentSourceIsNotAFile = 149,
     FailedToIncludeFile = 150,
     UnrecognizedAsDocTag = 151,
+    FailedParsingAsDocTag = 152,
 }
 
 impl DiagnosticKind {

@@ -15,10 +15,7 @@ Handwritten ActionScript 3 parser in the Rust language.
 
 It is almost finished; just missing annotatable definitions ([progress tracker](crates/as3_parser/progress.md)).
 
-Specifics:
-
-* Annotatable definitions: class definition and miscellaneous and their meta data and modifiers
-* ASDoc: recognize tags in https://airsdk.dev/docs/development/asdoc-comments#supported-tags
+Annotatable definitions mean things such as class definitions and variable definitions.
 
 ## Getting started
 

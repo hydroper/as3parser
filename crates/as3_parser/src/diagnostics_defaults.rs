@@ -34,6 +34,7 @@ lazy_static! {
         DiagnosticKind::ParentSourceIsNotAFile.id() => "Parent source is not a file".into(),
         DiagnosticKind::FailedToIncludeFile.id() => "Failed to include file".into(),
         DiagnosticKind::UnrecognizedAsDocTag.id() => "Unrecognized ASDoc tag '{1}'".into(),
+        DiagnosticKind::FailedParsingAsDocTag.id() => "Failed parsing ASDoc '{1}' tag".into(),
         // DiagnosticKind::K.id() => "".into(),
     };
 }

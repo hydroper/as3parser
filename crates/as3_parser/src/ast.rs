@@ -877,7 +877,7 @@ pub struct AsDoc {
 pub enum AsDocTag {
     Copy(String),
     Default(String),
-    EventType(Rc<TypeExpression>),
+    EventType(Rc<Expression>),
     Example(String),
     ExampleText(String),
     InheritDoc,
@@ -893,7 +893,7 @@ pub enum AsDocTag {
         display_text: Option<String>,
     },
     Throws {
-        class_name: Rc<TypeExpression>,
+        class_reference: Rc<TypeExpression>,
         description: Option<String>,
     },
 }

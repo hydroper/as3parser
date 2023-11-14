@@ -153,10 +153,8 @@ Syntax:
 * [x] Program
   * [x] Packages
   * [x] Top level directives
-* [ ] ASDoc
-  * [ ] `parse_asdoc`
-    * [ ] All tags (`parse_asdoc_tag_or_main_content`)
+* [x] ASDoc
 * `parser_facade`
   * [x] `parse_expression`
   * [x] `parse_type_expression`
-  * [ ] `parse_program`
+  * [x] `parse_program`

@@ -3358,7 +3358,7 @@ impl<'input> Parser<'input> {
             if comment.is_asdoc(&self.token.1) {
                 let content = &comment.content[1..];
                 let lines: Vec<&str> = regex!(r"\n|\r\n?").split(content).collect();
-                let lines: Vec<String> = lines.iter().map(|line| regex_replace!(r"^[\s\t]*(\*[\s\t]?)?", line, |_, _| "".to_owned()).into_owned()).collect();
+                let lines: Vec<String> = lines.iter().map(|line| regex_replace!(r"^\s*(\*\s?)?", line, |_, _| "".to_owned()).into_owned()).collect();
                 Some(self.parse_asdoc_lines(comment.location.clone(), lines))
             } else {
                 None
@@ -3426,10 +3426,113 @@ impl<'input> Parser<'input> {
             match tag_name.as_ref() {
                 // @copy reference
                 "copy" => {
-                    let content = building_content.join("\n");
-                    let reference = regex_replace!(r"^[\t\s\r\n]*", &content, |_| "".to_owned()).into_owned();
-                    let reference = regex_replace!(r"[\t\s\r\n]*$", &reference, |_| "".to_owned()).into_owned();
+                    let reference = building_content.join("\n").trim().to_owned();
                     tags.push(ast::AsDocTag::Copy(reference));
+                },
+
+                // @default value
+                "default" => {
+                    let reference = building_content.join("\n").trim().to_owned();
+                    tags.push(ast::AsDocTag::Default(reference));
+                },
+
+                // @eventType typeOrConstant
+                "eventType" => {
+                    let type_or_constant = building_content.join("\n").trim().to_owned();
+                    let source = Source::new(None, type_or_constant, &self.tokenizer.source.compiler_options);
+                    if let Some(exp) = parser_facade::parse_expression(&source) {
+                        tags.push(ast::AsDocTag::EventType(exp));
+                    } else {
+                        self.add_syntax_error(comment_location.clone(), DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.clone())]);
+                    }
+                },
+
+                // @example text
+                "example" => {
+                    let text = building_content.join("\n");
+                    tags.push(ast::AsDocTag::Example(text));
+                },
+
+                // @exampleText text
+                "exampleText" => {
+                    let text = building_content.join("\n");
+                    tags.push(ast::AsDocTag::ExampleText(text));
+                },
+
+                // @inheritDoc
+                "inheritDoc" => {
+                    let text = building_content.join("\n");
+
+                    // Content must be empty
+                    if !regex_is_match!(r"^\s*$", &text) {
+                        self.add_syntax_error(comment_location.clone(), DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.clone())]);
+                    }
+
+                    tags.push(ast::AsDocTag::InheritDoc);
+                },
+
+                // @internal text
+                "internal" => {
+                    let text = building_content.join("\n");
+
+                    // Content must be non empty
+                    if regex_is_match!(r"^\s*$", &text) {
+                        self.add_syntax_error(comment_location.clone(), DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.clone())]);
+                    }
+
+                    tags.push(ast::AsDocTag::Internal(text));
+                },
+
+                // @param paramName description
+                "param" => {
+                    let content = building_content.join("\n").trim().to_owned();
+                    if let Some((_, name, description)) = regex_captures!(r"(?x) ([^\s]+) (.*)", &content) {
+                        tags.push(ast::AsDocTag::Param { name: name.into(), description: description.trim_start().into() });
+                    } else {
+                        tags.push(ast::AsDocTag::Param { name: content, description: "".into() });
+                    }
+                },
+
+                // @private
+                "private" => {
+                    let text = building_content.join("\n");
+
+                    // Content must be empty
+                    if !regex_is_match!(r"^\s*$", &text) {
+                        self.add_syntax_error(comment_location.clone(), DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.clone())]);
+                    }
+
+                    tags.push(ast::AsDocTag::Private);
+                },
+
+                // @return text
+                "return" => {
+                    let text = building_content.join("\n");
+                    tags.push(ast::AsDocTag::Return(text));
+                },
+
+                // @see reference [displayText]
+                "see" => {
+                    let content = building_content.join("\n").trim().to_owned();
+                    if let Some((_, reference, display_text)) = regex_captures!(r"(?x) ([^\s]+) (.*)", &content) {
+                        tags.push(ast::AsDocTag::See { reference: reference.to_owned(), display_text: Some(display_text.to_owned()) });
+                    } else {
+                        tags.push(ast::AsDocTag::See { reference: content, display_text: None });
+                    }
+                },
+
+                // @throws className description
+                "throws" => {
+                    let class_name_and_description = building_content.join("\n").trim().to_owned();
+                    let class_name_and_description: Vec<String> = class_name_and_description.split(" ").map(|s| s.to_owned()).collect();
+                    let class_name = class_name_and_description[0].clone();
+                    let description = class_name_and_description.get(1).map(|d| d.clone());
+                    let source = Source::new(None, class_name, &self.tokenizer.source.compiler_options);
+                    if let Some(exp) = parser_facade::parse_type_expression(&source) {
+                        tags.push(ast::AsDocTag::Throws { class_reference: exp, description });
+                    } else {
+                        self.add_syntax_error(comment_location.clone(), DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.clone())]);
+                    }
                 },
 
                 // Unrecognized tag
