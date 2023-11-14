@@ -28,7 +28,7 @@ fn main() -> io::Result<()> {
     } else {
         let mut diagnostics = vec![];
         source.sort_diagnostics();
-        for diagnostic in source.diagnostics() {
+        for diagnostic in source.recursive_diagnostics() {
             diagnostics.push(diagnostic.format_default());
         }
         fs::write(&source_path_ast_json, "{}")?;

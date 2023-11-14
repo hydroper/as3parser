@@ -91,6 +91,17 @@ impl Source {
         self.diagnostics.borrow().clone()
     }
 
+    /// Diagnostics of the source file and its subsource files after parsing and/or
+    /// verification.
+    pub fn recursive_diagnostics(&self) -> Vec<Diagnostic> {
+        let mut diagnostics = self.diagnostics();
+        for subsource in self.subsources.borrow().iter() {
+            diagnostics.extend(subsource.diagnostics());
+        }
+        diagnostics
+    }
+
+    /// Sort diagnostics from the source and its subsources.
     pub fn sort_diagnostics(&self) {
         self.diagnostics.borrow_mut().sort();
         for subsource in self.subsources.borrow().iter() {
