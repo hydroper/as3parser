@@ -13,6 +13,63 @@
               "expression": {
                 "location": {},
                 "kind": {
+                  "XmlMarkup": "<!-- Comment -->"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "location": {},
+      "kind": {
+        "Statement": {
+          "location": {},
+          "kind": {
+            "Expression": {
+              "asdoc": null,
+              "expression": {
+                "location": {},
+                "kind": {
+                  "XmlMarkup": "<? ?>"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "location": {},
+      "kind": {
+        "Statement": {
+          "location": {},
+          "kind": {
+            "Expression": {
+              "asdoc": null,
+              "expression": {
+                "location": {},
+                "kind": {
+                  "XmlMarkup": "<![CDATA[ Characters ]]>"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "location": {},
+      "kind": {
+        "Statement": {
+          "location": {},
+          "kind": {
+            "Expression": {
+              "asdoc": null,
+              "expression": {
+                "location": {},
+                "kind": {
                   "Descendants": {
                     "base": {
                       "location": {},
@@ -31,6 +88,88 @@
                                 },
                                 "attributes": [],
                                 "content": [
+                                  {
+                                    "Text": [
+                                      "\r\n    ",
+                                      {}
+                                    ]
+                                  },
+                                  {
+                                    "Element": {
+                                      "location": {},
+                                      "opening_tag_name": {
+                                        "Name": [
+                                          "t",
+                                          {}
+                                        ]
+                                      },
+                                      "attributes": [],
+                                      "content": [],
+                                      "closing_tag_name": null
+                                    }
+                                  },
+                                  {
+                                    "Text": [
+                                      "\r\n    ",
+                                      {}
+                                    ]
+                                  },
+                                  {
+                                    "Element": {
+                                      "location": {},
+                                      "opening_tag_name": {
+                                        "Name": [
+                                          "t",
+                                          {}
+                                        ]
+                                      },
+                                      "attributes": [
+                                        {
+                                          "Expression": {
+                                            "location": {},
+                                            "kind": {
+                                              "Id": {
+                                                "attribute": false,
+                                                "qualifier": null,
+                                                "name": {
+                                                  "Id": [
+                                                    "c",
+                                                    {}
+                                                  ]
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      ],
+                                      "content": [],
+                                      "closing_tag_name": null
+                                    }
+                                  },
+                                  {
+                                    "Text": [
+                                      "\r\n    ",
+                                      {}
+                                    ]
+                                  },
+                                  {
+                                    "Markup": [
+                                      "<!-- Bug here -->",
+                                      {}
+                                    ]
+                                  },
+                                  {
+                                    "Text": [
+                                      "\r\n    ",
+                                      {}
+                                    ]
+                                  },
+                                  {
+                                    "Markup": [
+                                      "<!-- <t k=\"v\"> -->",
+                                      {}
+                                    ]
+                                  },
                                   {
                                     "Text": [
                                       "\r\n    ",
@@ -79,7 +218,62 @@
                                   },
                                   {
                                     "Text": [
-                                      "\r\n    Lorem ipsum\r\n",
+                                      "\r\n    Lorem ipsum\r\n    ",
+                                      {}
+                                    ]
+                                  },
+                                  {
+                                    "Element": {
+                                      "location": {},
+                                      "opening_tag_name": {
+                                        "Name": [
+                                          "t",
+                                          {}
+                                        ]
+                                      },
+                                      "attributes": [],
+                                      "content": [
+                                        {
+                                          "Text": [
+                                            "Lorem ipsum",
+                                            {}
+                                          ]
+                                        }
+                                      ],
+                                      "closing_tag_name": {
+                                        "Name": [
+                                          "t",
+                                          {}
+                                        ]
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "Text": [
+                                      "\r\n    ",
+                                      {}
+                                    ]
+                                  },
+                                  {
+                                    "Expression": {
+                                      "location": {},
+                                      "kind": {
+                                        "Id": {
+                                          "attribute": false,
+                                          "qualifier": null,
+                                          "name": {
+                                            "Id": [
+                                              "c",
+                                              {}
+                                            ]
+                                          }
+                                        }
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "Text": [
+                                      "\r\n",
                                       {}
                                     ]
                                   }
