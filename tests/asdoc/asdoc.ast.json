@@ -1,27 +1,12 @@
 {
-  "location": {
-    "first_line_number": 5,
-    "last_line_number": 5,
-    "first_offset": 44,
-    "last_offset": 0
-  },
+  "location": {},
   "packages": [],
   "directives": [
     {
-      "location": {
-        "first_line_number": 5,
-        "last_line_number": 5,
-        "first_offset": 44,
-        "last_offset": 0
-      },
+      "location": {},
       "kind": {
         "Statement": {
-          "location": {
-            "first_line_number": 5,
-            "last_line_number": 5,
-            "first_offset": 44,
-            "last_offset": 0
-          },
+          "location": {},
           "kind": {
             "Expression": {
               "asdoc": {
@@ -33,31 +18,16 @@
                 ]
               },
               "expression": {
-                "location": {
-                  "first_line_number": 5,
-                  "last_line_number": 5,
-                  "first_offset": 44,
-                  "last_offset": 0
-                },
+                "location": {},
                 "kind": {
                   "BracketsMember": {
                     "base": {
-                      "location": {
-                        "first_line_number": 5,
-                        "last_line_number": 5,
-                        "first_offset": 44,
-                        "last_offset": 49
-                      },
+                      "location": {},
                       "kind": {
                         "ArrayInitializer": {
                           "elements": [
                             {
-                              "location": {
-                                "first_line_number": 5,
-                                "last_line_number": 5,
-                                "first_offset": 45,
-                                "last_offset": 48
-                              },
+                              "location": {},
                               "kind": {
                                 "Id": {
                                   "attribute": false,
@@ -65,12 +35,7 @@
                                   "name": {
                                     "Id": [
                                       "Foo",
-                                      {
-                                        "first_line_number": 5,
-                                        "last_line_number": 5,
-                                        "first_offset": 45,
-                                        "last_offset": 48
-                                      }
+                                      {}
                                     ]
                                   }
                                 }
@@ -82,12 +47,7 @@
                     },
                     "asdoc": null,
                     "key": {
-                      "location": {
-                        "first_line_number": 5,
-                        "last_line_number": 5,
-                        "first_offset": 50,
-                        "last_offset": 53
-                      },
+                      "location": {},
                       "kind": {
                         "Id": {
                           "attribute": false,
@@ -95,12 +55,7 @@
                           "name": {
                             "Id": [
                               "Bar",
-                              {
-                                "first_line_number": 5,
-                                "last_line_number": 5,
-                                "first_offset": 50,
-                                "last_offset": 53
-                              }
+                              {}
                             ]
                           }
                         }

@@ -12,15 +12,19 @@ pub struct Location {
     pub(crate) source: Rc<Source>,
 
     /// First line number, counted from one.
+    #[serde(skip)]
     pub(crate) first_line_number: usize,
 
     /// Last line number, counted from one.
+    #[serde(skip)]
     pub(crate) last_line_number: usize,
 
     /// First UTF-8 offset.
+    #[serde(skip)]
     pub(crate) first_offset: usize,
 
     /// Last UTF-8 offset.
+    #[serde(skip)]
     pub(crate) last_offset: usize,
 }
 

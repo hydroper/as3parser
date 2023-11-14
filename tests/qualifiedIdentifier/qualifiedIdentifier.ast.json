@@ -1,37 +1,17 @@
 {
-  "location": {
-    "first_line_number": 1,
-    "last_line_number": 10,
-    "first_offset": 0,
-    "last_offset": 0
-  },
+  "location": {},
   "packages": [],
   "directives": [
     {
-      "location": {
-        "first_line_number": 1,
-        "last_line_number": 2,
-        "first_offset": 0,
-        "last_offset": 3
-      },
+      "location": {},
       "kind": {
         "Statement": {
-          "location": {
-            "first_line_number": 1,
-            "last_line_number": 2,
-            "first_offset": 0,
-            "last_offset": 3
-          },
+          "location": {},
           "kind": {
             "Expression": {
               "asdoc": null,
               "expression": {
-                "location": {
-                  "first_line_number": 1,
-                  "last_line_number": 1,
-                  "first_offset": 0,
-                  "last_offset": 1
-                },
+                "location": {},
                 "kind": {
                   "Id": {
                     "attribute": false,
@@ -39,12 +19,7 @@
                     "name": {
                       "Id": [
                         "*",
-                        {
-                          "first_line_number": 1,
-                          "last_line_number": 1,
-                          "first_offset": 0,
-                          "last_offset": 1
-                        }
+                        {}
                       ]
                     }
                   }
@@ -56,40 +31,20 @@
       }
     },
     {
-      "location": {
-        "first_line_number": 2,
-        "last_line_number": 3,
-        "first_offset": 3,
-        "last_offset": 16
-      },
+      "location": {},
       "kind": {
         "Statement": {
-          "location": {
-            "first_line_number": 2,
-            "last_line_number": 3,
-            "first_offset": 3,
-            "last_offset": 16
-          },
+          "location": {},
           "kind": {
             "Expression": {
               "asdoc": null,
               "expression": {
-                "location": {
-                  "first_line_number": 2,
-                  "last_line_number": 3,
-                  "first_offset": 3,
-                  "last_offset": 14
-                },
+                "location": {},
                 "kind": {
                   "Id": {
                     "attribute": false,
                     "qualifier": {
-                      "location": {
-                        "first_line_number": 2,
-                        "last_line_number": 2,
-                        "first_offset": 3,
-                        "last_offset": 9
-                      },
+                      "location": {},
                       "kind": {
                         "ReservedNamespace": "Public"
                       }
@@ -97,12 +52,7 @@
                     "name": {
                       "Id": [
                         "x",
-                        {
-                          "first_line_number": 2,
-                          "last_line_number": 2,
-                          "first_offset": 11,
-                          "last_offset": 12
-                        }
+                        {}
                       ]
                     }
                   }
@@ -114,40 +64,20 @@
       }
     },
     {
-      "location": {
-        "first_line_number": 3,
-        "last_line_number": 4,
-        "first_offset": 16,
-        "last_offset": 24
-      },
+      "location": {},
       "kind": {
         "Statement": {
-          "location": {
-            "first_line_number": 3,
-            "last_line_number": 4,
-            "first_offset": 16,
-            "last_offset": 24
-          },
+          "location": {},
           "kind": {
             "Expression": {
               "asdoc": null,
               "expression": {
-                "location": {
-                  "first_line_number": 3,
-                  "last_line_number": 4,
-                  "first_offset": 16,
-                  "last_offset": 24
-                },
+                "location": {},
                 "kind": {
                   "Id": {
                     "attribute": false,
                     "qualifier": {
-                      "location": {
-                        "first_line_number": 3,
-                        "last_line_number": 3,
-                        "first_offset": 17,
-                        "last_offset": 18
-                      },
+                      "location": {},
                       "kind": {
                         "Id": {
                           "attribute": false,
@@ -155,12 +85,7 @@
                           "name": {
                             "Id": [
                               "q",
-                              {
-                                "first_line_number": 3,
-                                "last_line_number": 3,
-                                "first_offset": 17,
-                                "last_offset": 18
-                              }
+                              {}
                             ]
                           }
                         }
@@ -169,12 +94,7 @@
                     "name": {
                       "Id": [
                         "x",
-                        {
-                          "first_line_number": 3,
-                          "last_line_number": 3,
-                          "first_offset": 21,
-                          "last_offset": 22
-                        }
+                        {}
                       ]
                     }
                   }
@@ -186,39 +106,19 @@
       }
     },
     {
-      "location": {
-        "first_line_number": 4,
-        "last_line_number": 5,
-        "first_offset": 24,
-        "last_offset": 29
-      },
+      "location": {},
       "kind": {
         "Statement": {
-          "location": {
-            "first_line_number": 4,
-            "last_line_number": 5,
-            "first_offset": 24,
-            "last_offset": 29
-          },
+          "location": {},
           "kind": {
             "Expression": {
               "asdoc": null,
               "expression": {
-                "location": {
-                  "first_line_number": 4,
-                  "last_line_number": 5,
-                  "first_offset": 24,
-                  "last_offset": 29
-                },
+                "location": {},
                 "kind": {
                   "DotMember": {
                     "base": {
-                      "location": {
-                        "first_line_number": 4,
-                        "last_line_number": 4,
-                        "first_offset": 24,
-                        "last_offset": 25
-                      },
+                      "location": {},
                       "kind": {
                         "Id": {
                           "attribute": false,
@@ -226,12 +126,7 @@
                           "name": {
                             "Id": [
                               "o",
-                              {
-                                "first_line_number": 4,
-                                "last_line_number": 4,
-                                "first_offset": 24,
-                                "last_offset": 25
-                              }
+                              {}
                             ]
                           }
                         }
@@ -243,12 +138,7 @@
                       "name": {
                         "Id": [
                           "*",
-                          {
-                            "first_line_number": 4,
-                            "last_line_number": 4,
-                            "first_offset": 26,
-                            "last_offset": 27
-                          }
+                          {}
                         ]
                       }
                     }
@@ -261,39 +151,19 @@
       }
     },
     {
-      "location": {
-        "first_line_number": 5,
-        "last_line_number": 6,
-        "first_offset": 29,
-        "last_offset": 39
-      },
+      "location": {},
       "kind": {
         "Statement": {
-          "location": {
-            "first_line_number": 5,
-            "last_line_number": 6,
-            "first_offset": 29,
-            "last_offset": 39
-          },
+          "location": {},
           "kind": {
             "Expression": {
               "asdoc": null,
               "expression": {
-                "location": {
-                  "first_line_number": 5,
-                  "last_line_number": 6,
-                  "first_offset": 29,
-                  "last_offset": 39
-                },
+                "location": {},
                 "kind": {
                   "DotMember": {
                     "base": {
-                      "location": {
-                        "first_line_number": 5,
-                        "last_line_number": 5,
-                        "first_offset": 29,
-                        "last_offset": 30
-                      },
+                      "location": {},
                       "kind": {
                         "Id": {
                           "attribute": false,
@@ -301,12 +171,7 @@
                           "name": {
                             "Id": [
                               "o",
-                              {
-                                "first_line_number": 5,
-                                "last_line_number": 5,
-                                "first_offset": 29,
-                                "last_offset": 30
-                              }
+                              {}
                             ]
                           }
                         }
@@ -318,12 +183,7 @@
                       "name": {
                         "Id": [
                           "public",
-                          {
-                            "first_line_number": 5,
-                            "last_line_number": 5,
-                            "first_offset": 31,
-                            "last_offset": 37
-                          }
+                          {}
                         ]
                       }
                     }
@@ -336,39 +196,19 @@
       }
     },
     {
-      "location": {
-        "first_line_number": 6,
-        "last_line_number": 7,
-        "first_offset": 39,
-        "last_offset": 52
-      },
+      "location": {},
       "kind": {
         "Statement": {
-          "location": {
-            "first_line_number": 6,
-            "last_line_number": 7,
-            "first_offset": 39,
-            "last_offset": 52
-          },
+          "location": {},
           "kind": {
             "Expression": {
               "asdoc": null,
               "expression": {
-                "location": {
-                  "first_line_number": 6,
-                  "last_line_number": 7,
-                  "first_offset": 39,
-                  "last_offset": 52
-                },
+                "location": {},
                 "kind": {
                   "DotMember": {
                     "base": {
-                      "location": {
-                        "first_line_number": 6,
-                        "last_line_number": 6,
-                        "first_offset": 39,
-                        "last_offset": 40
-                      },
+                      "location": {},
                       "kind": {
                         "Id": {
                           "attribute": false,
@@ -376,12 +216,7 @@
                           "name": {
                             "Id": [
                               "o",
-                              {
-                                "first_line_number": 6,
-                                "last_line_number": 6,
-                                "first_offset": 39,
-                                "last_offset": 40
-                              }
+                              {}
                             ]
                           }
                         }
@@ -390,12 +225,7 @@
                     "id": {
                       "attribute": false,
                       "qualifier": {
-                        "location": {
-                          "first_line_number": 6,
-                          "last_line_number": 6,
-                          "first_offset": 41,
-                          "last_offset": 47
-                        },
+                        "location": {},
                         "kind": {
                           "ReservedNamespace": "Public"
                         }
@@ -403,12 +233,7 @@
                       "name": {
                         "Id": [
                           "x",
-                          {
-                            "first_line_number": 6,
-                            "last_line_number": 6,
-                            "first_offset": 49,
-                            "last_offset": 50
-                          }
+                          {}
                         ]
                       }
                     }
@@ -421,39 +246,19 @@
       }
     },
     {
-      "location": {
-        "first_line_number": 7,
-        "last_line_number": 8,
-        "first_offset": 52,
-        "last_offset": 62
-      },
+      "location": {},
       "kind": {
         "Statement": {
-          "location": {
-            "first_line_number": 7,
-            "last_line_number": 8,
-            "first_offset": 52,
-            "last_offset": 62
-          },
+          "location": {},
           "kind": {
             "Expression": {
               "asdoc": null,
               "expression": {
-                "location": {
-                  "first_line_number": 7,
-                  "last_line_number": 8,
-                  "first_offset": 52,
-                  "last_offset": 62
-                },
+                "location": {},
                 "kind": {
                   "DotMember": {
                     "base": {
-                      "location": {
-                        "first_line_number": 7,
-                        "last_line_number": 7,
-                        "first_offset": 52,
-                        "last_offset": 53
-                      },
+                      "location": {},
                       "kind": {
                         "Id": {
                           "attribute": false,
@@ -461,12 +266,7 @@
                           "name": {
                             "Id": [
                               "o",
-                              {
-                                "first_line_number": 7,
-                                "last_line_number": 7,
-                                "first_offset": 52,
-                                "last_offset": 53
-                              }
+                              {}
                             ]
                           }
                         }
@@ -475,12 +275,7 @@
                     "id": {
                       "attribute": false,
                       "qualifier": {
-                        "location": {
-                          "first_line_number": 7,
-                          "last_line_number": 7,
-                          "first_offset": 55,
-                          "last_offset": 56
-                        },
+                        "location": {},
                         "kind": {
                           "Id": {
                             "attribute": false,
@@ -488,12 +283,7 @@
                             "name": {
                               "Id": [
                                 "q",
-                                {
-                                  "first_line_number": 7,
-                                  "last_line_number": 7,
-                                  "first_offset": 55,
-                                  "last_offset": 56
-                                }
+                                {}
                               ]
                             }
                           }
@@ -502,12 +292,7 @@
                       "name": {
                         "Id": [
                           "x",
-                          {
-                            "first_line_number": 7,
-                            "last_line_number": 7,
-                            "first_offset": 59,
-                            "last_offset": 60
-                          }
+                          {}
                         ]
                       }
                     }
@@ -520,39 +305,19 @@
       }
     },
     {
-      "location": {
-        "first_line_number": 8,
-        "last_line_number": 9,
-        "first_offset": 62,
-        "last_offset": 70
-      },
+      "location": {},
       "kind": {
         "Statement": {
-          "location": {
-            "first_line_number": 8,
-            "last_line_number": 9,
-            "first_offset": 62,
-            "last_offset": 70
-          },
+          "location": {},
           "kind": {
             "Expression": {
               "asdoc": null,
               "expression": {
-                "location": {
-                  "first_line_number": 8,
-                  "last_line_number": 9,
-                  "first_offset": 62,
-                  "last_offset": 70
-                },
+                "location": {},
                 "kind": {
                   "DotMember": {
                     "base": {
-                      "location": {
-                        "first_line_number": 8,
-                        "last_line_number": 8,
-                        "first_offset": 62,
-                        "last_offset": 63
-                      },
+                      "location": {},
                       "kind": {
                         "Id": {
                           "attribute": false,
@@ -560,12 +325,7 @@
                           "name": {
                             "Id": [
                               "o",
-                              {
-                                "first_line_number": 8,
-                                "last_line_number": 8,
-                                "first_offset": 62,
-                                "last_offset": 63
-                              }
+                              {}
                             ]
                           }
                         }
@@ -574,12 +334,7 @@
                     "id": {
                       "attribute": false,
                       "qualifier": {
-                        "location": {
-                          "first_line_number": 8,
-                          "last_line_number": 8,
-                          "first_offset": 64,
-                          "last_offset": 65
-                        },
+                        "location": {},
                         "kind": {
                           "Id": {
                             "attribute": false,
@@ -587,12 +342,7 @@
                             "name": {
                               "Id": [
                                 "q",
-                                {
-                                  "first_line_number": 8,
-                                  "last_line_number": 8,
-                                  "first_offset": 64,
-                                  "last_offset": 65
-                                }
+                                {}
                               ]
                             }
                           }
@@ -601,12 +351,7 @@
                       "name": {
                         "Id": [
                           "x",
-                          {
-                            "first_line_number": 8,
-                            "last_line_number": 8,
-                            "first_offset": 67,
-                            "last_offset": 68
-                          }
+                          {}
                         ]
                       }
                     }
@@ -619,39 +364,19 @@
       }
     },
     {
-      "location": {
-        "first_line_number": 9,
-        "last_line_number": 10,
-        "first_offset": 70,
-        "last_offset": 80
-      },
+      "location": {},
       "kind": {
         "Statement": {
-          "location": {
-            "first_line_number": 9,
-            "last_line_number": 10,
-            "first_offset": 70,
-            "last_offset": 80
-          },
+          "location": {},
           "kind": {
             "Expression": {
               "asdoc": null,
               "expression": {
-                "location": {
-                  "first_line_number": 9,
-                  "last_line_number": 10,
-                  "first_offset": 70,
-                  "last_offset": 80
-                },
+                "location": {},
                 "kind": {
                   "DotMember": {
                     "base": {
-                      "location": {
-                        "first_line_number": 9,
-                        "last_line_number": 9,
-                        "first_offset": 70,
-                        "last_offset": 71
-                      },
+                      "location": {},
                       "kind": {
                         "Id": {
                           "attribute": false,
@@ -659,12 +384,7 @@
                           "name": {
                             "Id": [
                               "o",
-                              {
-                                "first_line_number": 9,
-                                "last_line_number": 9,
-                                "first_offset": 70,
-                                "last_offset": 71
-                              }
+                              {}
                             ]
                           }
                         }
@@ -673,12 +393,7 @@
                     "id": {
                       "attribute": false,
                       "qualifier": {
-                        "location": {
-                          "first_line_number": 9,
-                          "last_line_number": 9,
-                          "first_offset": 72,
-                          "last_offset": 73
-                        },
+                        "location": {},
                         "kind": {
                           "Id": {
                             "attribute": false,
@@ -686,12 +401,7 @@
                             "name": {
                               "Id": [
                                 "q",
-                                {
-                                  "first_line_number": 9,
-                                  "last_line_number": 9,
-                                  "first_offset": 72,
-                                  "last_offset": 73
-                                }
+                                {}
                               ]
                             }
                           }
@@ -699,12 +409,7 @@
                       },
                       "name": {
                         "Brackets": {
-                          "location": {
-                            "first_line_number": 9,
-                            "last_line_number": 9,
-                            "first_offset": 76,
-                            "last_offset": 77
-                          },
+                          "location": {},
                           "kind": {
                             "Id": {
                               "attribute": false,
@@ -712,12 +417,7 @@
                               "name": {
                                 "Id": [
                                   "k",
-                                  {
-                                    "first_line_number": 9,
-                                    "last_line_number": 9,
-                                    "first_offset": 76,
-                                    "last_offset": 77
-                                  }
+                                  {}
                                 ]
                               }
                             }
@@ -734,39 +434,19 @@
       }
     },
     {
-      "location": {
-        "first_line_number": 10,
-        "last_line_number": 10,
-        "first_offset": 80,
-        "last_offset": 0
-      },
+      "location": {},
       "kind": {
         "Statement": {
-          "location": {
-            "first_line_number": 10,
-            "last_line_number": 10,
-            "first_offset": 80,
-            "last_offset": 0
-          },
+          "location": {},
           "kind": {
             "Expression": {
               "asdoc": null,
               "expression": {
-                "location": {
-                  "first_line_number": 10,
-                  "last_line_number": 10,
-                  "first_offset": 80,
-                  "last_offset": 84
-                },
+                "location": {},
                 "kind": {
                   "DotMember": {
                     "base": {
-                      "location": {
-                        "first_line_number": 10,
-                        "last_line_number": 10,
-                        "first_offset": 80,
-                        "last_offset": 81
-                      },
+                      "location": {},
                       "kind": {
                         "Id": {
                           "attribute": false,
@@ -774,12 +454,7 @@
                           "name": {
                             "Id": [
                               "o",
-                              {
-                                "first_line_number": 10,
-                                "last_line_number": 10,
-                                "first_offset": 80,
-                                "last_offset": 81
-                              }
+                              {}
                             ]
                           }
                         }
@@ -791,12 +466,7 @@
                       "name": {
                         "Id": [
                           "x",
-                          {
-                            "first_line_number": 10,
-                            "last_line_number": 10,
-                            "first_offset": 83,
-                            "last_offset": 84
-                          }
+                          {}
                         ]
                       }
                     }
