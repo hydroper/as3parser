@@ -140,13 +140,17 @@ Syntax:
     * [ ] Modifiers
       * [ ] Identifier
       * [ ] ReservedNamespace
+  * [ ] When parsing annotatable definitions, ensure modifiers are correctly specified
   * [ ] Variable definition
   * [ ] Function definition
+    * When parsing the function definition, ensure the body matches with the context and the `native` modifier
     * [ ] Constructor
+      * [ ] Parse body with a `ConstructorBlock` context
     * [ ] Getter
     * [ ] Setter
   * [ ] Type definition
   * [ ] Class definition
+    * [ ] Parse body with a `ClassBlock` context
   * [ ] Enum definition
   * [ ] Interface definition
   * [ ] Namespace definition

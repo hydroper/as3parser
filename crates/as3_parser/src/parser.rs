@@ -555,7 +555,11 @@ impl<'input> Parser<'input> {
     fn parse_arrow_function(&mut self, start: Location, context: ArrowFunctionContext) -> Result<Rc<ast::Expression>, ParserFailure> {
         self.expect(Token::FatArrow)?;
         self.push_location(&start);
+
+        // Enter activation
         self.activations.push(Activation::new());
+
+        // Reinterpret left side
         let mut params: Vec<ast::FunctionParam> = vec![];
         let mut return_annotation: Option<Rc<ast::TypeExpression>> = None;
         if let Some(left) = context.left {
@@ -566,7 +570,11 @@ impl<'input> Parser<'input> {
                 params = self.exp_to_function_params(Rc::clone(&left))?;
             }
         }
+
+        // Validate parameter list
         self.validate_function_parameter_list(&params)?;
+
+        // Body
         let body: ast::FunctionBody = if self.peek(Token::LeftBrace) {
             ast::FunctionBody::Block(self.parse_block(DirectiveContext::Default)?)
         } else {
@@ -575,7 +583,10 @@ impl<'input> Parser<'input> {
                 ..context.right_context
             })?)
         };
+
+        // Exit activation
         let activation = self.activations.pop().unwrap();
+
         Ok(Rc::new(ast::Expression {
             location: self.pop_location(),
             kind: ast::ExpressionKind::ArrowFunction(Rc::new(ast::FunctionCommon {
@@ -1005,7 +1016,7 @@ impl<'input> Parser<'input> {
             name = Some((id, self.token.1.clone()));
             self.next()?;
         }
-        let (common, _) = self.parse_function_common(true)?;
+        let (common, _) = self.parse_function_common(true, DirectiveContext::Default)?;
         Ok(Rc::new(ast::Expression {
             location: self.pop_location(),
             kind: ast::ExpressionKind::Function {
@@ -1015,7 +1026,7 @@ impl<'input> Parser<'input> {
         }))
     }
 
-    fn parse_function_common(&mut self, function_expr: bool) -> Result<(Rc<ast::FunctionCommon>, Option<ast::GenericsWhere>), ParserFailure> {
+    fn parse_function_common(&mut self, function_expr: bool, block_context: DirectiveContext) -> Result<(Rc<ast::FunctionCommon>, Option<ast::GenericsWhere>), ParserFailure> {
         self.expect(Token::LeftParen)?;
         let mut params: Vec<ast::FunctionParam> = vec![];
         while self.peek(Token::RightParen) {
@@ -1049,15 +1060,30 @@ impl<'input> Parser<'input> {
         let return_annotation = if self.consume(Token::Colon)? { Some(self.parse_type_expression()?) } else { None };
         let where_clause = if !function_expr { self.parse_generics_where_clause()? } else { None };
 
+        // Enter activation
         self.activations.push(Activation::new());
-        let body = ast::FunctionBody::Block(self.parse_block(DirectiveContext::Default)?);
+
+        // Body
+        let body = if self.peek(Token::LeftBrace) {
+            Some(ast::FunctionBody::Block(self.parse_block(block_context)?))
+        } else {
+            None
+        };
+
+        // Body is required by function expressions
+        if body.is_none() && function_expr {
+            self.expect(Token::LeftBrace)?;
+        }
+
+        // Exit activation
         let activation = self.activations.pop().unwrap();
+
         Ok((Rc::new(ast::FunctionCommon {
             flags: if activation.uses_yield { ast::FunctionFlags::YIELD } else { ast::FunctionFlags::empty() }
                 | if activation.uses_await { ast::FunctionFlags::AWAIT } else { ast::FunctionFlags::empty() },
             params,
             return_annotation,
-            body: Some(body),
+            body,
         }), where_clause))
     }
 
@@ -2476,10 +2502,25 @@ impl<'input> Parser<'input> {
                 }), semicolon_inserted))
             } else {
                 // SuperStatement
-                Ok((Rc::new(ast::Statement {
+                let node = Rc::new(ast::Statement {
                     location: self.pop_location(),
                     kind: ast::StatementKind::Super(arguments.unwrap()),
-                }), semicolon_inserted))
+                });
+
+                // Check if super statement is allowed here
+                let allowed_here;
+                if let DirectiveContext::ConstructorBlock { super_statement_found } = &context {
+                    allowed_here = !super_statement_found.get();
+                    super_statement_found.set(true);
+                } else {
+                    allowed_here = false;
+                }
+
+                if !allowed_here {
+                    self.add_syntax_error(node.location.clone(), DiagnosticKind::NotAllowedHere, diagnostic_arguments![Token(Token::Super)]);
+                }
+
+                Ok((node, semicolon_inserted))
             }
         // EmptyStatement
         } else if self.peek(Token::Semicolon) {
@@ -3643,6 +3684,9 @@ pub enum DirectiveContext {
     Default,
     ClassBlock {
         name: String,
+    },
+    InterfaceBlock,
+    ConstructorBlock {
         super_statement_found: Cell<bool>,
     },
     WithControl {
