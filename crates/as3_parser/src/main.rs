@@ -24,15 +24,14 @@ fn main() -> io::Result<()> {
     let source = Source::new(Some(source_path), source_content, &CompilerOptions::new());
     if let Some(program) = parser_facade::parse_program(&source) {
         fs::write(&source_path_ast_json, serde_json::to_string_pretty(&program).unwrap())?;
-        fs::write(&source_path_diagnostics, "")?;
     } else {
-        let mut diagnostics = vec![];
-        source.sort_diagnostics();
-        for diagnostic in source.recursive_diagnostics() {
-            diagnostics.push(diagnostic.format_default());
-        }
         fs::write(&source_path_ast_json, "{}")?;
-        fs::write(&source_path_diagnostics, diagnostics.join("\n"))?;
     }
+    let mut diagnostics = vec![];
+    source.sort_diagnostics();
+    for diagnostic in source.recursive_diagnostics() {
+        diagnostics.push(diagnostic.format_default());
+    }
+    fs::write(&source_path_diagnostics, diagnostics.join("\n"))?;
     Ok(())
 }
