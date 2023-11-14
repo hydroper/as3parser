@@ -153,22 +153,30 @@
                                     ]
                                   },
                                   {
-                                    "Markup": [
-                                      "<!-- Bug here -->",
-                                      {}
-                                    ]
-                                  },
-                                  {
-                                    "Text": [
-                                      "\r\n    ",
-                                      {}
-                                    ]
-                                  },
-                                  {
-                                    "Markup": [
-                                      "<!-- <t k=\"v\"> -->",
-                                      {}
-                                    ]
+                                    "Element": {
+                                      "location": {},
+                                      "opening_tag_name": {
+                                        "Name": [
+                                          "t",
+                                          {}
+                                        ]
+                                      },
+                                      "attributes": [
+                                        {
+                                          "Attribute": {
+                                            "name": [
+                                              "k",
+                                              {}
+                                            ],
+                                            "value": {
+                                              "Value": "v"
+                                            }
+                                          }
+                                        }
+                                      ],
+                                      "content": [],
+                                      "closing_tag_name": null
+                                    }
                                   },
                                   {
                                     "Text": [
