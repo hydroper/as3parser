@@ -13,7 +13,7 @@ Handwritten ActionScript 3 parser in the Rust language.
 
 ## Status
 
-It is almost finished; just missing directives ([progress tracker](crates/as3_parser/progress.md)).
+It is almost finished; just missing annotatable definitions ([progress tracker](crates/as3_parser/progress.md)).
 
 ## Getting started
 
