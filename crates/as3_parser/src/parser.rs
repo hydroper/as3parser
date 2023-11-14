@@ -567,7 +567,6 @@ impl<'input> Parser<'input> {
             }
         }
         self.validate_function_parameter_list(&params)?;
-        self.expect(Token::FatArrow)?;
         let body: ast::FunctionBody = if self.peek(Token::LeftBrace) {
             ast::FunctionBody::Block(self.parse_block(DirectiveContext::Default)?)
         } else {

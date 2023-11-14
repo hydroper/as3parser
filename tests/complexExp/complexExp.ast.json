@@ -1,1 +1,325 @@
-{}
+{
+  "location": {
+    "first_line_number": 1,
+    "last_line_number": 1,
+    "first_offset": 2,
+    "last_offset": 0
+  },
+  "packages": [],
+  "directives": [
+    {
+      "location": {
+        "first_line_number": 1,
+        "last_line_number": 1,
+        "first_offset": 0,
+        "last_offset": 0
+      },
+      "kind": {
+        "Statement": {
+          "location": {
+            "first_line_number": 1,
+            "last_line_number": 1,
+            "first_offset": 3,
+            "last_offset": 0
+          },
+          "kind": {
+            "Expression": {
+              "asdoc": null,
+              "expression": {
+                "location": {
+                  "first_line_number": 1,
+                  "last_line_number": 1,
+                  "first_offset": 0,
+                  "last_offset": 54
+                },
+                "kind": {
+                  "Paren": {
+                    "location": {
+                      "first_line_number": 1,
+                      "last_line_number": 1,
+                      "first_offset": 1,
+                      "last_offset": 53
+                    },
+                    "kind": {
+                      "ArrowFunction": {
+                        "flags": "",
+                        "params": [
+                          {
+                            "location": {
+                              "first_line_number": 1,
+                              "last_line_number": 1,
+                              "first_offset": 6,
+                              "last_offset": 8
+                            },
+                            "kind": "Required",
+                            "binding": {
+                              "pattern": {
+                                "location": {
+                                  "first_line_number": 1,
+                                  "last_line_number": 1,
+                                  "first_offset": 6,
+                                  "last_offset": 8
+                                },
+                                "kind": {
+                                  "Record": [
+                                    {
+                                      "location": {
+                                        "first_line_number": 1,
+                                        "last_line_number": 1,
+                                        "first_offset": 3,
+                                        "last_offset": 4
+                                      },
+                                      "key": [
+                                        {
+                                          "Id": {
+                                            "qualifier": null,
+                                            "name": {
+                                              "Id": [
+                                                "x",
+                                                {
+                                                  "first_line_number": 1,
+                                                  "last_line_number": 1,
+                                                  "first_offset": 3,
+                                                  "last_offset": 4
+                                                }
+                                              ]
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "first_line_number": 1,
+                                          "last_line_number": 1,
+                                          "first_offset": 3,
+                                          "last_offset": 4
+                                        }
+                                      ],
+                                      "non_null": false,
+                                      "alias": null
+                                    },
+                                    {
+                                      "location": {
+                                        "first_line_number": 1,
+                                        "last_line_number": 1,
+                                        "first_offset": 6,
+                                        "last_offset": 7
+                                      },
+                                      "key": [
+                                        {
+                                          "Id": {
+                                            "qualifier": null,
+                                            "name": {
+                                              "Id": [
+                                                "y",
+                                                {
+                                                  "first_line_number": 1,
+                                                  "last_line_number": 1,
+                                                  "first_offset": 6,
+                                                  "last_offset": 7
+                                                }
+                                              ]
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "first_line_number": 1,
+                                          "last_line_number": 1,
+                                          "first_offset": 6,
+                                          "last_offset": 7
+                                        }
+                                      ],
+                                      "non_null": false,
+                                      "alias": null
+                                    }
+                                  ]
+                                },
+                                "non_null": false,
+                                "type_annotation": null
+                              },
+                              "init": null
+                            }
+                          },
+                          {
+                            "location": {
+                              "first_line_number": 1,
+                              "last_line_number": 1,
+                              "first_offset": 10,
+                              "last_offset": 31
+                            },
+                            "kind": "Optional",
+                            "binding": {
+                              "pattern": {
+                                "location": {
+                                  "first_line_number": 1,
+                                  "last_line_number": 1,
+                                  "first_offset": 10,
+                                  "last_offset": 27
+                                },
+                                "kind": {
+                                  "Binding": {
+                                    "name": [
+                                      "argument",
+                                      {
+                                        "first_line_number": 1,
+                                        "last_line_number": 1,
+                                        "first_offset": 10,
+                                        "last_offset": 18
+                                      }
+                                    ]
+                                  }
+                                },
+                                "non_null": false,
+                                "type_annotation": {
+                                  "location": {
+                                    "first_line_number": 1,
+                                    "last_line_number": 1,
+                                    "first_offset": 20,
+                                    "last_offset": 27
+                                  },
+                                  "kind": {
+                                    "Id": {
+                                      "qualifier": null,
+                                      "name": {
+                                        "Id": [
+                                          "Number",
+                                          {
+                                            "first_line_number": 1,
+                                            "last_line_number": 1,
+                                            "first_offset": 20,
+                                            "last_offset": 26
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "init": {
+                                "location": {
+                                  "first_line_number": 1,
+                                  "last_line_number": 1,
+                                  "first_offset": 29,
+                                  "last_offset": 31
+                                },
+                                "kind": {
+                                  "Numeric": 10.0
+                                }
+                              }
+                            }
+                          }
+                        ],
+                        "return_annotation": null,
+                        "body": {
+                          "Expression": {
+                            "location": {
+                              "first_line_number": 1,
+                              "last_line_number": 1,
+                              "first_offset": 36,
+                              "last_offset": 53
+                            },
+                            "kind": {
+                              "Binary": {
+                                "left": {
+                                  "location": {
+                                    "first_line_number": 1,
+                                    "last_line_number": 1,
+                                    "first_offset": 36,
+                                    "last_offset": 43
+                                  },
+                                  "kind": {
+                                    "Binary": {
+                                      "left": {
+                                        "location": {
+                                          "first_line_number": 1,
+                                          "last_line_number": 1,
+                                          "first_offset": 36,
+                                          "last_offset": 37
+                                        },
+                                        "kind": {
+                                          "Id": {
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "name": {
+                                              "Id": [
+                                                "x",
+                                                {
+                                                  "first_line_number": 1,
+                                                  "last_line_number": 1,
+                                                  "first_offset": 36,
+                                                  "last_offset": 37
+                                                }
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "operator": "Power",
+                                      "right": {
+                                        "location": {
+                                          "first_line_number": 1,
+                                          "last_line_number": 1,
+                                          "first_offset": 41,
+                                          "last_offset": 42
+                                        },
+                                        "kind": {
+                                          "Id": {
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "name": {
+                                              "Id": [
+                                                "y",
+                                                {
+                                                  "first_line_number": 1,
+                                                  "last_line_number": 1,
+                                                  "first_offset": 41,
+                                                  "last_offset": 42
+                                                }
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "operator": "Add",
+                                "right": {
+                                  "location": {
+                                    "first_line_number": 1,
+                                    "last_line_number": 1,
+                                    "first_offset": 45,
+                                    "last_offset": 53
+                                  },
+                                  "kind": {
+                                    "Id": {
+                                      "attribute": false,
+                                      "qualifier": null,
+                                      "name": {
+                                        "Id": [
+                                          "argument",
+                                          {
+                                            "first_line_number": 1,
+                                            "last_line_number": 1,
+                                            "first_offset": 45,
+                                            "last_offset": 53
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
