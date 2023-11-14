@@ -780,49 +780,49 @@ impl<'input> Parser<'input> {
             }
         } else if self.peek(Token::Null) {
             self.mark_location();
-            self.next();
+            self.next()?;
             Ok(Some(Rc::new(ast::Expression {
                 location: self.pop_location(),
                 kind: ast::ExpressionKind::Null,
             })))
         } else if self.peek(Token::False) {
             self.mark_location();
-            self.next();
+            self.next()?;
             Ok(Some(Rc::new(ast::Expression {
                 location: self.pop_location(),
                 kind: ast::ExpressionKind::Boolean(false),
             })))
         } else if self.peek(Token::True) {
             self.mark_location();
-            self.next();
+            self.next()?;
             Ok(Some(Rc::new(ast::Expression {
                 location: self.pop_location(),
                 kind: ast::ExpressionKind::Boolean(true),
             })))
         } else if let Token::NumericLiteral(n) = self.token.0 {
             self.mark_location();
-            self.next();
+            self.next()?;
             Ok(Some(Rc::new(ast::Expression {
                 location: self.pop_location(),
                 kind: ast::ExpressionKind::Numeric(n),
             })))
         } else if let Token::StringLiteral(ref s) = self.token.0.clone() {
             self.mark_location();
-            self.next();
+            self.next()?;
             Ok(Some(Rc::new(ast::Expression {
                 location: self.pop_location(),
                 kind: ast::ExpressionKind::String(s.clone()),
             })))
         } else if self.peek(Token::This) {
             self.mark_location();
-            self.next();
+            self.next()?;
             Ok(Some(Rc::new(ast::Expression {
                 location: self.pop_location(),
                 kind: ast::ExpressionKind::This,
             })))
         } else if let Token::RegExpLiteral { ref body, ref flags } = self.token.0.clone() {
             self.mark_location();
-            self.next();
+            self.next()?;
             Ok(Some(Rc::new(ast::Expression {
                 location: self.pop_location(),
                 kind: ast::ExpressionKind::RegExp { body: body.clone(), flags: flags.clone() },
@@ -839,7 +839,7 @@ impl<'input> Parser<'input> {
         } else if let Some(reserved_ns) = self.peek_reserved_namespace() {
             self.mark_location();
             self.duplicate_location();
-            self.next();
+            self.next()?;
             let rns = Rc::new(ast::Expression {
                 location: self.pop_location(),
                 kind: ast::ExpressionKind::ReservedNamespace(reserved_ns),
@@ -914,7 +914,7 @@ impl<'input> Parser<'input> {
         // NewExpression, VectorInitializer
         } else if self.peek(Token::New) && context.min_precedence.includes(&OperatorPrecedence::Unary) {
             let start = self.token_location();
-            self.next();
+            self.next()?;
             if self.peek(Token::Lt) {
                 Ok(Some(self.parse_vector_initializer(start)?))
             } else {
@@ -969,7 +969,7 @@ impl<'input> Parser<'input> {
         } else if let Some((operator, subexp_precedence)) = self.check_prefix_operator() {
             if context.min_precedence.includes(&OperatorPrecedence::Postfix) {
                 self.mark_location();
-                self.next();
+                self.next()?;
                 let base = self.parse_expression(ExpressionContext { min_precedence: subexp_precedence, ..default() })?;
                 Ok(Some(Rc::new(ast::Expression {
                     location: self.pop_location(),
@@ -1045,7 +1045,7 @@ impl<'input> Parser<'input> {
             }
         }
         self.expect(Token::RightParen)?;
-        self.validate_function_parameter_list(&params);
+        self.validate_function_parameter_list(&params)?;
 
         let return_annotation = if self.consume(Token::Colon)? { Some(self.parse_type_expression()?) } else { None };
         let where_clause = if !function_expr { self.parse_generics_where_clause()? } else { None };
@@ -1262,49 +1262,49 @@ impl<'input> Parser<'input> {
             }
         } else if self.peek(Token::Null) {
             self.mark_location();
-            self.next();
+            self.next()?;
             Ok(Rc::new(ast::Expression {
                 location: self.pop_location(),
                 kind: ast::ExpressionKind::Null,
             }))
         } else if self.peek(Token::False) {
             self.mark_location();
-            self.next();
+            self.next()?;
             Ok(Rc::new(ast::Expression {
                 location: self.pop_location(),
                 kind: ast::ExpressionKind::Boolean(false),
             }))
         } else if self.peek(Token::True) {
             self.mark_location();
-            self.next();
+            self.next()?;
             Ok(Rc::new(ast::Expression {
                 location: self.pop_location(),
                 kind: ast::ExpressionKind::Boolean(true),
             }))
         } else if let Token::NumericLiteral(n) = self.token.0.clone() {
             self.mark_location();
-            self.next();
+            self.next()?;
             Ok(Rc::new(ast::Expression {
                 location: self.pop_location(),
                 kind: ast::ExpressionKind::Numeric(n),
             }))
         } else if let Token::StringLiteral(ref s) = self.token.0.clone() {
             self.mark_location();
-            self.next();
+            self.next()?;
             Ok(Rc::new(ast::Expression {
                 location: self.pop_location(),
                 kind: ast::ExpressionKind::String(s.clone()),
             }))
         } else if self.peek(Token::This) {
             self.mark_location();
-            self.next();
+            self.next()?;
             Ok(Rc::new(ast::Expression {
                 location: self.pop_location(),
                 kind: ast::ExpressionKind::This,
             }))
         } else if let Token::RegExpLiteral { ref body, ref flags } = self.token.0.clone() {
             self.mark_location();
-            self.next();
+            self.next()?;
             Ok(Rc::new(ast::Expression {
                 location: self.pop_location(),
                 kind: ast::ExpressionKind::RegExp { body: body.clone(), flags: flags.clone() },
@@ -1321,7 +1321,7 @@ impl<'input> Parser<'input> {
         } else if let Some(reserved_ns) = self.peek_reserved_namespace() {
             self.mark_location();
             self.duplicate_location();
-            self.next();
+            self.next()?;
             let rns = Rc::new(ast::Expression {
                 location: self.pop_location(),
                 kind: ast::ExpressionKind::ReservedNamespace(reserved_ns),
@@ -1392,7 +1392,7 @@ impl<'input> Parser<'input> {
 
     fn finish_embed_expression(&mut self, start: Location, source: String) -> Result<Rc<ast::Expression>, ParserFailure> {
         self.push_location(&start);
-        self.next();
+        self.next()?;
         let type_annotation = if self.consume(Token::Colon)? {
             Some(self.parse_type_expression()?)
         } else {
@@ -1504,7 +1504,7 @@ impl<'input> Parser<'input> {
             closing_tag_name = Some(self.parse_xml_tag_name()?);
             self.consume_and_ie_xml_tag(Token::XmlWhitespace)?;
             if ends_at_ie_div {
-                self.expect(Token::Gt);
+                self.expect(Token::Gt)?;
             } else {
                 self.expect_and_ie_xml_content(Token::Gt)?;
             }
@@ -3287,7 +3287,7 @@ impl<'input> Parser<'input> {
         self.next()?;
         let semicolon_inserted = self.parse_semicolon()?;
 
-        let mut replaced_by_source: Option<Rc<Source>> = None;
+        let replaced_by_source: Rc<Source>;
 
         // Select origin file path
         let origin_file_path = if let Some(file_path) = self.tokenizer.source.file_path.clone() {
@@ -3300,26 +3300,25 @@ impl<'input> Parser<'input> {
         if let Some(origin_file_path) = origin_file_path {
             let sub_file_path = file_paths::FlexPath::from_n_native([origin_file_path.as_ref(), source.as_ref()]).to_string_with_flex_separator();
             if let Ok(content) = std::fs::read_to_string(&sub_file_path) {
-                replaced_by_source = Some(Source::new(Some(sub_file_path.clone()), content, &self.tokenizer.source.compiler_options));
+                replaced_by_source = Source::new(Some(sub_file_path.clone()), content, &self.tokenizer.source.compiler_options);
             } else {
                 self.add_syntax_error(source_path_location.clone(), DiagnosticKind::FailedToIncludeFile, vec![]);
+
+                // Use a placeholder source
+                replaced_by_source = Source::new(None, "".into(), &self.tokenizer.source.compiler_options);
             }
         } else {
             self.add_syntax_error(source_path_location.clone(), DiagnosticKind::ParentSourceIsNotAFile, vec![]);
-        }
 
-        // If source was not resolved successfully, use a placeholder
-        if replaced_by_source.is_none() {
-            replaced_by_source = Some(Source::new(None, "".into(), &self.tokenizer.source.compiler_options));
+            // Use a placeholder source
+            replaced_by_source = Source::new(None, "".into(), &self.tokenizer.source.compiler_options);
         }
-
-        let replaced_by_source = replaced_by_source.unwrap();
 
         // Add subsource to super source
         self.tokenizer.source.subsources.borrow_mut().push(Rc::clone(&replaced_by_source));
 
         // Parse directives from replacement source
-        let replaced_by = Self::parse_include_directive_source(&replaced_by_source, context);
+        let replaced_by = parse_include_directive_source(Rc::clone(&replaced_by_source), context);
 
         // Delegate subsource errors to super source
         if replaced_by_source.invalidated() {
@@ -3336,15 +3335,6 @@ impl<'input> Parser<'input> {
         });
 
         Ok((node, semicolon_inserted))
-    }
-
-    fn parse_include_directive_source<'a: 'input>(replaced_by_source: &'a Rc<Source>, context: DirectiveContext) -> Vec<Rc<ast::Directive>> {
-        let mut parser = Self::new(&replaced_by_source);
-        if parser.next().is_ok() {
-            parser.parse_directives(context).unwrap_or(vec![])
-        } else {
-            vec![]
-        }
     }
 
     fn parse_directives(&mut self, context: DirectiveContext) -> Result<Vec<Rc<ast::Directive>>, ParserFailure> {
@@ -3453,6 +3443,15 @@ impl<'input> Parser<'input> {
 
         *building_content_tag_name = None;
         building_content.clear();
+    }
+}
+
+fn parse_include_directive_source(replaced_by_source: Rc<Source>, context: DirectiveContext) -> Vec<Rc<ast::Directive>> {
+    let mut parser = Parser::new(&replaced_by_source);
+    if parser.next().is_ok() {
+        parser.parse_directives(context).unwrap_or(vec![])
+    } else {
+        vec![]
     }
 }
 
@@ -3595,7 +3594,7 @@ impl DirectiveContext {
 }
 
 #[derive(Clone)]
-struct ControlContext {
+pub struct ControlContext {
     breakable: bool,
     iteration: bool,
 }
