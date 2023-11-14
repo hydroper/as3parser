@@ -676,7 +676,7 @@ impl<'input> Parser<'input> {
                     return Err(ParserFailure);
                 }
             },
-            ast::ExpressionKind::ArrayInitializer { elements, metadata_asdoc: _ } => {
+            ast::ExpressionKind::ArrayInitializer { elements } => {
                 destructuring_kind = self.array_initializer_to_destructuring_kind(elements.clone())?;
             },
             ast::ExpressionKind::ObjectInitializer { fields } => {
@@ -1409,7 +1409,7 @@ impl<'input> Parser<'input> {
 
     fn parse_array_initializer(&mut self) -> Result<Rc<ast::Expression>, ParserFailure> {
         self.mark_location();
-        let metadata_asdoc = self.parse_asdoc()?;
+        // let metadata_asdoc = self.parse_asdoc()?;
         self.expect(Token::LeftBracket)?;
         let mut elements: Vec<Option<Rc<ast::Expression>>> = vec![];
         while !self.peek(Token::RightBracket) {
@@ -1432,7 +1432,7 @@ impl<'input> Parser<'input> {
         self.expect(Token::RightBracket)?;
         Ok(Rc::new(ast::Expression {
             location: self.pop_location(),
-            kind: ast::ExpressionKind::ArrayInitializer { elements, metadata_asdoc },
+            kind: ast::ExpressionKind::ArrayInitializer { elements },
         }))
     }
 
@@ -3200,6 +3200,8 @@ impl<'input> Parser<'input> {
                     return self.parse_include_directive(context.clone(), start.clone());
                 }
             }
+
+            self.push_location(&start);
 
             Ok((Rc::new(ast::Directive {
                 location: self.pop_location(),

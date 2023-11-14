@@ -107,7 +107,8 @@ pub enum ExpressionKind {
     /// This expression is not valid in other contexts.
     Rest(Rc<Expression>),
     ArrayInitializer {
-        metadata_asdoc: Option<AsDoc>,
+        // metadata_asdoc: Option<AsDoc>,
+
         /// Element sequence possibly containing `Rest`s and ellisions.
         elements: Vec<Option<Rc<Expression>>>,
     },
