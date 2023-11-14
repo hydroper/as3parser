@@ -1,0 +1,118 @@
+{
+  "location": {
+    "first_line_number": 5,
+    "last_line_number": 5,
+    "first_offset": 44,
+    "last_offset": 0
+  },
+  "packages": [],
+  "directives": [
+    {
+      "location": {
+        "first_line_number": 5,
+        "last_line_number": 5,
+        "first_offset": 44,
+        "last_offset": 0
+      },
+      "kind": {
+        "Statement": {
+          "location": {
+            "first_line_number": 5,
+            "last_line_number": 5,
+            "first_offset": 44,
+            "last_offset": 0
+          },
+          "kind": {
+            "Expression": {
+              "asdoc": {
+                "main_body": "\nMain body",
+                "tags": [
+                  {
+                    "Copy": "reference"
+                  }
+                ]
+              },
+              "expression": {
+                "location": {
+                  "first_line_number": 5,
+                  "last_line_number": 5,
+                  "first_offset": 44,
+                  "last_offset": 0
+                },
+                "kind": {
+                  "BracketsMember": {
+                    "base": {
+                      "location": {
+                        "first_line_number": 5,
+                        "last_line_number": 5,
+                        "first_offset": 44,
+                        "last_offset": 49
+                      },
+                      "kind": {
+                        "ArrayInitializer": {
+                          "elements": [
+                            {
+                              "location": {
+                                "first_line_number": 5,
+                                "last_line_number": 5,
+                                "first_offset": 45,
+                                "last_offset": 48
+                              },
+                              "kind": {
+                                "Id": {
+                                  "attribute": false,
+                                  "qualifier": null,
+                                  "name": {
+                                    "Id": [
+                                      "Foo",
+                                      {
+                                        "first_line_number": 5,
+                                        "last_line_number": 5,
+                                        "first_offset": 45,
+                                        "last_offset": 48
+                                      }
+                                    ]
+                                  }
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    "metadata_asdoc": null,
+                    "key": {
+                      "location": {
+                        "first_line_number": 5,
+                        "last_line_number": 5,
+                        "first_offset": 50,
+                        "last_offset": 53
+                      },
+                      "kind": {
+                        "Id": {
+                          "attribute": false,
+                          "qualifier": null,
+                          "name": {
+                            "Id": [
+                              "Bar",
+                              {
+                                "first_line_number": 5,
+                                "last_line_number": 5,
+                                "first_offset": 50,
+                                "last_offset": 53
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

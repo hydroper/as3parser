@@ -50,6 +50,7 @@ impl Comment {
                     break;
                 }
             }
+            i += self.location.last_offset;
             location_to_precede.first_offset == i
         } else {
             false

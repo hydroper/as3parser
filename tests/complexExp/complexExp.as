@@ -1,5 +1,1 @@
-// (({x, y}, argument: Number = 10) => x ** y + argument);
-/**
- * zxc
- */
-[]
+(({x, y}, argument: Number = 10) => x ** y + argument);
