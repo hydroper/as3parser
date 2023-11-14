@@ -3633,7 +3633,7 @@ pub struct ControlContext {
 pub mod parser_facade {
     pub use crate::*;
     pub use crate::util::default;
-    pub use std::rc::Rc;
+    use std::rc::Rc;
 
     /// Parses `Program`.
     pub fn parse_program(source: &Rc<Source>) -> Option<Rc<ast::Program>> {
