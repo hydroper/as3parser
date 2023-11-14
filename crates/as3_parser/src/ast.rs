@@ -107,7 +107,7 @@ pub enum ExpressionKind {
     /// This expression is not valid in other contexts.
     Rest(Rc<Expression>),
     ArrayInitializer {
-        // metadata_asdoc: Option<AsDoc>,
+        // asdoc: Option<AsDoc>,
 
         /// Element sequence possibly containing `Rest`s and ellisions.
         elements: Vec<Option<Rc<Expression>>>,
@@ -139,7 +139,7 @@ pub enum ExpressionKind {
     /// The `o[k]` expression.
     BracketsMember {
         base: Rc<Expression>,
-        metadata_asdoc: Option<AsDoc>,
+        asdoc: Option<AsDoc>,
         key: Rc<Expression>,
     },
     /// `base.<T1, Tn>`

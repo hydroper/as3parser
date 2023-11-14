@@ -284,14 +284,14 @@ impl<'input> Parser<'input> {
             } else if self.consume(Token::OptionalChaining)? {
                 base = self.parse_optional_chaining_subexpression(base)?;
             } else if self.peek(Token::LeftBracket) {
-                let metadata_asdoc = self.parse_asdoc()?;
+                let asdoc = self.parse_asdoc()?;
                 self.next()?;
                 self.push_location(&base.location);
                 let key = self.parse_expression(ExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
                 self.expect(Token::RightBracket)?;
                 base = Rc::new(ast::Expression {
                     location: self.pop_location(),
-                    kind: ast::ExpressionKind::BracketsMember { base, key, metadata_asdoc }
+                    kind: ast::ExpressionKind::BracketsMember { base, key, asdoc }
                 });
             } else if self.consume(Token::Descendants)? {
                 self.push_location(&base.location);
@@ -494,7 +494,7 @@ impl<'input> Parser<'input> {
             self.expect(Token::RightBracket)?;
             operation = Rc::new(ast::Expression {
                 location: self.pop_location(),
-                kind: ast::ExpressionKind::BracketsMember { base: operation, key, metadata_asdoc: None }
+                kind: ast::ExpressionKind::BracketsMember { base: operation, key, asdoc: None }
             });
         } else {
             let id = self.parse_qualified_identifier()?;
@@ -1176,7 +1176,7 @@ impl<'input> Parser<'input> {
             self.expect(Token::RightBracket)?;
             Ok(Rc::new(ast::Expression {
                 location: self.pop_location(),
-                kind: ast::ExpressionKind::BracketsMember { base: super_expr, key, metadata_asdoc: None },
+                kind: ast::ExpressionKind::BracketsMember { base: super_expr, key, asdoc: None },
             }))
         } else {
             self.expect(Token::Dot)?;
@@ -1214,7 +1214,7 @@ impl<'input> Parser<'input> {
                 self.expect(Token::RightBracket)?;
                 base = Rc::new(ast::Expression {
                     location: self.pop_location(),
-                    kind: ast::ExpressionKind::BracketsMember { base, key, metadata_asdoc: None },
+                    kind: ast::ExpressionKind::BracketsMember { base, key, asdoc: None },
                 });
             } else if self.consume(Token::Dot)? {
                 self.push_location(&base.location);
@@ -1409,7 +1409,7 @@ impl<'input> Parser<'input> {
 
     fn parse_array_initializer(&mut self) -> Result<Rc<ast::Expression>, ParserFailure> {
         self.mark_location();
-        // let metadata_asdoc = self.parse_asdoc()?;
+        // let asdoc = self.parse_asdoc()?;
         self.expect(Token::LeftBracket)?;
         let mut elements: Vec<Option<Rc<ast::Expression>>> = vec![];
         while !self.peek(Token::RightBracket) {

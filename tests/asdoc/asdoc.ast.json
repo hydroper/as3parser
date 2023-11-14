@@ -80,7 +80,7 @@
                         }
                       }
                     },
-                    "metadata_asdoc": null,
+                    "asdoc": null,
                     "key": {
                       "location": {
                         "first_line_number": 5,
