@@ -1,0 +1,152 @@
+{
+  "location": {},
+  "packages": [],
+  "directives": [
+    {
+      "location": {},
+      "kind": {
+        "Statement": {
+          "location": {},
+          "kind": {
+            "Expression": {
+              "asdoc": null,
+              "expression": {
+                "location": {},
+                "kind": {
+                  "Descendants": {
+                    "base": {
+                      "location": {},
+                      "kind": {
+                        "Filter": {
+                          "base": {
+                            "location": {},
+                            "kind": {
+                              "XmlElement": {
+                                "location": {},
+                                "opening_tag_name": {
+                                  "Name": [
+                                    "t",
+                                    {}
+                                  ]
+                                },
+                                "attributes": [],
+                                "content": [
+                                  {
+                                    "Text": [
+                                      "\r\n    ",
+                                      {}
+                                    ]
+                                  },
+                                  {
+                                    "Element": {
+                                      "location": {},
+                                      "opening_tag_name": {
+                                        "Name": [
+                                          "t",
+                                          {}
+                                        ]
+                                      },
+                                      "attributes": [
+                                        {
+                                          "Attribute": {
+                                            "name": [
+                                              "k",
+                                              {}
+                                            ],
+                                            "value": {
+                                              "Expression": {
+                                                "location": {},
+                                                "kind": {
+                                                  "Id": {
+                                                    "attribute": false,
+                                                    "qualifier": null,
+                                                    "name": {
+                                                      "Id": [
+                                                        "v",
+                                                        {}
+                                                      ]
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      ],
+                                      "content": [],
+                                      "closing_tag_name": null
+                                    }
+                                  },
+                                  {
+                                    "Text": [
+                                      "\r\n    Lorem ipsum\r\n",
+                                      {}
+                                    ]
+                                  }
+                                ],
+                                "closing_tag_name": {
+                                  "Name": [
+                                    "t",
+                                    {}
+                                  ]
+                                }
+                              }
+                            }
+                          },
+                          "condition": {
+                            "location": {},
+                            "kind": {
+                              "Id": {
+                                "attribute": false,
+                                "qualifier": null,
+                                "name": {
+                                  "Id": [
+                                    "filterCondition",
+                                    {}
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "id": {
+                      "attribute": false,
+                      "qualifier": null,
+                      "name": {
+                        "Id": [
+                          "d",
+                          {}
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "location": {},
+      "kind": {
+        "Statement": {
+          "location": {},
+          "kind": {
+            "Expression": {
+              "asdoc": null,
+              "expression": {
+                "location": {},
+                "kind": {
+                  "XmlList": []
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
