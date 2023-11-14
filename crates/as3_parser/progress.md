@@ -155,8 +155,7 @@ Syntax:
   * [ ] Top level directives
 * [ ] ASDoc
   * [ ] `parse_asdoc`
-    * Checks if there is at least one comment in the Source and whether `last_comment.is_asdoc(item_location)` is true, parsing the comment as an `AsDoc` value.
-    * [ ] Ignore lines inside a \`\`\` block (code-block).
+    * [ ] All tags (`parse_asdoc_tag_or_main_content`)
 * `parser_facade`
   * [x] `parse_expression`
   * [x] `parse_type_expression`

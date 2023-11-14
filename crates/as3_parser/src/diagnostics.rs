@@ -174,6 +174,7 @@ pub enum DiagnosticKind {
     TokenMustNotFollowLineBreak = 148,
     ParentSourceIsNotAFile = 149,
     FailedToIncludeFile = 150,
+    UnrecognizedAsDocTag = 151,
 }
 
 impl DiagnosticKind {

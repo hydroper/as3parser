@@ -1,4 +1,5 @@
 use std::{cell::Cell, collections::HashMap, rc::Rc};
+use lazy_regex::*;
 use crate::*;
 use crate::ast::XmlElement;
 use crate::util::default;
@@ -2538,7 +2539,7 @@ impl<'input> Parser<'input> {
             self.parse_try_statement(context)
         // `default xml namespace = expression`
         } else if self.peek(Token::Default) {
-            self.parse_default_xml_namespace_statement(context)
+            self.parse_default_xml_namespace_statement()
         // ExpressionStatement
         } else {
             self.mark_location();
@@ -2644,14 +2645,14 @@ impl<'input> Parser<'input> {
         let test = self.parse_expression(ExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
         self.expect(Token::RightParen)?;
         let mut semicolon_inserted = false;
-        let (consequent, semicolon_inserted_1) = self.parse_substatement(context)?;
+        let (consequent, semicolon_inserted_1) = self.parse_substatement(context.clone())?;
         let mut alternative = None;
         if self.peek(Token::Else) {
             if !semicolon_inserted_1 {
                 self.expect(Token::Semicolon)?;
             }
             self.next()?;
-            let (alternative_2, semicolon_inserted_2) = self.parse_substatement(context)?;
+            let (alternative_2, semicolon_inserted_2) = self.parse_substatement(context.clone())?;
             alternative = Some(alternative_2);
             semicolon_inserted = semicolon_inserted_2;
         } else {
@@ -3150,7 +3151,7 @@ impl<'input> Parser<'input> {
         Ok((node, true))
     }
 
-    fn parse_default_xml_namespace_statement(&mut self, context: DirectiveContext) -> Result<(Rc<ast::Statement>, bool), ParserFailure> {
+    fn parse_default_xml_namespace_statement(&mut self) -> Result<(Rc<ast::Statement>, bool), ParserFailure> {
         self.mark_location();
         self.next()?;
 
@@ -3185,17 +3186,17 @@ impl<'input> Parser<'input> {
 
     fn parse_directive(&mut self, context: DirectiveContext) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
         if self.peek(Token::Import) {
-            self.parse_import_directive(context)
+            self.parse_import_directive()
         } else if self.peek(Token::Use) {
-            self.parse_use_directive(context)
+            self.parse_use_directive()
         } else {
             let start = self.token_location();
-            let (statement, semicolon_inserted) = self.parse_statement(context)?;
+            let (statement, semicolon_inserted) = self.parse_statement(context.clone())?;
 
             let id = statement.to_identifier();
             if let Some(id) = id {
                 if id.0 == "include" && id.1.character_count() == "include".len() && matches!(self.token.0, Token::StringLiteral(_)) && !semicolon_inserted {
-                    return self.parse_include_directive(context, start.clone());
+                    return self.parse_include_directive(context.clone(), start.clone());
                 }
             }
 
@@ -3206,7 +3207,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn parse_use_directive(&mut self, context: DirectiveContext) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
+    fn parse_use_directive(&mut self) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
         self.mark_location();
         self.next()?;
         self.expect_context_keyword("namespace")?;
@@ -3225,7 +3226,7 @@ impl<'input> Parser<'input> {
         Ok((node, semicolon_inserted))
     }
 
-    fn parse_import_directive(&mut self, context: DirectiveContext) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
+    fn parse_import_directive(&mut self) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
         self.mark_location();
         self.next()?;
         let mut alias: Option<(String, Location)> = None;
@@ -3336,8 +3337,8 @@ impl<'input> Parser<'input> {
         Ok((node, semicolon_inserted))
     }
 
-    fn parse_include_directive_source(replaced_by_source: &Rc<Source>, context: DirectiveContext) -> Vec<Rc<ast::Directive>> {
-        let mut parser = Self::new(replaced_by_source);
+    fn parse_include_directive_source<'a: 'input>(replaced_by_source: &'a Rc<Source>, context: DirectiveContext) -> Vec<Rc<ast::Directive>> {
+        let mut parser = Self::new(&replaced_by_source);
         if parser.next().is_ok() {
             parser.parse_directives(context).unwrap_or(vec![])
         } else {
@@ -3360,17 +3361,97 @@ impl<'input> Parser<'input> {
     }
 
     fn parse_asdoc(&mut self) -> Result<Option<ast::AsDoc>, ParserFailure> {
-        let last_comment = self.source().comments.borrow().last();
+        let comments = self.source().comments.borrow();
+        let last_comment = comments.last();
         Ok(last_comment.and_then(|comment| {
             if comment.is_asdoc(&self.token.1) {
                 let content = &comment.content[1..];
-                let lines: Vec<&str> = lazy_regex::regex!(r"\n|\r\n?").split(content).collect();
-                
-                Some(ast::AsDoc {})
+                let lines: Vec<&str> = regex!(r"\n|\r\n?").split(content).collect();
+                let lines: Vec<String> = lines.iter().map(|line| regex_replace!(r"^[\s\t]*(\*[\s\t]?)?", line, |_, _| "".to_owned()).into_owned()).collect();
+                Some(self.parse_asdoc_lines(comment.location.clone(), lines))
             } else {
                 None
             }
         }))
+    }
+
+    fn parse_asdoc_lines(&self, comment_location: Location, lines: Vec<String>) -> ast::AsDoc {
+        let mut main_body = String::new();
+        let mut tags: Vec<ast::AsDocTag> = vec![];
+        let mut i = 0;
+        let line_count = lines.len();
+
+        let mut building_content_tag_name: Option<String> = None;
+        let mut building_content: Vec<String> = vec![];
+        let mut inside_code_block = false;
+
+        while i < line_count {
+            let line = &lines[i];
+            let tag = if inside_code_block { None } else {
+                regex_captures!(r"^[\s\t]*\@([^\s\t]+)(.*)", &line)
+            };
+            if let Some((_, tag_name, tag_content)) = tag {
+                self.parse_asdoc_tag_or_main_content(
+                    comment_location.clone(),
+                    &mut building_content_tag_name,
+                    &mut building_content,
+                    &mut main_body,
+                    &mut tags,
+                );
+                if regex_is_match!(r"^[\s\t]*```([^`]|$)", &tag_content) {
+                    inside_code_block = true;
+                }
+                building_content_tag_name = Some(tag_name.into());
+                building_content.push(tag_content.into());
+            } else {
+                if regex_is_match!(r"^[\s\t]*```([^`]|$)", &line) {
+                    inside_code_block = !inside_code_block;
+                }
+                building_content.push(line.to_owned());
+            }
+            i += 1;
+        }
+
+        self.parse_asdoc_tag_or_main_content(
+            comment_location.clone(),
+            &mut building_content_tag_name,
+            &mut building_content,
+            &mut main_body,
+            &mut tags,
+        );
+
+        ast::AsDoc { main_body, tags }
+    }
+
+    fn parse_asdoc_tag_or_main_content(
+        &self,
+        comment_location: Location,
+        building_content_tag_name: &mut Option<String>,
+        building_content: &mut Vec<String>,
+        main_body: &mut String,
+        tags: &mut Vec<ast::AsDocTag>
+    ) {
+        if let Some(tag_name) = building_content_tag_name.as_ref() {
+            match tag_name.as_ref() {
+                // @copy reference
+                "copy" => {
+                    let content = building_content.join("\n");
+                    let reference = regex_replace!(r"^[\t\s\r\n]*", &content, |_| "".to_owned()).into_owned();
+                    let reference = regex_replace!(r"[\t\s\r\n]*$", &reference, |_| "".to_owned()).into_owned();
+                    tags.push(ast::AsDocTag::Copy(reference));
+                },
+
+                // Unrecognized tag
+                _ => {
+                    self.add_syntax_error(comment_location.clone(), DiagnosticKind::UnrecognizedAsDocTag, diagnostic_arguments![String(tag_name.clone())]);
+                },
+            }
+        } else {
+            *main_body = building_content.join("\n");
+        }
+
+        *building_content_tag_name = None;
+        building_content.clear();
     }
 }
 
@@ -3441,7 +3522,7 @@ pub enum DirectiveContext {
 impl DirectiveContext {
     fn clone_control(&self) -> Self {
         match self {
-            Self::WithControl { .. } => *self,
+            Self::WithControl { .. } => self.clone(),
             _ => Self::Default,
         }
     }
@@ -3456,7 +3537,7 @@ impl DirectiveContext {
             _ => HashMap::new(),
         };
         if let Some(label) = label.clone() {
-            labels[&label] = context.clone();
+            labels.insert(label, context.clone());
         }
         if label_only {
             context = ControlContext {

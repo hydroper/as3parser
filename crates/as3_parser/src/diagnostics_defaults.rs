@@ -33,6 +33,7 @@ lazy_static! {
         DiagnosticKind::TokenMustNotFollowLineBreak.id() => "Token must not follow line break".into(),
         DiagnosticKind::ParentSourceIsNotAFile.id() => "Parent source is not a file".into(),
         DiagnosticKind::FailedToIncludeFile.id() => "Failed to include file".into(),
+        DiagnosticKind::UnrecognizedAsDocTag.id() => "Unrecognized ASDoc tag '{1}'".into(),
         // DiagnosticKind::K.id() => "".into(),
     };
 }
