@@ -168,6 +168,93 @@
                   }
                 }
               }
+            },
+            {
+              "location": {},
+              "kind": {
+                "FunctionDefinition": {
+                  "asdoc": null,
+                  "annotations": {
+                    "metadata": [],
+                    "modifiers": "",
+                    "access_modifier": null
+                  },
+                  "name": [
+                    "default",
+                    {}
+                  ],
+                  "generics": {
+                    "params": null,
+                    "where_clause": null
+                  },
+                  "common": {
+                    "flags": "",
+                    "params": [],
+                    "return_annotation": {
+                      "location": {},
+                      "kind": "Void"
+                    },
+                    "body": {
+                      "Block": []
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "location": {},
+              "kind": {
+                "VariableDefinition": {
+                  "asdoc": null,
+                  "annotations": {
+                    "metadata": [],
+                    "modifiers": "STATIC",
+                    "access_modifier": {
+                      "location": {},
+                      "kind": {
+                        "ReservedNamespace": "Public"
+                      }
+                    }
+                  },
+                  "kind": "Var",
+                  "bindings": [
+                    {
+                      "pattern": {
+                        "location": {},
+                        "kind": {
+                          "Binding": {
+                            "name": [
+                              "for",
+                              {}
+                            ]
+                          }
+                        },
+                        "non_null": false,
+                        "type_annotation": {
+                          "location": {},
+                          "kind": {
+                            "Id": {
+                              "qualifier": null,
+                              "name": {
+                                "Id": [
+                                  "Number",
+                                  {}
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "init": {
+                        "location": {},
+                        "kind": {
+                          "Numeric": 0.0
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
             }
           ]
         }

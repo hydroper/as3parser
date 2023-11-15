@@ -8,4 +8,8 @@ q class C {
     function C() {}
 
     native function f(): void;
+
+    function default(): void {}
+
+    public static var for: Number = 0;
 }
