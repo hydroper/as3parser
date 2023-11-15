@@ -71,6 +71,14 @@ pub struct Expression {
 }
 
 impl Expression {
+    pub(crate) fn to_identifier(&self) -> Option<(String, Location)> {
+        if let ExpressionKind::Id(id) = &self.kind {
+            id.to_identifier()
+        } else {
+            None
+        }
+    }
+
     pub(crate) fn list_metadata_expressions(self: &Rc<Self>) -> Option<Vec<Rc<Self>>> {
         match &self.kind {
             ExpressionKind::ArrayInitializer { .. } => Some(vec![Rc::clone(self)]),
@@ -477,10 +485,30 @@ pub struct Statement {
 }
 
 impl Statement {
+    pub(crate) fn extract_asdoc(&self) -> Option<AsDoc> {
+        if let StatementKind::Expression { asdoc, expression: _ } = &self.kind {
+            asdoc.clone()
+        } else {
+            None
+        }
+    }
+
     pub(crate) fn to_identifier(&self) -> Option<(String, Location)> {
         if let StatementKind::Expression { expression, .. } = &self.kind {
             if let ExpressionKind::Id(id) = &expression.kind {
                 id.to_identifier()
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    }
+
+    pub(crate) fn to_identifier_or_reserved_namespace(&self) -> Option<Rc<Expression>> {
+        if let StatementKind::Expression { expression, .. } = &self.kind {
+            if matches!(expression.kind, ExpressionKind::ReservedNamespace(_)) || self.to_identifier().is_some() {
+                Some(Rc::clone(expression))
             } else {
                 None
             }

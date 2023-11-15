@@ -3231,6 +3231,20 @@ impl<'input> Parser<'input> {
             self.parse_use_directive()
         } else {
             let start = self.token_location();
+
+            // AnnotatableDefinition (reservedWord)
+            if self.peek_annotatable_definition_reserved_word() {
+                let asdoc = self.parse_asdoc()?;
+                return self.parse_annotatable_definition(AnnotatableContext {
+                    start,
+                    metadata_exp: vec![],
+                    asdoc,
+                    first_modifier: None,
+                    previous_token_is_definition_keyword: false,
+                    context,
+                });
+            }
+
             let (statement, semicolon_inserted) = self.parse_statement(context.clone())?;
 
             let id = statement.to_identifier();
@@ -3238,6 +3252,44 @@ impl<'input> Parser<'input> {
                 if id.0 == "include" && id.1.character_count() == "include".len() && matches!(self.token.0, Token::StringLiteral(_)) && !semicolon_inserted {
                     return self.parse_include_directive(context.clone(), start.clone());
                 }
+
+                // AnnotatableDefinition (modifierOrContextKeyword modifierOrName)
+                if !semicolon_inserted && (matches!(self.token.0, Token::Identifier(_)) || self.peek_reserved_namespace().is_some()) {
+                    let previous_token_is_definition_keyword = is_annotatable_definition_context_keyword(&id);
+                    return self.parse_annotatable_definition(AnnotatableContext {
+                        start,
+                        metadata_exp: vec![],
+                        asdoc: statement.extract_asdoc(),
+                        first_modifier: if previous_token_is_definition_keyword { None } else { statement.to_identifier_or_reserved_namespace() },
+                        previous_token_is_definition_keyword,
+                        context,
+                    });
+                }
+            } else if let Some(first_modifier) = statement.to_identifier_or_reserved_namespace() {
+                // AnnotatableDefinition (modifier modifierOrKeyword)
+                if !semicolon_inserted && (matches!(self.token.0, Token::Identifier(_))
+                    || self.peek_reserved_namespace().is_some())
+                    || self.peek_annotatable_definition_reserved_word() {
+                    return self.parse_annotatable_definition(AnnotatableContext {
+                        start,
+                        metadata_exp: vec![],
+                        asdoc: statement.extract_asdoc(),
+                        first_modifier: Some(first_modifier),
+                        previous_token_is_definition_keyword: false,
+                        context,
+                    });
+                }
+            // AnnotatableDefinition (metaData)
+            } else if let Some(metadata_exp) = statement.list_metadata_expressions() {
+                let asdoc = self.parse_asdoc()?;
+                return self.parse_annotatable_definition(AnnotatableContext {
+                    start,
+                    metadata_exp,
+                    asdoc,
+                    first_modifier: None,
+                    previous_token_is_definition_keyword: false,
+                    context,
+                });
             }
 
             self.push_location(&start);
@@ -3247,6 +3299,27 @@ impl<'input> Parser<'input> {
                 kind: ast::DirectiveKind::Statement(Rc::clone(&statement)),
             }), semicolon_inserted))
         }
+    }
+
+    /// `AnnotatableDefinition`
+    ///
+    /// ```ignore
+    /// self.parse_annotatable_definition(AnnotatableContext {
+    ///     start,
+    ///     metadata_exp,
+    ///     asdoc,
+    ///     first_modifier,
+    ///     previous_token_is_definition_keyword,
+    ///     context,
+    /// })?
+    /// ```
+    fn parse_annotatable_definition(&self, annotatable_context: AnnotatableContext) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
+        ()
+    }
+
+    fn peek_annotatable_definition_reserved_word(&self) -> bool {
+        self.peek(Token::Class) || self.peek(Token::Interface) || self.peek(Token::Function) ||
+        self.peek(Token::Var) || self.peek(Token::Const)
     }
 
     fn parse_use_directive(&mut self) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
@@ -3629,6 +3702,10 @@ fn parse_include_directive_source(replaced_by_source: Rc<Source>, context: Direc
     }
 }
 
+fn is_annotatable_definition_context_keyword(id: &(String, Location)) -> bool {
+    ["namespace", "type", "enum"].contains(&id.0.as_ref()) && id.1.character_count() == id.0.len()
+}
+
 /// Context used to control the parsing of an expression.
 #[derive(Clone)]
 pub struct ExpressionContext {
@@ -3774,6 +3851,16 @@ impl DirectiveContext {
 pub struct ControlContext {
     breakable: bool,
     iteration: bool,
+}
+
+#[derive(Clone)]
+pub struct AnnotatableContext {
+    start: Location,
+    metadata_exp: Vec<Rc<ast::Expression>>,
+    asdoc: Option<ast::AsDoc>,
+    first_modifier: Option<Rc<ast::Expression>>,
+    previous_token_is_definition_keyword: bool,
+    context: DirectiveContext,
 }
 
 /// Parser facade.

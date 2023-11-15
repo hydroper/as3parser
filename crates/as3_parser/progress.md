@@ -162,3 +162,19 @@ Syntax:
   * [x] `parse_expression`
   * [x] `parse_type_expression`
   * [x] `parse_program`
+
+## Annotatable definitions
+
+* Use `self.peek_annotatable_definition_reserved_word()` to check for `class/interface/function/var/const`
+* Use `is_annotatable_definition_context_keyword(&id)` to check for `enum/namespace/type`
+
+```plain
+self.parse_annotatable_definition(AnnotatableContext {
+    start,
+    metadata_exp,
+    asdoc,
+    first_modifier,
+    previous_token_is_definition_keyword,
+    context,
+})?;
+```
