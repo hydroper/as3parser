@@ -1,1 +1,36 @@
-{}
+{
+  "location": {},
+  "packages": [],
+  "directives": [
+    {
+      "location": {},
+      "kind": {
+        "FunctionDefinition": {
+          "asdoc": null,
+          "annotations": {
+            "metadata": [],
+            "modifiers": "NATIVE",
+            "access_modifier": null
+          },
+          "name": [
+            "f",
+            {}
+          ],
+          "generics": {
+            "params": null,
+            "where_clause": null
+          },
+          "common": {
+            "flags": "",
+            "params": [],
+            "return_annotation": {
+              "location": {},
+              "kind": "Void"
+            },
+            "body": null
+          }
+        }
+      }
+    }
+  ]
+}
