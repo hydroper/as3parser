@@ -1,4 +1,4 @@
-# Language specification changes
+# Language specification comparisons
 
 This document is incomplete yet.
 

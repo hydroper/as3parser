@@ -1,6 +1,11 @@
 # Features
 
-This project would add a number of features to ActionScript 3.0. Some of them must be enabled explicitly as they affect existing sources and some allow for format migration, such as ASDoc comments.
+This ActionScript 3 parser adds several syntax constructs from TypeScript, ECMAScript 4 and Apache Royale Compiler. Notice that some of the descriptions in this document are not specific to this parser but to the verifier, which is not integrated with the parser.
+
+The parser adds the following major enhancements to the language:
+
+* Destructuring
+* Arrow functions
 
 ## Global
 
