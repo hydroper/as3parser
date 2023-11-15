@@ -200,11 +200,15 @@ A function containing the `await` operator is implicitly asynchronous; a functio
   - `Map.isEmpty` and `Map.nonEmpty` should be efficient and just use AVM `nextnameindex` once.
 - Iterators
 
+## Static classes
+
+Static classes contain the `static` modifier. Such classes are not allowed to be instantiated at compile time.
+
 ## Enums
 
 The `enum` context keyword defines simple enumerations. Algebraic data types are complex and do not fit well with ActionScript, therefore the feature was oversimplified.
 
-Simple enumerations consist of variants mapped to (string, number) pairs. With the `typeInference` compiler option on, string literals implicitly convert to enumerations.
+Simple enumerations consist of variants mapped to (*string*, *number*) pairs. With the `typeInference` compiler option on, string literals implicitly convert to enumerations.
 
 ```as3
 // Defines a class `E`.

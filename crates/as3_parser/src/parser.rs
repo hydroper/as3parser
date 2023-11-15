@@ -78,6 +78,21 @@ impl<'input> Parser<'input> {
         self.token.0 == token
     }
 
+    fn peek_identifier(&self, reserved_words: bool) -> Result<Option<(String, Location)>, ParserFailure> {
+        if let Token::Identifier(id) = self.token.0.clone() {
+            let location = self.token.1.clone();
+            Ok(Some((id, location)))
+        } else {
+            if reserved_words {
+                if let Some(id) = self.token.0.reserved_word_name() {
+                    let location = self.token.1.clone();
+                    return Ok(Some((id, location)));
+                }
+            }
+            Ok(None)
+        }
+    }
+
     fn peek_context_keyword(&self, name: &str) -> bool {
         if let Token::Identifier(id) = self.token.0.clone() { id == name && self.token.1.character_count() == name.len() } else { false }
     }
@@ -3437,8 +3452,39 @@ impl<'input> Parser<'input> {
             );
         }
 
+        // VariableDefinition
         if self.peek(Token::Var) || self.peek(Token::Const) {
             return self.parse_variable_definition(
+                annotatable_context.start.clone(),
+                annotations,
+                annotatable_context.asdoc,
+                annotatable_context.context,
+            );
+        }
+
+        // FunctionDefinition
+        if self.peek(Token::Function) {
+            return self.parse_function_definition(
+                annotatable_context.start.clone(),
+                annotations,
+                annotatable_context.asdoc,
+                annotatable_context.context,
+            );
+        }
+
+        // ClassDefinition
+        if self.peek(Token::Class) {
+            return self.parse_class_definition(
+                annotatable_context.start.clone(),
+                annotations,
+                annotatable_context.asdoc,
+                annotatable_context.context,
+            );
+        }
+
+        // InterfaceDefinition
+        if self.peek(Token::Interface) {
+            return self.parse_interface_definition(
                 annotatable_context.start.clone(),
                 annotations,
                 annotatable_context.asdoc,
@@ -3449,6 +3495,444 @@ impl<'input> Parser<'input> {
         // Error: expected one of { "class", "interface", "function", "var", "const" }
         self.add_syntax_error(self.token_location(), DiagnosticKind::UnexpectedOrInvalidToken, vec![]);
         Err(ParserFailure)
+    }
+
+    fn parse_class_definition(
+        &mut self,
+        start: Location,
+        annotations: ast::Annotations,
+        asdoc: Option<ast::AsDoc>,
+        context: DirectiveContext,
+    ) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
+        self.push_location(&start);
+
+        self.next()?;
+
+        let name = self.expect_identifier(true)?;
+        let mut generics = self.parse_generics()?;
+        let mut extends_clause: Option<Rc<ast::TypeExpression>> = None;
+        let mut implements_clause: Option<Vec<Rc<ast::TypeExpression>>> = None;
+
+        loop {
+            let first_token_location = self.token_location();
+            let where_clause = self.parse_generics_where_clause()?;
+            // `where`
+            if where_clause.is_some() {
+                if generics.where_clause.is_some() {
+                    self.add_syntax_error(first_token_location.clone(), DiagnosticKind::DuplicateClause, diagnostic_arguments![String("where".into())]);
+                }
+                generics.where_clause = where_clause;
+            // `extends`
+            } else if self.peek(Token::Extends) {
+                if extends_clause.is_some() {
+                    self.add_syntax_error(first_token_location.clone(), DiagnosticKind::DuplicateClause, diagnostic_arguments![String("extends".into())]);
+                }
+                self.next()?;
+                extends_clause = Some(self.parse_type_expression()?);
+            // `implements`
+            } else if self.peek(Token::Implements) {
+                if implements_clause.is_some() {
+                    self.add_syntax_error(first_token_location.clone(), DiagnosticKind::DuplicateClause, diagnostic_arguments![String("implements".into())]);
+                }
+                self.next()?;
+                let mut list = vec![self.parse_type_expression()?];
+                while self.consume(Token::Comma)? {
+                    list.push(self.parse_type_expression()?);
+                }
+                implements_clause = Some(list);
+            } else {
+                break;
+            }
+        }
+
+        let block = self.parse_block(DirectiveContext::ClassBlock { name: name.0.clone() })?;
+
+        let modifiers = annotations.modifiers.clone();
+
+        let node = Rc::new(ast::Directive {
+            location: self.pop_location(),
+            kind: ast::DirectiveKind::ClassDefinition(Rc::new(ast::ClassDefinition {
+                asdoc,
+                annotations,
+                name: name.clone(),
+                generics,
+                extends_clause,
+                implements_clause,
+                block,
+            })),
+        });
+
+        // Do not allow nested classes
+        if !(matches!(context, DirectiveContext::PackageBlock | DirectiveContext::TopLevel)) {
+            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedNestedClasses, diagnostic_arguments![]);
+        }
+
+        // Always allow `static`
+
+        // Forbid `native`
+        if modifiers.contains(ast::Modifiers::NATIVE) {
+            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("native".into())]);
+        }
+
+        // Forbid `override`
+        if modifiers.contains(ast::Modifiers::OVERRIDE) {
+            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("override".into())]);
+        }
+
+        // Always allow `dynamic`
+
+        // Always allow `final`
+
+        Ok((node, true))
+    }
+
+    fn parse_interface_definition(
+        &mut self,
+        start: Location,
+        annotations: ast::Annotations,
+        asdoc: Option<ast::AsDoc>,
+        context: DirectiveContext,
+    ) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
+        self.push_location(&start);
+
+        self.next()?;
+
+        let name = self.expect_identifier(true)?;
+        let mut generics = self.parse_generics()?;
+        let mut extends_clause: Option<Vec<Rc<ast::TypeExpression>>> = None;
+
+        loop {
+            let first_token_location = self.token_location();
+            let where_clause = self.parse_generics_where_clause()?;
+            // `where`
+            if where_clause.is_some() {
+                if generics.where_clause.is_some() {
+                    self.add_syntax_error(first_token_location.clone(), DiagnosticKind::DuplicateClause, diagnostic_arguments![String("where".into())]);
+                }
+                generics.where_clause = where_clause;
+            // `extends`
+            } else if self.peek(Token::Extends) {
+                if extends_clause.is_some() {
+                    self.add_syntax_error(first_token_location.clone(), DiagnosticKind::DuplicateClause, diagnostic_arguments![String("extends".into())]);
+                }
+                self.next()?;
+                let mut list = vec![self.parse_type_expression()?];
+                while self.consume(Token::Comma)? {
+                    list.push(self.parse_type_expression()?);
+                }
+                extends_clause = Some(list);
+            } else {
+                break;
+            }
+        }
+
+        let block = self.parse_block(DirectiveContext::InterfaceBlock)?;
+
+        let modifiers = annotations.modifiers.clone();
+
+        let node = Rc::new(ast::Directive {
+            location: self.pop_location(),
+            kind: ast::DirectiveKind::InterfaceDefinition(Rc::new(ast::InterfaceDefinition {
+                asdoc,
+                annotations,
+                name: name.clone(),
+                generics,
+                extends_clause,
+                block,
+            })),
+        });
+
+        // Do not allow nested classes
+        if !(matches!(context, DirectiveContext::PackageBlock | DirectiveContext::TopLevel)) {
+            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedNestedClasses, diagnostic_arguments![]);
+        }
+
+        // Forbid `static`
+        if modifiers.contains(ast::Modifiers::STATIC) {
+            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("static".into())]);
+        }
+
+        // Forbid `native`
+        if modifiers.contains(ast::Modifiers::NATIVE) {
+            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("native".into())]);
+        }
+
+        // Forbid `override`
+        if modifiers.contains(ast::Modifiers::OVERRIDE) {
+            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("override".into())]);
+        }
+
+        // Forbid `dynamic`
+        if modifiers.contains(ast::Modifiers::DYNAMIC) {
+            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("dynamic".into())]);
+        }
+
+        // Forbid `final`
+        if modifiers.contains(ast::Modifiers::FINAL) {
+            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("final".into())]);
+        }
+
+        Ok((node, true))
+    }
+
+    fn parse_function_definition(
+        &mut self,
+        start: Location,
+        annotations: ast::Annotations,
+        asdoc: Option<ast::AsDoc>,
+        context: DirectiveContext,
+    ) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
+        self.push_location(&start);
+
+        self.next()?;
+
+        let name = self.expect_identifier(true)?;
+
+        // `function get x`
+        // `function set x`
+        if let Some(name1) = self.peek_identifier(true)? {
+            if name.0 == "get" && name.1.character_count() == "get".len() {
+                self.next()?;
+                return self.parse_getter_or_setter_definition(annotations, asdoc, context, name1, true);
+            }
+            if name.0 == "set" && name.1.character_count() == "set".len() {
+                self.next()?;
+                return self.parse_getter_or_setter_definition(annotations, asdoc, context, name1, false);
+            }
+        }
+
+        let is_constructor = if let DirectiveContext::ClassBlock { name: name2 } = &context {
+            &name.0 == name2
+        } else {
+            false
+        };
+
+        let mut generics = self.parse_generics()?;
+        let modifiers = annotations.modifiers.clone();
+
+        let body_context = if is_constructor {
+            DirectiveContext::ConstructorBlock { super_statement_found: Cell::new(false) }
+        } else {
+            DirectiveContext::Default
+        };
+
+        let (common, where_clause) = self.parse_function_common(false, body_context)?;
+
+        // Parse semicolon
+        let semicolon = if let Some(body) = &common.body {
+            match body {
+                ast::FunctionBody::Expression(_) => self.parse_semicolon()?,
+                ast::FunctionBody::Block(_) => true,
+            }
+        } else {
+            self.parse_semicolon()?
+        };
+
+        generics.where_clause = where_clause;
+
+        let is_interface_method = matches!(context, DirectiveContext::InterfaceBlock);
+        let is_native = modifiers.contains(ast::Modifiers::NATIVE);
+
+        // Body verification
+        if common.body.is_some() {
+            if is_native || is_interface_method {
+                self.add_syntax_error(name.1.clone(), DiagnosticKind::MethodMustNotHaveBody, diagnostic_arguments![]);
+            }
+        } else {
+            if !(is_native || is_interface_method) {
+                self.add_syntax_error(name.1.clone(), DiagnosticKind::MethodMustSpecifyBody, diagnostic_arguments![]);
+            }
+        }
+
+        // Interface method must not contain annotations
+        if is_interface_method && (annotations.access_modifier.is_some() || !annotations.metadata.is_empty() || !modifiers.is_empty()) {
+            self.add_syntax_error(name.1.clone(), DiagnosticKind::InterfaceMethodHasAnnotations, diagnostic_arguments![]);
+        }
+
+        // Allow `override` in type blocks only
+        if modifiers.contains(ast::Modifiers::OVERRIDE) && !context.is_type_block() {
+            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("override".into())]);
+        }
+
+        // Allow `final` in type blocks only
+        if modifiers.contains(ast::Modifiers::FINAL) && !context.is_type_block() {
+            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("final".into())]);
+        }
+
+        // Forbid `dynamic`
+        if modifiers.contains(ast::Modifiers::DYNAMIC) {
+            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("dynamic".into())]);
+        }
+
+        // Always allow `native`
+
+        // Allow `static` in type blocks only
+        if modifiers.contains(ast::Modifiers::STATIC) && !context.is_type_block() {
+            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("static".into())]);
+        }
+
+        // Constructor must not have generics
+        if is_constructor && (generics.params.is_some() || generics.where_clause.is_some()) {
+            self.add_syntax_error(name.1.clone(), DiagnosticKind::MethodMustNotHaveGenerics, diagnostic_arguments![]);
+        }
+
+        let node = if is_constructor {
+            Rc::new(ast::Directive {
+                location: self.pop_location(),
+                kind: ast::DirectiveKind::ConstructorDefinition(Rc::new(ast::ConstructorDefinition {
+                    asdoc, annotations, name, common,
+                })),
+            })
+        } else {
+            Rc::new(ast::Directive {
+                location: self.pop_location(),
+                kind: ast::DirectiveKind::FunctionDefinition(Rc::new(ast::FunctionDefinition {
+                    asdoc, annotations, name, generics, common,
+                })),
+            })
+        };
+
+        Ok((node, semicolon))
+    }
+
+    fn parse_getter_or_setter_definition(
+        &mut self,
+        annotations: ast::Annotations,
+        asdoc: Option<ast::AsDoc>,
+        context: DirectiveContext,
+        name: (String, Location),
+        getter: bool,
+    ) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
+        let (common, where_clause) = self.parse_function_common(false, DirectiveContext::Default)?;
+
+        // Parse semicolon
+        let semicolon = if let Some(body) = &common.body {
+            match body {
+                ast::FunctionBody::Expression(_) => self.parse_semicolon()?,
+                ast::FunctionBody::Block(_) => true,
+            }
+        } else {
+            self.parse_semicolon()?
+        };
+
+        let modifiers = annotations.modifiers.clone();
+
+        let is_interface_method = matches!(context, DirectiveContext::InterfaceBlock);
+        let is_native = modifiers.contains(ast::Modifiers::NATIVE);
+
+        // Body verification
+        if common.body.is_some() {
+            if is_native || is_interface_method {
+                self.add_syntax_error(name.1.clone(), DiagnosticKind::MethodMustNotHaveBody, diagnostic_arguments![]);
+            }
+        } else {
+            if !(is_native || is_interface_method) {
+                self.add_syntax_error(name.1.clone(), DiagnosticKind::MethodMustSpecifyBody, diagnostic_arguments![]);
+            }
+        }
+
+        // Interface method must not contain annotations
+        if is_interface_method && (annotations.access_modifier.is_some() || !annotations.metadata.is_empty() || !modifiers.is_empty()) {
+            self.add_syntax_error(name.1.clone(), DiagnosticKind::InterfaceMethodHasAnnotations, diagnostic_arguments![]);
+        }
+
+        // Allow `override` in type blocks only
+        if modifiers.contains(ast::Modifiers::OVERRIDE) && !context.is_type_block() {
+            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("override".into())]);
+        }
+
+        // Allow `final` in type blocks only
+        if modifiers.contains(ast::Modifiers::FINAL) && !context.is_type_block() {
+            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("final".into())]);
+        }
+
+        // Forbid `dynamic`
+        if modifiers.contains(ast::Modifiers::DYNAMIC) {
+            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("dynamic".into())]);
+        }
+
+        // Always allow `native`
+
+        // Allow `static` in type blocks only
+        if modifiers.contains(ast::Modifiers::STATIC) && !context.is_type_block() {
+            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("static".into())]);
+        }
+
+        // Getters and setters must not have generics
+        if where_clause.is_some() {
+            self.add_syntax_error(name.1.clone(), DiagnosticKind::MethodMustNotHaveGenerics, diagnostic_arguments![]);
+        }
+
+        let node = if getter {
+            Rc::new(ast::Directive {
+                location: self.pop_location(),
+                kind: ast::DirectiveKind::GetterDefinition(Rc::new(ast::GetterDefinition {
+                    asdoc, annotations, name, common,
+                })),
+            })
+        } else {
+            Rc::new(ast::Directive {
+                location: self.pop_location(),
+                kind: ast::DirectiveKind::SetterDefinition(Rc::new(ast::SetterDefinition {
+                    asdoc, annotations, name, common,
+                })),
+            })
+        };
+
+        Ok((node, semicolon))
+    }
+
+    /// Parses optional generics declaration in the form `.<T, ...Tn>`.
+    fn parse_generics(&mut self) -> Result<ast::Generics, ParserFailure> {
+        if !self.peek(Token::Dot) {
+            return Ok(ast::Generics {
+                params: None,
+                where_clause: None,
+            });
+        }
+        self.next()?;
+        self.expect(Token::Lt)?;
+
+        let mut params = vec![self.parse_generic_param()?];
+        while self.consume(Token::Comma)? {
+            params.push(self.parse_generic_param()?);
+        }
+
+        self.expect_generics_gt()?;
+
+        Ok(ast::Generics {
+            params: Some(params),
+            where_clause: None,
+        })
+    }
+
+    fn parse_generic_param(&mut self) -> Result<Rc<ast::GenericParam>, ParserFailure> {
+        self.mark_location();
+        let name = self.expect_identifier(false)?;
+
+        // C1
+        // C1 + ..Cn
+        let mut constraints = vec![];
+        if self.consume(Token::Colon)? {
+            constraints.push(self.parse_type_expression()?);
+            while self.consume(Token::Plus)? {
+                constraints.push(self.parse_type_expression()?);
+            }
+        }
+
+        // T = D
+        let default_type = if self.consume(Token::Assign)? {
+            Some(self.parse_type_expression()?)
+        } else {
+            None
+        };
+
+        Ok(Rc::new(ast::GenericParam {
+            location: self.pop_location(),
+            name,
+            constraints,
+            default_type,
+        }))
     }
 
     fn parse_variable_definition(
@@ -3514,6 +3998,179 @@ impl<'input> Parser<'input> {
         Ok((node, semicolon))
     }
 
+    fn parse_type_definition(
+        &mut self,
+        start: Location,
+        annotations: ast::Annotations,
+        asdoc: Option<ast::AsDoc>,
+        context: DirectiveContext,
+    ) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
+        self.push_location(&start);
+
+        let left = self.expect_identifier(false)?;
+        let generics = self.parse_generics()?;
+        self.expect(Token::Assign)?;
+        let right = self.parse_type_expression()?;
+        let semicolon = self.parse_semicolon()?;
+
+        let modifiers = annotations.modifiers.clone();
+
+        let node = Rc::new(ast::Directive {
+            location: self.pop_location(),
+            kind: ast::DirectiveKind::TypeDefinition(Rc::new(ast::TypeDefinition {
+                asdoc,
+                annotations,
+                left: left.clone(),
+                generics,
+                right,
+            })),
+        });
+
+        // Allow `static` in type blocks only
+        if modifiers.contains(ast::Modifiers::STATIC) && !context.is_type_block() {
+            self.add_syntax_error(left.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("static".into())]);
+        }
+
+        // Forbid `native`
+        if modifiers.contains(ast::Modifiers::NATIVE) {
+            self.add_syntax_error(left.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("native".into())]);
+        }
+
+        // Forbid `override`
+        if modifiers.contains(ast::Modifiers::OVERRIDE) {
+            self.add_syntax_error(left.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("override".into())]);
+        }
+
+        // Forbid `dynamic`
+        if modifiers.contains(ast::Modifiers::DYNAMIC) {
+            self.add_syntax_error(left.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("dynamic".into())]);
+        }
+
+        // Forbid `final`
+        if modifiers.contains(ast::Modifiers::FINAL) {
+            self.add_syntax_error(left.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("final".into())]);
+        }
+
+        Ok((node, semicolon))
+    }
+
+    fn parse_namespace_definition(
+        &mut self,
+        start: Location,
+        annotations: ast::Annotations,
+        asdoc: Option<ast::AsDoc>,
+        context: DirectiveContext,
+    ) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
+        self.push_location(&start);
+
+        let left = self.expect_identifier(false)?;
+        let right = if self.consume(Token::Assign)? {
+            Some(self.parse_expression(ExpressionContext {
+                allow_in: true,
+                min_precedence: OperatorPrecedence::AssignmentAndOther,
+                ..default()
+            })?)
+        } else {
+            None
+        };
+        let semicolon = self.parse_semicolon()?;
+
+        let modifiers = annotations.modifiers.clone();
+
+        let node = Rc::new(ast::Directive {
+            location: self.pop_location(),
+            kind: ast::DirectiveKind::NamespaceDefinition(Rc::new(ast::NamespaceDefinition {
+                asdoc,
+                annotations,
+                left: left.clone(),
+                right,
+            })),
+        });
+
+        // Allow `static` in type blocks only
+        if modifiers.contains(ast::Modifiers::STATIC) && !context.is_type_block() {
+            self.add_syntax_error(left.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("static".into())]);
+        }
+
+        // Forbid `native`
+        if modifiers.contains(ast::Modifiers::NATIVE) {
+            self.add_syntax_error(left.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("native".into())]);
+        }
+
+        // Forbid `override`
+        if modifiers.contains(ast::Modifiers::OVERRIDE) {
+            self.add_syntax_error(left.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("override".into())]);
+        }
+
+        // Forbid `dynamic`
+        if modifiers.contains(ast::Modifiers::DYNAMIC) {
+            self.add_syntax_error(left.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("dynamic".into())]);
+        }
+
+        // Forbid `final`
+        if modifiers.contains(ast::Modifiers::FINAL) {
+            self.add_syntax_error(left.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("final".into())]);
+        }
+
+        Ok((node, semicolon))
+    }
+
+    fn parse_enum_definition(
+        &mut self,
+        start: Location,
+        annotations: ast::Annotations,
+        asdoc: Option<ast::AsDoc>,
+        context: DirectiveContext,
+    ) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
+        self.push_location(&start);
+
+        let name = self.expect_identifier(true)?;
+        let block = self.parse_block(DirectiveContext::EnumBlock)?;
+        let modifiers = annotations.modifiers.clone();
+
+        let node = Rc::new(ast::Directive {
+            location: self.pop_location(),
+            kind: ast::DirectiveKind::EnumDefinition(Rc::new(ast::EnumDefinition {
+                asdoc,
+                annotations,
+                name: name.clone(),
+                block,
+            })),
+        });
+
+        // Do not allow nested classes
+        if !(matches!(context, DirectiveContext::PackageBlock | DirectiveContext::TopLevel)) {
+            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedNestedClasses, diagnostic_arguments![]);
+        }
+
+        // Forbid `static`
+        if modifiers.contains(ast::Modifiers::STATIC) {
+            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("static".into())]);
+        }
+
+        // Forbid `native`
+        if modifiers.contains(ast::Modifiers::NATIVE) {
+            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("native".into())]);
+        }
+
+        // Forbid `override`
+        if modifiers.contains(ast::Modifiers::OVERRIDE) {
+            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("override".into())]);
+        }
+
+        // Forbid `dynamic`
+        if modifiers.contains(ast::Modifiers::DYNAMIC) {
+            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("dynamic".into())]);
+        }
+
+        // Forbid `final`
+        if modifiers.contains(ast::Modifiers::FINAL) {
+            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("final".into())]);
+        }
+
+        Ok((node, true))
+    }
+
     fn parse_annotatable_definition_after_context_keyword(
         &mut self,
         start: Location,
@@ -3528,9 +4185,20 @@ impl<'input> Parser<'input> {
             panic!();
         }
 
-        // Parse it
-
-        panic!();
+        match previous_word.as_ref() {
+            "type" => {
+                self.parse_type_definition(start, annotations, asdoc, context)
+            },
+            "namespace" => {
+                self.parse_namespace_definition(start, annotations, asdoc, context)
+            },
+            "enum" => {
+                self.parse_enum_definition(start, annotations, asdoc, context)
+            },
+            _ => {
+                panic!();
+            },
+        }
     }
 
     fn exps_to_metadata(&mut self, expressions: &Vec<Rc<ast::Expression>>) -> Vec<Rc<ast::Metadata>> {

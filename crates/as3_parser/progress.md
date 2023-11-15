@@ -105,7 +105,7 @@ Syntax:
   * [x] `o.<T1, ...TN>`
 * Reserved words
   * [x] Reserved words are valid identifiers in destructuring patterns from variable bindings
-  * [ ] Reserved words are valid identifiers in function definition names, including regular functions, getters and setters
+  * [x] Reserved words are valid identifiers in function definition names, including regular functions, getters and setters
 * Statements
   * Parsing statement returns (*node*, *semicolonInserted*)
   * [x] Empty
@@ -140,32 +140,16 @@ Syntax:
     * [x] Modifiers
   * [x] Variable definition
     * [x] Ensure modifiers are correctly specified
-  * [ ] Function definition
-    * [ ] Ensure modifiers are correctly specified
-    * When parsing the function definition, ensure the body matches with the context and the `native` modifier
-    * [ ] Constructor
-      * [ ] Parse body with a `ConstructorBlock` context
-    * [ ] Getter
-    * [ ] Setter
-  * [ ] Type definition
-    * `fn parse_annotatable_definition_after_context_keyword`
-    * [ ] Ensure modifiers are correctly specified
-  * [ ] Class definition
-    * [ ] Parse block with a `ClassBlock` context
-    * [ ] Allow it only within a package or top-level (no nested classes)
-    * [ ] Ensure modifiers are correctly specified
-  * [ ] Enum definition
-    * [ ] Parse block with a `EnumBlock` context
-    * `fn parse_annotatable_definition_after_context_keyword`
-    * [ ] Allow it only within a package or top-level (no nested enums)
-    * [ ] Ensure modifiers are correctly specified
-  * [ ] Interface definition
-    * [ ] Parse block with a `InterfaceBlock` context
-    * [ ] Allow it only within a package or top-level (no nested interfaces)
-    * [ ] Ensure modifiers are correctly specified
-  * [ ] Namespace definition
-    * `fn parse_annotatable_definition_after_context_keyword`
-    * [ ] Ensure modifiers are correctly specified
+  * [x] Function definition
+    * [x] Ensure modifiers are correctly specified
+    * [x] Constructor
+    * [x] Getter
+    * [x] Setter
+  * [x] Type definition
+  * [x] Class definition
+  * [x] Enum definition
+  * [x] Interface definition
+  * [x] Namespace definition
 * [x] Program
   * [x] Packages
   * [x] Top level directives

@@ -37,7 +37,13 @@ lazy_static! {
         DiagnosticKind::FailedParsingAsDocTag.id() => "Failed parsing ASDoc '{1}' tag".into(),
         DiagnosticKind::MalformedMetadataElement.id() => "Malformed meta data element".into(),
         DiagnosticKind::DuplicateModifier.id() => "Duplicate modifier".into(),
-        DiagnosticKind::UnallowedModifier.id() => "Unallowed modifier '{1}'".into(),
+        DiagnosticKind::UnallowedModifier.id() => "Directive has unallowed modifier '{1}'".into(),
+        DiagnosticKind::InterfaceMethodHasAnnotations.id() => "Interface method must not have annotations".into(),
+        DiagnosticKind::MethodMustNotHaveBody.id() => "Method must not have body".into(),
+        DiagnosticKind::MethodMustSpecifyBody.id() => "Method must specify body".into(),
+        DiagnosticKind::MethodMustNotHaveGenerics.id() => "Method must not have generics".into(),
+        DiagnosticKind::DuplicateClause.id() => "Duplicate '{1}' clause".into(),
+        DiagnosticKind::UnallowedNestedClasses.id() => "Nested classes are not allowed".into(),
         // DiagnosticKind::K.id() => "".into(),
     };
 }

@@ -9,6 +9,7 @@ Work in progress.
 Not initiated.
 
 * Verification only occurs if there are no syntax errors.
+* Count references to a definition
 
 ## Language Server
 

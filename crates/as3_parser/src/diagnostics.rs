@@ -179,6 +179,12 @@ pub enum DiagnosticKind {
     MalformedMetadataElement = 153,
     DuplicateModifier = 154,
     UnallowedModifier = 155,
+    InterfaceMethodHasAnnotations = 156,
+    MethodMustNotHaveBody = 157,
+    MethodMustSpecifyBody = 158,
+    MethodMustNotHaveGenerics = 159,
+    DuplicateClause = 160,
+    UnallowedNestedClasses = 161,
 }
 
 impl DiagnosticKind {
