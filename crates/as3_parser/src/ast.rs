@@ -22,6 +22,31 @@ impl QualifiedIdentifier {
             None
         }
     }
+
+    /// Converts the qualified identifier to a meta data name.
+    pub fn to_metadata_name(&self) -> Option<(String, Location)> {
+        if self.attribute {
+            return None;
+        }
+
+        // `[q::Metadata]`
+        if let Some(q) = self.qualifier.as_ref() {
+            let q = q.to_identifier()?;
+            let n = if let IdentifierOrBrackets::Id(id, location) = &self.name {
+                if id != "*" { Some((id.clone(), location.clone())) } else { None }
+            } else {
+                None
+            }?;
+            return Some((format!("{}::{}", q.0, n.0), q.1.combine_with(n.1)));
+        }
+
+        // `[Metadata]`
+        if let IdentifierOrBrackets::Id(id, location) = &self.name {
+            if id != "*" { Some((id.clone(), location.clone())) } else { None }
+        } else {
+            None
+        }
+    }
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -71,6 +96,24 @@ pub struct Expression {
 }
 
 impl Expression {
+    pub(crate) fn to_metadata_key(&self) -> Option<(String, Location)> {
+        if let ExpressionKind::Id(id) = &self.kind {
+            id.to_metadata_name()
+        } else {
+            None
+        }
+    }
+
+    pub(crate) fn to_metadata_value(&self) -> Option<(String, Location)> {
+        if let ExpressionKind::Id(id) = &self.kind {
+            id.to_metadata_name()
+        } else if let ExpressionKind::String(value) = &self.kind {
+            Some((value.clone(), self.location.clone()))
+        } else {
+            None
+        }
+    }
+
     pub(crate) fn to_identifier(&self) -> Option<(String, Location)> {
         if let ExpressionKind::Id(id) = &self.kind {
             id.to_identifier()
@@ -115,7 +158,7 @@ pub enum ExpressionKind {
     /// This expression is not valid in other contexts.
     Rest(Rc<Expression>),
     ArrayInitializer {
-        // asdoc: Option<AsDoc>,
+        asdoc: Option<AsDoc>,
 
         /// Element sequence possibly containing `Rest`s and ellisions.
         elements: Vec<Option<Rc<Expression>>>,
@@ -230,6 +273,13 @@ impl AssignmentLeft {
         match self {
             Self::Expression(exp) => exp.location.clone(),
             Self::Destructuring(destr) => destr.location.clone(),
+        }
+    }
+
+    pub(crate) fn to_metadata_key(&self) -> Option<(String, Location)> {
+        match self {
+            Self::Expression(exp) => exp.to_metadata_key(),
+            Self::Destructuring(destr) => None,
         }
     }
 }

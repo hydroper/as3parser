@@ -136,7 +136,7 @@ Syntax:
   * [x] Import
   * [x] Use namespace
   * Parse annotatable definitions from
-    * [ ] Meta data (`statement.list_meta_data_expressions()` and postprocessing)
+    * [x] Meta data (`statement.list_meta_data_expressions()` and postprocessing)
     * [ ] Modifiers
       * [ ] Identifier
       * [ ] ReservedNamespace

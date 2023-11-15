@@ -176,6 +176,7 @@ pub enum DiagnosticKind {
     FailedToIncludeFile = 150,
     UnrecognizedAsDocTag = 151,
     FailedParsingAsDocTag = 152,
+    MalformedMetadataElement = 153,
 }
 
 impl DiagnosticKind {

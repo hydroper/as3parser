@@ -686,7 +686,7 @@ impl<'input> Parser<'input> {
                     return Err(ParserFailure);
                 }
             },
-            ast::ExpressionKind::ArrayInitializer { elements } => {
+            ast::ExpressionKind::ArrayInitializer { elements, asdoc: _ } => {
                 destructuring_kind = self.array_initializer_to_destructuring_kind(elements.clone())?;
             },
             ast::ExpressionKind::ObjectInitializer { fields } => {
@@ -1434,9 +1434,14 @@ impl<'input> Parser<'input> {
 
     fn parse_array_initializer(&mut self) -> Result<Rc<ast::Expression>, ParserFailure> {
         self.mark_location();
-        // let asdoc = self.parse_asdoc()?;
+
+        // ASDoc
+        let asdoc = self.parse_asdoc()?;
+
         self.expect(Token::LeftBracket)?;
+
         let mut elements: Vec<Option<Rc<ast::Expression>>> = vec![];
+
         while !self.peek(Token::RightBracket) {
             let mut ellipses = false;
             while self.consume(Token::Comma)? {
@@ -1457,7 +1462,7 @@ impl<'input> Parser<'input> {
         self.expect(Token::RightBracket)?;
         Ok(Rc::new(ast::Expression {
             location: self.pop_location(),
-            kind: ast::ExpressionKind::ArrayInitializer { elements },
+            kind: ast::ExpressionKind::ArrayInitializer { asdoc, elements },
         }))
     }
 
@@ -3314,15 +3319,120 @@ impl<'input> Parser<'input> {
     /// })?
     /// ```
     fn parse_annotatable_definition(&self, annotatable_context: AnnotatableContext) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
+        let metadata = self.exps_to_metadata(&annotatable_context.metadata_exp);
         ()
     }
 
-    fn exps_to_metadata(&self) -> Vec<Rc<ast::Metadata>> {
-        ()
+    fn exps_to_metadata(&self, expressions: &Vec<Rc<ast::Expression>>) -> Vec<Rc<ast::Metadata>> {
+        let mut result = vec![];
+        for exp in expressions {
+            if let Some(metadata) = self.exp_to_metadata(exp) {
+                result.push(metadata);
+            }
+        }
+        result
     }
 
-    fn exp_to_metadata(&self) -> Rc<ast::Metadata> {
-        ()
+    fn exp_to_metadata(&self, exp: &Rc<ast::Expression>) -> Option<Rc<ast::Metadata>> {
+        match &exp.kind {
+            ast::ExpressionKind::ArrayInitializer { elements, asdoc, .. } => {
+                if elements.len() != 1 || elements[0].is_none() {
+                    self.add_syntax_error(exp.location.clone(), DiagnosticKind::MalformedMetadataElement, diagnostic_arguments![]);
+                    None
+                } else {
+                    self.exp_to_metadata_1(asdoc.clone(), elements[0].as_ref().unwrap())
+                }
+            },
+            ast::ExpressionKind::BracketsMember { key, asdoc, .. } => self.exp_to_metadata_1(asdoc.clone(), key),
+            _ => None,
+        }
+    }
+
+    fn exp_to_metadata_1(&self, asdoc: Option<ast::AsDoc>, exp: &Rc<ast::Expression>) -> Option<Rc<ast::Metadata>> {
+        match &exp.kind {
+            ast::ExpressionKind::Id(id) => {
+                if let Some(name) = id.to_metadata_name() {
+                    Some(Rc::new(ast::Metadata { asdoc, location: exp.location.clone(), name, entries: vec![] }))
+                } else {
+                    self.add_syntax_error(exp.location.clone(), DiagnosticKind::MalformedMetadataElement, diagnostic_arguments![]);
+                    None
+                }
+            },
+            ast::ExpressionKind::Call { base, arguments } => {
+                if let Some(name) = self.exp_to_metadata_name(base) {
+                    let mut entries = vec![];
+                    for entry in arguments {
+                        if let Some(entry) = self.exp_to_metadata_entry(entry) {
+                            entries.push(entry);
+                        }
+                    }
+                    Some(Rc::new(ast::Metadata { asdoc, location: exp.location.clone(), name, entries }))
+                } else {
+                    self.add_syntax_error(exp.location.clone(), DiagnosticKind::MalformedMetadataElement, diagnostic_arguments![]);
+                    None
+                }
+            },
+            _ => {
+                self.add_syntax_error(exp.location.clone(), DiagnosticKind::MalformedMetadataElement, diagnostic_arguments![]);
+                None
+            },
+        }
+    }
+
+    fn exp_to_metadata_name(&self, exp: &Rc<ast::Expression>) -> Option<(String, Location)> {
+        match &exp.kind {
+            ast::ExpressionKind::Id(id) => {
+                if let Some(name) = id.to_metadata_name() {
+                    Some(name)
+                } else {
+                    self.add_syntax_error(exp.location.clone(), DiagnosticKind::MalformedMetadataElement, diagnostic_arguments![]);
+                    None
+                }
+            },
+            _ => {
+                self.add_syntax_error(exp.location.clone(), DiagnosticKind::MalformedMetadataElement, diagnostic_arguments![]);
+                None
+            },
+        }
+    }
+
+    fn exp_to_metadata_entry(&self, exp: &Rc<ast::Expression>) -> Option<ast::MetadataEntry> {
+        match &exp.kind {
+            ast::ExpressionKind::Id(id) => {
+                if let Some(value) = id.to_metadata_name() {
+                    Some(ast::MetadataEntry {
+                        key: None,
+                        value,
+                    })
+                } else {
+                    self.add_syntax_error(exp.location.clone(), DiagnosticKind::MalformedMetadataElement, diagnostic_arguments![]);
+                    None
+                }
+            },
+            ast::ExpressionKind::Assignment { left, compound, right } => {
+                // Compound assignment is not allowed in meta data
+                if compound.is_some() {
+                    self.add_syntax_error(exp.location.clone(), DiagnosticKind::MalformedMetadataElement, diagnostic_arguments![]);
+                    return None;
+                }
+
+                let Some(key) = left.to_metadata_key() else {
+                    self.add_syntax_error(exp.location.clone(), DiagnosticKind::MalformedMetadataElement, diagnostic_arguments![]);
+                    return None;
+                };
+
+                let Some(value) = right.to_metadata_value() else {
+                    self.add_syntax_error(exp.location.clone(), DiagnosticKind::MalformedMetadataElement, diagnostic_arguments![]);
+                    return None;
+                };
+
+                Some(ast::MetadataEntry { key: Some(key), value })
+            },
+            _ => {
+                self.add_syntax_error(exp.location.clone(), DiagnosticKind::MalformedMetadataElement, diagnostic_arguments![]);
+                None
+            },
+        }
     }
 
     fn peek_annotatable_definition_reserved_word(&self) -> bool {

@@ -35,6 +35,7 @@ lazy_static! {
         DiagnosticKind::FailedToIncludeFile.id() => "Failed to include file".into(),
         DiagnosticKind::UnrecognizedAsDocTag.id() => "Unrecognized ASDoc tag '{1}'".into(),
         DiagnosticKind::FailedParsingAsDocTag.id() => "Failed parsing ASDoc '{1}' tag".into(),
+        DiagnosticKind::MalformedMetadataElement.id() => "Malformed meta data element".into(),
         // DiagnosticKind::K.id() => "".into(),
     };
 }
