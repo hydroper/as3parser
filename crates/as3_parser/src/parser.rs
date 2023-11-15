@@ -1044,7 +1044,7 @@ impl<'input> Parser<'input> {
     fn parse_function_common(&mut self, function_expr: bool, block_context: DirectiveContext) -> Result<(Rc<ast::FunctionCommon>, Option<ast::GenericsWhere>), ParserFailure> {
         self.expect(Token::LeftParen)?;
         let mut params: Vec<ast::FunctionParam> = vec![];
-        while self.peek(Token::RightParen) {
+        while !self.peek(Token::RightParen) {
             self.mark_location();
             let rest = self.consume(Token::Ellipsis)?;
             let binding = self.parse_variable_binding(true)?;
@@ -1065,7 +1065,7 @@ impl<'input> Parser<'input> {
                 },
             };
             params.push(param);
-            if self.consume(Token::Comma)? {
+            if !self.consume(Token::Comma)? {
                 break;
             }
         }

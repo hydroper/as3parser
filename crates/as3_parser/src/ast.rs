@@ -867,7 +867,7 @@ pub struct Annotations {
 }
 
 bitflags! {
-    #[derive(Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
+    #[derive(Copy, Clone, PartialEq, Eq, Serialize, Deserialize, Debug)]
     pub struct Modifiers: u32 {
         const OVERRIDE  = 0b00000001;
         const FINAL     = 0b00000010;
@@ -939,7 +939,7 @@ pub struct FunctionParam {
 }
 
 bitflags! {
-    #[derive(Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
+    #[derive(Copy, Clone, PartialEq, Eq, Serialize, Deserialize, Debug)]
     pub struct FunctionFlags: u32 {
         const AWAIT     = 0b00000001;
         const YIELD     = 0b00000010;

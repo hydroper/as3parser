@@ -46,6 +46,7 @@ pub fn reserved_word_token(name: &str) -> Option<Token> {
                 "await" => Some(Token::Await),
                 "break" => Some(Token::Break),
                 "catch" => Some(Token::Catch),
+                "class" => Some(Token::Class),
                 "const" => Some(Token::Const),
                 "false" => Some(Token::False),
                 "super" => Some(Token::Super),
