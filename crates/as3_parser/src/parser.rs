@@ -3739,7 +3739,7 @@ impl<'input> Parser<'input> {
                 self.add_syntax_error(name.1.clone(), DiagnosticKind::MethodMustNotHaveBody, diagnostic_arguments![]);
             }
         } else {
-            if !(is_native || is_interface_method) {
+            if !(is_native || !is_interface_method) {
                 self.add_syntax_error(name.1.clone(), DiagnosticKind::MethodMustSpecifyBody, diagnostic_arguments![]);
             }
         }
@@ -3826,7 +3826,7 @@ impl<'input> Parser<'input> {
                 self.add_syntax_error(name.1.clone(), DiagnosticKind::MethodMustNotHaveBody, diagnostic_arguments![]);
             }
         } else {
-            if !(is_native || is_interface_method) {
+            if !(is_native || !is_interface_method) {
                 self.add_syntax_error(name.1.clone(), DiagnosticKind::MethodMustSpecifyBody, diagnostic_arguments![]);
             }
         }
