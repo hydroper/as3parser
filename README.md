@@ -13,9 +13,7 @@ Handwritten ActionScript 3 parser in the Rust language.
 
 ## Status
 
-It is almost finished; just missing annotatable definitions ([progress tracker](crates/as3_parser/progress.md)).
-
-Annotatable definitions mean things such as class definitions and variable definitions.
+The parser is complete. I am adding documentation to it.
 
 ## Getting started
 
