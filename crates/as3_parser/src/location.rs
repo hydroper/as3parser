@@ -1,5 +1,6 @@
 use std::rc::Rc;
 use std::cmp::Ordering;
+use std::fmt::Debug;
 use serde::{Serialize, Deserialize};
 use crate::source::Source;
 
@@ -26,6 +27,27 @@ pub struct Location {
     /// Last UTF-8 offset.
     #[serde(skip)]
     pub(crate) last_offset: usize,
+}
+
+impl Debug for Location {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f,
+            "Location(\n\
+                first_line_number={},\n\
+                first_column={},\n\
+                first_offset={},\n\
+                last_line_number={},\n\
+                last_column={}\n\
+                last_offset={}\n\
+            )",
+            self.first_line_number,
+            self.first_column(),
+            self.first_offset,
+            self.last_line_number,
+            self.last_column(),
+            self.last_offset
+        )
+    }
 }
 
 impl Eq for Location {}
@@ -165,15 +187,7 @@ impl Location {
     }
 
     pub fn character_count(&self) -> usize {
-        let mut count = 0;
-        let j = self.last_offset;
-        for (i, _) in self.source.text[self.first_offset..].char_indices() {
-            if i >= j {
-                break;
-            }
-            count += 1;
-        }
-        count
+        self.source.text[self.first_offset..self.last_offset].chars().count()
     }
     
     /// Indicates whether a previous location and a next location

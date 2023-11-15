@@ -146,22 +146,8 @@
                   "asdoc": null,
                   "annotations": {
                     "metadata": [],
-                    "modifiers": "",
-                    "access_modifier": {
-                      "location": {},
-                      "kind": {
-                        "Id": {
-                          "attribute": false,
-                          "qualifier": null,
-                          "name": {
-                            "Id": [
-                              "native",
-                              {}
-                            ]
-                          }
-                        }
-                      }
-                    }
+                    "modifiers": "NATIVE",
+                    "access_modifier": null
                   },
                   "name": [
                     "f",
