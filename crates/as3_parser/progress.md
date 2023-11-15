@@ -137,9 +137,7 @@ Syntax:
   * [x] Use namespace
   * Parse annotatable definitions from
     * [x] Meta data (`statement.list_meta_data_expressions()` and postprocessing)
-    * [ ] Modifiers
-      * [ ] Identifier
-      * [ ] ReservedNamespace
+    * [x] Modifiers
   * [ ] When parsing annotatable definitions, ensure modifiers are correctly specified
   * [ ] Variable definition
   * [ ] Function definition
@@ -149,11 +147,14 @@ Syntax:
     * [ ] Getter
     * [ ] Setter
   * [ ] Type definition
+    * `fn parse_annotatable_definition_after_context_keyword`
   * [ ] Class definition
     * [ ] Parse body with a `ClassBlock` context
   * [ ] Enum definition
+    * `fn parse_annotatable_definition_after_context_keyword`
   * [ ] Interface definition
   * [ ] Namespace definition
+    * `fn parse_annotatable_definition_after_context_keyword`
 * [x] Program
   * [x] Packages
   * [x] Top level directives
@@ -162,19 +163,3 @@ Syntax:
   * [x] `parse_expression`
   * [x] `parse_type_expression`
   * [x] `parse_program`
-
-## Annotatable definitions
-
-* Use `self.peek_annotatable_definition_reserved_word()` to check for `class/interface/function/var/const`
-* Use `is_annotatable_definition_context_keyword(&id)` to check for `enum/namespace/type`
-
-```plain
-self.parse_annotatable_definition(AnnotatableContext {
-    start,
-    metadata_exp,
-    asdoc,
-    first_modifier,
-    previous_token_is_definition_keyword,
-    context,
-})?;
-```

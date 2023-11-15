@@ -3319,7 +3319,142 @@ impl<'input> Parser<'input> {
     /// })?
     /// ```
     fn parse_annotatable_definition(&self, annotatable_context: AnnotatableContext) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
+        // Parse meta data
         let metadata = self.exps_to_metadata(&annotatable_context.metadata_exp);
+
+        // If AnnotatableDefinition starts directly from a context keyword (the previous token),
+        // skip parsing attributes.
+        if annotatable_context.previous_token_is_definition_keyword {
+            return self.parse_annotatable_definition_after_context_keyword(
+                annotatable_context.start.clone(),
+                ast::Annotations {
+                    metadata,
+                    modifiers: ast::Modifiers::empty(),
+                    access_modifier: None,
+                },
+                annotatable_context.asdoc,
+                annotatable_context.context,
+            );
+        }
+
+        let mut modifiers = ast::Modifiers::empty();
+        let mut access_modifier: Option<Rc<ast::Expression>> = None;
+        let mut found_modifier = false;
+        let mut is_a_context_keyword_definition = false;
+
+        // First attribute
+        if let Some(m) = &annotatable_context.first_modifier {
+            found_modifier = true;
+            if let Some(m) = m.to_modifier() {
+                modifiers |= m;
+            } else {
+                access_modifier = Some(Rc::clone(m));
+            }
+        }
+
+        // Parse attributes
+        loop {
+            if found_modifier {
+                self.forbid_line_break_before_token();
+            }
+
+            // Check for `class/interface/function/const/var`
+            if self.peek_annotatable_definition_reserved_word() {
+                break;
+            }
+
+            let mut exp = None;
+            let mut modifier = None;
+            let location: Location;
+
+            if let Some(rns) = self.peek_reserved_namespace() {
+                // ReservedNamespace attribute
+                self.mark_location();
+                self.next()?;
+                let location = self.pop_location();
+                exp = Some(Rc::new(ast::Expression {
+                    location: location.clone(),
+                    kind: ast::ExpressionKind::ReservedNamespace(rns),
+                }));
+                found_modifier = true;
+            } else {
+                // Identifier attribute
+                let id = self.expect_identifier(false)?;
+                location = id.1.clone();
+
+                // Check for `enum/namespace/type`
+                if is_annotatable_definition_context_keyword(&id) {
+                    is_a_context_keyword_definition = true;
+                    break;
+                }
+
+                let exp2 = Rc::new(ast::Expression {
+                    location: id.1.clone(),
+                    kind: ast::ExpressionKind::Id(ast::QualifiedIdentifier {
+                        attribute: false,
+                        qualifier: None,
+                        name: ast::IdentifierOrBrackets::Id(id.0, id.1.clone()),
+                    }),
+                });
+
+                if let Some(modifier2) = exp2.to_modifier() {
+                    modifier = Some(modifier2);
+                } else {
+                    exp = Some(exp2);
+                }
+
+                found_modifier = true;
+            }
+
+            // Contribute modifier and verify it is not duplicate
+            if let Some(exp) = exp.as_ref() {
+                if access_modifier.is_some() {
+                    self.add_syntax_error(exp.location.clone(), DiagnosticKind::DuplicateModifier, vec![]);
+                }
+                access_modifier = Some(Rc::clone(exp));
+            } else {
+                let modifier = modifier.unwrap();
+                if modifiers.contains(modifier) {
+                    self.add_syntax_error(location, DiagnosticKind::DuplicateModifier, vec![]);
+                }
+                modifiers |= modifier;
+            }
+        }
+
+        // Previous token is a ContextKeyword identifying an annotatable directive
+        if is_a_context_keyword_definition {
+            return self.parse_annotatable_definition_after_context_keyword(
+                annotatable_context.start.clone(),
+                ast::Annotations {
+                    metadata,
+                    modifiers,
+                    access_modifier: access_modifier.as_ref().map(|m| Rc::clone(m)),
+                },
+                annotatable_context.asdoc,
+                annotatable_context.context,
+            );
+        }
+
+        parse_other;
+
+        // Error: expected one of { "class", "interface", "function", "var", "const" }
+        self.add_syntax_error(self.token_location(), DiagnosticKind::UnexpectedOrInvalidToken, vec![]);
+        Err(ParserFailure)
+    }
+
+    fn parse_annotatable_definition_after_context_keyword(
+        &self,
+        start: Location,
+        annotations: ast::Annotations,
+        asdoc: Option<ast::AsDoc>,
+        context: DirectiveContext,
+    ) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
+        let Token::Identifier(previous_word) = &self.previous_token.0 else {
+            panic!();
+        };
+        if !["namespace", "enum", "type"].contains(&previous_word.as_ref()) {
+            panic!();
+        }
         ()
     }
 
@@ -3972,7 +4107,7 @@ pub struct ControlContext {
 }
 
 #[derive(Clone)]
-pub struct AnnotatableContext {
+struct AnnotatableContext {
     start: Location,
     metadata_exp: Vec<Rc<ast::Expression>>,
     asdoc: Option<ast::AsDoc>,

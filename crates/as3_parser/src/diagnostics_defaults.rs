@@ -36,6 +36,7 @@ lazy_static! {
         DiagnosticKind::UnrecognizedAsDocTag.id() => "Unrecognized ASDoc tag '{1}'".into(),
         DiagnosticKind::FailedParsingAsDocTag.id() => "Failed parsing ASDoc '{1}' tag".into(),
         DiagnosticKind::MalformedMetadataElement.id() => "Malformed meta data element".into(),
+        DiagnosticKind::DuplicateModifier.id() => "Duplicate modifier".into(),
         // DiagnosticKind::K.id() => "".into(),
     };
 }

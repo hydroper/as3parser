@@ -96,6 +96,21 @@ pub struct Expression {
 }
 
 impl Expression {
+    pub(crate) fn to_modifier(&self) -> Option<Modifiers> {
+        let id = self.to_identifier()?;
+        if id.1.character_count() != id.0.len() {
+            return None;
+        }
+        match id.0.as_ref() {
+            "override" => Some(Modifiers::OVERRIDE),
+            "final" => Some(Modifiers::FINAL),
+            "dynamic" => Some(Modifiers::DYNAMIC),
+            "native" => Some(Modifiers::NATIVE),
+            "static" => Some(Modifiers::STATIC),
+            _ => None,
+        }
+    }
+
     pub(crate) fn to_metadata_key(&self) -> Option<(String, Location)> {
         if let ExpressionKind::Id(id) = &self.kind {
             id.to_metadata_name()
@@ -728,7 +743,7 @@ pub enum DirectiveKind {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct ClassDefinition {
     pub asdoc: Option<AsDoc>,
-    pub annotations: DefinitionAnnotations,
+    pub annotations: Annotations,
     pub name: (String, Location),
     pub generics: Generics,
     pub extends_clause: Option<Rc<TypeExpression>>,
@@ -739,7 +754,7 @@ pub struct ClassDefinition {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct InterfaceDefinition {
     pub asdoc: Option<AsDoc>,
-    pub annotations: DefinitionAnnotations,
+    pub annotations: Annotations,
     pub name: (String, Location),
     pub generics: Generics,
     pub extends_clause: Option<Vec<Rc<TypeExpression>>>,
@@ -749,7 +764,7 @@ pub struct InterfaceDefinition {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct EnumDefinition {
     pub asdoc: Option<AsDoc>,
-    pub annotations: DefinitionAnnotations,
+    pub annotations: Annotations,
     pub name: (String, Location),
     pub block: Rc<Block>,
 }
@@ -757,7 +772,7 @@ pub struct EnumDefinition {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct NamespaceDefinition {
     pub asdoc: Option<AsDoc>,
-    pub annotations: DefinitionAnnotations,
+    pub annotations: Annotations,
     pub left: (String, Location),
     pub right: Option<Rc<Expression>>,
 }
@@ -797,7 +812,7 @@ pub enum ImportItem {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct VariableDefinition {
     pub asdoc: Option<AsDoc>,
-    pub annotations: DefinitionAnnotations,
+    pub annotations: Annotations,
     pub kind: VariableKind,
     pub bindings: Vec<VariableBinding>,
 }
@@ -805,7 +820,7 @@ pub struct VariableDefinition {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct FunctionDefinition {
     pub asdoc: Option<AsDoc>,
-    pub annotations: DefinitionAnnotations,
+    pub annotations: Annotations,
     pub name: (String, Location),
     pub generics: Generics,
     pub common: Rc<FunctionCommon>,
@@ -814,7 +829,7 @@ pub struct FunctionDefinition {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct ConstructorDefinition {
     pub asdoc: Option<AsDoc>,
-    pub annotations: DefinitionAnnotations,
+    pub annotations: Annotations,
     pub name: (String, Location),
     pub common: Rc<FunctionCommon>,
 }
@@ -822,7 +837,7 @@ pub struct ConstructorDefinition {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct GetterDefinition {
     pub asdoc: Option<AsDoc>,
-    pub annotations: DefinitionAnnotations,
+    pub annotations: Annotations,
     pub name: (String, Location),
     pub common: Rc<FunctionCommon>,
 }
@@ -830,7 +845,7 @@ pub struct GetterDefinition {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct SetterDefinition {
     pub asdoc: Option<AsDoc>,
-    pub annotations: DefinitionAnnotations,
+    pub annotations: Annotations,
     pub name: (String, Location),
     pub common: Rc<FunctionCommon>,
 }
@@ -838,22 +853,22 @@ pub struct SetterDefinition {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct TypeDefinition {
     pub asdoc: Option<AsDoc>,
-    pub annotations: DefinitionAnnotations,
+    pub annotations: Annotations,
     pub left: (String, Location),
     pub generics: Generics,
     pub right: Rc<TypeExpression>,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
-pub struct DefinitionAnnotations {
+pub struct Annotations {
     pub metadata: Vec<Rc<Metadata>>,
-    pub flag_modifiers: DefinitionModifiersFlags,
+    pub modifiers: Modifiers,
     pub access_modifier: Option<Rc<Expression>>,
 }
 
 bitflags! {
     #[derive(Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
-    pub struct DefinitionModifiersFlags: u32 {
+    pub struct Modifiers: u32 {
         const OVERRIDE  = 0b00000001;
         const FINAL     = 0b00000010;
         const DYNAMIC   = 0b00000100;
@@ -862,7 +877,7 @@ bitflags! {
     }
 }
 
-impl Default for DefinitionModifiersFlags {
+impl Default for Modifiers {
     fn default() -> Self {
         Self::empty()
     }
