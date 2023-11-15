@@ -13,7 +13,7 @@ Handwritten ActionScript 3 parser in the Rust language.
 
 ## Status
 
-The parser is complete. I am adding documentation to it.
+The parser is complete. I am adding documentation and more tests to it.
 
 ## Getting started
 
