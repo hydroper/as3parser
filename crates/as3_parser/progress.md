@@ -138,9 +138,10 @@ Syntax:
   * Parse annotatable definitions from
     * [x] Meta data (`statement.list_meta_data_expressions()` and postprocessing)
     * [x] Modifiers
-  * [ ] When parsing annotatable definitions, ensure modifiers are correctly specified
-  * [ ] Variable definition
+  * [x] Variable definition
+    * [x] Ensure modifiers are correctly specified
   * [ ] Function definition
+    * [ ] Ensure modifiers are correctly specified
     * When parsing the function definition, ensure the body matches with the context and the `native` modifier
     * [ ] Constructor
       * [ ] Parse body with a `ConstructorBlock` context
@@ -148,13 +149,20 @@ Syntax:
     * [ ] Setter
   * [ ] Type definition
     * `fn parse_annotatable_definition_after_context_keyword`
+    * [ ] Ensure modifiers are correctly specified
   * [ ] Class definition
-    * [ ] Parse body with a `ClassBlock` context
+    * [ ] Parse block with a `ClassBlock` context
+    * [ ] Ensure modifiers are correctly specified
   * [ ] Enum definition
+    * [ ] Parse block with a `EnumBlock` context
     * `fn parse_annotatable_definition_after_context_keyword`
+    * [ ] Ensure modifiers are correctly specified
   * [ ] Interface definition
+    * [ ] Parse block with a `InterfaceBlock` context
+    * [ ] Ensure modifiers are correctly specified
   * [ ] Namespace definition
     * `fn parse_annotatable_definition_after_context_keyword`
+    * [ ] Ensure modifiers are correctly specified
 * [x] Program
   * [x] Packages
   * [x] Top level directives

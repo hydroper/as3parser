@@ -294,7 +294,7 @@ impl AssignmentLeft {
     pub(crate) fn to_metadata_key(&self) -> Option<(String, Location)> {
         match self {
             Self::Expression(exp) => exp.to_metadata_key(),
-            Self::Destructuring(destr) => None,
+            _ => None,
         }
     }
 }

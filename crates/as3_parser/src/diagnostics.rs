@@ -178,6 +178,7 @@ pub enum DiagnosticKind {
     FailedParsingAsDocTag = 152,
     MalformedMetadataElement = 153,
     DuplicateModifier = 154,
+    UnallowedModifier = 155,
 }
 
 impl DiagnosticKind {

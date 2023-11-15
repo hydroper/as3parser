@@ -3318,7 +3318,7 @@ impl<'input> Parser<'input> {
     ///     context,
     /// })?
     /// ```
-    fn parse_annotatable_definition(&self, annotatable_context: AnnotatableContext) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
+    fn parse_annotatable_definition(&mut self, annotatable_context: AnnotatableContext) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
         // Parse meta data
         let metadata = self.exps_to_metadata(&annotatable_context.metadata_exp);
 
@@ -3371,7 +3371,7 @@ impl<'input> Parser<'input> {
                 // ReservedNamespace attribute
                 self.mark_location();
                 self.next()?;
-                let location = self.pop_location();
+                location = self.pop_location();
                 exp = Some(Rc::new(ast::Expression {
                     location: location.clone(),
                     kind: ast::ExpressionKind::ReservedNamespace(rns),
@@ -3421,29 +3421,101 @@ impl<'input> Parser<'input> {
             }
         }
 
+        let annotations = ast::Annotations {
+            metadata,
+            modifiers,
+            access_modifier: access_modifier.as_ref().map(|m| Rc::clone(m)),
+        };
+
         // Previous token is a ContextKeyword identifying an annotatable directive
         if is_a_context_keyword_definition {
             return self.parse_annotatable_definition_after_context_keyword(
                 annotatable_context.start.clone(),
-                ast::Annotations {
-                    metadata,
-                    modifiers,
-                    access_modifier: access_modifier.as_ref().map(|m| Rc::clone(m)),
-                },
+                annotations,
                 annotatable_context.asdoc,
                 annotatable_context.context,
             );
         }
 
-        parse_other;
+        if self.peek(Token::Var) || self.peek(Token::Const) {
+            return self.parse_variable_definition(
+                annotatable_context.start.clone(),
+                annotations,
+                annotatable_context.asdoc,
+                annotatable_context.context,
+            );
+        }
 
         // Error: expected one of { "class", "interface", "function", "var", "const" }
         self.add_syntax_error(self.token_location(), DiagnosticKind::UnexpectedOrInvalidToken, vec![]);
         Err(ParserFailure)
     }
 
+    fn parse_variable_definition(
+        &mut self,
+        start: Location,
+        annotations: ast::Annotations,
+        asdoc: Option<ast::AsDoc>,
+        context: DirectiveContext,
+    ) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
+        self.push_location(&start);
+
+        let kind: ast::VariableKind;
+        if self.consume(Token::Const)? {
+            kind = ast::VariableKind::Const;
+        } else {
+            self.expect(Token::Var)?;
+            kind = ast::VariableKind::Var;
+        }
+        let mut bindings = vec![self.parse_variable_binding(true)?];
+        while self.consume(Token::Comma)? {
+            bindings.push(self.parse_variable_binding(true)?);
+        }
+
+        let semicolon = self.parse_semicolon()?;
+
+        let modifiers = annotations.modifiers.clone();
+
+        let node = Rc::new(ast::Directive {
+            location: self.pop_location(),
+            kind: ast::DirectiveKind::VariableDefinition(Rc::new(ast::VariableDefinition {
+                asdoc,
+                annotations,
+                kind,
+                bindings,
+            })),
+        });
+
+        // Allow `static` in type blocks only
+        if modifiers.contains(ast::Modifiers::STATIC) && !context.is_type_block() {
+            self.add_syntax_error(node.location.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("static".into())]);
+        }
+
+        // Forbid `native`
+        if modifiers.contains(ast::Modifiers::NATIVE) {
+            self.add_syntax_error(node.location.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("native".into())]);
+        }
+
+        // Forbid `override`
+        if modifiers.contains(ast::Modifiers::OVERRIDE) {
+            self.add_syntax_error(node.location.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("override".into())]);
+        }
+
+        // Forbid `dynamic`
+        if modifiers.contains(ast::Modifiers::DYNAMIC) {
+            self.add_syntax_error(node.location.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("dynamic".into())]);
+        }
+
+        // Forbid `final`
+        if modifiers.contains(ast::Modifiers::FINAL) {
+            self.add_syntax_error(node.location.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("final".into())]);
+        }
+
+        Ok((node, semicolon))
+    }
+
     fn parse_annotatable_definition_after_context_keyword(
-        &self,
+        &mut self,
         start: Location,
         annotations: ast::Annotations,
         asdoc: Option<ast::AsDoc>,
@@ -3455,10 +3527,13 @@ impl<'input> Parser<'input> {
         if !["namespace", "enum", "type"].contains(&previous_word.as_ref()) {
             panic!();
         }
-        ()
+
+        // Parse it
+
+        panic!();
     }
 
-    fn exps_to_metadata(&self, expressions: &Vec<Rc<ast::Expression>>) -> Vec<Rc<ast::Metadata>> {
+    fn exps_to_metadata(&mut self, expressions: &Vec<Rc<ast::Expression>>) -> Vec<Rc<ast::Metadata>> {
         let mut result = vec![];
         for exp in expressions {
             if let Some(metadata) = self.exp_to_metadata(exp) {
@@ -3468,7 +3543,7 @@ impl<'input> Parser<'input> {
         result
     }
 
-    fn exp_to_metadata(&self, exp: &Rc<ast::Expression>) -> Option<Rc<ast::Metadata>> {
+    fn exp_to_metadata(&mut self, exp: &Rc<ast::Expression>) -> Option<Rc<ast::Metadata>> {
         match &exp.kind {
             ast::ExpressionKind::ArrayInitializer { elements, asdoc, .. } => {
                 if elements.len() != 1 || elements[0].is_none() {
@@ -3483,7 +3558,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn exp_to_metadata_1(&self, asdoc: Option<ast::AsDoc>, exp: &Rc<ast::Expression>) -> Option<Rc<ast::Metadata>> {
+    fn exp_to_metadata_1(&mut self, asdoc: Option<ast::AsDoc>, exp: &Rc<ast::Expression>) -> Option<Rc<ast::Metadata>> {
         match &exp.kind {
             ast::ExpressionKind::Id(id) => {
                 if let Some(name) = id.to_metadata_name() {
@@ -3514,7 +3589,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn exp_to_metadata_name(&self, exp: &Rc<ast::Expression>) -> Option<(String, Location)> {
+    fn exp_to_metadata_name(&mut self, exp: &Rc<ast::Expression>) -> Option<(String, Location)> {
         match &exp.kind {
             ast::ExpressionKind::Id(id) => {
                 if let Some(name) = id.to_metadata_name() {
@@ -3531,7 +3606,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn exp_to_metadata_entry(&self, exp: &Rc<ast::Expression>) -> Option<ast::MetadataEntry> {
+    fn exp_to_metadata_entry(&mut self, exp: &Rc<ast::Expression>) -> Option<ast::MetadataEntry> {
         match &exp.kind {
             ast::ExpressionKind::Id(id) => {
                 if let Some(value) = id.to_metadata_name() {
@@ -4016,6 +4091,7 @@ pub enum DirectiveContext {
         name: String,
     },
     InterfaceBlock,
+    EnumBlock,
     ConstructorBlock {
         super_statement_found: Cell<bool>,
     },
@@ -4027,6 +4103,15 @@ pub enum DirectiveContext {
 }
 
 impl DirectiveContext {
+    fn is_type_block(&self) -> bool {
+        match self {
+            Self::ClassBlock { .. } |
+            Self::InterfaceBlock |
+            Self::EnumBlock => true,
+            _ => false,
+        }
+    }
+
     fn clone_control(&self) -> Self {
         match self {
             Self::WithControl { .. } => self.clone(),
@@ -4035,9 +4120,11 @@ impl DirectiveContext {
     }
 
     fn override_control_context(&self, label_only: bool, mut context: ControlContext) -> Self {
+        let mut prev_context = None;
         let mut label = None;
         let mut labels = match self {
-            Self::WithControl { control_context: _, labels, to_be_labeled: label1 } => {
+            Self::WithControl { control_context, labels, to_be_labeled: label1 } => {
+                prev_context = Some(control_context.clone());
                 label = label1.clone();
                 labels.clone()
             },
@@ -4047,10 +4134,10 @@ impl DirectiveContext {
             labels.insert(label, context.clone());
         }
         if label_only {
-            context = ControlContext {
+            context = prev_context.unwrap_or(ControlContext {
                 breakable: false,
                 iteration: false,
-            };
+            });
         }
         Self::WithControl { control_context: context, labels, to_be_labeled: None }
     }
