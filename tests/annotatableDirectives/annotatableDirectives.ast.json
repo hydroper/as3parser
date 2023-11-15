@@ -1,0 +1,83 @@
+{
+  "location": {},
+  "packages": [],
+  "directives": [
+    {
+      "location": {},
+      "kind": {
+        "VariableDefinition": {
+          "asdoc": null,
+          "annotations": {
+            "metadata": [],
+            "modifiers": "",
+            "access_modifier": {
+              "location": {},
+              "kind": {
+                "ReservedNamespace": "Public"
+              }
+            }
+          },
+          "kind": "Var",
+          "bindings": [
+            {
+              "pattern": {
+                "location": {},
+                "kind": {
+                  "Binding": {
+                    "name": [
+                      "x",
+                      {}
+                    ]
+                  }
+                },
+                "non_null": false,
+                "type_annotation": null
+              },
+              "init": {
+                "location": {},
+                "kind": {
+                  "Numeric": 0.0
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "location": {},
+      "kind": {
+        "VariableDefinition": {
+          "asdoc": {
+            "main_body": "\nY\n",
+            "tags": []
+          },
+          "annotations": {
+            "metadata": [],
+            "modifiers": "",
+            "access_modifier": null
+          },
+          "kind": "Var",
+          "bindings": [
+            {
+              "pattern": {
+                "location": {},
+                "kind": {
+                  "Binding": {
+                    "name": [
+                      "y",
+                      {}
+                    ]
+                  }
+                },
+                "non_null": false,
+                "type_annotation": null
+              },
+              "init": null
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -3258,8 +3258,8 @@ impl<'input> Parser<'input> {
                     return self.parse_include_directive(context.clone(), start.clone());
                 }
 
-                // AnnotatableDefinition (modifierOrContextKeyword modifierOrName)
-                if !semicolon_inserted && (matches!(self.token.0, Token::Identifier(_)) || self.peek_reserved_namespace().is_some()) {
+                // AnnotatableDefinition (modifierOrContextKeyword modifierOrNameOrKeyword)
+                if !semicolon_inserted && (matches!(self.token.0, Token::Identifier(_)) || self.peek_reserved_namespace().is_some() || self.peek_annotatable_definition_reserved_word()) {
                     let previous_token_is_definition_keyword = is_annotatable_definition_context_keyword(&id);
                     return self.parse_annotatable_definition(AnnotatableContext {
                         start,
@@ -3406,7 +3406,7 @@ impl<'input> Parser<'input> {
                 found_modifier = true;
             }
 
-            // Contribute modifier and verify it is not duplicate
+            // Contribute modifier and verify that it is not duplicate
             if let Some(exp) = exp.as_ref() {
                 if access_modifier.is_some() {
                     self.add_syntax_error(exp.location.clone(), DiagnosticKind::DuplicateModifier, vec![]);

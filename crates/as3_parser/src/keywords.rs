@@ -25,6 +25,7 @@ pub fn reserved_word_token(name: &str) -> Option<Token> {
                 "new" => Some(Token::New),
                 "try" => Some(Token::Try),
                 "use" => Some(Token::Use),
+                "var" => Some(Token::Var),
                 _ => None,
             }
         },
