@@ -1,0 +1,296 @@
+{
+  "location": {},
+  "packages": [],
+  "directives": [
+    {
+      "location": {},
+      "kind": {
+        "TypeDefinition": {
+          "asdoc": null,
+          "annotations": {
+            "metadata": [],
+            "modifiers": "",
+            "access_modifier": null
+          },
+          "left": [
+            "T1",
+            {}
+          ],
+          "generics": {
+            "params": null,
+            "where_clause": null
+          },
+          "right": {
+            "location": {},
+            "kind": "Undefined"
+          }
+        }
+      }
+    },
+    {
+      "location": {},
+      "kind": {
+        "TypeDefinition": {
+          "asdoc": null,
+          "annotations": {
+            "metadata": [],
+            "modifiers": "",
+            "access_modifier": null
+          },
+          "left": [
+            "T2",
+            {}
+          ],
+          "generics": {
+            "params": null,
+            "where_clause": null
+          },
+          "right": {
+            "location": {},
+            "kind": {
+              "Nullable": {
+                "location": {},
+                "kind": {
+                  "Id": {
+                    "qualifier": null,
+                    "name": {
+                      "Id": [
+                        "T",
+                        {}
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "location": {},
+      "kind": {
+        "TypeDefinition": {
+          "asdoc": null,
+          "annotations": {
+            "metadata": [],
+            "modifiers": "",
+            "access_modifier": null
+          },
+          "left": [
+            "T3",
+            {}
+          ],
+          "generics": {
+            "params": null,
+            "where_clause": null
+          },
+          "right": {
+            "location": {},
+            "kind": {
+              "NonNullable": {
+                "location": {},
+                "kind": {
+                  "Id": {
+                    "qualifier": null,
+                    "name": {
+                      "Id": [
+                        "T",
+                        {}
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "location": {},
+      "kind": {
+        "TypeDefinition": {
+          "asdoc": null,
+          "annotations": {
+            "metadata": [],
+            "modifiers": "",
+            "access_modifier": null
+          },
+          "left": [
+            "T4",
+            {}
+          ],
+          "generics": {
+            "params": null,
+            "where_clause": null
+          },
+          "right": {
+            "location": {},
+            "kind": {
+              "Nullable": {
+                "location": {},
+                "kind": {
+                  "Id": {
+                    "qualifier": null,
+                    "name": {
+                      "Id": [
+                        "T",
+                        {}
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "location": {},
+      "kind": {
+        "TypeDefinition": {
+          "asdoc": null,
+          "annotations": {
+            "metadata": [],
+            "modifiers": "",
+            "access_modifier": null
+          },
+          "left": [
+            "T5",
+            {}
+          ],
+          "generics": {
+            "params": null,
+            "where_clause": null
+          },
+          "right": {
+            "location": {},
+            "kind": {
+              "Union": [
+                {
+                  "location": {},
+                  "kind": "Void"
+                },
+                {
+                  "location": {},
+                  "kind": "Any"
+                },
+                {
+                  "location": {},
+                  "kind": {
+                    "Id": {
+                      "qualifier": null,
+                      "name": {
+                        "Id": [
+                          "String",
+                          {}
+                        ]
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "location": {},
+      "kind": {
+        "TypeDefinition": {
+          "asdoc": null,
+          "annotations": {
+            "metadata": [],
+            "modifiers": "",
+            "access_modifier": null
+          },
+          "left": [
+            "T6",
+            {}
+          ],
+          "generics": {
+            "params": null,
+            "where_clause": null
+          },
+          "right": {
+            "location": {},
+            "kind": {
+              "Paren": {
+                "location": {},
+                "kind": {
+                  "Id": {
+                    "qualifier": null,
+                    "name": {
+                      "Id": [
+                        "T",
+                        {}
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "location": {},
+      "kind": {
+        "TypeDefinition": {
+          "asdoc": null,
+          "annotations": {
+            "metadata": [],
+            "modifiers": "",
+            "access_modifier": null
+          },
+          "left": [
+            "T7",
+            {}
+          ],
+          "generics": {
+            "params": null,
+            "where_clause": null
+          },
+          "right": {
+            "location": {},
+            "kind": {
+              "Function": {
+                "params": [
+                  {
+                    "kind": "Required",
+                    "name": [
+                      "v",
+                      {}
+                    ],
+                    "type_annotation": {
+                      "location": {},
+                      "kind": {
+                        "Id": {
+                          "qualifier": null,
+                          "name": {
+                            "Id": [
+                              "T",
+                              {}
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                ],
+                "return_annotation": {
+                  "location": {},
+                  "kind": "Void"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

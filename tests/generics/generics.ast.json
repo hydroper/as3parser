@@ -1,0 +1,186 @@
+{
+  "location": {},
+  "packages": [],
+  "directives": [
+    {
+      "location": {},
+      "kind": {
+        "ClassDefinition": {
+          "asdoc": null,
+          "annotations": {
+            "metadata": [],
+            "modifiers": "",
+            "access_modifier": null
+          },
+          "name": [
+            "C",
+            {}
+          ],
+          "generics": {
+            "params": [
+              {
+                "location": {},
+                "name": [
+                  "T",
+                  {}
+                ],
+                "constraints": [
+                  {
+                    "location": {},
+                    "kind": {
+                      "Id": {
+                        "qualifier": null,
+                        "name": {
+                          "Id": [
+                            "C1",
+                            {}
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "location": {},
+                    "kind": {
+                      "Id": {
+                        "qualifier": null,
+                        "name": {
+                          "Id": [
+                            "C2",
+                            {}
+                          ]
+                        }
+                      }
+                    }
+                  }
+                ],
+                "default_type": null
+              }
+            ],
+            "where_clause": null
+          },
+          "extends_clause": null,
+          "implements_clause": null,
+          "block": [
+            {
+              "location": {},
+              "kind": {
+                "FunctionDefinition": {
+                  "asdoc": null,
+                  "annotations": {
+                    "metadata": [],
+                    "modifiers": "",
+                    "access_modifier": null
+                  },
+                  "name": [
+                    "f",
+                    {}
+                  ],
+                  "generics": {
+                    "params": null,
+                    "where_clause": {
+                      "constraints": [
+                        {
+                          "name": [
+                            "T",
+                            {}
+                          ],
+                          "constraints": [
+                            {
+                              "location": {},
+                              "kind": {
+                                "Id": {
+                                  "qualifier": null,
+                                  "name": {
+                                    "Id": [
+                                      "C3",
+                                      {}
+                                    ]
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "location": {},
+                              "kind": {
+                                "Id": {
+                                  "qualifier": null,
+                                  "name": {
+                                    "Id": [
+                                      "C4",
+                                      {}
+                                    ]
+                                  }
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "common": {
+                    "flags": "",
+                    "params": [],
+                    "return_annotation": {
+                      "location": {},
+                      "kind": "Void"
+                    },
+                    "body": {
+                      "Block": []
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "location": {},
+              "kind": {
+                "FunctionDefinition": {
+                  "asdoc": null,
+                  "annotations": {
+                    "metadata": [],
+                    "modifiers": "",
+                    "access_modifier": null
+                  },
+                  "name": [
+                    "f2",
+                    {}
+                  ],
+                  "generics": {
+                    "params": [
+                      {
+                        "location": {},
+                        "name": [
+                          "T",
+                          {}
+                        ],
+                        "constraints": [],
+                        "default_type": {
+                          "location": {},
+                          "kind": "Void"
+                        }
+                      }
+                    ],
+                    "where_clause": null
+                  },
+                  "common": {
+                    "flags": "",
+                    "params": [],
+                    "return_annotation": {
+                      "location": {},
+                      "kind": "Void"
+                    },
+                    "body": {
+                      "Block": []
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

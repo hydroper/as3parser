@@ -17,3 +17,12 @@ for diagnostic in diagnostics {
     println!("{}", diagnostic.format_default());
 }
 ```
+
+## Invalidation
+
+A source is invalidated when it or any of its `IncludeDirective` files contain any errors:
+
+```rust
+// invalidated: bool
+let invalidated = source.invalidated();
+```
