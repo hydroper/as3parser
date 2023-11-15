@@ -1,1 +1,309 @@
-{}
+{
+  "location": {},
+  "packages": [],
+  "directives": [
+    {
+      "location": {},
+      "kind": {
+        "FunctionDefinition": {
+          "asdoc": null,
+          "annotations": {
+            "metadata": [],
+            "modifiers": "",
+            "access_modifier": null
+          },
+          "name": [
+            "f",
+            {}
+          ],
+          "generics": {
+            "params": null,
+            "where_clause": null
+          },
+          "common": {
+            "flags": "",
+            "params": [
+              {
+                "location": {},
+                "kind": "Required",
+                "binding": {
+                  "pattern": {
+                    "location": {},
+                    "kind": {
+                      "Array": [
+                        {
+                          "Pattern": {
+                            "location": {},
+                            "kind": {
+                              "Binding": {
+                                "name": [
+                                  "a",
+                                  {}
+                                ]
+                              }
+                            },
+                            "non_null": false,
+                            "type_annotation": null
+                          }
+                        },
+                        {
+                          "Pattern": {
+                            "location": {},
+                            "kind": {
+                              "Binding": {
+                                "name": [
+                                  "b",
+                                  {}
+                                ]
+                              }
+                            },
+                            "non_null": false,
+                            "type_annotation": null
+                          }
+                        },
+                        {
+                          "Pattern": {
+                            "location": {},
+                            "kind": {
+                              "Record": [
+                                {
+                                  "location": {},
+                                  "key": [
+                                    {
+                                      "Id": {
+                                        "qualifier": null,
+                                        "name": {
+                                          "Id": [
+                                            "x",
+                                            {}
+                                          ]
+                                        }
+                                      }
+                                    },
+                                    {}
+                                  ],
+                                  "non_null": false,
+                                  "alias": {
+                                    "location": {},
+                                    "kind": {
+                                      "Binding": {
+                                        "name": [
+                                          "x1",
+                                          {}
+                                        ]
+                                      }
+                                    },
+                                    "non_null": false,
+                                    "type_annotation": null
+                                  }
+                                },
+                                {
+                                  "location": {},
+                                  "key": [
+                                    {
+                                      "Id": {
+                                        "qualifier": null,
+                                        "name": {
+                                          "Id": [
+                                            "y",
+                                            {}
+                                          ]
+                                        }
+                                      }
+                                    },
+                                    {}
+                                  ],
+                                  "non_null": false,
+                                  "alias": null
+                                }
+                              ]
+                            },
+                            "non_null": false,
+                            "type_annotation": null
+                          }
+                        }
+                      ]
+                    },
+                    "non_null": false,
+                    "type_annotation": {
+                      "location": {},
+                      "kind": {
+                        "Id": {
+                          "qualifier": null,
+                          "name": {
+                            "Id": [
+                              "Array",
+                              {}
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "init": null
+                }
+              }
+            ],
+            "return_annotation": {
+              "location": {},
+              "kind": "Void"
+            },
+            "body": {
+              "Block": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "location": {},
+      "kind": {
+        "Statement": {
+          "location": {},
+          "kind": {
+            "Expression": {
+              "asdoc": null,
+              "expression": {
+                "location": {},
+                "kind": {
+                  "Paren": {
+                    "location": {},
+                    "kind": {
+                      "Assignment": {
+                        "left": {
+                          "Destructuring": {
+                            "location": {},
+                            "kind": {
+                              "Record": []
+                            },
+                            "non_null": false,
+                            "type_annotation": null
+                          }
+                        },
+                        "compound": null,
+                        "right": {
+                          "location": {},
+                          "kind": {
+                            "Id": {
+                              "attribute": false,
+                              "qualifier": null,
+                              "name": {
+                                "Id": [
+                                  "y",
+                                  {}
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "location": {},
+      "kind": {
+        "Statement": {
+          "location": {},
+          "kind": {
+            "Expression": {
+              "asdoc": null,
+              "expression": {
+                "location": {},
+                "kind": {
+                  "Assignment": {
+                    "left": {
+                      "Destructuring": {
+                        "location": {},
+                        "kind": {
+                          "Array": []
+                        },
+                        "non_null": false,
+                        "type_annotation": null
+                      }
+                    },
+                    "compound": null,
+                    "right": {
+                      "location": {},
+                      "kind": {
+                        "Id": {
+                          "attribute": false,
+                          "qualifier": null,
+                          "name": {
+                            "Id": [
+                              "y",
+                              {}
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "location": {},
+      "kind": {
+        "Statement": {
+          "location": {},
+          "kind": {
+            "Expression": {
+              "asdoc": null,
+              "expression": {
+                "location": {},
+                "kind": {
+                  "Assignment": {
+                    "left": {
+                      "Expression": {
+                        "location": {},
+                        "kind": {
+                          "Id": {
+                            "attribute": false,
+                            "qualifier": null,
+                            "name": {
+                              "Id": [
+                                "x",
+                                {}
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "compound": null,
+                    "right": {
+                      "location": {},
+                      "kind": {
+                        "Id": {
+                          "attribute": false,
+                          "qualifier": null,
+                          "name": {
+                            "Id": [
+                              "y",
+                              {}
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

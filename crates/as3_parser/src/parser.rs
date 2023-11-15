@@ -1121,9 +1121,9 @@ impl<'input> Parser<'input> {
     }
 
     fn parse_object_field(&mut self) -> Result<Rc<ast::ObjectField>, ParserFailure> {
-        self.mark_location();
-
-        if self.consume(Token::Ellipsis)? {
+        if self.peek(Token::Ellipsis) {
+            self.mark_location();
+            self.next()?;
             let subexp = self.parse_expression(ExpressionContext {
                 allow_in: true,
                 min_precedence: OperatorPrecedence::AssignmentAndOther.add_one().unwrap(),
