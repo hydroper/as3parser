@@ -291,6 +291,46 @@
           }
         }
       }
+    },
+    {
+      "location": {},
+      "kind": {
+        "TypeDefinition": {
+          "asdoc": null,
+          "annotations": {
+            "metadata": [],
+            "modifiers": "",
+            "access_modifier": null
+          },
+          "left": [
+            "T8",
+            {}
+          ],
+          "generics": {
+            "params": null,
+            "where_clause": null
+          },
+          "right": {
+            "location": {},
+            "kind": {
+              "Complement": [
+                {
+                  "location": {},
+                  "kind": {
+                    "Record": []
+                  }
+                },
+                {
+                  "location": {},
+                  "kind": {
+                    "Record": []
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
     }
   ]
 }

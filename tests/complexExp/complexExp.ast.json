@@ -185,6 +185,58 @@
           }
         }
       }
+    },
+    {
+      "location": {},
+      "kind": {
+        "Statement": {
+          "location": {},
+          "kind": {
+            "Expression": {
+              "asdoc": null,
+              "expression": {
+                "location": {},
+                "kind": {
+                  "ArrowFunction": {
+                    "flags": "",
+                    "params": [
+                      {
+                        "location": {},
+                        "kind": "Required",
+                        "binding": {
+                          "pattern": {
+                            "location": {},
+                            "kind": {
+                              "Binding": {
+                                "name": [
+                                  "a",
+                                  {}
+                                ]
+                              }
+                            },
+                            "non_null": false,
+                            "type_annotation": null
+                          },
+                          "init": null
+                        }
+                      }
+                    ],
+                    "return_annotation": null,
+                    "body": {
+                      "Expression": {
+                        "location": {},
+                        "kind": {
+                          "Numeric": 10.0
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   ]
 }

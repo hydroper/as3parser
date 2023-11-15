@@ -8,3 +8,4 @@ type T5 =
     | String;
 type T6 = (T);
 type T7 = (v: T) => void;
+type T8 = {} & {};
