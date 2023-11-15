@@ -82,9 +82,9 @@ impl Expression {
     pub(crate) fn list_metadata_expressions(self: &Rc<Self>) -> Option<Vec<Rc<Self>>> {
         match &self.kind {
             ExpressionKind::ArrayInitializer { .. } => Some(vec![Rc::clone(self)]),
-            ExpressionKind::BracketsMember { base, key, .. } => {
+            ExpressionKind::BracketsMember { base, .. } => {
                 let mut result = base.list_metadata_expressions()?;
-                result.push(Rc::clone(&key));
+                result.push(Rc::clone(&self));
                 Some(result)
             },
             _ => None,

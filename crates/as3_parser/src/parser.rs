@@ -3317,6 +3317,14 @@ impl<'input> Parser<'input> {
         ()
     }
 
+    fn exps_to_metadata(&self) -> Vec<Rc<ast::Metadata>> {
+        ()
+    }
+
+    fn exp_to_metadata(&self) -> Rc<ast::Metadata> {
+        ()
+    }
+
     fn peek_annotatable_definition_reserved_word(&self) -> bool {
         self.peek(Token::Class) || self.peek(Token::Interface) || self.peek(Token::Function) ||
         self.peek(Token::Var) || self.peek(Token::Const)
