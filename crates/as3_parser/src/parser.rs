@@ -4004,7 +4004,7 @@ impl<'input> Parser<'input> {
                     id.push(self.expect_identifier(true)?);
                 }
             }
-            let block = self.parse_block(DirectiveContext::Default)?;
+            let block = self.parse_block(DirectiveContext::PackageBlock)?;
             packages.push(Rc::new(ast::PackageDefinition {
                 location: self.pop_location(),
                 asdoc,
@@ -4012,7 +4012,7 @@ impl<'input> Parser<'input> {
                 block,
             }));
         }
-        let directives = self.parse_directives(DirectiveContext::Default)?;
+        let directives = self.parse_directives(DirectiveContext::TopLevel)?;
         Ok(Rc::new(ast::Program {
             location: self.pop_location(),
             packages,
@@ -4087,6 +4087,8 @@ impl Activation {
 #[derive(Clone)]
 pub enum DirectiveContext {
     Default,
+    TopLevel,
+    PackageBlock,
     ClassBlock {
         name: String,
     },

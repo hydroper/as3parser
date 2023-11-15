@@ -152,13 +152,16 @@ Syntax:
     * [ ] Ensure modifiers are correctly specified
   * [ ] Class definition
     * [ ] Parse block with a `ClassBlock` context
+    * [ ] Allow it only within a package or top-level (no nested classes)
     * [ ] Ensure modifiers are correctly specified
   * [ ] Enum definition
     * [ ] Parse block with a `EnumBlock` context
     * `fn parse_annotatable_definition_after_context_keyword`
+    * [ ] Allow it only within a package or top-level (no nested enums)
     * [ ] Ensure modifiers are correctly specified
   * [ ] Interface definition
     * [ ] Parse block with a `InterfaceBlock` context
+    * [ ] Allow it only within a package or top-level (no nested interfaces)
     * [ ] Ensure modifiers are correctly specified
   * [ ] Namespace definition
     * `fn parse_annotatable_definition_after_context_keyword`
