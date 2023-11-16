@@ -39,3 +39,7 @@ Global objects are resolved asynchronously and certain properties are required b
 ## Control flow
 
 * [ ] Check control flow from AST
+
+## Type conversions
+
+* [ ] `C(v)` is a type conversion for most classes, except `Array` and `Vector.<T>`.
