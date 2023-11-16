@@ -24,3 +24,16 @@ External libraries is typically code originating from an external SWC or ABC suc
 
 * [ ] Symbols have an `external` toggle.
 * [ ] External mode. When the verifier is in external mode, any symbols it defines are external.
+
+## Built-ins
+
+The verifier does not include any built-in libraries by default. External libraries such as `playerglobal.swc` have to be loaded explicitly.
+
+## ABC
+
+* [ ] Add functions to contribute definitions from an ABC structure from the `swf` crate to the verifier
+  * [ ] Ignore duplicate definitions (common when including a SWC twice)
+
+## Control flow
+
+* [ ] Check control flow from AST
