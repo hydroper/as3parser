@@ -50,6 +50,9 @@ Enhancements:
 Non standard syntax:
 
 * `o!` — Non-nullish assertion
+* `x is not T`
+* `x not instanceof T`
+* `k not in o`
 * `embed "filePath"` — Anonymous embedded data (`: T` or type inference)
 * From the Royale Compiler
   * `IdentifierName` instead of `Identifier` for `VariableBinding` and `FunctionDefinition` names, excluding the case of arrow functions
