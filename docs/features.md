@@ -1,11 +1,8 @@
 # Features
 
-This ActionScript 3 parser adds several syntax constructs from TypeScript, ECMAScript 4 and Apache Royale Compiler. Notice that some of the descriptions in this document are not specific to this parser but to the verifier, which is not integrated with the parser.
+This ActionScript 3 parser introduces several syntax constructs from TypeScript, ECMA 4th edition and Apache Royale Compiler.
 
-The parser adds the following major enhancements to the language:
-
-* Destructuring
-* Arrow functions
+> **NOTICE:** Some of the features and language semantics in this document are not specific to this parser but to the verifier or compiler, which is not integrated with the parser.
 
 ## Global
 

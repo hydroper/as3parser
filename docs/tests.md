@@ -1,6 +1,6 @@
 # Tests
 
-The parser is not fully tested yet. You can contribute single tests by running the following in the repository's root directory:
+The parser is not fully tested. You can contribute single tests by running the following in the repository's root directory:
 
 ```sh
 # Generates two files:

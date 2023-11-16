@@ -13,11 +13,11 @@ Handwritten ActionScript 3 parser in the Rust language.
 
 ## Documentation
 
-* [Getting Started](docs/getting-started.md)
+* [Getting started](docs/getting-started.md)
 * [Diagnostics](docs/diagnostics.md)
 * [Standards](docs/standards.md)
 * [Features](docs/features.md)
-  * [Feature Syntax Summary](docs/feature-syntax-summary.md)
+  * [Feature syntax summary](docs/feature-syntax-summary.md)
 * [Tests](docs/tests.md)
 
 ## License
