@@ -4892,7 +4892,7 @@ pub mod parser_facade {
     pub use crate::util::default;
     use std::rc::Rc;
 
-    /// Parses `Program`.
+    /// Parses `Program` until end-of-file.
     pub fn parse_program(source: &Rc<Source>) -> Option<Rc<ast::Program>> {
         let mut parser = Parser::new(source);
         if parser.next().is_ok() {
@@ -4928,6 +4928,17 @@ pub mod parser_facade {
                 let _ = parser.expect_eof();
             }
             if source.invalidated() { None } else { exp }
+        } else {
+            None
+        }
+    }
+
+    /// Parses `Directives` until end-of-file.
+    pub fn parse_directives(source: &Rc<Source>, context: DirectiveContext) -> Option<Vec<Rc<ast::Directive>>> {
+        let mut parser = Parser::new(source);
+        if parser.next().is_ok() {
+            let directives = parser.parse_directives(context).ok();
+            if source.invalidated() { None } else { directives }
         } else {
             None
         }
