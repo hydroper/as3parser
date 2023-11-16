@@ -11,6 +11,7 @@ description = "ActionScript 3 verifier"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+as3_parser = { path = "../as3_parser", version = "0.1" }
 bitflags = { version = "2.4.1", features = ["serde"] }
 file_paths = "1.0.0"
 maplit = "1.0.2"
