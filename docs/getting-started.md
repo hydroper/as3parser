@@ -47,7 +47,7 @@ The parser attaches ASDoc tags to supported elements and splits tags beforehand,
 * A verifier derives semantic symbols and produces multiple errors from the verification phase. Not all meta data are trivial to implement:
   * `[Embed]`
 * In Rust you use the `std::rc::Rc` type to use reference counting, which is similiar to C++'s `std::shared_t<T>`. Most AST structures are behind a `Rc`, so that you can attach a symbol to it; for this, use the `ByAddress` type exported from the crates.io `by_address` crate (for example, `ByAddress<Rc<ast::Expression>>`) as a key in a [`HashMap`](https://doc.rust-lang.org/stable/std/collections/struct.HashMap.html).
-* A verifier that implements correct type inference may need to use the Hindley-Milner type system.
+* A verifier implements bidirectional type checking.
 
 # Building your own compiler
 
