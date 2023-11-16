@@ -27,7 +27,7 @@ The global package (also called top-level) is imported into a parent anonymous s
 
 ## Type inference
 
-The _typeInference_ compiler option adds type inference for specific contexts such that:
+The _typeInference_ compiler option turns on type inference for specific contexts such that:
 
 - constants from discriminant enums implicitly convert to discriminant enums,
 - variable bindings have the type of the assigned expression,
@@ -85,11 +85,9 @@ Nullability operators consider a value to be null when it is either `undefined` 
 * Optional chaining: `?.`, `?.(...)` and `?.[...]`
 * `??`, `??=`
 
-## Destructuring patterns
+## Destructuring
 
-Destructuring patterns are introduced to variable bindings. A pattern may have a postfix `!` for asserting that a base is non-null.
-
-Examples of destructuring patterns:
+Destructuring is introduced to variable bindings and other contexts. A pattern may have a postfix `!` for asserting that a base is non-null.
 
 ```as3
 const [x, y] = array; // array
