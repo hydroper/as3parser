@@ -3688,6 +3688,8 @@ impl<'input> Parser<'input> {
 
         self.next()?;
 
+        let modifiers = annotations.modifiers.clone();
+
         let name = self.expect_identifier(true)?;
 
         // `function get x`
@@ -3704,13 +3706,12 @@ impl<'input> Parser<'input> {
         }
 
         let is_constructor = if let DirectiveContext::ClassBlock { name: name2 } = &context {
-            &name.0 == name2
+            !modifiers.contains(ast::Modifiers::STATIC) && &name.0 == name2
         } else {
             false
         };
 
         let mut generics = self.parse_generics()?;
-        let modifiers = annotations.modifiers.clone();
 
         let body_context = if is_constructor {
             DirectiveContext::ConstructorBlock { super_statement_found: Cell::new(false) }
@@ -3751,8 +3752,8 @@ impl<'input> Parser<'input> {
             self.add_syntax_error(name.1.clone(), DiagnosticKind::InterfaceMethodHasAnnotations, diagnostic_arguments![]);
         }
 
-        // Allow `override` in type blocks only
-        if modifiers.contains(ast::Modifiers::OVERRIDE) && !context.is_type_block() {
+        // Allow `override` in type blocks and non constructors only
+        if modifiers.contains(ast::Modifiers::OVERRIDE) && (!context.is_type_block() || is_constructor) {
             self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("override".into())]);
         }
 
