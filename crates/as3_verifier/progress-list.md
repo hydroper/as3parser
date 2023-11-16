@@ -29,6 +29,8 @@ External libraries is typically code originating from an external SWC or ABC suc
 
 The verifier does not include any built-in libraries by default. External libraries such as `playerglobal.swc` have to be loaded explicitly.
 
+Global objects are resolved asynchronously and certain properties are required by the verifier occasionally.
+
 ## ABC
 
 * [ ] Add functions to contribute definitions from an ABC structure from the `swf` crate to the verifier
