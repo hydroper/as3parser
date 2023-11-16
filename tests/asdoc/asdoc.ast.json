@@ -5,67 +5,67 @@
     {
       "location": {},
       "kind": {
-        "Statement": {
-          "location": {},
-          "kind": {
-            "Expression": {
-              "asdoc": {
-                "main_body": "\nMain body",
-                "tags": [
-                  {
-                    "Copy": "reference"
-                  }
-                ]
+        "VariableDefinition": {
+          "asdoc": {
+            "main_body": "Main body",
+            "tags": [
+              {
+                "Copy": "reference"
               },
-              "expression": {
+              {
+                "ExampleText": "Example text"
+              }
+            ]
+          },
+          "annotations": {
+            "metadata": [
+              {
+                "asdoc": {
+                  "main_body": "Foo",
+                  "tags": []
+                },
+                "location": {},
+                "name": [
+                  "Foo",
+                  {}
+                ],
+                "entries": []
+              },
+              {
+                "asdoc": {
+                  "main_body": "Bar",
+                  "tags": []
+                },
+                "location": {},
+                "name": [
+                  "Bar",
+                  {}
+                ],
+                "entries": []
+              }
+            ],
+            "modifiers": "",
+            "access_modifier": null
+          },
+          "kind": "Var",
+          "bindings": [
+            {
+              "pattern": {
                 "location": {},
                 "kind": {
-                  "BracketsMember": {
-                    "base": {
-                      "location": {},
-                      "kind": {
-                        "ArrayInitializer": {
-                          "elements": [
-                            {
-                              "location": {},
-                              "kind": {
-                                "Id": {
-                                  "attribute": false,
-                                  "qualifier": null,
-                                  "name": {
-                                    "Id": [
-                                      "Foo",
-                                      {}
-                                    ]
-                                  }
-                                }
-                              }
-                            }
-                          ]
-                        }
-                      }
-                    },
-                    "asdoc": null,
-                    "key": {
-                      "location": {},
-                      "kind": {
-                        "Id": {
-                          "attribute": false,
-                          "qualifier": null,
-                          "name": {
-                            "Id": [
-                              "Bar",
-                              {}
-                            ]
-                          }
-                        }
-                      }
-                    }
+                  "Binding": {
+                    "name": [
+                      "x",
+                      {}
+                    ]
                   }
-                }
-              }
+                },
+                "non_null": false,
+                "type_annotation": null
+              },
+              "init": null
             }
-          }
+          ]
         }
       }
     }

@@ -1,5 +1,14 @@
 /**
+ * Foo
+ */
+[Foo]
+/**
+ * Bar
+ */
+[Bar]
+/**
  * Main body
  * @copy reference
+ * @exampleText Example text
  */
-[Foo][Bar]
+var x;
