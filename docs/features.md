@@ -96,7 +96,7 @@ const [x, y] = array; // array
 ({x, y} = p); // record
 ```
 
-## Improved variables
+## Enhanced variables
 
 Variables are block-scoped and can shadow others in the same scope, if the compiler option `variables` is `"next"`:
 
@@ -352,9 +352,9 @@ type F = (a: T, b?: T, ...c) => void;
 
 ## Vector
 
-Some improvements to the Vector type:
+Enhancements to the Vector type:
 
-- You can assign an array initializer directly to a `Vector.<T>` typed variable.
+- You can assign an array initializer directly to a `Vector.<T>` typed variable with type inference.
 
 ## String literal type
 
@@ -362,7 +362,7 @@ String literals are valid types, equivalent to `String`, but with additional typ
 
 ## ASDoc
 
-_ASDoc variant_: ASDoc comments can be configured to use an improved format that supports Markdown and facilitates writing comments. Set the compiler option `asdoc` to 2 (that is, ASDoc version 2) to use this facility:
+*ASDoc variant*: ASDoc comments can be configured to use an enhanced format that supports Markdown and facilitates writing comments. Set the compiler option `asdoc` to 2 (that is, ASDoc version 2) to use this facility:
 
 ```json
 {
@@ -474,5 +474,5 @@ never
 ## Migrations
 
 - Migrate code to ASDoc 2
-- Migrate code to nullability, by translating existing type expressions to include `null` explicitly
-- Migrate code to improved variables
+- Migrate code to nullability, by translating existing type expressions to include `null` explicitly and adding `!` assertion where necessary
+- Migrate code to enhanced variables
