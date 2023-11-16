@@ -80,6 +80,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "as3_verifier"
+version = "0.1.0"
+dependencies = [
+ "as3_parser",
+ "bitflags",
+ "file_paths",
+ "lazy-regex",
+ "lazy_static",
+ "maplit",
+]
+
+[[package]]
 name = "autocfg"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

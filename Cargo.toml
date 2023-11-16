@@ -1,5 +1,6 @@
 [workspace]
 members = [
     "crates/as3_parser",
+    "crates/as3_verifier",
 ]
 resolver = "2"
