@@ -1,7 +1,5 @@
 # ActionScript 3 parser
 
-> **NOTICE:** The parser is almost finishing (excluding tests). A verifier will be futurely implemented.
-
 An ActionScript 3 parser written in the Rust language.
 
 ## Requirements
@@ -24,6 +22,6 @@ assert!(matches!(tokenizer.scan_ie_div(), Ok((Token::Times, _))));
 assert!(matches!(tokenizer.scan_ie_div(), Ok((Token::Identifier(_n), _))));
 ```
 
-*Parsing*: not available yet.
+*Parsing*: [see the repository](https://github.com/hydroper/as3parser) for details on parsing.
 
 *Verification*: not available yet.
