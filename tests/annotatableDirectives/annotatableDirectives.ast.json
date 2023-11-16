@@ -49,7 +49,7 @@
       "kind": {
         "VariableDefinition": {
           "asdoc": {
-            "main_body": "\nY\n",
+            "main_body": "Y",
             "tags": []
           },
           "annotations": {
@@ -173,7 +173,30 @@
               "location": {},
               "kind": {
                 "FunctionDefinition": {
-                  "asdoc": null,
+                  "asdoc": {
+                    "main_body": "",
+                    "tags": [
+                      {
+                        "Throws": {
+                          "class_reference": {
+                            "location": {},
+                            "kind": {
+                              "Id": {
+                                "qualifier": null,
+                                "name": {
+                                  "Id": [
+                                    "TypeError",
+                                    {}
+                                  ]
+                                }
+                              }
+                            }
+                          },
+                          "description": "Thrown if yes"
+                        }
+                      }
+                    ]
+                  },
                   "annotations": {
                     "metadata": [],
                     "modifiers": "",
@@ -253,6 +276,84 @@
                       }
                     }
                   ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "location": {},
+      "kind": {
+        "VariableDefinition": {
+          "asdoc": {
+            "main_body": "x",
+            "tags": []
+          },
+          "annotations": {
+            "metadata": [
+              {
+                "asdoc": {
+                  "main_body": "M1",
+                  "tags": []
+                },
+                "location": {},
+                "name": [
+                  "M1",
+                  {}
+                ],
+                "entries": []
+              },
+              {
+                "asdoc": {
+                  "main_body": "M2",
+                  "tags": []
+                },
+                "location": {},
+                "name": [
+                  "M2",
+                  {}
+                ],
+                "entries": []
+              }
+            ],
+            "modifiers": "",
+            "access_modifier": null
+          },
+          "kind": "Var",
+          "bindings": [
+            {
+              "pattern": {
+                "location": {},
+                "kind": {
+                  "Binding": {
+                    "name": [
+                      "x",
+                      {}
+                    ]
+                  }
+                },
+                "non_null": false,
+                "type_annotation": {
+                  "location": {},
+                  "kind": {
+                    "Id": {
+                      "qualifier": null,
+                      "name": {
+                        "Id": [
+                          "Number",
+                          {}
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "init": {
+                "location": {},
+                "kind": {
+                  "Numeric": 10.0
                 }
               }
             }

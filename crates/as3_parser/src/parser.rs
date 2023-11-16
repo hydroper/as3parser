@@ -4564,13 +4564,13 @@ impl<'input> Parser<'input> {
 
                 // @example text
                 "example" => {
-                    let text = building_content.join("\n");
+                    let text = building_content.join("\n").trim().into();
                     tags.push(ast::AsDocTag::Example(text));
                 },
 
                 // @exampleText text
                 "exampleText" => {
-                    let text = building_content.join("\n");
+                    let text = building_content.join("\n").trim().into();
                     tags.push(ast::AsDocTag::ExampleText(text));
                 },
 
@@ -4588,7 +4588,7 @@ impl<'input> Parser<'input> {
 
                 // @internal text
                 "internal" => {
-                    let text = building_content.join("\n");
+                    let text = building_content.join("\n").trim().to_owned();
 
                     // Content must be non empty
                     if regex_is_match!(r"^\s*$", &text) {
@@ -4622,7 +4622,7 @@ impl<'input> Parser<'input> {
 
                 // @return text
                 "return" => {
-                    let text = building_content.join("\n");
+                    let text = building_content.join("\n").trim().into();
                     tags.push(ast::AsDocTag::Return(text));
                 },
 
@@ -4639,12 +4639,20 @@ impl<'input> Parser<'input> {
                 // @throws className description
                 "throws" => {
                     let class_name_and_description = building_content.join("\n").trim().to_owned();
-                    let class_name_and_description: Vec<String> = class_name_and_description.split(" ").map(|s| s.to_owned()).collect();
-                    let class_name = class_name_and_description[0].clone();
-                    let description = class_name_and_description.get(1).map(|d| d.clone());
-                    let source = Source::new(None, class_name, &self.tokenizer.source.compiler_options);
-                    if let Some(exp) = parser_facade::parse_type_expression(&source) {
-                        tags.push(ast::AsDocTag::Throws { class_reference: exp, description });
+                    let class_name_and_description = regex_captures!(r"^([^\s]+)(\s.*)?", &class_name_and_description);
+                    if let Some((_, class_name, description)) = class_name_and_description {
+                        let description = description.trim().to_owned();
+                        let description = if description.is_empty() {
+                            None
+                        } else {
+                            Some(description)
+                        };
+                        let source = Source::new(None, class_name.into(), &self.tokenizer.source.compiler_options);
+                        if let Some(exp) = parser_facade::parse_type_expression(&source) {
+                            tags.push(ast::AsDocTag::Throws { class_reference: exp, description });
+                        } else {
+                            self.add_syntax_error(comment_location.clone(), DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.clone())]);
+                        }
                     } else {
                         self.add_syntax_error(comment_location.clone(), DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.clone())]);
                     }
@@ -4656,7 +4664,7 @@ impl<'input> Parser<'input> {
                 },
             }
         } else {
-            *main_body = building_content.join("\n");
+            *main_body = building_content.join("\n").trim().into();
         }
 
         *building_content_tag_name = None;
