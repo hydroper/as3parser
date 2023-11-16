@@ -4888,8 +4888,8 @@ struct AnnotatableContext {
 
 /// Parser facade.
 pub mod parser_facade {
-    pub use crate::*;
-    pub use crate::util::default;
+    use crate::*;
+    use crate::util::default;
     use std::rc::Rc;
 
     /// Parses `Program` until end-of-file.
