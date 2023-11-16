@@ -61,6 +61,7 @@ pub fn reserved_word_token(name: &str) -> Option<Token> {
                 "delete" => Some(Token::Delete),
                 "import" => Some(Token::Import),
                 "public" => Some(Token::Public),
+                "return" => Some(Token::Return),
                 "switch" => Some(Token::Switch),
                 "typeof" => Some(Token::Typeof),
                 _ => None,

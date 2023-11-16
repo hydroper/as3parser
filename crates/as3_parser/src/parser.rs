@@ -52,9 +52,11 @@ impl<'input> Parser<'input> {
         self.source().add_diagnostic(Diagnostic::new_syntax_error(location, kind, arguments));
     }
 
+    /*
     fn add_warning(&self, location: Location, kind: DiagnosticKind, arguments: Vec<DiagnosticArgument>) {
         self.source().add_diagnostic(Diagnostic::new_warning(location, kind, arguments));
     }
+    */
 
     fn next(&mut self) -> Result<(), ParserFailure> {
         self.previous_token = self.token.clone();
@@ -4369,6 +4371,8 @@ impl<'input> Parser<'input> {
                 if !self.peek(Token::Dot) {
                     import_item = (ast::ImportItem::Name(id1.0, id1.1.clone()), id1.1.clone());
                     break;
+                } else {
+                    package_name.push(id1.clone());
                 }
             }
         }

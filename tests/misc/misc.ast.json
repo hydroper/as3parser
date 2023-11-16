@@ -1,0 +1,1217 @@
+{
+  "location": {},
+  "packages": [
+    {
+      "asdoc": null,
+      "location": {},
+      "id": [],
+      "block": [
+        {
+          "location": {},
+          "kind": {
+            "Import": {
+              "alias": null,
+              "package_name": [
+                [
+                  "flash",
+                  {}
+                ],
+                [
+                  "display",
+                  {}
+                ]
+              ],
+              "import_item": [
+                {
+                  "Name": [
+                    "Sprite",
+                    {}
+                  ]
+                },
+                {}
+              ]
+            }
+          }
+        },
+        {
+          "location": {},
+          "kind": {
+            "Import": {
+              "alias": null,
+              "package_name": [
+                [
+                  "flash",
+                  {}
+                ],
+                [
+                  "text",
+                  {}
+                ]
+              ],
+              "import_item": [
+                {
+                  "Name": [
+                    "TextField",
+                    {}
+                  ]
+                },
+                {}
+              ]
+            }
+          }
+        },
+        {
+          "location": {},
+          "kind": {
+            "Import": {
+              "alias": null,
+              "package_name": [
+                [
+                  "flash",
+                  {}
+                ],
+                [
+                  "text",
+                  {}
+                ]
+              ],
+              "import_item": [
+                {
+                  "Name": [
+                    "TextFieldType",
+                    {}
+                  ]
+                },
+                {}
+              ]
+            }
+          }
+        },
+        {
+          "location": {},
+          "kind": {
+            "ClassDefinition": {
+              "asdoc": null,
+              "annotations": {
+                "metadata": [],
+                "modifiers": "",
+                "access_modifier": {
+                  "location": {},
+                  "kind": {
+                    "ReservedNamespace": "Public"
+                  }
+                }
+              },
+              "name": [
+                "TextField_alwaysShowSelection",
+                {}
+              ],
+              "generics": {
+                "params": null,
+                "where_clause": null
+              },
+              "extends_clause": {
+                "location": {},
+                "kind": {
+                  "Id": {
+                    "qualifier": null,
+                    "name": {
+                      "Id": [
+                        "Sprite",
+                        {}
+                      ]
+                    }
+                  }
+                }
+              },
+              "implements_clause": null,
+              "block": [
+                {
+                  "location": {},
+                  "kind": {
+                    "ConstructorDefinition": {
+                      "asdoc": null,
+                      "annotations": {
+                        "metadata": [],
+                        "modifiers": "",
+                        "access_modifier": {
+                          "location": {},
+                          "kind": {
+                            "ReservedNamespace": "Public"
+                          }
+                        }
+                      },
+                      "name": [
+                        "TextField_alwaysShowSelection",
+                        {}
+                      ],
+                      "common": {
+                        "flags": "",
+                        "params": [],
+                        "return_annotation": null,
+                        "body": {
+                          "Block": [
+                            {
+                              "location": {},
+                              "kind": {
+                                "VariableDefinition": {
+                                  "asdoc": null,
+                                  "annotations": {
+                                    "metadata": [],
+                                    "modifiers": "",
+                                    "access_modifier": null
+                                  },
+                                  "kind": "Var",
+                                  "bindings": [
+                                    {
+                                      "pattern": {
+                                        "location": {},
+                                        "kind": {
+                                          "Binding": {
+                                            "name": [
+                                              "label1",
+                                              {}
+                                            ]
+                                          }
+                                        },
+                                        "non_null": false,
+                                        "type_annotation": {
+                                          "location": {},
+                                          "kind": {
+                                            "Id": {
+                                              "qualifier": null,
+                                              "name": {
+                                                "Id": [
+                                                  "TextField",
+                                                  {}
+                                                ]
+                                              }
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "init": {
+                                        "location": {},
+                                        "kind": {
+                                          "Call": {
+                                            "base": {
+                                              "location": {},
+                                              "kind": {
+                                                "Id": {
+                                                  "attribute": false,
+                                                  "qualifier": null,
+                                                  "name": {
+                                                    "Id": [
+                                                      "createCustomTextField",
+                                                      {}
+                                                    ]
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "arguments": [
+                                              {
+                                                "location": {},
+                                                "kind": {
+                                                  "Numeric": 0.0
+                                                }
+                                              },
+                                              {
+                                                "location": {},
+                                                "kind": {
+                                                  "Numeric": 20.0
+                                                }
+                                              },
+                                              {
+                                                "location": {},
+                                                "kind": {
+                                                  "Numeric": 200.0
+                                                }
+                                              },
+                                              {
+                                                "location": {},
+                                                "kind": {
+                                                  "Numeric": 20.0
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            },
+                            {
+                              "location": {},
+                              "kind": {
+                                "Statement": {
+                                  "location": {},
+                                  "kind": {
+                                    "Expression": {
+                                      "asdoc": null,
+                                      "expression": {
+                                        "location": {},
+                                        "kind": {
+                                          "Assignment": {
+                                            "left": {
+                                              "Expression": {
+                                                "location": {},
+                                                "kind": {
+                                                  "DotMember": {
+                                                    "base": {
+                                                      "location": {},
+                                                      "kind": {
+                                                        "Id": {
+                                                          "attribute": false,
+                                                          "qualifier": null,
+                                                          "name": {
+                                                            "Id": [
+                                                              "label1",
+                                                              {}
+                                                            ]
+                                                          }
+                                                        }
+                                                      }
+                                                    },
+                                                    "id": {
+                                                      "attribute": false,
+                                                      "qualifier": null,
+                                                      "name": {
+                                                        "Id": [
+                                                          "text",
+                                                          {}
+                                                        ]
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "compound": null,
+                                            "right": {
+                                              "location": {},
+                                              "kind": {
+                                                "String": "This text is selected."
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "location": {},
+                              "kind": {
+                                "Statement": {
+                                  "location": {},
+                                  "kind": {
+                                    "Expression": {
+                                      "asdoc": null,
+                                      "expression": {
+                                        "location": {},
+                                        "kind": {
+                                          "Call": {
+                                            "base": {
+                                              "location": {},
+                                              "kind": {
+                                                "DotMember": {
+                                                  "base": {
+                                                    "location": {},
+                                                    "kind": {
+                                                      "Id": {
+                                                        "attribute": false,
+                                                        "qualifier": null,
+                                                        "name": {
+                                                          "Id": [
+                                                            "label1",
+                                                            {}
+                                                          ]
+                                                        }
+                                                      }
+                                                    }
+                                                  },
+                                                  "id": {
+                                                    "attribute": false,
+                                                    "qualifier": null,
+                                                    "name": {
+                                                      "Id": [
+                                                        "setSelection",
+                                                        {}
+                                                      ]
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "arguments": [
+                                              {
+                                                "location": {},
+                                                "kind": {
+                                                  "Numeric": 0.0
+                                                }
+                                              },
+                                              {
+                                                "location": {},
+                                                "kind": {
+                                                  "Numeric": 9.0
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "location": {},
+                              "kind": {
+                                "Statement": {
+                                  "location": {},
+                                  "kind": {
+                                    "Expression": {
+                                      "asdoc": null,
+                                      "expression": {
+                                        "location": {},
+                                        "kind": {
+                                          "Assignment": {
+                                            "left": {
+                                              "Expression": {
+                                                "location": {},
+                                                "kind": {
+                                                  "DotMember": {
+                                                    "base": {
+                                                      "location": {},
+                                                      "kind": {
+                                                        "Id": {
+                                                          "attribute": false,
+                                                          "qualifier": null,
+                                                          "name": {
+                                                            "Id": [
+                                                              "label1",
+                                                              {}
+                                                            ]
+                                                          }
+                                                        }
+                                                      }
+                                                    },
+                                                    "id": {
+                                                      "attribute": false,
+                                                      "qualifier": null,
+                                                      "name": {
+                                                        "Id": [
+                                                          "alwaysShowSelection",
+                                                          {}
+                                                        ]
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "compound": null,
+                                            "right": {
+                                              "location": {},
+                                              "kind": {
+                                                "Boolean": true
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "location": {},
+                              "kind": {
+                                "VariableDefinition": {
+                                  "asdoc": null,
+                                  "annotations": {
+                                    "metadata": [],
+                                    "modifiers": "",
+                                    "access_modifier": null
+                                  },
+                                  "kind": "Var",
+                                  "bindings": [
+                                    {
+                                      "pattern": {
+                                        "location": {},
+                                        "kind": {
+                                          "Binding": {
+                                            "name": [
+                                              "label2",
+                                              {}
+                                            ]
+                                          }
+                                        },
+                                        "non_null": false,
+                                        "type_annotation": {
+                                          "location": {},
+                                          "kind": {
+                                            "Id": {
+                                              "qualifier": null,
+                                              "name": {
+                                                "Id": [
+                                                  "TextField",
+                                                  {}
+                                                ]
+                                              }
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "init": {
+                                        "location": {},
+                                        "kind": {
+                                          "Call": {
+                                            "base": {
+                                              "location": {},
+                                              "kind": {
+                                                "Id": {
+                                                  "attribute": false,
+                                                  "qualifier": null,
+                                                  "name": {
+                                                    "Id": [
+                                                      "createCustomTextField",
+                                                      {}
+                                                    ]
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "arguments": [
+                                              {
+                                                "location": {},
+                                                "kind": {
+                                                  "Numeric": 0.0
+                                                }
+                                              },
+                                              {
+                                                "location": {},
+                                                "kind": {
+                                                  "Numeric": 50.0
+                                                }
+                                              },
+                                              {
+                                                "location": {},
+                                                "kind": {
+                                                  "Numeric": 200.0
+                                                }
+                                              },
+                                              {
+                                                "location": {},
+                                                "kind": {
+                                                  "Numeric": 20.0
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            },
+                            {
+                              "location": {},
+                              "kind": {
+                                "Statement": {
+                                  "location": {},
+                                  "kind": {
+                                    "Expression": {
+                                      "asdoc": null,
+                                      "expression": {
+                                        "location": {},
+                                        "kind": {
+                                          "Assignment": {
+                                            "left": {
+                                              "Expression": {
+                                                "location": {},
+                                                "kind": {
+                                                  "DotMember": {
+                                                    "base": {
+                                                      "location": {},
+                                                      "kind": {
+                                                        "Id": {
+                                                          "attribute": false,
+                                                          "qualifier": null,
+                                                          "name": {
+                                                            "Id": [
+                                                              "label2",
+                                                              {}
+                                                            ]
+                                                          }
+                                                        }
+                                                      }
+                                                    },
+                                                    "id": {
+                                                      "attribute": false,
+                                                      "qualifier": null,
+                                                      "name": {
+                                                        "Id": [
+                                                          "text",
+                                                          {}
+                                                        ]
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "compound": null,
+                                            "right": {
+                                              "location": {},
+                                              "kind": {
+                                                "String": "Drag to select some of this text."
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "location": {},
+                  "kind": {
+                    "FunctionDefinition": {
+                      "asdoc": null,
+                      "annotations": {
+                        "metadata": [],
+                        "modifiers": "",
+                        "access_modifier": {
+                          "location": {},
+                          "kind": {
+                            "Id": {
+                              "attribute": false,
+                              "qualifier": null,
+                              "name": {
+                                "Id": [
+                                  "private",
+                                  {}
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "name": [
+                        "createCustomTextField",
+                        {}
+                      ],
+                      "generics": {
+                        "params": null,
+                        "where_clause": null
+                      },
+                      "common": {
+                        "flags": "",
+                        "params": [
+                          {
+                            "location": {},
+                            "kind": "Required",
+                            "binding": {
+                              "pattern": {
+                                "location": {},
+                                "kind": {
+                                  "Binding": {
+                                    "name": [
+                                      "x",
+                                      {}
+                                    ]
+                                  }
+                                },
+                                "non_null": false,
+                                "type_annotation": {
+                                  "location": {},
+                                  "kind": {
+                                    "Id": {
+                                      "qualifier": null,
+                                      "name": {
+                                        "Id": [
+                                          "Number",
+                                          {}
+                                        ]
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "init": null
+                            }
+                          },
+                          {
+                            "location": {},
+                            "kind": "Required",
+                            "binding": {
+                              "pattern": {
+                                "location": {},
+                                "kind": {
+                                  "Binding": {
+                                    "name": [
+                                      "y",
+                                      {}
+                                    ]
+                                  }
+                                },
+                                "non_null": false,
+                                "type_annotation": {
+                                  "location": {},
+                                  "kind": {
+                                    "Id": {
+                                      "qualifier": null,
+                                      "name": {
+                                        "Id": [
+                                          "Number",
+                                          {}
+                                        ]
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "init": null
+                            }
+                          },
+                          {
+                            "location": {},
+                            "kind": "Required",
+                            "binding": {
+                              "pattern": {
+                                "location": {},
+                                "kind": {
+                                  "Binding": {
+                                    "name": [
+                                      "width",
+                                      {}
+                                    ]
+                                  }
+                                },
+                                "non_null": false,
+                                "type_annotation": {
+                                  "location": {},
+                                  "kind": {
+                                    "Id": {
+                                      "qualifier": null,
+                                      "name": {
+                                        "Id": [
+                                          "Number",
+                                          {}
+                                        ]
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "init": null
+                            }
+                          },
+                          {
+                            "location": {},
+                            "kind": "Required",
+                            "binding": {
+                              "pattern": {
+                                "location": {},
+                                "kind": {
+                                  "Binding": {
+                                    "name": [
+                                      "height",
+                                      {}
+                                    ]
+                                  }
+                                },
+                                "non_null": false,
+                                "type_annotation": {
+                                  "location": {},
+                                  "kind": {
+                                    "Id": {
+                                      "qualifier": null,
+                                      "name": {
+                                        "Id": [
+                                          "Number",
+                                          {}
+                                        ]
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "init": null
+                            }
+                          }
+                        ],
+                        "return_annotation": {
+                          "location": {},
+                          "kind": {
+                            "Id": {
+                              "qualifier": null,
+                              "name": {
+                                "Id": [
+                                  "TextField",
+                                  {}
+                                ]
+                              }
+                            }
+                          }
+                        },
+                        "body": {
+                          "Block": [
+                            {
+                              "location": {},
+                              "kind": {
+                                "VariableDefinition": {
+                                  "asdoc": null,
+                                  "annotations": {
+                                    "metadata": [],
+                                    "modifiers": "",
+                                    "access_modifier": null
+                                  },
+                                  "kind": "Var",
+                                  "bindings": [
+                                    {
+                                      "pattern": {
+                                        "location": {},
+                                        "kind": {
+                                          "Binding": {
+                                            "name": [
+                                              "result",
+                                              {}
+                                            ]
+                                          }
+                                        },
+                                        "non_null": false,
+                                        "type_annotation": {
+                                          "location": {},
+                                          "kind": {
+                                            "Id": {
+                                              "qualifier": null,
+                                              "name": {
+                                                "Id": [
+                                                  "TextField",
+                                                  {}
+                                                ]
+                                              }
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "init": {
+                                        "location": {},
+                                        "kind": {
+                                          "New": {
+                                            "base": {
+                                              "location": {},
+                                              "kind": {
+                                                "Id": {
+                                                  "attribute": false,
+                                                  "qualifier": null,
+                                                  "name": {
+                                                    "Id": [
+                                                      "TextField",
+                                                      {}
+                                                    ]
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "arguments": []
+                                          }
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            },
+                            {
+                              "location": {},
+                              "kind": {
+                                "Statement": {
+                                  "location": {},
+                                  "kind": {
+                                    "Expression": {
+                                      "asdoc": null,
+                                      "expression": {
+                                        "location": {},
+                                        "kind": {
+                                          "Assignment": {
+                                            "left": {
+                                              "Expression": {
+                                                "location": {},
+                                                "kind": {
+                                                  "DotMember": {
+                                                    "base": {
+                                                      "location": {},
+                                                      "kind": {
+                                                        "Id": {
+                                                          "attribute": false,
+                                                          "qualifier": null,
+                                                          "name": {
+                                                            "Id": [
+                                                              "result",
+                                                              {}
+                                                            ]
+                                                          }
+                                                        }
+                                                      }
+                                                    },
+                                                    "id": {
+                                                      "attribute": false,
+                                                      "qualifier": null,
+                                                      "name": {
+                                                        "Id": [
+                                                          "x",
+                                                          {}
+                                                        ]
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "compound": null,
+                                            "right": {
+                                              "location": {},
+                                              "kind": {
+                                                "Id": {
+                                                  "attribute": false,
+                                                  "qualifier": null,
+                                                  "name": {
+                                                    "Id": [
+                                                      "x",
+                                                      {}
+                                                    ]
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "location": {},
+                              "kind": {
+                                "Statement": {
+                                  "location": {},
+                                  "kind": {
+                                    "Expression": {
+                                      "asdoc": null,
+                                      "expression": {
+                                        "location": {},
+                                        "kind": {
+                                          "Assignment": {
+                                            "left": {
+                                              "Expression": {
+                                                "location": {},
+                                                "kind": {
+                                                  "DotMember": {
+                                                    "base": {
+                                                      "location": {},
+                                                      "kind": {
+                                                        "Id": {
+                                                          "attribute": false,
+                                                          "qualifier": null,
+                                                          "name": {
+                                                            "Id": [
+                                                              "result",
+                                                              {}
+                                                            ]
+                                                          }
+                                                        }
+                                                      }
+                                                    },
+                                                    "id": {
+                                                      "attribute": false,
+                                                      "qualifier": null,
+                                                      "name": {
+                                                        "Id": [
+                                                          "y",
+                                                          {}
+                                                        ]
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "compound": null,
+                                            "right": {
+                                              "location": {},
+                                              "kind": {
+                                                "Id": {
+                                                  "attribute": false,
+                                                  "qualifier": null,
+                                                  "name": {
+                                                    "Id": [
+                                                      "y",
+                                                      {}
+                                                    ]
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "location": {},
+                              "kind": {
+                                "Statement": {
+                                  "location": {},
+                                  "kind": {
+                                    "Expression": {
+                                      "asdoc": null,
+                                      "expression": {
+                                        "location": {},
+                                        "kind": {
+                                          "Assignment": {
+                                            "left": {
+                                              "Expression": {
+                                                "location": {},
+                                                "kind": {
+                                                  "DotMember": {
+                                                    "base": {
+                                                      "location": {},
+                                                      "kind": {
+                                                        "Id": {
+                                                          "attribute": false,
+                                                          "qualifier": null,
+                                                          "name": {
+                                                            "Id": [
+                                                              "result",
+                                                              {}
+                                                            ]
+                                                          }
+                                                        }
+                                                      }
+                                                    },
+                                                    "id": {
+                                                      "attribute": false,
+                                                      "qualifier": null,
+                                                      "name": {
+                                                        "Id": [
+                                                          "width",
+                                                          {}
+                                                        ]
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "compound": null,
+                                            "right": {
+                                              "location": {},
+                                              "kind": {
+                                                "Id": {
+                                                  "attribute": false,
+                                                  "qualifier": null,
+                                                  "name": {
+                                                    "Id": [
+                                                      "width",
+                                                      {}
+                                                    ]
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "location": {},
+                              "kind": {
+                                "Statement": {
+                                  "location": {},
+                                  "kind": {
+                                    "Expression": {
+                                      "asdoc": null,
+                                      "expression": {
+                                        "location": {},
+                                        "kind": {
+                                          "Assignment": {
+                                            "left": {
+                                              "Expression": {
+                                                "location": {},
+                                                "kind": {
+                                                  "DotMember": {
+                                                    "base": {
+                                                      "location": {},
+                                                      "kind": {
+                                                        "Id": {
+                                                          "attribute": false,
+                                                          "qualifier": null,
+                                                          "name": {
+                                                            "Id": [
+                                                              "result",
+                                                              {}
+                                                            ]
+                                                          }
+                                                        }
+                                                      }
+                                                    },
+                                                    "id": {
+                                                      "attribute": false,
+                                                      "qualifier": null,
+                                                      "name": {
+                                                        "Id": [
+                                                          "height",
+                                                          {}
+                                                        ]
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "compound": null,
+                                            "right": {
+                                              "location": {},
+                                              "kind": {
+                                                "Id": {
+                                                  "attribute": false,
+                                                  "qualifier": null,
+                                                  "name": {
+                                                    "Id": [
+                                                      "height",
+                                                      {}
+                                                    ]
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "location": {},
+                              "kind": {
+                                "Statement": {
+                                  "location": {},
+                                  "kind": {
+                                    "Expression": {
+                                      "asdoc": null,
+                                      "expression": {
+                                        "location": {},
+                                        "kind": {
+                                          "Call": {
+                                            "base": {
+                                              "location": {},
+                                              "kind": {
+                                                "Id": {
+                                                  "attribute": false,
+                                                  "qualifier": null,
+                                                  "name": {
+                                                    "Id": [
+                                                      "addChild",
+                                                      {}
+                                                    ]
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "arguments": [
+                                              {
+                                                "location": {},
+                                                "kind": {
+                                                  "Id": {
+                                                    "attribute": false,
+                                                    "qualifier": null,
+                                                    "name": {
+                                                      "Id": [
+                                                        "result",
+                                                        {}
+                                                      ]
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "location": {},
+                              "kind": {
+                                "Statement": {
+                                  "location": {},
+                                  "kind": {
+                                    "Return": {
+                                      "expression": {
+                                        "location": {},
+                                        "kind": {
+                                          "Id": {
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "name": {
+                                              "Id": [
+                                                "result",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "directives": []
+}
