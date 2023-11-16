@@ -1,0 +1,18 @@
+[package]
+name = "as3_verifier"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+authors = ["hydroper <matheusdiasdesouzads@gmail.com>"]
+repository = "https://github.com/hydroper/as3_parser"
+keywords = ["actionscript", "verifier"]
+description = "ActionScript 3 verifier"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bitflags = { version = "2.4.1", features = ["serde"] }
+file_paths = "1.0.0"
+maplit = "1.0.2"
+lazy-regex = "3.0.2"
+lazy_static = "1.4.0"
