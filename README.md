@@ -15,6 +15,7 @@ Handwritten ActionScript 3 parser in the Rust language.
 
 * [Getting started](docs/getting-started.md)
 * [Diagnostics](docs/diagnostics.md)
+* [Embedded ActionScript](docs/embedded-actionscript.md)
 * [Standards](docs/standards.md)
 * [Features](docs/features.md)
   * [Feature syntax summary](docs/feature-syntax-summary.md)

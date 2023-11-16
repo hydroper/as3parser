@@ -42,13 +42,13 @@ The parser attaches ASDoc tags to supported elements and splits tags beforehand,
 * Meta data can contain an ASDoc comment
 * Annotatable directives can contain an ASDoc comment
 
-# Building your own verifier
+## Building your own verifier
 
 * A verifier derives semantic symbols and produces multiple errors from the verification phase. Not all meta data are trivial to implement:
   * `[Embed]`
 * In Rust you use the `std::rc::Rc` type to use reference counting, which is similiar to C++'s `std::shared_t<T>`. Most AST structures are behind a `Rc`, so that you can attach a symbol to it; for this, use the `ByAddress` type exported from the crates.io `by_address` crate (for example, `ByAddress<Rc<ast::Expression>>`) as a key in a [`HashMap`](https://doc.rust-lang.org/stable/std/collections/struct.HashMap.html).
 * A verifier implements bidirectional type checking.
 
-# Building your own compiler
+## Building your own compiler
 
 * Reading and writing SWFs: the Ruffle player contains a [`swf` package](https://github.com/ruffle-rs/ruffle/tree/master/swf) that reads and writes SWF from/into structures.
