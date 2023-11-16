@@ -180,15 +180,17 @@ public function for(): void {
 
 ## Object initializer
 
-_Shorthand_: Shorthand fields equivalent to ECMAScript shorthand fields are added.
+_Key_: Field's key in object initializers is allowed to be a bracketed expression.
 
-_Rest_: Rest components equivalent to ECMAScript rest components are added, taking a compatible iterable value.
+_Shorthand_: Shorthand fields equivalent to ECMAScript shorthand fields are introduced.
+
+_Rest_: Rest components equivalent to ECMAScript rest components are introduced, taking a compatible iterable value.
 
 _Trailling comma_: The object initializer is allowed to contain a trailling comma.
 
 ## Array initializer
 
-_Rest_: Rest components equivalent to ECMAScript rest components are added, taking a compatible iterable value.
+_Rest_: Rest components equivalent to ECMAScript rest components are introduced, taking a compatible iterable value.
 
 ## Asynchronous and generators
 
@@ -464,11 +466,15 @@ A source may consist of multiple definitions in multiple packages.
 
 ## Miscellaneous
 
-*Added type expressions*:
+*Introduced type expressions*:
 
 ```as3
 undefined
 never
+null
+StringLiteral
+NumericLiteral
+(parenthesized)
 ```
 
 ## Migrations
