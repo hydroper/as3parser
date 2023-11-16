@@ -376,9 +376,9 @@ _Format migration_: Sources using ASDoc 1 format can be migrated to sources usin
 
 _Places_: ASDoc comments can be applied to additional places, such as to type aliases and record fields.
 
-## Meta-data
+## Meta data
 
-Meta-data are the same as of the Adobe ActionScript compiler and include syntax such as:
+Meta data are the same as of the Adobe ActionScript compiler and include syntax such as:
 
 * keyless entries, either in the form `s` or `"s"`, such as in `[D(s)]` and `[D("s")]`;
 * qualified names, in the form `q::x`, such as in `[q::x]`.
@@ -388,6 +388,7 @@ The compiler will eventually handle all of ActionScript meta-data and document t
 - `SWF`
 - `Embed`
 - `Event`
+- `Exclude`
 - Some introduced by Apache Royale, such as `Bindable`
 
 ## Type relationship expressions
