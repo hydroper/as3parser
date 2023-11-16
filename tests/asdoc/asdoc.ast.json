@@ -68,6 +68,84 @@
           ]
         }
       }
+    },
+    {
+      "location": {},
+      "kind": {
+        "FunctionDefinition": {
+          "asdoc": {
+            "main_body": "",
+            "tags": [
+              {
+                "ExampleText": "```\nf();\n```"
+              }
+            ]
+          },
+          "annotations": {
+            "metadata": [],
+            "modifiers": "",
+            "access_modifier": null
+          },
+          "name": [
+            "f",
+            {}
+          ],
+          "generics": {
+            "params": null,
+            "where_clause": null
+          },
+          "common": {
+            "flags": "",
+            "params": [],
+            "return_annotation": {
+              "location": {},
+              "kind": "Void"
+            },
+            "body": {
+              "Block": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "location": {},
+      "kind": {
+        "FunctionDefinition": {
+          "asdoc": {
+            "main_body": "",
+            "tags": [
+              {
+                "ExampleText": "<listing version=\"3.0\">\n    f2();\n</listing>"
+              }
+            ]
+          },
+          "annotations": {
+            "metadata": [],
+            "modifiers": "",
+            "access_modifier": null
+          },
+          "name": [
+            "f2",
+            {}
+          ],
+          "generics": {
+            "params": null,
+            "where_clause": null
+          },
+          "common": {
+            "flags": "",
+            "params": [],
+            "return_annotation": {
+              "location": {},
+              "kind": "Void"
+            },
+            "body": {
+              "Block": []
+            }
+          }
+        }
+      }
     }
   ]
 }
