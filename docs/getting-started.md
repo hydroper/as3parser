@@ -36,11 +36,12 @@ let json = serde_json::to_string_pretty(&node).unwrap();
 
 ## ASDoc
 
-The parser attaches ASDoc tags to supported elements and splits tags beforehand, maintaining indentation of code blocks in an adequate way.
+The parser attaches ASDoc comments to supported elements and recognizes tags beforehand, maintaining indentation of code blocks.
 
 * Fields from record type expressions can contain an ASDoc comment
 * Meta data can contain an ASDoc comment
 * Annotatable directives can contain an ASDoc comment
+* Package definitions can contain an ASDoc comment
 
 ## Building your own verifier
 
