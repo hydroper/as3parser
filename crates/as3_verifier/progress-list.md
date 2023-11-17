@@ -43,3 +43,13 @@ Global objects are resolved asynchronously and certain properties are required b
 ## Type conversions
 
 * [ ] `C(v)` is a type conversion for most classes, except `Array` and `Vector.<T>`.
+
+## Generics
+
+* `Vector`
+  * ????? Any of the items in this list may be wrong, as ABC may represent the `Vector` variations differently
+  * [ ] `Vector` translates to `__AS3__.vec.Vector` (or not?)
+  * [ ] `Vector.<Object>` translates to `__AS3__.vec.Vector$Object`
+  * [ ] `Vector.<uint>` translates to `__AS3__.vec.Vector$uint`
+  * [ ] `Vector.<int>` translates to `__AS3__.vec.Vector$int`
+  * [ ] `Vector.<Number>` translates to `__AS3__.vec.Vector$double`
