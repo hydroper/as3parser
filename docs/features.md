@@ -91,6 +91,8 @@ const [x, y] = array; // array
 ({x, y} = p); // record
 ```
 
+Array destructuring can be used to destructure `Array`, `Vector` and tuples.
+
 ## Enhanced variables
 
 Variables are block-scoped and can shadow others in the same scope, if the compiler option `variables` is `"next"`:
