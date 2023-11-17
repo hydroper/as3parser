@@ -45,10 +45,13 @@ The parser attaches ASDoc comments to supported elements and recognizes tags bef
 
 ## Building your own verifier
 
+> **NOTICE**: A verifier might be futurely developed as part of this repository.
+
 * A verifier derives semantic symbols and produces multiple errors from the verification phase. Not all meta data are trivial to implement:
   * `[Embed]`
 * In Rust you use the `std::rc::Rc` type to use reference counting, which is similiar to C++'s `std::shared_t<T>`. Most AST structures are behind a `Rc`, so that you can attach a symbol to it; for this, use the `ByAddress` type exported from the crates.io `by_address` crate (for example, `ByAddress<Rc<ast::Expression>>`) as a key in a [`HashMap`](https://doc.rust-lang.org/stable/std/collections/struct.HashMap.html).
 * A verifier implements bidirectional type checking.
+* A verifier implements control flow checking.
 
 ## Building your own compiler
 
