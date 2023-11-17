@@ -29,9 +29,20 @@ let invalidated = source.invalidated();
 
 ## Adding diagnostics
 
-Adding a diagnostic to a `Source` object is a simple call:
+Adding a diagnostic to a `Source` object is a simple call, where `K` is the diagnostic kind:
 
 ```as3
 // Syntax error
-source.add_diagnostic(Diagnostic::new_syntax_error(&location, ));
+source.add_diagnostic(Diagnostic::new_syntax_error(&location, DiagnosticKind::K, diagnostic_arguments![]));
+
+// Verify error
+source.add_diagnostic(Diagnostic::new_verify_error(&location, DiagnosticKind::K, diagnostic_arguments![]));
+
+// Warning
+source.add_diagnostic(Diagnostic::new_warning(&location, DiagnosticKind::K, diagnostic_arguments![]));
 ```
+
+The `diagnostic_arguments![]` literal takes elements in one of the forms:
+
+* `Token(token)`
+* `String(string)`
