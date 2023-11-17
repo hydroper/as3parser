@@ -31,7 +31,7 @@ let invalidated = source.invalidated();
 
 Adding a diagnostic to a `Source` object is a simple call, where `K` is the diagnostic kind:
 
-```as3
+```rust
 // Syntax error
 source.add_diagnostic(Diagnostic::new_syntax_error(&location, DiagnosticKind::K, diagnostic_arguments![]));
 
