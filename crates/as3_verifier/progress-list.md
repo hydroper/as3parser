@@ -10,8 +10,8 @@
 >
 > Using the ECMAScript edition 3 prototype-based object model lets you use
 > untyped properties and functions in your application code. As a result, if you
-> set the value of the es compiler option to true, you must set the strict
-> compiler option to false. Otherwise, the compiler will throw errors
+> set the value of the `es` compiler option to true, you must set the strict
+> compiler option to false. Otherwise, the compiler will throw errors.
 
 > From Adobe Flex documentation (`-strict`):
 >
