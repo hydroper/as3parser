@@ -1,0 +1,171 @@
+{
+  "location": {},
+  "packages": [],
+  "directives": [
+    {
+      "location": {},
+      "kind": {
+        "Statement": {
+          "location": {},
+          "kind": {
+            "Expression": {
+              "asdoc": null,
+              "expression": {
+                "location": {},
+                "kind": {
+                  "OptionalChaining": {
+                    "base": {
+                      "location": {},
+                      "kind": {
+                        "Id": {
+                          "attribute": false,
+                          "qualifier": null,
+                          "name": {
+                            "Id": [
+                              "o",
+                              {}
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "operations": {
+                      "location": {},
+                      "kind": {
+                        "DotMember": {
+                          "base": {
+                            "location": {},
+                            "kind": "OptionalChainingHost"
+                          },
+                          "id": {
+                            "attribute": false,
+                            "qualifier": null,
+                            "name": {
+                              "Id": [
+                                "x",
+                                {}
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "location": {},
+      "kind": {
+        "Statement": {
+          "location": {},
+          "kind": {
+            "Expression": {
+              "asdoc": null,
+              "expression": {
+                "location": {},
+                "kind": {
+                  "OptionalChaining": {
+                    "base": {
+                      "location": {},
+                      "kind": {
+                        "Id": {
+                          "attribute": false,
+                          "qualifier": null,
+                          "name": {
+                            "Id": [
+                              "o",
+                              {}
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "operations": {
+                      "location": {},
+                      "kind": {
+                        "BracketsMember": {
+                          "base": {
+                            "location": {},
+                            "kind": "OptionalChainingHost"
+                          },
+                          "asdoc": null,
+                          "key": {
+                            "location": {},
+                            "kind": {
+                              "Id": {
+                                "attribute": false,
+                                "qualifier": null,
+                                "name": {
+                                  "Id": [
+                                    "k",
+                                    {}
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "location": {},
+      "kind": {
+        "Statement": {
+          "location": {},
+          "kind": {
+            "Expression": {
+              "asdoc": null,
+              "expression": {
+                "location": {},
+                "kind": {
+                  "OptionalChaining": {
+                    "base": {
+                      "location": {},
+                      "kind": {
+                        "Id": {
+                          "attribute": false,
+                          "qualifier": null,
+                          "name": {
+                            "Id": [
+                              "o",
+                              {}
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "operations": {
+                      "location": {},
+                      "kind": {
+                        "Call": {
+                          "base": {
+                            "location": {},
+                            "kind": "OptionalChainingHost"
+                          },
+                          "arguments": []
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
