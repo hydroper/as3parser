@@ -487,9 +487,9 @@ impl<'input> Tokenizer<'input> {
 
     fn add_unexpected_error(&self) {
         if self.code_points.has_remaining() {
-            self.source.add_diagnostic(Diagnostic::new_syntax_error(self.current_character_ahead_location(), DiagnosticKind::UnexpectedOrInvalidToken, vec![]))
+            self.source.add_diagnostic(Diagnostic::new_syntax_error(&self.current_character_ahead_location(), DiagnosticKind::UnexpectedOrInvalidToken, vec![]))
         } else {
-            self.source.add_diagnostic(Diagnostic::new_syntax_error(self.current_cursor_location(), DiagnosticKind::UnexpectedEnd, vec![]))
+            self.source.add_diagnostic(Diagnostic::new_syntax_error(&self.current_cursor_location(), DiagnosticKind::UnexpectedEnd, vec![]))
         }
     }
 
@@ -659,7 +659,7 @@ impl<'input> Tokenizer<'input> {
                 | (self.expect_hex_digit()? << 4)
                 | self.expect_hex_digit()?);
             let Some(r) = r else {
-                self.source.add_diagnostic(Diagnostic::new_syntax_error(start.combine_with(self.current_cursor_location()), DiagnosticKind::UnexpectedOrInvalidToken, vec![]));
+                self.source.add_diagnostic(Diagnostic::new_syntax_error(&start.combine_with(self.current_cursor_location()), DiagnosticKind::UnexpectedOrInvalidToken, vec![]));
                 return Err(ParserFailure);
             };
             return Ok(r);
@@ -682,12 +682,12 @@ impl<'input> Tokenizer<'input> {
         let location = start.combine_with(self.current_cursor_location());
         let r = u32::from_str_radix(&self.source.text[(start.first_offset + 2)..(location.last_offset - 1)], 16);
         let Ok(r) = r else {
-            self.source.add_diagnostic(Diagnostic::new_syntax_error(location, DiagnosticKind::UnexpectedOrInvalidToken, vec![]));
+            self.source.add_diagnostic(Diagnostic::new_syntax_error(&location, DiagnosticKind::UnexpectedOrInvalidToken, vec![]));
             return Err(ParserFailure);
         };
         let r = char::from_u32(r);
         let Some(r) = r else {
-            self.source.add_diagnostic(Diagnostic::new_syntax_error(location, DiagnosticKind::UnexpectedOrInvalidToken, vec![]));
+            self.source.add_diagnostic(Diagnostic::new_syntax_error(&location, DiagnosticKind::UnexpectedOrInvalidToken, vec![]));
             return Err(ParserFailure);
         };
         Ok(r)
@@ -799,7 +799,7 @@ impl<'input> Tokenizer<'input> {
         let string = self.source.text[location.first_offset..location.last_offset].to_owned().replace('_', "");
 
         let Ok(v) = f64::from_str(&string) else {
-            self.source.add_diagnostic(Diagnostic::new_syntax_error(location, DiagnosticKind::FailedProcessingNumericLiteral, vec![]));
+            self.source.add_diagnostic(Diagnostic::new_syntax_error(&location, DiagnosticKind::FailedProcessingNumericLiteral, vec![]));
             return Err(ParserFailure);
         };
 
@@ -826,7 +826,7 @@ impl<'input> Tokenizer<'input> {
             .and_then(|n| f64::value_from(n).map_err(|_| NumericRangeError));
 
         let Ok(n) = n else {
-            self.source.add_diagnostic(Diagnostic::new_syntax_error(location, DiagnosticKind::FailedProcessingNumericLiteral, vec![]));
+            self.source.add_diagnostic(Diagnostic::new_syntax_error(&location, DiagnosticKind::FailedProcessingNumericLiteral, vec![]));
             return Err(ParserFailure);
         };
 
@@ -853,7 +853,7 @@ impl<'input> Tokenizer<'input> {
             .and_then(|n| f64::value_from(n).map_err(|_| NumericRangeError));
 
         let Ok(n) = n else {
-            self.source.add_diagnostic(Diagnostic::new_syntax_error(location, DiagnosticKind::FailedProcessingNumericLiteral, vec![]));
+            self.source.add_diagnostic(Diagnostic::new_syntax_error(&location, DiagnosticKind::FailedProcessingNumericLiteral, vec![]));
             return Err(ParserFailure);
         };
 
@@ -927,7 +927,7 @@ impl<'input> Tokenizer<'input> {
                     self.code_points.next();
                     break;
                 } else if character_validation::is_line_terminator(ch) {
-                    self.source.add_diagnostic(Diagnostic::new_syntax_error(self.current_character_ahead_location(), DiagnosticKind::UnallowedLineBreak, vec![]));
+                    self.source.add_diagnostic(Diagnostic::new_syntax_error(&self.current_character_ahead_location(), DiagnosticKind::UnallowedLineBreak, vec![]));
                     self.consume_line_terminator();
                 } else if !self.code_points.has_remaining() {
                     self.add_unexpected_error();

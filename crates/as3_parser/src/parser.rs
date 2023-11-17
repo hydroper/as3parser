@@ -48,12 +48,12 @@ impl<'input> Parser<'input> {
         self.locations.pop().unwrap().combine_with_start_of(self.token.1.clone())
     }
 
-    fn add_syntax_error(&self, location: Location, kind: DiagnosticKind, arguments: Vec<DiagnosticArgument>) {
+    fn add_syntax_error(&self, location: &Location, kind: DiagnosticKind, arguments: Vec<DiagnosticArgument>) {
         self.source().add_diagnostic(Diagnostic::new_syntax_error(location, kind, arguments));
     }
 
     /*
-    fn add_warning(&self, location: Location, kind: DiagnosticKind, arguments: Vec<DiagnosticArgument>) {
+    fn add_warning(&self, location: &Location, kind: DiagnosticKind, arguments: Vec<DiagnosticArgument>) {
         self.source().add_diagnostic(Diagnostic::new_warning(location, kind, arguments));
     }
     */
@@ -168,7 +168,7 @@ impl<'input> Parser<'input> {
 
     fn expect(&mut self, token: Token) -> Result<(), ParserFailure> {
         if self.token.0 != token {
-            self.add_syntax_error(self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![Token(token), Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![Token(token), Token(self.token.0.clone())]);
             Err(ParserFailure)
         } else {
             self.next()?;
@@ -178,7 +178,7 @@ impl<'input> Parser<'input> {
 
     fn expect_and_ie_xml_tag(&mut self, token: Token) -> Result<(), ParserFailure> {
         if self.token.0 != token {
-            self.add_syntax_error(self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![Token(token), Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![Token(token), Token(self.token.0.clone())]);
             Err(ParserFailure)
         } else {
             self.next_ie_xml_tag()?;
@@ -188,7 +188,7 @@ impl<'input> Parser<'input> {
 
     fn expect_and_ie_xml_content(&mut self, token: Token) -> Result<(), ParserFailure> {
         if self.token.0 != token {
-            self.add_syntax_error(self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![Token(token), Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![Token(token), Token(self.token.0.clone())]);
             Err(ParserFailure)
         } else {
             self.next_ie_xml_content()?;
@@ -209,7 +209,7 @@ impl<'input> Parser<'input> {
                     return Ok((id, location));
                 }
             }
-            self.add_syntax_error(self.token_location(), DiagnosticKind::ExpectedIdentifier, diagnostic_arguments![Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectedIdentifier, diagnostic_arguments![Token(self.token.0.clone())]);
             Err(ParserFailure)
         }
     }
@@ -221,7 +221,7 @@ impl<'input> Parser<'input> {
                 return Ok(());
             }
         }
-        self.add_syntax_error(self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![String(name.into()), Token(self.token.0.clone())]);
+        self.add_syntax_error(&self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![String(name.into()), Token(self.token.0.clone())]);
         Err(ParserFailure)
     }
 
@@ -273,7 +273,7 @@ impl<'input> Parser<'input> {
         if let Some(exp) = self.parse_opt_expression(context)? {
             Ok(exp)
         } else {
-            self.add_syntax_error(self.token_location(), DiagnosticKind::ExpectedExpression, diagnostic_arguments![Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectedExpression, diagnostic_arguments![Token(self.token.0.clone())]);
             Err(ParserFailure)
         }
     }
@@ -452,7 +452,7 @@ impl<'input> Parser<'input> {
         if operator == Operator::NullCoalescing {
             if let ast::ExpressionKind::Unary { base, operator } = &base.kind {
                 if [Operator::LogicalAnd, Operator::LogicalXor, Operator::LogicalOr].contains(&operator) {
-                    self.add_syntax_error(base.location.clone(), DiagnosticKind::IllegalNullishCoalescingLeftOperand, vec![]);
+                    self.add_syntax_error(&base.location.clone(), DiagnosticKind::IllegalNullishCoalescingLeftOperand, vec![]);
                 }
             }
         }
@@ -652,7 +652,7 @@ impl<'input> Parser<'input> {
                 ast::AssignmentLeft::Expression(exp) => self.exp_to_destructuring(Rc::clone(&exp))?,
             };
             if compound.is_some() {
-                self.add_syntax_error(exp.location.clone(), DiagnosticKind::MalformedArrowFunctionElement, vec![]);
+                self.add_syntax_error(&exp.location.clone(), DiagnosticKind::MalformedArrowFunctionElement, vec![]);
                 return Err(ParserFailure);
             }
             Ok(ast::FunctionParam {
@@ -699,7 +699,7 @@ impl<'input> Parser<'input> {
                 if let Some(name) = id.to_identifier() {
                     destructuring_kind = ast::DestructuringKind::Binding { name };
                 } else {
-                    self.add_syntax_error(exp.location.clone(), DiagnosticKind::MalformedDestructuring, vec![]);
+                    self.add_syntax_error(&exp.location.clone(), DiagnosticKind::MalformedDestructuring, vec![]);
                     return Err(ParserFailure);
                 }
             },
@@ -710,7 +710,7 @@ impl<'input> Parser<'input> {
                 destructuring_kind = self.object_initializer_to_destructuring_kind(fields.clone())?;
             },
             _ => {
-                self.add_syntax_error(exp.location.clone(), DiagnosticKind::MalformedDestructuring, vec![]);
+                self.add_syntax_error(&exp.location.clone(), DiagnosticKind::MalformedDestructuring, vec![]);
                 return Err(ParserFailure);
             },
         }
@@ -743,7 +743,7 @@ impl<'input> Parser<'input> {
         let mut result_fields: Vec<Rc<ast::RecordDestructuringField>> = vec![];
         for field in fields {
             let ast::ObjectField::Field { ref key, destructuring_non_null, ref value } = *field else {
-                self.add_syntax_error(field.location(), DiagnosticKind::UnsupportedDestructuringRest, vec![]);
+                self.add_syntax_error(&field.location(), DiagnosticKind::UnsupportedDestructuringRest, vec![]);
                 continue;
             };
             let alias = if let Some(v) = value { Some(self.exp_to_destructuring(Rc::clone(&v))?) } else { None };
@@ -764,11 +764,11 @@ impl<'input> Parser<'input> {
         let mut has_rest = false;
         for param in params {
             if !least_kind.may_be_followed_by(param.kind) {
-                self.add_syntax_error(param.location.clone(), DiagnosticKind::WrongParameterPosition, vec![]);
+                self.add_syntax_error(&param.location.clone(), DiagnosticKind::WrongParameterPosition, vec![]);
             }
             least_kind = param.kind;
             if param.kind == ast::FunctionParamKind::Rest && has_rest {
-                self.add_syntax_error(param.location.clone(), DiagnosticKind::DuplicateRestParameter, vec![]);
+                self.add_syntax_error(&param.location.clone(), DiagnosticKind::DuplicateRestParameter, vec![]);
             }
             has_rest = param.kind == ast::FunctionParamKind::Rest;
         }
@@ -967,7 +967,7 @@ impl<'input> Parser<'input> {
             if let Some(activation) = self.activations.last_mut() {
                 activation.uses_await = true;
             } else {
-                self.add_syntax_error(operator_token.1, DiagnosticKind::NotAllowedHere, diagnostic_arguments![Token(operator_token.0)]);
+                self.add_syntax_error(&operator_token.1, DiagnosticKind::NotAllowedHere, diagnostic_arguments![Token(operator_token.0)]);
             }
             Ok(Some(Rc::new(ast::Expression {
                 location: self.pop_location(),
@@ -986,7 +986,7 @@ impl<'input> Parser<'input> {
             if let Some(activation) = self.activations.last_mut() {
                 activation.uses_yield = true;
             } else {
-                self.add_syntax_error(operator_token.1, DiagnosticKind::NotAllowedHere, diagnostic_arguments![Token(operator_token.0)]);
+                self.add_syntax_error(&operator_token.1, DiagnosticKind::NotAllowedHere, diagnostic_arguments![Token(operator_token.0)]);
             }
             Ok(Some(Rc::new(ast::Expression {
                 location: self.pop_location(),
@@ -1053,7 +1053,7 @@ impl<'input> Parser<'input> {
             let has_initializer = binding.init.is_some();
             let location = self.pop_location();
             if rest && has_initializer {
-                self.add_syntax_error(location.clone(), DiagnosticKind::MalformedRestParameter, vec![]);
+                self.add_syntax_error(&location.clone(), DiagnosticKind::MalformedRestParameter, vec![]);
             }
             let param = ast::FunctionParam {
                 location,
@@ -1427,7 +1427,7 @@ impl<'input> Parser<'input> {
         } else if self.peek(Token::Function) {
             Ok(self.parse_function_expression()?)
         } else {
-            self.add_syntax_error(self.token_location(), DiagnosticKind::ExpectedExpression, diagnostic_arguments![Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectedExpression, diagnostic_arguments![Token(self.token.0.clone())]);
             Err(ParserFailure)
         }
     }
@@ -1571,7 +1571,7 @@ impl<'input> Parser<'input> {
             self.next_ie_xml_tag()?;
             return Ok(value);
         } else {
-            self.add_syntax_error(self.token_location(), DiagnosticKind::ExpectedXmlAttributeValue, diagnostic_arguments![Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectedXmlAttributeValue, diagnostic_arguments![Token(self.token.0.clone())]);
             Err(ParserFailure)
         }
     }
@@ -1596,7 +1596,7 @@ impl<'input> Parser<'input> {
             self.next_ie_xml_tag()?;
             return Ok((name, name_location));
         } else {
-            self.add_syntax_error(self.token_location(), DiagnosticKind::ExpectedXmlName, diagnostic_arguments![Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectedXmlName, diagnostic_arguments![Token(self.token.0.clone())]);
             Err(ParserFailure)
         }
     }
@@ -1779,7 +1779,7 @@ impl<'input> Parser<'input> {
             }
         }
 
-        self.add_syntax_error(self.token_location(), DiagnosticKind::ExpectedIdentifier, diagnostic_arguments![Token(self.token.0.clone())]);
+        self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectedIdentifier, diagnostic_arguments![Token(self.token.0.clone())]);
         Err(ParserFailure)
     }
 
@@ -1880,7 +1880,7 @@ impl<'input> Parser<'input> {
             }
         }
 
-        self.add_syntax_error(self.token_location(), DiagnosticKind::ExpectedIdentifier, diagnostic_arguments![Token(self.token.0.clone())]);
+        self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectedIdentifier, diagnostic_arguments![Token(self.token.0.clone())]);
         Err(ParserFailure)
     }
 
@@ -1926,7 +1926,7 @@ impl<'input> Parser<'input> {
                 name: ast::IdentifierOrBrackets::Brackets(brackets),
             })
         } else {
-            self.add_syntax_error(self.token_location(), DiagnosticKind::ExpectedIdentifier, diagnostic_arguments![Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectedIdentifier, diagnostic_arguments![Token(self.token.0.clone())]);
             Err(ParserFailure)
         }
     }
@@ -1969,7 +1969,7 @@ impl<'input> Parser<'input> {
                 name: ast::IdentifierOrBrackets::Brackets(brackets),
             })
         } else {
-            self.add_syntax_error(self.token_location(), DiagnosticKind::ExpectedIdentifier, diagnostic_arguments![Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectedIdentifier, diagnostic_arguments![Token(self.token.0.clone())]);
             Err(ParserFailure)
         }
     }
@@ -2539,7 +2539,7 @@ impl<'input> Parser<'input> {
                 }
 
                 if !allowed_here {
-                    self.add_syntax_error(node.location.clone(), DiagnosticKind::NotAllowedHere, diagnostic_arguments![Token(Token::Super)]);
+                    self.add_syntax_error(&node.location.clone(), DiagnosticKind::NotAllowedHere, diagnostic_arguments![Token(Token::Super)]);
                 }
 
                 Ok((node, semicolon_inserted))
@@ -2979,7 +2979,7 @@ impl<'input> Parser<'input> {
             self.next()?;
             let binding = self.parse_variable_binding(false)?;
             if let Some(init) = &binding.init {
-                self.add_syntax_error(init.location.clone(), DiagnosticKind::IllegalForInInitializer, vec![]);
+                self.add_syntax_error(&init.location.clone(), DiagnosticKind::IllegalForInInitializer, vec![]);
             }
             ast::ForInLeft::Variable(kind, binding)
         } else {
@@ -3007,11 +3007,11 @@ impl<'input> Parser<'input> {
         let variable_binding = left.bindings[0].clone();
 
         if let Some(init) = &variable_binding.init {
-            self.add_syntax_error(init.location.clone(), DiagnosticKind::IllegalForInInitializer, vec![]);
+            self.add_syntax_error(&init.location.clone(), DiagnosticKind::IllegalForInInitializer, vec![]);
         }
 
         if left.bindings.len() > 1 {
-            self.add_syntax_error(left.kind.1.clone(), DiagnosticKind::MultipleForInBindings, vec![]);
+            self.add_syntax_error(&left.kind.1.clone(), DiagnosticKind::MultipleForInBindings, vec![]);
         }
 
         let right = self.parse_expression(ExpressionContext {
@@ -3100,9 +3100,9 @@ impl<'input> Parser<'input> {
         });
 
         if label.is_some() && !context.is_label_defined(label.clone().unwrap()) {
-            self.add_syntax_error(label_location.unwrap(), DiagnosticKind::UndefinedLabel, diagnostic_arguments![String(label.clone().unwrap())]);
+            self.add_syntax_error(&label_location.unwrap(), DiagnosticKind::UndefinedLabel, diagnostic_arguments![String(label.clone().unwrap())]);
         } else if !context.is_break_allowed(label) {
-            self.add_syntax_error(node.location.clone(), DiagnosticKind::IllegalBreak, vec![]);
+            self.add_syntax_error(&node.location.clone(), DiagnosticKind::IllegalBreak, vec![]);
         }
 
         Ok((node, semicolon_inserted))
@@ -3124,9 +3124,9 @@ impl<'input> Parser<'input> {
         });
 
         if label.is_some() && !context.is_label_defined(label.clone().unwrap()) {
-            self.add_syntax_error(label_location.unwrap(), DiagnosticKind::UndefinedLabel, diagnostic_arguments![String(label.clone().unwrap())]);
+            self.add_syntax_error(&label_location.unwrap(), DiagnosticKind::UndefinedLabel, diagnostic_arguments![String(label.clone().unwrap())]);
         } else if !context.is_continue_allowed(label) {
-            self.add_syntax_error(node.location.clone(), DiagnosticKind::IllegalContinue, vec![]);
+            self.add_syntax_error(&node.location.clone(), DiagnosticKind::IllegalContinue, vec![]);
         }
 
         Ok((node, semicolon_inserted))
@@ -3167,7 +3167,7 @@ impl<'input> Parser<'input> {
         })?;
 
         if line_break {
-            self.add_syntax_error(expression.location.clone(), DiagnosticKind::ExpressionMustNotFollowLineBreak, vec![]);
+            self.add_syntax_error(&expression.location.clone(), DiagnosticKind::ExpressionMustNotFollowLineBreak, vec![]);
         }
 
         let semicolon_inserted = self.parse_semicolon()?;
@@ -3242,7 +3242,7 @@ impl<'input> Parser<'input> {
 
     fn forbid_line_break_before_token(&mut self) {
         if self.previous_token.1.line_break(&self.token.1) {
-            self.add_syntax_error(self.token.1.clone(), DiagnosticKind::TokenMustNotFollowLineBreak, vec![]);
+            self.add_syntax_error(&self.token.1.clone(), DiagnosticKind::TokenMustNotFollowLineBreak, vec![]);
         }
     }
 
@@ -3426,13 +3426,13 @@ impl<'input> Parser<'input> {
             // Contribute modifier and verify that it is not duplicate
             if let Some(exp) = exp.as_ref() {
                 if access_modifier.is_some() {
-                    self.add_syntax_error(exp.location.clone(), DiagnosticKind::DuplicateModifier, vec![]);
+                    self.add_syntax_error(&exp.location.clone(), DiagnosticKind::DuplicateModifier, vec![]);
                 }
                 access_modifier = Some(Rc::clone(exp));
             } else {
                 let modifier = modifier.unwrap();
                 if modifiers.contains(modifier) {
-                    self.add_syntax_error(location, DiagnosticKind::DuplicateModifier, vec![]);
+                    self.add_syntax_error(&location, DiagnosticKind::DuplicateModifier, vec![]);
                 }
                 modifiers |= modifier;
             }
@@ -3495,7 +3495,7 @@ impl<'input> Parser<'input> {
         }
 
         // Error: expected one of { "class", "interface", "function", "var", "const" }
-        self.add_syntax_error(self.token_location(), DiagnosticKind::UnexpectedOrInvalidToken, vec![]);
+        self.add_syntax_error(&self.token_location(), DiagnosticKind::UnexpectedOrInvalidToken, vec![]);
         Err(ParserFailure)
     }
 
@@ -3521,20 +3521,20 @@ impl<'input> Parser<'input> {
             // `where`
             if where_clause.is_some() {
                 if generics.where_clause.is_some() {
-                    self.add_syntax_error(first_token_location.clone(), DiagnosticKind::DuplicateClause, diagnostic_arguments![String("where".into())]);
+                    self.add_syntax_error(&first_token_location.clone(), DiagnosticKind::DuplicateClause, diagnostic_arguments![String("where".into())]);
                 }
                 generics.where_clause = where_clause;
             // `extends`
             } else if self.peek(Token::Extends) {
                 if extends_clause.is_some() {
-                    self.add_syntax_error(first_token_location.clone(), DiagnosticKind::DuplicateClause, diagnostic_arguments![String("extends".into())]);
+                    self.add_syntax_error(&first_token_location.clone(), DiagnosticKind::DuplicateClause, diagnostic_arguments![String("extends".into())]);
                 }
                 self.next()?;
                 extends_clause = Some(self.parse_type_expression()?);
             // `implements`
             } else if self.peek(Token::Implements) {
                 if implements_clause.is_some() {
-                    self.add_syntax_error(first_token_location.clone(), DiagnosticKind::DuplicateClause, diagnostic_arguments![String("implements".into())]);
+                    self.add_syntax_error(&first_token_location.clone(), DiagnosticKind::DuplicateClause, diagnostic_arguments![String("implements".into())]);
                 }
                 self.next()?;
                 let mut list = vec![self.parse_type_expression()?];
@@ -3566,19 +3566,19 @@ impl<'input> Parser<'input> {
 
         // Do not allow nested classes
         if !(matches!(context, DirectiveContext::PackageBlock | DirectiveContext::TopLevel)) {
-            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedNestedClasses, diagnostic_arguments![]);
+            self.add_syntax_error(&name.1.clone(), DiagnosticKind::UnallowedNestedClasses, diagnostic_arguments![]);
         }
 
         // Always allow `static`
 
         // Forbid `native`
         if modifiers.contains(ast::Modifiers::NATIVE) {
-            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("native".into())]);
+            self.add_syntax_error(&name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("native".into())]);
         }
 
         // Forbid `override`
         if modifiers.contains(ast::Modifiers::OVERRIDE) {
-            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("override".into())]);
+            self.add_syntax_error(&name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("override".into())]);
         }
 
         // Always allow `dynamic`
@@ -3609,13 +3609,13 @@ impl<'input> Parser<'input> {
             // `where`
             if where_clause.is_some() {
                 if generics.where_clause.is_some() {
-                    self.add_syntax_error(first_token_location.clone(), DiagnosticKind::DuplicateClause, diagnostic_arguments![String("where".into())]);
+                    self.add_syntax_error(&first_token_location.clone(), DiagnosticKind::DuplicateClause, diagnostic_arguments![String("where".into())]);
                 }
                 generics.where_clause = where_clause;
             // `extends`
             } else if self.peek(Token::Extends) {
                 if extends_clause.is_some() {
-                    self.add_syntax_error(first_token_location.clone(), DiagnosticKind::DuplicateClause, diagnostic_arguments![String("extends".into())]);
+                    self.add_syntax_error(&first_token_location.clone(), DiagnosticKind::DuplicateClause, diagnostic_arguments![String("extends".into())]);
                 }
                 self.next()?;
                 let mut list = vec![self.parse_type_expression()?];
@@ -3646,32 +3646,32 @@ impl<'input> Parser<'input> {
 
         // Do not allow nested classes
         if !(matches!(context, DirectiveContext::PackageBlock | DirectiveContext::TopLevel)) {
-            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedNestedClasses, diagnostic_arguments![]);
+            self.add_syntax_error(&name.1.clone(), DiagnosticKind::UnallowedNestedClasses, diagnostic_arguments![]);
         }
 
         // Forbid `static`
         if modifiers.contains(ast::Modifiers::STATIC) {
-            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("static".into())]);
+            self.add_syntax_error(&name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("static".into())]);
         }
 
         // Forbid `native`
         if modifiers.contains(ast::Modifiers::NATIVE) {
-            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("native".into())]);
+            self.add_syntax_error(&name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("native".into())]);
         }
 
         // Forbid `override`
         if modifiers.contains(ast::Modifiers::OVERRIDE) {
-            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("override".into())]);
+            self.add_syntax_error(&name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("override".into())]);
         }
 
         // Forbid `dynamic`
         if modifiers.contains(ast::Modifiers::DYNAMIC) {
-            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("dynamic".into())]);
+            self.add_syntax_error(&name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("dynamic".into())]);
         }
 
         // Forbid `final`
         if modifiers.contains(ast::Modifiers::FINAL) {
-            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("final".into())]);
+            self.add_syntax_error(&name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("final".into())]);
         }
 
         Ok((node, true))
@@ -3739,44 +3739,44 @@ impl<'input> Parser<'input> {
         // Body verification
         if common.body.is_some() {
             if is_native || is_interface_method {
-                self.add_syntax_error(name.1.clone(), DiagnosticKind::MethodMustNotHaveBody, diagnostic_arguments![]);
+                self.add_syntax_error(&name.1.clone(), DiagnosticKind::MethodMustNotHaveBody, diagnostic_arguments![]);
             }
         } else {
             if !(is_native || !is_interface_method) {
-                self.add_syntax_error(name.1.clone(), DiagnosticKind::MethodMustSpecifyBody, diagnostic_arguments![]);
+                self.add_syntax_error(&name.1.clone(), DiagnosticKind::MethodMustSpecifyBody, diagnostic_arguments![]);
             }
         }
 
         // Interface method must not contain annotations
         if is_interface_method && (annotations.access_modifier.is_some() || !annotations.metadata.is_empty() || !modifiers.is_empty()) {
-            self.add_syntax_error(name.1.clone(), DiagnosticKind::InterfaceMethodHasAnnotations, diagnostic_arguments![]);
+            self.add_syntax_error(&name.1.clone(), DiagnosticKind::InterfaceMethodHasAnnotations, diagnostic_arguments![]);
         }
 
         // Allow `override` in type blocks and non constructors only
         if modifiers.contains(ast::Modifiers::OVERRIDE) && (!context.is_type_block() || is_constructor) {
-            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("override".into())]);
+            self.add_syntax_error(&name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("override".into())]);
         }
 
         // Allow `final` in type blocks only
         if modifiers.contains(ast::Modifiers::FINAL) && !context.is_type_block() {
-            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("final".into())]);
+            self.add_syntax_error(&name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("final".into())]);
         }
 
         // Forbid `dynamic`
         if modifiers.contains(ast::Modifiers::DYNAMIC) {
-            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("dynamic".into())]);
+            self.add_syntax_error(&name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("dynamic".into())]);
         }
 
         // Always allow `native`
 
         // Allow `static` in type blocks only
         if modifiers.contains(ast::Modifiers::STATIC) && !context.is_type_block() {
-            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("static".into())]);
+            self.add_syntax_error(&name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("static".into())]);
         }
 
         // Constructor must not have generics
         if is_constructor && (generics.params.is_some() || generics.where_clause.is_some()) {
-            self.add_syntax_error(name.1.clone(), DiagnosticKind::MethodMustNotHaveGenerics, diagnostic_arguments![]);
+            self.add_syntax_error(&name.1.clone(), DiagnosticKind::MethodMustNotHaveGenerics, diagnostic_arguments![]);
         }
 
         let node = if is_constructor {
@@ -3826,44 +3826,44 @@ impl<'input> Parser<'input> {
         // Body verification
         if common.body.is_some() {
             if is_native || is_interface_method {
-                self.add_syntax_error(name.1.clone(), DiagnosticKind::MethodMustNotHaveBody, diagnostic_arguments![]);
+                self.add_syntax_error(&name.1.clone(), DiagnosticKind::MethodMustNotHaveBody, diagnostic_arguments![]);
             }
         } else {
             if !(is_native || !is_interface_method) {
-                self.add_syntax_error(name.1.clone(), DiagnosticKind::MethodMustSpecifyBody, diagnostic_arguments![]);
+                self.add_syntax_error(&name.1.clone(), DiagnosticKind::MethodMustSpecifyBody, diagnostic_arguments![]);
             }
         }
 
         // Interface method must not contain annotations
         if is_interface_method && (annotations.access_modifier.is_some() || !annotations.metadata.is_empty() || !modifiers.is_empty()) {
-            self.add_syntax_error(name.1.clone(), DiagnosticKind::InterfaceMethodHasAnnotations, diagnostic_arguments![]);
+            self.add_syntax_error(&name.1.clone(), DiagnosticKind::InterfaceMethodHasAnnotations, diagnostic_arguments![]);
         }
 
         // Allow `override` in type blocks only
         if modifiers.contains(ast::Modifiers::OVERRIDE) && !context.is_type_block() {
-            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("override".into())]);
+            self.add_syntax_error(&name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("override".into())]);
         }
 
         // Allow `final` in type blocks only
         if modifiers.contains(ast::Modifiers::FINAL) && !context.is_type_block() {
-            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("final".into())]);
+            self.add_syntax_error(&name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("final".into())]);
         }
 
         // Forbid `dynamic`
         if modifiers.contains(ast::Modifiers::DYNAMIC) {
-            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("dynamic".into())]);
+            self.add_syntax_error(&name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("dynamic".into())]);
         }
 
         // Always allow `native`
 
         // Allow `static` in type blocks only
         if modifiers.contains(ast::Modifiers::STATIC) && !context.is_type_block() {
-            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("static".into())]);
+            self.add_syntax_error(&name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("static".into())]);
         }
 
         // Getters and setters must not have generics
         if where_clause.is_some() {
-            self.add_syntax_error(name.1.clone(), DiagnosticKind::MethodMustNotHaveGenerics, diagnostic_arguments![]);
+            self.add_syntax_error(&name.1.clone(), DiagnosticKind::MethodMustNotHaveGenerics, diagnostic_arguments![]);
         }
 
         let node = if getter {
@@ -3975,27 +3975,27 @@ impl<'input> Parser<'input> {
 
         // Allow `static` in type blocks only
         if modifiers.contains(ast::Modifiers::STATIC) && !context.is_type_block() {
-            self.add_syntax_error(node.location.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("static".into())]);
+            self.add_syntax_error(&node.location.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("static".into())]);
         }
 
         // Forbid `native`
         if modifiers.contains(ast::Modifiers::NATIVE) {
-            self.add_syntax_error(node.location.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("native".into())]);
+            self.add_syntax_error(&node.location.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("native".into())]);
         }
 
         // Forbid `override`
         if modifiers.contains(ast::Modifiers::OVERRIDE) {
-            self.add_syntax_error(node.location.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("override".into())]);
+            self.add_syntax_error(&node.location.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("override".into())]);
         }
 
         // Forbid `dynamic`
         if modifiers.contains(ast::Modifiers::DYNAMIC) {
-            self.add_syntax_error(node.location.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("dynamic".into())]);
+            self.add_syntax_error(&node.location.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("dynamic".into())]);
         }
 
         // Forbid `final`
         if modifiers.contains(ast::Modifiers::FINAL) {
-            self.add_syntax_error(node.location.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("final".into())]);
+            self.add_syntax_error(&node.location.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("final".into())]);
         }
 
         Ok((node, semicolon))
@@ -4031,27 +4031,27 @@ impl<'input> Parser<'input> {
 
         // Allow `static` in type blocks only
         if modifiers.contains(ast::Modifiers::STATIC) && !context.is_type_block() {
-            self.add_syntax_error(left.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("static".into())]);
+            self.add_syntax_error(&left.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("static".into())]);
         }
 
         // Forbid `native`
         if modifiers.contains(ast::Modifiers::NATIVE) {
-            self.add_syntax_error(left.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("native".into())]);
+            self.add_syntax_error(&left.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("native".into())]);
         }
 
         // Forbid `override`
         if modifiers.contains(ast::Modifiers::OVERRIDE) {
-            self.add_syntax_error(left.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("override".into())]);
+            self.add_syntax_error(&left.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("override".into())]);
         }
 
         // Forbid `dynamic`
         if modifiers.contains(ast::Modifiers::DYNAMIC) {
-            self.add_syntax_error(left.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("dynamic".into())]);
+            self.add_syntax_error(&left.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("dynamic".into())]);
         }
 
         // Forbid `final`
         if modifiers.contains(ast::Modifiers::FINAL) {
-            self.add_syntax_error(left.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("final".into())]);
+            self.add_syntax_error(&left.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("final".into())]);
         }
 
         Ok((node, semicolon))
@@ -4092,27 +4092,27 @@ impl<'input> Parser<'input> {
 
         // Allow `static` in type blocks only
         if modifiers.contains(ast::Modifiers::STATIC) && !context.is_type_block() {
-            self.add_syntax_error(left.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("static".into())]);
+            self.add_syntax_error(&left.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("static".into())]);
         }
 
         // Forbid `native`
         if modifiers.contains(ast::Modifiers::NATIVE) {
-            self.add_syntax_error(left.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("native".into())]);
+            self.add_syntax_error(&left.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("native".into())]);
         }
 
         // Forbid `override`
         if modifiers.contains(ast::Modifiers::OVERRIDE) {
-            self.add_syntax_error(left.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("override".into())]);
+            self.add_syntax_error(&left.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("override".into())]);
         }
 
         // Forbid `dynamic`
         if modifiers.contains(ast::Modifiers::DYNAMIC) {
-            self.add_syntax_error(left.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("dynamic".into())]);
+            self.add_syntax_error(&left.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("dynamic".into())]);
         }
 
         // Forbid `final`
         if modifiers.contains(ast::Modifiers::FINAL) {
-            self.add_syntax_error(left.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("final".into())]);
+            self.add_syntax_error(&left.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("final".into())]);
         }
 
         Ok((node, semicolon))
@@ -4143,32 +4143,32 @@ impl<'input> Parser<'input> {
 
         // Do not allow nested classes
         if !(matches!(context, DirectiveContext::PackageBlock | DirectiveContext::TopLevel)) {
-            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedNestedClasses, diagnostic_arguments![]);
+            self.add_syntax_error(&name.1.clone(), DiagnosticKind::UnallowedNestedClasses, diagnostic_arguments![]);
         }
 
         // Forbid `static`
         if modifiers.contains(ast::Modifiers::STATIC) {
-            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("static".into())]);
+            self.add_syntax_error(&name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("static".into())]);
         }
 
         // Forbid `native`
         if modifiers.contains(ast::Modifiers::NATIVE) {
-            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("native".into())]);
+            self.add_syntax_error(&name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("native".into())]);
         }
 
         // Forbid `override`
         if modifiers.contains(ast::Modifiers::OVERRIDE) {
-            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("override".into())]);
+            self.add_syntax_error(&name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("override".into())]);
         }
 
         // Forbid `dynamic`
         if modifiers.contains(ast::Modifiers::DYNAMIC) {
-            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("dynamic".into())]);
+            self.add_syntax_error(&name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("dynamic".into())]);
         }
 
         // Forbid `final`
         if modifiers.contains(ast::Modifiers::FINAL) {
-            self.add_syntax_error(name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("final".into())]);
+            self.add_syntax_error(&name.1.clone(), DiagnosticKind::UnallowedModifier, diagnostic_arguments![String("final".into())]);
         }
 
         Ok((node, true))
@@ -4218,7 +4218,7 @@ impl<'input> Parser<'input> {
         match &exp.kind {
             ast::ExpressionKind::ArrayInitializer { elements, asdoc, .. } => {
                 if elements.len() != 1 || elements[0].is_none() {
-                    self.add_syntax_error(exp.location.clone(), DiagnosticKind::MalformedMetadataElement, diagnostic_arguments![]);
+                    self.add_syntax_error(&exp.location.clone(), DiagnosticKind::MalformedMetadataElement, diagnostic_arguments![]);
                     None
                 } else {
                     self.exp_to_metadata_1(asdoc.clone(), elements[0].as_ref().unwrap())
@@ -4235,7 +4235,7 @@ impl<'input> Parser<'input> {
                 if let Some(name) = id.to_metadata_name() {
                     Some(Rc::new(ast::Metadata { asdoc, location: exp.location.clone(), name, entries: vec![] }))
                 } else {
-                    self.add_syntax_error(exp.location.clone(), DiagnosticKind::MalformedMetadataElement, diagnostic_arguments![]);
+                    self.add_syntax_error(&exp.location.clone(), DiagnosticKind::MalformedMetadataElement, diagnostic_arguments![]);
                     None
                 }
             },
@@ -4249,12 +4249,12 @@ impl<'input> Parser<'input> {
                     }
                     Some(Rc::new(ast::Metadata { asdoc, location: exp.location.clone(), name, entries }))
                 } else {
-                    self.add_syntax_error(exp.location.clone(), DiagnosticKind::MalformedMetadataElement, diagnostic_arguments![]);
+                    self.add_syntax_error(&exp.location.clone(), DiagnosticKind::MalformedMetadataElement, diagnostic_arguments![]);
                     None
                 }
             },
             _ => {
-                self.add_syntax_error(exp.location.clone(), DiagnosticKind::MalformedMetadataElement, diagnostic_arguments![]);
+                self.add_syntax_error(&exp.location.clone(), DiagnosticKind::MalformedMetadataElement, diagnostic_arguments![]);
                 None
             },
         }
@@ -4266,12 +4266,12 @@ impl<'input> Parser<'input> {
                 if let Some(name) = id.to_metadata_name() {
                     Some(name)
                 } else {
-                    self.add_syntax_error(exp.location.clone(), DiagnosticKind::MalformedMetadataElement, diagnostic_arguments![]);
+                    self.add_syntax_error(&exp.location.clone(), DiagnosticKind::MalformedMetadataElement, diagnostic_arguments![]);
                     None
                 }
             },
             _ => {
-                self.add_syntax_error(exp.location.clone(), DiagnosticKind::MalformedMetadataElement, diagnostic_arguments![]);
+                self.add_syntax_error(&exp.location.clone(), DiagnosticKind::MalformedMetadataElement, diagnostic_arguments![]);
                 None
             },
         }
@@ -4286,31 +4286,31 @@ impl<'input> Parser<'input> {
                         value,
                     })
                 } else {
-                    self.add_syntax_error(exp.location.clone(), DiagnosticKind::MalformedMetadataElement, diagnostic_arguments![]);
+                    self.add_syntax_error(&exp.location.clone(), DiagnosticKind::MalformedMetadataElement, diagnostic_arguments![]);
                     None
                 }
             },
             ast::ExpressionKind::Assignment { left, compound, right } => {
                 // Compound assignment is not allowed in meta data
                 if compound.is_some() {
-                    self.add_syntax_error(exp.location.clone(), DiagnosticKind::MalformedMetadataElement, diagnostic_arguments![]);
+                    self.add_syntax_error(&exp.location.clone(), DiagnosticKind::MalformedMetadataElement, diagnostic_arguments![]);
                     return None;
                 }
 
                 let Some(key) = left.to_metadata_key() else {
-                    self.add_syntax_error(exp.location.clone(), DiagnosticKind::MalformedMetadataElement, diagnostic_arguments![]);
+                    self.add_syntax_error(&exp.location.clone(), DiagnosticKind::MalformedMetadataElement, diagnostic_arguments![]);
                     return None;
                 };
 
                 let Some(value) = right.to_metadata_value() else {
-                    self.add_syntax_error(exp.location.clone(), DiagnosticKind::MalformedMetadataElement, diagnostic_arguments![]);
+                    self.add_syntax_error(&exp.location.clone(), DiagnosticKind::MalformedMetadataElement, diagnostic_arguments![]);
                     return None;
                 };
 
                 Some(ast::MetadataEntry { key: Some(key), value })
             },
             _ => {
-                self.add_syntax_error(exp.location.clone(), DiagnosticKind::MalformedMetadataElement, diagnostic_arguments![]);
+                self.add_syntax_error(&exp.location.clone(), DiagnosticKind::MalformedMetadataElement, diagnostic_arguments![]);
                 None
             },
         }
@@ -4417,13 +4417,13 @@ impl<'input> Parser<'input> {
             if let Ok(content) = std::fs::read_to_string(&sub_file_path) {
                 replaced_by_source = Source::new(Some(sub_file_path.clone()), content, &self.tokenizer.source.compiler_options);
             } else {
-                self.add_syntax_error(source_path_location.clone(), DiagnosticKind::FailedToIncludeFile, vec![]);
+                self.add_syntax_error(&source_path_location.clone(), DiagnosticKind::FailedToIncludeFile, vec![]);
 
                 // Use a placeholder source
                 replaced_by_source = Source::new(None, "".into(), &self.tokenizer.source.compiler_options);
             }
         } else {
-            self.add_syntax_error(source_path_location.clone(), DiagnosticKind::ParentSourceIsNotAFile, vec![]);
+            self.add_syntax_error(&source_path_location.clone(), DiagnosticKind::ParentSourceIsNotAFile, vec![]);
 
             // Use a placeholder source
             replaced_by_source = Source::new(None, "".into(), &self.tokenizer.source.compiler_options);
@@ -4558,7 +4558,7 @@ impl<'input> Parser<'input> {
                     if let Some(exp) = parser_facade::parse_expression(&source) {
                         tags.push(ast::AsDocTag::EventType(exp));
                     } else {
-                        self.add_syntax_error(comment_location.clone(), DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.clone())]);
+                        self.add_syntax_error(&comment_location.clone(), DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.clone())]);
                     }
                 },
 
@@ -4580,7 +4580,7 @@ impl<'input> Parser<'input> {
 
                     // Content must be empty
                     if !regex_is_match!(r"^\s*$", &text) {
-                        self.add_syntax_error(comment_location.clone(), DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.clone())]);
+                        self.add_syntax_error(&comment_location.clone(), DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.clone())]);
                     }
 
                     tags.push(ast::AsDocTag::InheritDoc);
@@ -4592,7 +4592,7 @@ impl<'input> Parser<'input> {
 
                     // Content must be non empty
                     if regex_is_match!(r"^\s*$", &text) {
-                        self.add_syntax_error(comment_location.clone(), DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.clone())]);
+                        self.add_syntax_error(&comment_location.clone(), DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.clone())]);
                     }
 
                     tags.push(ast::AsDocTag::Internal(text));
@@ -4614,7 +4614,7 @@ impl<'input> Parser<'input> {
 
                     // Content must be empty
                     if !regex_is_match!(r"^\s*$", &text) {
-                        self.add_syntax_error(comment_location.clone(), DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.clone())]);
+                        self.add_syntax_error(&comment_location.clone(), DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.clone())]);
                     }
 
                     tags.push(ast::AsDocTag::Private);
@@ -4651,16 +4651,16 @@ impl<'input> Parser<'input> {
                         if let Some(exp) = parser_facade::parse_type_expression(&source) {
                             tags.push(ast::AsDocTag::Throws { class_reference: exp, description });
                         } else {
-                            self.add_syntax_error(comment_location.clone(), DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.clone())]);
+                            self.add_syntax_error(&comment_location.clone(), DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.clone())]);
                         }
                     } else {
-                        self.add_syntax_error(comment_location.clone(), DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.clone())]);
+                        self.add_syntax_error(&comment_location.clone(), DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.clone())]);
                     }
                 },
 
                 // Unrecognized tag
                 _ => {
-                    self.add_syntax_error(comment_location.clone(), DiagnosticKind::UnrecognizedAsDocTag, diagnostic_arguments![String(tag_name.clone())]);
+                    self.add_syntax_error(&comment_location.clone(), DiagnosticKind::UnrecognizedAsDocTag, diagnostic_arguments![String(tag_name.clone())]);
                 },
             }
         } else {

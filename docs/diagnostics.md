@@ -26,3 +26,12 @@ A source is invalidated when it or any of its `IncludeDirective` files contain a
 // invalidated: bool
 let invalidated = source.invalidated();
 ```
+
+## Adding diagnostics
+
+Adding a diagnostic to a `Source` object is a simple call:
+
+```as3
+// Syntax error
+source.add_diagnostic(Diagnostic::new_syntax_error(&location, ));
+```

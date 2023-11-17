@@ -36,9 +36,9 @@ impl PartialOrd for Diagnostic {
 }
 
 impl Diagnostic {
-    pub fn new_syntax_error(location: Location, kind: DiagnosticKind, arguments: Vec<DiagnosticArgument>) -> Self {
+    pub fn new_syntax_error(location: &Location, kind: DiagnosticKind, arguments: Vec<DiagnosticArgument>) -> Self {
         Self {
-            location,
+            location: location.clone(),
             kind,
             is_verify_error: false,
             is_warning: false,
@@ -46,9 +46,9 @@ impl Diagnostic {
         }
     }
 
-    pub fn new_verify_error(location: Location, kind: DiagnosticKind, arguments: Vec<DiagnosticArgument>) -> Self {
+    pub fn new_verify_error(location: &Location, kind: DiagnosticKind, arguments: Vec<DiagnosticArgument>) -> Self {
         Self {
-            location,
+            location: location.clone(),
             kind,
             is_verify_error: true,
             is_warning: false,
@@ -56,9 +56,9 @@ impl Diagnostic {
         }
     }
 
-    pub fn new_warning(location: Location, kind: DiagnosticKind, arguments: Vec<DiagnosticArgument>) -> Self {
+    pub fn new_warning(location: &Location, kind: DiagnosticKind, arguments: Vec<DiagnosticArgument>) -> Self {
         Self {
-            location,
+            location: location.clone(),
             kind,
             is_verify_error: false,
             is_warning: true,
