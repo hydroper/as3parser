@@ -47,3 +47,8 @@ Global objects are resolved asynchronously and certain properties are required b
 ## Vector type
 
 * [ ] The `Vector` class is treated specially for compatibility. The program or an external library defines the `__AS3__.vec.Vector` class and the compiler automatically turns it into a generic class with a single type parameter.
+
+## Bytecode 
+
+* [ ] Determine slot number of a trait based on hierarchy
+* [ ] Determine dynamic dispatch optimization number
