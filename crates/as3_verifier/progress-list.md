@@ -52,3 +52,8 @@ Global objects are resolved asynchronously and certain properties are required b
 
 * [ ] Determine slot number of a trait based on hierarchy
 * [ ] Determine dynamic dispatch optimization number
+
+## Embed meta data
+
+* [ ] `[Embed]` on variable definition
+* [ ] `[Embed]` on class definition
