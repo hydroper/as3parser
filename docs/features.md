@@ -461,6 +461,20 @@ The sources are supplied to the compiler only through `sources.include` and `sou
 
 A source may consist of multiple definitions in multiple packages.
 
+## `export` directive
+
+The `export` directive is similiar to the `import` directive. It must be used within a package block. It either contributes a single alias to the package's names or contributes a wildcard export to the package's names.
+
+It uses a new reserved word `export`.
+
+It supports the following forms:
+
+```as3
+export foo.*;
+export foo.x;
+export x = foo.y;
+```
+
 ## Miscellaneous
 
 *Introduced type expressions*:

@@ -1,6 +1,6 @@
 # Language specification comparisons
 
-This document is incomplete yet.
+This document is non exhaustive yet.
 
 ## Lexical structure
 
@@ -17,6 +17,8 @@ This document is incomplete yet.
     - Null coalescing assignment
   - `=>`
     - Used by arrow functions
+- Added reserved words:
+  - `export`
 - Added context keywords:
   - `embed`
   - `enum`

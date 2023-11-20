@@ -59,6 +59,7 @@ pub fn reserved_word_token(name: &str) -> Option<Token> {
         6 => {
             match name {
                 "delete" => Some(Token::Delete),
+                "export" => Some(Token::Export),
                 "import" => Some(Token::Import),
                 "public" => Some(Token::Public),
                 "return" => Some(Token::Return),

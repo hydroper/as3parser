@@ -3249,6 +3249,8 @@ impl<'input> Parser<'input> {
     fn parse_directive(&mut self, context: DirectiveContext) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
         if self.peek(Token::Import) {
             self.parse_import_directive()
+        } else if self.peek(Token::Export) {
+            self.parse_export_directive()
         } else if self.peek(Token::Use) {
             self.parse_use_directive()
         } else {
@@ -4386,6 +4388,54 @@ impl<'input> Parser<'input> {
                 alias,
                 package_name,
                 import_item,
+            })),
+        });
+
+        Ok((node, semicolon_inserted))
+    }
+
+    fn parse_export_directive(&mut self) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
+        self.mark_location();
+        self.next()?;
+        let mut alias: Option<(String, Location)> = None;
+        let mut package_name: Vec<(String, Location)> = vec![];
+        let mut export_item = (ast::ExportItem::Wildcard, self.token_location());
+        let id1 = self.expect_identifier(false)?;
+        if self.consume(Token::Assign)? {
+            alias = Some(id1.clone());
+            package_name.push(self.expect_identifier(false)?);
+        } else {
+            package_name.push(id1);
+        }
+
+        if !self.peek(Token::Dot) {
+            self.expect(Token::Dot)?;
+        }
+
+        while self.consume(Token::Dot)? {
+            if self.peek(Token::Times) {
+                export_item = (ast::ExportItem::Wildcard, self.token_location());
+                self.next()?;
+                break;
+            } else {
+                let id1 = self.expect_identifier(true)?;
+                if !self.peek(Token::Dot) {
+                    export_item = (ast::ExportItem::Name(id1.0, id1.1.clone()), id1.1.clone());
+                    break;
+                } else {
+                    package_name.push(id1.clone());
+                }
+            }
+        }
+
+        let semicolon_inserted = self.parse_semicolon()?;
+
+        let node = Rc::new(ast::Directive {
+            location: self.pop_location(),
+            kind: ast::DirectiveKind::Export(Rc::new(ast::ExportDirective {
+                alias,
+                package_name,
+                export_item,
             })),
         });
 

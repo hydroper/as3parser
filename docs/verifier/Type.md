@@ -1,6 +1,6 @@
 # Type
 
-The `Type` object represents a type, trait, package, namespace or namespace set.
+The `Type` object represents a type or one of several traits.
 
 ## Memory management
 

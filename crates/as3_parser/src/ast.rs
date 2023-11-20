@@ -727,6 +727,7 @@ pub enum DirectiveKind {
     Statement(Rc<Statement>),
     Include(Rc<IncludeDirective>),
     Import(Rc<ImportDirective>),
+    Export(Rc<ExportDirective>),
     UseNamespace(Rc<Expression>),
     VariableDefinition(Rc<VariableDefinition>),
     FunctionDefinition(Rc<FunctionDefinition>),
@@ -801,11 +802,25 @@ pub struct ImportDirective {
     pub import_item: (ImportItem, Location),
 }
 
+/// An export directive.
+#[derive(Clone, Serialize, Deserialize)]
+pub struct ExportDirective {
+    pub alias: Option<(String, Location)>,
+    pub package_name: Vec<(String, Location)>,
+    pub export_item: (ExportItem, Location),
+}
+
 #[derive(Clone, Serialize, Deserialize)]
 pub enum ImportItem {
     Wildcard,
     /// `**`
     Recursive,
+    Name(String, Location),
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub enum ExportItem {
+    Wildcard,
     Name(String, Location),
 }
 
