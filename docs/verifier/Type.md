@@ -13,13 +13,13 @@ The `Type` object is an unification of various kinds. To make sure it is a certa
 ```rust
 use as3_verifier::*;
 
-struct Data {
+struct Foo {
     foo_package: Package,
 }
 
-let data = Data { foo_package: Package(foo_type) };
+let foo = Foo { foo_package: Package(foo_type) };
 
 // Take `Package` back into `Type` object
 // by asserting that the contained `Type` is a package
-let foo_type: Type = data.foo_package.get()
+let foo_type: Type = foo.foo_package.get()
 ```
