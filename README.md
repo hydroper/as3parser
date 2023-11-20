@@ -21,6 +21,16 @@ Handwritten ActionScript 3 parser in the Rust language.
   * [Feature syntax summary](docs/feature-syntax-summary.md)
 * [Tests](docs/tests.md)
 
+## Verifier
+
+The verifier is a work in progress.
+
+Documentation:
+
+* [Type](docs/verifier/Type.md)
+* [TypeHost](docs/verifier/TypeHost.md)
+* [Vector type](docs/verifier/vector.md)
+
 ## License
 
 Mozilla Public License: https://www.mozilla.org/en-US/MPL/2.0/
