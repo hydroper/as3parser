@@ -134,6 +134,7 @@ Syntax:
 * Directives
   * [x] Include
   * [x] Import
+  * [x] Export
   * [x] Use namespace
   * Parse annotatable definitions from
     * [x] Meta data (`statement.list_meta_data_expressions()` and postprocessing)
