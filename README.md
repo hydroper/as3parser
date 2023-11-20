@@ -28,6 +28,8 @@ The verifier is a work in progress.
 Documentation:
 
 * [Type](docs/verifier/Type.md)
+  * Kinds
+    * [Package](docs/verifier/Type/kinds/package.md)
 * [TypeHost](docs/verifier/TypeHost.md)
 * [Vector type](docs/verifier/vector.md)
 

@@ -8,7 +8,7 @@ The `Type` object is garbage-collected using mark-and-sweep.
 
 ## Assertion
 
-The `Type` object is an unification of various kinds. To make sure it is a certain type when storing it somewhere, use assertion layers such as `Class(t)` and `Variable(t)`.
+The `Type` object is an unification of various kinds. To make sure it is a certain type when storing it somewhere, use assertion layers such as `ClassType(t)` and `VariableProperty(t)`.
 
 ```rust
 use as3_verifier::*;
