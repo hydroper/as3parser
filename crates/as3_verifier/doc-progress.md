@@ -22,6 +22,7 @@ Type kinds:
 - [ ] String literal type 
 - [ ] Number literal type
 - [ ] Variable property
+  - [ ] Read only
 - [ ] Virtual property
 - [ ] Function property
 - [ ] Alias
@@ -29,4 +30,12 @@ Type kinds:
 - [ ]
 - [ ]
 - [ ]
+- [ ]
+
+Names:
+
+- [ ] The `Names` object represents a qualified name to 
+
+Frame:
+
 - [ ]
