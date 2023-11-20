@@ -6,7 +6,7 @@ The `Type` object represents a type, trait, package, namespace or namespace set.
 
 The `Type` object is garbage-collected using mark-and-sweep.
 
-## Type safety
+## Assertion
 
 The `Type` object is an unification of various kinds. To make sure it is a certain type when storing it somewhere, use assertion layers such as `Class(t)` and `Variable(t)`.
 
@@ -21,5 +21,5 @@ let foo = Foo { foo_package: Package(foo_type) };
 
 // Take `Package` back into `Type` object
 // by asserting that the contained `Type` is a package
-let foo_type: Type = foo.foo_package.get()
+let foo_type: Type = foo.foo_package.get();
 ```
