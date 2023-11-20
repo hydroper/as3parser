@@ -17,7 +17,7 @@ struct Data {
     foo_package: Package,
 }
 
-let data = Data { foo_package: Package(foo_type) }
+let data = Data { foo_package: Package(foo_type) };
 
 // Take `Package` back into `Type` object
 // by asserting that the contained `Type` is a package
