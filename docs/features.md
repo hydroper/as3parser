@@ -95,12 +95,12 @@ Array destructuring can be used to destructure `Array`, `Vector` and tuples.
 
 ## Enhanced variables
 
-Variables are block-scoped and can shadow others in the same scope, if the compiler option `variables` is `"next"`:
+Variables are block-scoped and can shadow others in the same scope, if the compiler option `enhancedVariables` is `true`:
 
 ```json
 {
     "compilerOptions": {
-        "variables": "next"
+        "enhancedVariables": true
     }
 }
 ```
@@ -121,15 +121,17 @@ var x: String = "";
 ## Import alias
 
 ```as3
-import n2 = q.n1;
+import n2 = q.n1
 
 // Open `public` from `q` and alias it
-import q2 = q.*;
+import q2 = q.*
 q2::x
 
-// Open `public` from `q` and its recursive subpackages
-// and alias `q` and its recursive subpackages as `q3`
-import q3 = q.**;
+// Open `public` from `q` and its subpackages recursively
+// and alias `q` and its subpackages recursively as `q3`
+import q3 = q.**
+
+q3::x
 ```
 
 ## Power expression
