@@ -4,7 +4,7 @@ The `Type` object represents a type, trait, package, namespace or namespace set.
 
 ## Memory management
 
-The `Type` object is reference counted, therefore a type `WeakTypeRef` is supported for breaking circular references.
+The `Type` object is garbage-collected using mark-and-sweep.
 
 ## Type safety
 
