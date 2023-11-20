@@ -34,3 +34,7 @@ Type kinds:
 Names:
 
 - [ ] The `Names` object represents a mapping from `Name` kind to `Type` and a collection of wildcard package exports.
+
+Miscellaneous:
+
+- [ ] `SimpleTypedName` (`a: T` as used in a function type)
