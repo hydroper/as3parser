@@ -18,6 +18,28 @@
 > Prints undefined property and function calls; also performs compile-time
 type checking on assignments and options supplied to method calls.
 
+## Fully package qualified references
+
+- [ ] In a `o.x` expression, imported packages shadows any topmost variable name under a lexical scope, conforming to ActionScript 3 specification.
+
+- [ ] Reproduce the following diagnostic (optional):
+
+```as3
+package {
+    import flash.display.Sprite;
+    import flash.geom.*;
+    public class Main extends Sprite {
+        public function Main() {
+            var flash: F = new F;
+            trace(flash.geom.toString());
+            // Error: Attempted access of inaccessible method toString through a reference with static type G.
+        }
+    }
+}
+package { public class F { public const geom: G = new G; } }
+package { public class G { public function toString(): String { return ""; } } }
+```
+
 ## External libraries
 
 External libraries is typically code originating from an external SWC or ABC such as `playerglobal.swc`.
