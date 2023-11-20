@@ -18,9 +18,14 @@
 > Prints undefined property and function calls; also performs compile-time
 type checking on assignments and options supplied to method calls.
 
+## Expression verification
+
+* [ ] Value expectation
+  * [ ] Not all kinds of types are expected as value. Invalidate namespace sets, packages and certain types such as `*`. The result of expecting a value should produce a `Value` type kind.
+
 ## Fully package qualified references
 
-- [ ] In a `o.x` expression, imported packages shadows any topmost variable name under a lexical scope, conforming to ActionScript 3 specification.
+- [ ] In a `o.x` expression (without `q::x`), imported packages shadows any topmost variable name under a lexical scope, conforming to ActionScript 3 specification.
 
 - [ ] Reproduce the following diagnostic (optional):
 

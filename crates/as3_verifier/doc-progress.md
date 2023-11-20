@@ -29,7 +29,9 @@ Type kinds:
 - [ ] Alias
   - [ ] The `Alias` type kind represents an alias to a type or property.
 - [ ] Frame
-  - [ ] The `Frame` object represents a lexical scope. A `Frame` contains an optional reference to a parent frame, a collection of wildcard package imports, recursive package imports and a `Names` object.
+  - [ ] The `Frame` type kind represents a lexical scope. A `Frame` contains an optional reference to a parent frame, a collection of wildcard package imports, recursive package imports and a `Names` object.
+- [ ] Value
+  - [ ] The `Value` type kind represents a value with a static type and various variations.
 
 Names:
 
