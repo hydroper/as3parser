@@ -2,7 +2,7 @@
 
 This ActionScript 3 parser introduces several syntax constructs from TypeScript, ECMA 4th edition and Apache Royale Compiler.
 
-> **NOTICE:** Some of the features and language semantics in this document are not specific to this parser but to the verifier or compiler, which is not integrated with the parser.
+> Note: Some of the descriptions in this document are not specific to this parser but to the verifier or compiler, which is not integrated with the parser.
 
 ## Global
 
@@ -463,7 +463,7 @@ A source may consist of multiple definitions in multiple packages.
 
 ## `export` directive
 
-The `export` directive is similiar to the `import` directive. It must be used within a package block. It either contributes a single alias to the package's names or contributes a wildcard export to the package's names.
+The `export` directive is similiar to the `import` directive. It must be used within a package block. It either contributes a single public alias to the package's names or contributes a public wildcard export to the package's names.
 
 It uses a new reserved word `export`.
 
