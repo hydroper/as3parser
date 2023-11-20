@@ -1,7 +1,5 @@
 # Vector type
 
-> **NOTICE**: the verifier is not available.
-
 The `Vector` class is treated in a special way for compatibility. The program or an external library defines the `__AS3__.vec.Vector` class and the verifier automatically turns it into a generic class with a single type parameter.
 
 ## Code generation
