@@ -4,7 +4,7 @@ Install `as3_parser` in your Cargo project with `cargo add as3_parser`, or add t
 
 ```toml
 [dependencies]
-as3_parser = "0.1"
+as3_parser = "0.2"
 ```
 
 Parse programs or expressions through the `parser_facade` submodule of the `as3_parser` crate:

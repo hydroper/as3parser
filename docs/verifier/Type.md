@@ -19,7 +19,10 @@ struct Foo {
 
 let foo = Foo { foo_package: Package(foo_type) };
 
+// Assertion layers implement `Deref` targetting `&Type`.
+println!("{:?}", foo.foo_package.parent());
+
 // Take `Package` back into `Type` object
-// by asserting that the contained `Type` is a package
-let foo_type: Type = foo.foo_package.get();
+// by asserting that the contained `Type` is a package.
+let foo_type: Type = *foo.foo_package;
 ```

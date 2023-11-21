@@ -3505,7 +3505,7 @@ impl<'input> Parser<'input> {
         &mut self,
         start: Location,
         annotations: ast::Annotations,
-        asdoc: Option<ast::AsDoc>,
+        asdoc: Option<Rc<ast::AsDoc>>,
         context: DirectiveContext,
     ) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
         self.push_location(&start);
@@ -3594,7 +3594,7 @@ impl<'input> Parser<'input> {
         &mut self,
         start: Location,
         annotations: ast::Annotations,
-        asdoc: Option<ast::AsDoc>,
+        asdoc: Option<Rc<ast::AsDoc>>,
         context: DirectiveContext,
     ) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
         self.push_location(&start);
@@ -3683,7 +3683,7 @@ impl<'input> Parser<'input> {
         &mut self,
         start: Location,
         annotations: ast::Annotations,
-        asdoc: Option<ast::AsDoc>,
+        asdoc: Option<Rc<ast::AsDoc>>,
         context: DirectiveContext,
     ) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
         self.push_location(&start);
@@ -3803,7 +3803,7 @@ impl<'input> Parser<'input> {
     fn parse_getter_or_setter_definition(
         &mut self,
         annotations: ast::Annotations,
-        asdoc: Option<ast::AsDoc>,
+        asdoc: Option<Rc<ast::AsDoc>>,
         context: DirectiveContext,
         name: (String, Location),
         getter: bool,
@@ -3944,7 +3944,7 @@ impl<'input> Parser<'input> {
         &mut self,
         start: Location,
         annotations: ast::Annotations,
-        asdoc: Option<ast::AsDoc>,
+        asdoc: Option<Rc<ast::AsDoc>>,
         context: DirectiveContext,
     ) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
         self.push_location(&start);
@@ -4007,7 +4007,7 @@ impl<'input> Parser<'input> {
         &mut self,
         start: Location,
         annotations: ast::Annotations,
-        asdoc: Option<ast::AsDoc>,
+        asdoc: Option<Rc<ast::AsDoc>>,
         context: DirectiveContext,
     ) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
         self.push_location(&start);
@@ -4063,7 +4063,7 @@ impl<'input> Parser<'input> {
         &mut self,
         start: Location,
         annotations: ast::Annotations,
-        asdoc: Option<ast::AsDoc>,
+        asdoc: Option<Rc<ast::AsDoc>>,
         context: DirectiveContext,
     ) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
         self.push_location(&start);
@@ -4124,7 +4124,7 @@ impl<'input> Parser<'input> {
         &mut self,
         start: Location,
         annotations: ast::Annotations,
-        asdoc: Option<ast::AsDoc>,
+        asdoc: Option<Rc<ast::AsDoc>>,
         context: DirectiveContext,
     ) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
         self.push_location(&start);
@@ -4180,7 +4180,7 @@ impl<'input> Parser<'input> {
         &mut self,
         start: Location,
         annotations: ast::Annotations,
-        asdoc: Option<ast::AsDoc>,
+        asdoc: Option<Rc<ast::AsDoc>>,
         context: DirectiveContext,
     ) -> Result<(Rc<ast::Directive>, bool), ParserFailure> {
         let Token::Identifier(previous_word) = &self.previous_token.0 else {
@@ -4231,7 +4231,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn exp_to_metadata_1(&mut self, asdoc: Option<ast::AsDoc>, exp: &Rc<ast::Expression>) -> Option<Rc<ast::Metadata>> {
+    fn exp_to_metadata_1(&mut self, asdoc: Option<Rc<ast::AsDoc>>, exp: &Rc<ast::Expression>) -> Option<Rc<ast::Metadata>> {
         match &exp.kind {
             ast::ExpressionKind::Id(id) => {
                 if let Some(name) = id.to_metadata_name() {
@@ -4516,7 +4516,7 @@ impl<'input> Parser<'input> {
         Ok(directives)
     }
 
-    fn parse_asdoc(&mut self) -> Result<Option<ast::AsDoc>, ParserFailure> {
+    fn parse_asdoc(&mut self) -> Result<Option<Rc<ast::AsDoc>>, ParserFailure> {
         let comments = self.source().comments.borrow();
         let last_comment = comments.last();
         Ok(last_comment.and_then(|comment| {
@@ -4531,7 +4531,7 @@ impl<'input> Parser<'input> {
         }))
     }
 
-    fn parse_asdoc_lines(&self, comment_location: Location, lines: Vec<String>) -> ast::AsDoc {
+    fn parse_asdoc_lines(&self, comment_location: Location, lines: Vec<String>) -> Rc<ast::AsDoc> {
         let mut main_body = String::new();
         let mut tags: Vec<ast::AsDocTag> = vec![];
         let mut i = 0;
@@ -4576,7 +4576,7 @@ impl<'input> Parser<'input> {
             &mut tags,
         );
 
-        ast::AsDoc { main_body, tags }
+        Rc::new(ast::AsDoc { main_body, tags })
     }
 
     fn parse_asdoc_tag_or_main_content(
@@ -4930,7 +4930,7 @@ pub struct ControlContext {
 struct AnnotatableContext {
     start: Location,
     metadata_exp: Vec<Rc<ast::Expression>>,
-    asdoc: Option<ast::AsDoc>,
+    asdoc: Option<Rc<ast::AsDoc>>,
     first_modifier: Option<Rc<ast::Expression>>,
     previous_token_is_definition_keyword: bool,
     context: DirectiveContext,

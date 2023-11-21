@@ -29,6 +29,7 @@ Documentation:
 
 * [Type](docs/verifier/Type.md)
   * Kinds
+    * [Name](docs/verifier/Type/kinds/name.md)
     * [Package](docs/verifier/Type/kinds/package.md)
 * [TypeHost](docs/verifier/TypeHost.md)
 * [Vector type](docs/verifier/vector.md)

@@ -173,7 +173,7 @@ pub enum ExpressionKind {
     /// This expression is not valid in other contexts.
     Rest(Rc<Expression>),
     ArrayInitializer {
-        asdoc: Option<AsDoc>,
+        asdoc: Option<Rc<AsDoc>>,
 
         /// Element sequence possibly containing `Rest`s and ellisions.
         elements: Vec<Option<Rc<Expression>>>,
@@ -205,7 +205,7 @@ pub enum ExpressionKind {
     /// The `o[k]` expression.
     BracketsMember {
         base: Rc<Expression>,
-        asdoc: Option<AsDoc>,
+        asdoc: Option<Rc<AsDoc>>,
         key: Rc<Expression>,
     },
     /// `base.<T1, Tn>`
@@ -529,7 +529,7 @@ impl FunctionParamKind {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct RecordTypeField {
-    pub asdoc: Option<AsDoc>,
+    pub asdoc: Option<Rc<AsDoc>>,
     pub readonly: bool,
     pub key: (ObjectKey, Location),
     pub nullability: FieldNullability,
@@ -550,7 +550,7 @@ pub struct Statement {
 }
 
 impl Statement {
-    pub(crate) fn extract_asdoc(&self) -> Option<AsDoc> {
+    pub(crate) fn extract_asdoc(&self) -> Option<Rc<AsDoc>> {
         if let StatementKind::Expression { asdoc, expression: _ } = &self.kind {
             asdoc.clone()
         } else {
@@ -651,7 +651,7 @@ pub enum StatementKind {
         finally_clause: Option<FinallyClause>,
     },
     Expression {
-        asdoc: Option<AsDoc>,
+        asdoc: Option<Rc<AsDoc>>,
         expression: Rc<Expression>,
     },
     Labeled {
@@ -743,7 +743,7 @@ pub enum DirectiveKind {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct ClassDefinition {
-    pub asdoc: Option<AsDoc>,
+    pub asdoc: Option<Rc<AsDoc>>,
     pub annotations: Annotations,
     pub name: (String, Location),
     pub generics: Generics,
@@ -754,7 +754,7 @@ pub struct ClassDefinition {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct InterfaceDefinition {
-    pub asdoc: Option<AsDoc>,
+    pub asdoc: Option<Rc<AsDoc>>,
     pub annotations: Annotations,
     pub name: (String, Location),
     pub generics: Generics,
@@ -764,7 +764,7 @@ pub struct InterfaceDefinition {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct EnumDefinition {
-    pub asdoc: Option<AsDoc>,
+    pub asdoc: Option<Rc<AsDoc>>,
     pub annotations: Annotations,
     pub name: (String, Location),
     pub block: Rc<Block>,
@@ -772,7 +772,7 @@ pub struct EnumDefinition {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct NamespaceDefinition {
-    pub asdoc: Option<AsDoc>,
+    pub asdoc: Option<Rc<AsDoc>>,
     pub annotations: Annotations,
     pub left: (String, Location),
     pub right: Option<Rc<Expression>>,
@@ -826,7 +826,7 @@ pub enum ExportItem {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct VariableDefinition {
-    pub asdoc: Option<AsDoc>,
+    pub asdoc: Option<Rc<AsDoc>>,
     pub annotations: Annotations,
     pub kind: VariableKind,
     pub bindings: Vec<VariableBinding>,
@@ -834,7 +834,7 @@ pub struct VariableDefinition {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct FunctionDefinition {
-    pub asdoc: Option<AsDoc>,
+    pub asdoc: Option<Rc<AsDoc>>,
     pub annotations: Annotations,
     pub name: (String, Location),
     pub generics: Generics,
@@ -843,7 +843,7 @@ pub struct FunctionDefinition {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct ConstructorDefinition {
-    pub asdoc: Option<AsDoc>,
+    pub asdoc: Option<Rc<AsDoc>>,
     pub annotations: Annotations,
     pub name: (String, Location),
     pub common: Rc<FunctionCommon>,
@@ -851,7 +851,7 @@ pub struct ConstructorDefinition {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct GetterDefinition {
-    pub asdoc: Option<AsDoc>,
+    pub asdoc: Option<Rc<AsDoc>>,
     pub annotations: Annotations,
     pub name: (String, Location),
     pub common: Rc<FunctionCommon>,
@@ -859,7 +859,7 @@ pub struct GetterDefinition {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct SetterDefinition {
-    pub asdoc: Option<AsDoc>,
+    pub asdoc: Option<Rc<AsDoc>>,
     pub annotations: Annotations,
     pub name: (String, Location),
     pub common: Rc<FunctionCommon>,
@@ -867,7 +867,7 @@ pub struct SetterDefinition {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct TypeDefinition {
-    pub asdoc: Option<AsDoc>,
+    pub asdoc: Option<Rc<AsDoc>>,
     pub annotations: Annotations,
     pub left: (String, Location),
     pub generics: Generics,
@@ -900,7 +900,7 @@ impl Default for Modifiers {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Metadata {
-    pub asdoc: Option<AsDoc>,
+    pub asdoc: Option<Rc<AsDoc>>,
     pub location: Location,
     /// The metadata name. The metadata name may contain a single `::` delimiter.
     pub name: (String, Location),
@@ -1008,7 +1008,7 @@ pub enum AsDocTag {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct PackageDefinition {
-    pub asdoc: Option<AsDoc>,
+    pub asdoc: Option<Rc<AsDoc>>,
     pub location: Location,
     pub id: Vec<(String, Location)>,
     pub block: Rc<Block>,

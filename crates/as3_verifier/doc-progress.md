@@ -1,7 +1,6 @@
 Type kinds:
 
-- [ ] Name
-  - [ ] The `Name` type kind represents an unique name consisting of a namespace and a string.
+- [x] Name
 - [ ] Package
 - [ ] Namespace
 - [ ] Namespace set
