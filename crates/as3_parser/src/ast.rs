@@ -1,6 +1,6 @@
-use std::rc::Rc;
 use bitflags::bitflags;
 use serde::{Serialize, Deserialize};
+use std::rc::Rc;
 use crate::*;
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -139,10 +139,10 @@ impl Expression {
 
     pub(crate) fn list_metadata_expressions(self: &Rc<Self>) -> Option<Vec<Rc<Self>>> {
         match &self.kind {
-            ExpressionKind::ArrayInitializer { .. } => Some(vec![Rc::clone(self)]),
+            ExpressionKind::ArrayInitializer { .. } => Some(vec![self.clone()]),
             ExpressionKind::BracketsMember { base, .. } => {
                 let mut result = base.list_metadata_expressions()?;
-                result.push(Rc::clone(&self));
+                result.push(self.clone());
                 Some(result)
             },
             _ => None,
@@ -340,7 +340,7 @@ pub enum XmlAttributeValueOrExpression {
     Expression(Rc<Expression>),
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Copy, Clone, Serialize, Deserialize)]
 pub enum ReservedNamespace {
     Public,
     Private,
@@ -573,7 +573,7 @@ impl Statement {
     pub(crate) fn to_identifier_or_reserved_namespace(&self) -> Option<Rc<Expression>> {
         if let StatementKind::Expression { expression, .. } = &self.kind {
             if matches!(expression.kind, ExpressionKind::ReservedNamespace(_)) || self.to_identifier().is_some() {
-                Some(Rc::clone(expression))
+                Some(expression.clone())
             } else {
                 None
             }

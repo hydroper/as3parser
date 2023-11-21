@@ -1,5 +1,5 @@
-use std::rc::Rc;
 use std::cell::{RefCell, Cell, RefMut};
+use std::rc::Rc;
 use crate::*;
 
 /// Represents an ActionScript source file.
@@ -47,7 +47,7 @@ impl Source {
             invalidated: Cell::new(false),
             error_count: Cell::new(0),
             warning_count: Cell::new(0),
-            compiler_options: Rc::clone(compiler_options),
+            compiler_options: compiler_options.clone(),
             comments: RefCell::new(vec![]),
             subsources: RefCell::new(vec![]),
         })
@@ -89,7 +89,7 @@ impl Source {
     pub fn subsources(&self) -> Vec<Rc<Source>> {
         let mut result = vec![];
         for source in self.subsources.borrow().iter() {
-            result.push(Rc::clone(&source));
+            result.push(source.clone());
         }
         result
     }

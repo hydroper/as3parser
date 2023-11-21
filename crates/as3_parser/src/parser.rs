@@ -538,7 +538,7 @@ impl<'input> Parser<'input> {
         if self.peek(Token::LeftParen) {
             let paren_exp = self.parse_paren_list_expression()?;
             if !matches!(paren_exp.kind, ast::ExpressionKind::Sequence(_, _)) && self.peek(Token::ColonColon) {
-                let id = self.finish_qualified_identifier(false, Rc::clone(&paren_exp))?;
+                let id = self.finish_qualified_identifier(false, paren_exp.clone())?;
                 Ok(Rc::new(ast::Expression {
                     location: self.pop_location(),
                     kind: ast::ExpressionKind::DotMember { base, id }
@@ -581,10 +581,10 @@ impl<'input> Parser<'input> {
         let mut return_annotation: Option<Rc<ast::TypeExpression>> = None;
         if let Some(left) = context.left {
             if let ast::ExpressionKind::WithTypeAnnotation { base, type_annotation } = &left.kind {
-                params = self.exp_to_function_params(Rc::clone(&base))?;
+                params = self.exp_to_function_params(base.clone())?;
                 return_annotation = Some(type_annotation.clone());
             } else {
-                params = self.exp_to_function_params(Rc::clone(&left))?;
+                params = self.exp_to_function_params(left.clone())?;
             }
         }
 
@@ -620,19 +620,19 @@ impl<'input> Parser<'input> {
         if let ast::ExpressionKind::EmptyParen = exp.kind {
             Ok(vec![])
         } else if let ast::ExpressionKind::Paren(exp) = &exp.kind {
-            self.seq_exp_to_function_params(Rc::clone(&exp))
+            self.seq_exp_to_function_params(exp.clone())
         } else {
-            self.seq_exp_to_function_params(Rc::clone(&exp))
+            self.seq_exp_to_function_params(exp.clone())
         }
     }
 
     fn seq_exp_to_function_params(&mut self, exp: Rc<ast::Expression>) -> Result<Vec<ast::FunctionParam>, ParserFailure> {
         if let ast::ExpressionKind::Sequence(left, right) = &exp.kind {
-            let mut params = self.seq_exp_to_function_params(Rc::clone(&left))?;
-            params.push(self.exp_to_function_param(Rc::clone(&right))?);
+            let mut params = self.seq_exp_to_function_params(left.clone())?;
+            params.push(self.exp_to_function_param(right.clone())?);
             Ok(params)
         } else {
-            Ok(vec![self.exp_to_function_param(Rc::clone(&exp))?])
+            Ok(vec![self.exp_to_function_param(exp.clone())?])
         }
     }
 
@@ -642,14 +642,14 @@ impl<'input> Parser<'input> {
                 location: exp.location.clone(),
                 kind: ast::FunctionParamKind::Rest,
                 binding: ast::VariableBinding {
-                    pattern: self.exp_to_destructuring(Rc::clone(&subexp))?,
+                    pattern: self.exp_to_destructuring(subexp.clone())?,
                     init: None,
                 },
             })
         } else if let ast::ExpressionKind::Assignment { left, compound, right } = &exp.kind {
             let left = match left {
-                ast::AssignmentLeft::Destructuring(destructuring) => Rc::clone(&destructuring),
-                ast::AssignmentLeft::Expression(exp) => self.exp_to_destructuring(Rc::clone(&exp))?,
+                ast::AssignmentLeft::Destructuring(destructuring) => destructuring.clone(),
+                ast::AssignmentLeft::Expression(exp) => self.exp_to_destructuring(exp.clone())?,
             };
             if compound.is_some() {
                 self.add_syntax_error(&exp.location.clone(), DiagnosticKind::MalformedArrowFunctionElement, vec![]);
@@ -660,7 +660,7 @@ impl<'input> Parser<'input> {
                 kind: ast::FunctionParamKind::Optional,
                 binding: ast::VariableBinding {
                     pattern: left,
-                    init: Some(Rc::clone(&right)),
+                    init: Some(right.clone()),
                 },
             })
         } else {
@@ -668,7 +668,7 @@ impl<'input> Parser<'input> {
                 location: exp.location.clone(),
                 kind: ast::FunctionParamKind::Required,
                 binding: ast::VariableBinding {
-                    pattern: self.exp_to_destructuring(Rc::clone(&exp))?,
+                    pattern: self.exp_to_destructuring(exp.clone())?,
                     init: None,
                 },
             })
@@ -677,19 +677,19 @@ impl<'input> Parser<'input> {
 
     fn exp_to_destructuring(&mut self, exp: Rc<ast::Expression>) -> Result<Rc<ast::Destructuring>, ParserFailure> {
         if let ast::ExpressionKind::WithTypeAnnotation { base, type_annotation } = &exp.kind {
-            self.exp_to_destructuring_1(Rc::clone(&base), Some(Rc::clone(&type_annotation)), exp.location.clone())
+            self.exp_to_destructuring_1(base.clone(), Some(type_annotation.clone()), exp.location.clone())
         } else {
-            self.exp_to_destructuring_1(Rc::clone(&exp), None, exp.location.clone())
+            self.exp_to_destructuring_1(exp.clone(), None, exp.location.clone())
         }
     }
 
     fn exp_to_destructuring_1(&mut self, exp: Rc<ast::Expression>, type_annotation: Option<Rc<ast::TypeExpression>>, location: Location) -> Result<Rc<ast::Destructuring>, ParserFailure> {
         if let ast::ExpressionKind::Unary { base, operator } = &exp.kind {
             if *operator == Operator::NonNull {
-                return self.exp_to_destructuring_2(Rc::clone(&base), true, type_annotation, location);
+                return self.exp_to_destructuring_2(base.clone(), true, type_annotation, location);
             }
         }
-        self.exp_to_destructuring_2(Rc::clone(&exp), false, type_annotation, location)
+        self.exp_to_destructuring_2(exp.clone(), false, type_annotation, location)
     }
 
     fn exp_to_destructuring_2(&mut self, exp: Rc<ast::Expression>, non_null: bool, type_annotation: Option<Rc<ast::TypeExpression>>, location: Location) -> Result<Rc<ast::Destructuring>, ParserFailure> {
@@ -731,10 +731,10 @@ impl<'input> Parser<'input> {
             }
             let element = element.unwrap();
             if let ast::ExpressionKind::Rest(subexp) = &element.kind {
-                result_items.push(Some(ast::ArrayDestructuringItem::Rest(self.exp_to_destructuring(Rc::clone(&subexp))?, element.location.clone())));
+                result_items.push(Some(ast::ArrayDestructuringItem::Rest(self.exp_to_destructuring(subexp.clone())?, element.location.clone())));
                 continue;
             }
-            result_items.push(Some(ast::ArrayDestructuringItem::Pattern(self.exp_to_destructuring(Rc::clone(&element))?)));
+            result_items.push(Some(ast::ArrayDestructuringItem::Pattern(self.exp_to_destructuring(element.clone())?)));
         }
         Ok(ast::DestructuringKind::Array(result_items))
     }
@@ -746,7 +746,7 @@ impl<'input> Parser<'input> {
                 self.add_syntax_error(&field.location(), DiagnosticKind::UnsupportedDestructuringRest, vec![]);
                 continue;
             };
-            let alias = if let Some(v) = value { Some(self.exp_to_destructuring(Rc::clone(&v))?) } else { None };
+            let alias = if let Some(v) = value { Some(self.exp_to_destructuring(v.clone())?) } else { None };
             result_fields.push(Rc::new(ast::RecordDestructuringField {
                 location: field.location(),
                 key: key.clone(),
@@ -3320,7 +3320,7 @@ impl<'input> Parser<'input> {
 
             Ok((Rc::new(ast::Directive {
                 location: self.pop_location(),
-                kind: ast::DirectiveKind::Statement(Rc::clone(&statement)),
+                kind: ast::DirectiveKind::Statement(statement.clone()),
             }), semicolon_inserted))
         }
     }
@@ -3367,7 +3367,7 @@ impl<'input> Parser<'input> {
             if let Some(m) = m.to_modifier() {
                 modifiers |= m;
             } else {
-                access_modifier = Some(Rc::clone(m));
+                access_modifier = Some(m.clone());
             }
         }
 
@@ -3430,7 +3430,7 @@ impl<'input> Parser<'input> {
                 if access_modifier.is_some() {
                     self.add_syntax_error(&exp.location.clone(), DiagnosticKind::DuplicateModifier, vec![]);
                 }
-                access_modifier = Some(Rc::clone(exp));
+                access_modifier = Some(exp.clone());
             } else {
                 let modifier = modifier.unwrap();
                 if modifiers.contains(modifier) {
@@ -3443,7 +3443,7 @@ impl<'input> Parser<'input> {
         let annotations = ast::Annotations {
             metadata,
             modifiers,
-            access_modifier: access_modifier.as_ref().map(|m| Rc::clone(m)),
+            access_modifier: access_modifier.as_ref().map(|m| m.clone()),
         };
 
         // Previous token is a ContextKeyword identifying an annotatable directive
@@ -4480,10 +4480,10 @@ impl<'input> Parser<'input> {
         }
 
         // Add subsource to super source
-        self.tokenizer.source.subsources.borrow_mut().push(Rc::clone(&replaced_by_source));
+        self.tokenizer.source.subsources.borrow_mut().push(replaced_by_source.clone());
 
         // Parse directives from replacement source
-        let replaced_by = parse_include_directive_source(Rc::clone(&replaced_by_source), context);
+        let replaced_by = parse_include_directive_source(replaced_by_source.clone(), context);
 
         // Delegate subsource errors to super source
         if replaced_by_source.invalidated() {
@@ -4495,7 +4495,7 @@ impl<'input> Parser<'input> {
             kind: ast::DirectiveKind::Include(Rc::new(ast::IncludeDirective {
                 source,
                 replaced_by,
-                replaced_by_source: Rc::clone(&replaced_by_source),
+                replaced_by_source: replaced_by_source.clone(),
             })),
         });
 

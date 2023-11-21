@@ -1,4 +1,6 @@
 #![feature(decl_macro)]
+#![feature(try_blocks)]
+#![feature(arbitrary_self_types)]
 
 pub mod character_validation;
 pub(crate) mod compiler_options;

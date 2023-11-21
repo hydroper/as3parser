@@ -4,7 +4,7 @@ The `Type` object represents a type or one of several traits.
 
 ## Memory management
 
-The `Type` object is garbage-collected using mark-and-sweep.
+The `Type` object is reference counted in an arena. Use `WeakTypeRef` for weak references.
 
 ## Assertion
 

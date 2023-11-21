@@ -61,7 +61,7 @@ dependencies = [
 
 [[package]]
 name = "as3_parser"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "bitflags",
  "by_address",
@@ -86,7 +86,6 @@ dependencies = [
  "as3_parser",
  "bitflags",
  "file_paths",
- "gc",
  "lazy-regex",
  "lazy_static",
  "maplit",
@@ -144,7 +143,7 @@ dependencies = [
  "heck",
  "proc-macro2",
  "quote",
- "syn 2.0.37",
+ "syn",
 ]
 
 [[package]]
@@ -181,27 +180,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6655a548f719048f152b0349acf5f1b0fa7ce430acb49d4afc1d42513f160549"
 dependencies = [
  "lazy-regex",
-]
-
-[[package]]
-name = "gc"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f73a03797d58caede765f4b19522d1a63d737088bbef81de06d2dd117d7bc8c3"
-dependencies = [
- "gc_derive",
-]
-
-[[package]]
-name = "gc_derive"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fb6f1e0d69658b2806f60864bad1a80a9634fc0bc17f7ed55828e3b9c45bf61e"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 1.0.109",
- "synstructure",
 ]
 
 [[package]]
@@ -246,7 +224,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "regex",
- "syn 2.0.37",
+ "syn",
 ]
 
 [[package]]
@@ -275,7 +253,7 @@ checksum = "cfb77679af88f8b125209d354a202862602672222e7f2313fdd6dc349bad4712"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.37",
+ "syn",
 ]
 
 [[package]]
@@ -363,7 +341,7 @@ checksum = "d6c7207fbec9faa48073f3e3074cbe553af6ea512d7c21ba46e434e70ea9fbc1"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.37",
+ "syn",
 ]
 
 [[package]]
@@ -385,17 +363,6 @@ checksum = "73473c0e59e6d5812c5dfe2a064a6444949f089e20eec9a2e5506596494e4623"
 
 [[package]]
 name = "syn"
-version = "1.0.109"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "72b64191b275b66ffe2469e8af2c1cfe3bafa67b529ead792a6d0160888b4237"
-dependencies = [
- "proc-macro2",
- "quote",
- "unicode-ident",
-]
-
-[[package]]
-name = "syn"
 version = "2.0.37"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7303ef2c05cd654186cb250d29049a24840ca25d2747c25c0381c8d9e2f582e8"
@@ -403,18 +370,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "unicode-ident",
-]
-
-[[package]]
-name = "synstructure"
-version = "0.12.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f36bdaa60a83aca3921b5259d5400cbf5e90fc51931376a9bd4a0eb79aa7210f"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 1.0.109",
- "unicode-xid",
 ]
 
 [[package]]
@@ -428,12 +383,6 @@ name = "unicode-ident"
 version = "1.0.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3354b9ac3fae1ff6755cb6db53683adb661634f67557942dea4facebec0fee4b"
-
-[[package]]
-name = "unicode-xid"
-version = "0.2.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f962df74c8c05a667b5ee8bcf162993134c104e96440b663c8daa176dc772d8c"
 
 [[package]]
 name = "utf8parse"

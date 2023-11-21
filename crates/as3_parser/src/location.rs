@@ -1,7 +1,7 @@
-use std::rc::Rc;
 use std::cmp::Ordering;
 use std::fmt::Debug;
 use serde::{Serialize, Deserialize};
+use std::rc::Rc;
 use crate::source::Source;
 
 /// Represents a source location. This location includes
@@ -84,7 +84,7 @@ impl Location {
         last_offset: usize,
     ) -> Self {
         Self {
-            source: Rc::clone(source),
+            source: source.clone(),
             first_line_number,
             last_line_number,
             first_offset,
@@ -112,7 +112,7 @@ impl Location {
     /// last location.
     pub fn combine_with(&self, other: Location) -> Self {
         Self {
-            source: Rc::clone(&self.source),
+            source: self.source.clone(),
             first_line_number: self.first_line_number,
             last_line_number: other.last_line_number,
             first_offset: self.first_offset,
@@ -125,7 +125,7 @@ impl Location {
     /// of `other` serves as the last location.
     pub fn combine_with_start_of(&self, other: Location) -> Self {
         Self {
-            source: Rc::clone(&self.source),
+            source: self.source.clone(),
             first_line_number: self.first_line_number,
             last_line_number: other.first_line_number,
             first_offset: self.first_offset,
@@ -135,7 +135,7 @@ impl Location {
 
     /// The source file that this location belongs to.
     pub fn source(&self) -> Rc<Source> {
-        Rc::clone(&self.source)
+        self.source.clone()
     }
 
     /// First line number, counted from one.
