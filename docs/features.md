@@ -6,7 +6,7 @@ This ActionScript 3 parser introduces several syntax constructs from TypeScript,
 
 ## Global
 
-A `global` constant, defined in a parent anonymous scope of the source, identifies the top-level package, which allows to resolve ambiguities in the lexical scope:
+A `global` constant, defined in a parent anonymous scope of the source, resolves properties from top-level package. This constant allows to resolve ambiguities in the lexical scope:
 
 ```as3
 package com.q {
