@@ -1,7 +1,7 @@
 Type kinds:
 
 - [x] Name
-- [ ] Package
+- [x] Package
 - [ ] Namespace
 - [ ] Namespace set
 - [ ] Any type
