@@ -1,6 +1,6 @@
 # Package
 
-The `Package` type kind represents a package as consisting of a name string (excluding dots), an optional parent package, a properties `Names` object, a collection of direct subpackages, a set of reserved namespaces (`public`, `internal`), and an optional ASDoc comment.
+The `Package` type kind represents a package as consisting of a name string (excluding dots), an optional parent package, a properties `Names` object, a collection of wildcard package exports (`export q.*;`), a collection of direct subpackages, a set of reserved namespaces (`public`, `internal`), and an optional ASDoc comment.
 
 ## Supported methods
 
@@ -15,6 +15,18 @@ The parent package of the package, or `None`.
 ### `properties()`
 
 The properties of the package as a `Names` object.
+
+### `wildcard_package_exports()`
+
+A collection of wildcard package exports, as a vector of `Package` types. A wildcard package export is contributed from an `export` directive that exports a wildcard (`*`) item, such as in:
+
+```as3
+export q.*;
+```
+
+### `add_wildcard_package_export()`
+
+Adds a wildcard package export. This method is used by the `export` directive.
 
 ### `subpackages()`
 

@@ -22,8 +22,8 @@ Returns the name's string.
 
 ### `ToString`
 
-The `to_string()` method applied to a `Name` type kind returns either:
+The `to_string()` method applied to a `Name` type kind returns either of:
 
 * `"anonymousNamespace::x"`
 * `"x"`
-* `"'uri'::x"`
+* `"\"uri\"::x"`

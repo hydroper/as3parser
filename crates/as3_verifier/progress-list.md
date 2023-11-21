@@ -23,6 +23,10 @@ type checking on assignments and options supplied to method calls.
 * [ ] Value expectation
   * [ ] Not all kinds of types are expected as value. Invalidate namespace sets, packages and certain types such as `*`. The result of expecting a value should produce a `Value` type kind.
 
+## `import` behavior
+
+- [ ] The `import` directive contributes to the collection of package imports of the scope `Frame` type. This is important for all imports, whether for wildcard, for recursive or for a specific property, to put package shadowing in effect.
+
 ## Fully package qualified references
 
 - [ ] In a `o.x` expression (without `q::x`), imported packages shadows any topmost variable name under a lexical scope, conforming to ActionScript 3 specification.

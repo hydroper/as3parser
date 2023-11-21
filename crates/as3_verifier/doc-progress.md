@@ -2,8 +2,8 @@ Type kinds:
 
 - [x] Name
 - [x] Package
-- [ ] Namespace
-- [ ] Namespace set
+- [x] Namespace
+- [x] Namespace set
 - [ ] Any type
 - [ ] Undefined type
 - [ ] Void type (equivalent to undefined type, but literally spelled differentt)
@@ -28,15 +28,16 @@ Type kinds:
 - [ ] Alias
   - [ ] The `Alias` type kind represents an alias to a type or property.
 - [ ] Frame
-  - [ ] The `Frame` type kind represents a lexical scope. A `Frame` contains an optional reference to a parent frame, a collection of wildcard package imports, recursive package imports and a `Names` object.
+  - [ ] The `Frame` type kind represents a lexical scope. A `Frame` contains an optional reference to a parent frame, a collection of package imports (specific properties, wildcard and recursive) and a `Names` object.
 - [ ] Value
   - [ ] The `Value` type kind represents a value with a static type and various variations.
 - [ ] Delegate
 
 Names:
 
-- [ ] The `Names` object represents a mapping from `Name` kind to `Type` and a collection of wildcard package exports.
+- [ ] The `Names` object represents a mapping from `Name` kind to `Type`.
 
 Miscellaneous:
 
 - [ ] `SimpleTypedName` (`a: T` as used in a function type)
+- [ ] `TypeFactory` (belongs to a `TypeHost`)

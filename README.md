@@ -32,6 +32,7 @@ Documentation:
     * [Name](docs/verifier/Type/kinds/name.md)
     * [Package](docs/verifier/Type/kinds/package.md)
     * [Namespace](docs/verifier/Type/kinds/namespace.md)
+    * [Namespace set](docs/verifier/Type/kinds/namespace-set.md)
 * [TypeHost](docs/verifier/TypeHost.md)
 * [Vector type](docs/verifier/vector.md)
 
