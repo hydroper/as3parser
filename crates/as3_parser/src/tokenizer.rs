@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use std::rc::Rc;
 use std::str::FromStr;
 use conv::ValueFrom;
@@ -526,11 +527,11 @@ impl<'input> Tokenizer<'input> {
             let location = start.combine_with(self.current_cursor_location());
             self.consume_line_terminator();
 
-            self.source.comments.borrow_mut().push(Comment {
+            self.source.comments.borrow_mut().push(Rc::new(Comment {
                 multiline: false,
-                content: self.source.text[(location.first_offset() + 2)..location.last_offset()].to_owned(),
-                location,
-            });
+                content: RefCell::new(self.source.text[(location.first_offset() + 2)..location.last_offset()].to_owned()),
+                location: RefCell::new(location),
+            }));
 
             return Ok(true);
         }
@@ -554,11 +555,11 @@ impl<'input> Tokenizer<'input> {
 
             let location = start.combine_with(self.current_cursor_location());
 
-            self.source.comments.borrow_mut().push(Comment {
+            self.source.comments.borrow_mut().push(Rc::new(Comment {
                 multiline: true,
-                content: self.source.text[(location.first_offset() + 2)..(location.last_offset() - 2)].to_owned(),
-                location,
-            });
+                content: RefCell::new(self.source.text[(location.first_offset() + 2)..(location.last_offset() - 2)].to_owned()),
+                location: RefCell::new(location),
+            }));
 
             return Ok(true);
         }
@@ -1308,8 +1309,8 @@ mod tests {
         ".into(), &CompilerOptions::new());
         let mut tokenizer = Tokenizer::new(&source);
         assert!(matches!(tokenizer.scan_ie_div(), Ok((Token::Eof, _))));
-        assert_eq!(source.comments().borrow()[0].content(), " Single-line comment");
-        assert_eq!(source.comments().borrow()[1].content(), " Multi-line comment ");
+        assert_eq!(source.comments()[0].content(), " Single-line comment");
+        assert_eq!(source.comments()[1].content(), " Multi-line comment ");
     }
 
     #[test]

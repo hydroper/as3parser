@@ -1,5 +1,5 @@
 use std::rc::Rc;
-use std::cell::{RefCell, Cell};
+use std::cell::{RefCell, Cell, RefMut};
 use crate::*;
 
 /// Represents an ActionScript source file.
@@ -13,7 +13,7 @@ pub struct Source {
     pub(crate) warning_count: Cell<u32>,
     pub(crate) invalidated: Cell<bool>,
     pub(crate) compiler_options: Rc<CompilerOptions>,
-    pub(crate) comments: RefCell<Vec<Comment>>,
+    pub(crate) comments: RefCell<Vec<Rc<Comment>>>,
     pub(crate) subsources: RefCell<Vec<Rc<Source>>>,
 }
 
@@ -69,10 +69,19 @@ impl Source {
         self.invalidated.get()
     }
 
-    /// The comments present in the source file. It is allowed to
-    /// dynamically modify their contents in the structure.
-    pub fn comments(&self) -> &RefCell<Vec<Comment>> {
-        &self.comments
+    /// The comments present in the source file. To get mutable access to the
+    /// collection of comments, use the `comments_mut()` method instead.
+    pub fn comments(&self) -> Vec<Rc<Comment>> {
+        let mut collection = vec![];
+        for c in self.comments.borrow().iter() {
+            collection.push(c.clone());
+        }
+        collection
+    }
+
+    /// The comments present in the source file, as a mutable collection.
+    pub fn comments_mut(&self) -> RefMut<Vec<Rc<Comment>>> {
+        self.comments.borrow_mut()
     }
 
     /// Returns source files belonging to include directives

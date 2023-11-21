@@ -4518,13 +4518,15 @@ impl<'input> Parser<'input> {
 
     fn parse_asdoc(&mut self) -> Result<Option<Rc<ast::AsDoc>>, ParserFailure> {
         let comments = self.source().comments.borrow();
-        let last_comment = comments.last();
+        let last_comment = comments.last().map(|last_comment| last_comment.clone());
+        drop(comments);
         Ok(last_comment.and_then(|comment| {
             if comment.is_asdoc(&self.token.1) {
-                let content = &comment.content[1..];
+                self.source().comments_mut().pop();
+                let content = &comment.content.borrow()[1..];
                 let lines: Vec<&str> = regex!(r"\n|\r\n?").split(content).collect();
                 let lines: Vec<String> = lines.iter().map(|line| regex_replace!(r"^\s*(\*\s?)?", line, |_, _| "".to_owned()).into_owned()).collect();
-                Some(self.parse_asdoc_lines(comment.location.clone(), lines))
+                Some(self.parse_asdoc_lines(comment.location(), lines))
             } else {
                 None
             }

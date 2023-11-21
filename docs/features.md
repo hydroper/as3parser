@@ -26,7 +26,7 @@ The global package (also called top-level) is imported into a parent anonymous s
 
 The _typeInference_ compiler option turns on type inference for specific contexts such that:
 
-- constants from discriminant enums implicitly convert to discriminant enums,
+- string constants from enums implicitly convert to the respective enums,
 - variable bindings have the type of the assigned expression,
 - function signatures without a return type expression are taken as returning `void`, and
 - `for` and `for each` perform type inference for the left variable based on the iterable.
