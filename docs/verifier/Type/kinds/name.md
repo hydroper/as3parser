@@ -2,6 +2,8 @@
 
 The `Name` type kind represents an unique name consisting of a namespace and a string. `Name` objects are used frequently to represent the name of classes, variables, and miscellaneous other symbols.
 
+`Name` types are interned in the `TypeHost` object.
+
 ## Supported methods
 
 ### `is_name()`

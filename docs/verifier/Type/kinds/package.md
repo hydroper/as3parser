@@ -1,6 +1,6 @@
 # Package
 
-The `Package` type kind represents a package as consisting of a name string (excluding dots), an optional parent package, a properties `Names` object, a collection of direct subpackages, and an optional ASDoc comment.
+The `Package` type kind represents a package as consisting of a name string (excluding dots), an optional parent package, a properties `Names` object, a collection of direct subpackages, a set of reserved namespaces (`public`, `internal`), and an optional ASDoc comment.
 
 ## Supported methods
 
@@ -53,6 +53,14 @@ let xyz: Option<Package> = type_host.global_package().get_package(["x", "y", "z"
 ### `get_packages_deep()`
 
 Returns a vector containing the package and all of its subpackages recursively.
+
+### `public_namespace()`
+
+The `public` namespace of the package.
+
+### `internal_namespace()`
+
+The `internal` namespace of the package.
 
 ## Supported traits
 
