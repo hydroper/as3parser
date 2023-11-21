@@ -4,10 +4,10 @@ Type kinds:
 - [x] Package
 - [x] Namespace
 - [x] Namespace set
-- [ ] Any type
-- [ ] Undefined type
-- [ ] Void type (equivalent to undefined type, but literally spelled differentt)
-- [ ] Never type
+- [x] Any type
+- [x] Undefined type
+- [x] Void type
+- [x] Never type
 - [ ] Class type
 - [ ] Interface type
 - [ ] Enum type
@@ -32,6 +32,8 @@ Type kinds:
 - [ ] Value
   - [ ] The `Value` type kind represents a value with a static type and various variations.
 - [ ] Delegate
+- [ ] Unresolved
+  - [ ] The `Unresolved` type kind represents an unresolved symbol that is eventually replaced by another type as the verifier finishes tasks.
 
 Names:
 

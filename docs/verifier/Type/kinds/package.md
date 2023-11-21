@@ -8,6 +8,19 @@ The `Package` type kind represents a package as consisting of a name string (exc
 
 The name string of the package. This is a single identifier; therefore it does not contain the dot character. For example, it returns `y` for a package `x.y`.
 
+The package:
+
+```as3
+package x.y {}
+```
+
+Produces:
+
+```rust
+xy.name_string() == "y"
+xy.to_string() == "x.y"
+```
+
 ### `parent()`
 
 The parent package of the package, or `None`.
@@ -79,3 +92,16 @@ The `internal` namespace of the package.
 ### `ToString`
 
 The `to_string()` method returns the fully-qualified name of the package using the dot delimiter.
+
+The following package:
+
+```as3
+package x.y.z {}
+```
+
+Produces:
+
+```rust
+xyz.to_string() == "x.y.z"
+xyz.name_string() == "z"
+```
