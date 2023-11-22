@@ -20,14 +20,14 @@ type checking on assignments and options supplied to method calls.
 
 ## Strictness exceptions
 
-Working with the following type is entirely dynamically typed and produces no errors such as undefined properties and function calls, nor incompatible unary/binary operations:
+Working with the following types is entirely dynamically typed and produces no errors such as undefined properties, function calls, and incompatible unary or binary operations:
 
 - [ ] `*`
 - [ ] `Object`
 
 ## Proxy
 
-Recognize the `flash_proxy` namespace and the `flash.utils.Proxy` class. The `flash_proxy` namespace is defined by:
+Recognize the `flash_proxy` namespace and the `flash.utils.Proxy` class. The `flash_proxy` namespace is defined by the following URI:
 
 ```as3
 namespace flash_proxy = "http://www.adobe.com/2006/actionscript/flash/proxy";
