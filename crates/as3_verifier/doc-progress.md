@@ -10,7 +10,7 @@ Type kinds:
 - [x] Never type
 - [x] Class type
 - [x] Interface type
-- [ ] Enum type
+- [x] Enum type
 - [ ] Function type
 - [ ] Union type
 - [ ] Complement type
