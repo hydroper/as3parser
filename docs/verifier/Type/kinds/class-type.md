@@ -60,9 +60,87 @@ This returns a `Names` object.
 
 The super class or `None`. The only class with no super class is `Object`.
 
+The super class may be an `Unresolved` type.
+
 ### `set_super_class()`
 
 A setter for the `super_class()` property.
+
+### `implemented_interfaces()`
+
+Set of implemented interfaces, possibly containing `Unresolved` types.
+
+### `add_implemented_interface()`
+
+Adds an implemented interface to the end of the `implemented_interfaces()` collection.
+
+### `replace_implemented_interface()`
+
+Replaces an implemented interface. This is used for replacing `Unresolved` by another type.
+
+### `known_subclasses()`
+
+Set of known subclasses. This set is used by the ASDoc tool.
+
+### `add_known_subclass()`
+
+Adds a known subclass.
+
+### `constructor_function()`
+
+An optional constructor function.
+
+### `set_constructor_definition()`
+
+Setter for the `constructor_function()` property.
+
+### `is_static()`
+
+Whether the class is static.
+
+### `set_is_static()`
+
+Setter for the `is_static()` property.
+
+### `is_final()`
+
+Whether the class is final.
+
+### `set_is_final()`
+
+Setter for the `is_final()` property.
+
+### `public_namespace()`
+
+The `public` namespace of the class.
+
+### `private_namespace()`
+
+The `private` namespace of the class.
+
+### `protected_namespace()`
+
+The `protected` namespace of the class.
+
+### `internal_namespace()`
+
+The `internal` namespace of the class.
+
+### `is_external()`
+
+Whether the class is external.
+
+### `set_is_external()`
+
+Setter for the `is_external()` property.
+
+### `metadata()`
+
+Collection of meta data.
+
+### `add_metadata()`
+
+Adds meta data.
 
 ## Supported traits
 
