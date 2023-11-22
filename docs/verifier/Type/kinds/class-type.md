@@ -4,7 +4,7 @@ The `ClassType` type kind represents a class. It consists of:
 
 * A `Name`
 * An optional parent `Type`
-  * It may be a `Package` type or
+  * It may be a `Package` type
 * A sequence of type parameters
 * Static properties `Names` object
   * ECMA-262 `prototype` is a static read-only `prototype: *` property
@@ -16,7 +16,7 @@ The `ClassType` type kind represents a class. It consists of:
   * Used by the ASDoc tool
 * Constructor function property
 * Modifiers such as `final` and `static`
-* Reserved namespaces (`public`, `private`, `protected`, `internal`)
+* Reserved namespaces (`private`, `protected`, `static protected`)
 * An external toggle
 * Meta data
 
@@ -110,10 +110,6 @@ Whether the class is final.
 
 Setter for the `is_final()` property.
 
-### `public_namespace()`
-
-The `public` namespace of the class.
-
 ### `private_namespace()`
 
 The `private` namespace of the class.
@@ -122,9 +118,9 @@ The `private` namespace of the class.
 
 The `protected` namespace of the class.
 
-### `internal_namespace()`
+### `static_protected_namespace()`
 
-The `internal` namespace of the class.
+The `static protected` namespace of the class.
 
 ### `is_external()`
 

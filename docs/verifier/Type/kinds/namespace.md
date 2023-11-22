@@ -1,8 +1,8 @@
 # Namespace
 
-The `Namespace` type kind represents a namespace used as a name qualifier in the ActionScript language. A namespace is either a reserved namespace, an anonymous namespace (`namespace N1;`), or a string assigned namespace (`namespace N1 = "https://foo.com";`). A namespace may contain an ASDoc comment.
+The `Namespace` type kind represents a namespace used as a name qualifier in the ActionScript language. A namespace is either a system namespace, or an user namespace (`namespace N1 = "https://foo.com";`). A namespace may contain an ASDoc comment.
 
-String assigned namespaces are interned in the `TypeHost` object.
+User namespaces are interned in the `TypeHost` object.
 
 ## Supported methods
 
@@ -10,29 +10,27 @@ String assigned namespaces are interned in the `TypeHost` object.
 
 Returns `true`.
 
-### `is_reserved_namespace()`
+### `is_system_namespace()`
 
-Returns whether the namespace is a reserved namespace.
+Returns whether the namespace is a system namespace.
 
-### `is_anonymous_namespace()`
+### `is_explicit_namespace()`
 
-Returns whether the namespace is an anonymous namespace.
+Returns whether the namespace is an explicit namespace. This includes both string assigned namespaces and non string assigned namespaces.
 
 ### `is_string_assigned_namespace()`
 
 Returns whether the namespace is a string assigned namespace.
 
-### `reserved_namespace()`
+### `system_namespace()`
 
-Returns the kind of reserved namespace the namespace is, if it is a reserved namespace; otherwise `None`.
+Returns the kind of system namespace the namespace is, if it is a system namespace; otherwise `None`.
 
-### `name_string()`
+It includes not only `public`, `private`, `protected`, or `internal`, but also `static protected`.
 
-Returns the name string of the namespace, if it is an anonymous namespace. For example, the namespace `namespace N1;` has a `name_string() == "N1"`.
+### `namespace_string()`
 
-### `namespace_assigned_string()`
-
-Returns the assigned string of the namespace, if it is a string assigned namespace. For example, the namespace `namespace w3c = "https://www.w3c.org";` has a `namespace_assigned_string() == "https://www.w3c.org"`.
+Returns the assigned string of the namespace, if it is an user namespace. For example, the namespace `namespace w3c = "http://www.w3c.org";` has a `namespace_string() == "http://www.w3c.org"`.
 
 ### `asdoc()`
 
@@ -52,5 +50,4 @@ The `to_string()` method returns either of:
 * `"private"`
 * `"protected"`
 * `"internal"`
-* `"\"assignedString\""`
-* `"anonymousNamespaceName"`
+* `"\"string\""`

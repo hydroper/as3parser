@@ -27,13 +27,22 @@ Working with the following types is entirely dynamically typed and produces no e
 
 ## Proxy
 
-Recognize the `flash_proxy` namespace and the `flash.utils.Proxy` class. The `flash_proxy` namespace is defined by the following URI:
+- [ ] Recognize the `flash_proxy` namespace and the `flash.utils.Proxy` class. The `flash_proxy` namespace is defined by the following URI:
 
 ```as3
 namespace flash_proxy = "http://www.adobe.com/2006/actionscript/flash/proxy";
 ```
 
 - [ ] Operations overridable by `flash_proxy` are considered in the respective contexts.
+
+## `static protected`
+
+- [ ] The `protected` access modifier, when combined with `static`, produces a `StaticProtected` namespace kind.
+
+## Namespace definitions
+
+- [ ] `namespace ns1;` produces `ns1` assigned to a new `internal` namespace
+- [ ] `namespace ns1 = "http://www.adobe.com";` produces `ns1` assigned to an user namespace
 
 ## Expression verification
 

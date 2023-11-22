@@ -9,7 +9,7 @@ Type kinds:
 - [x] Void type
 - [x] Never type
 - [x] Class type
-- [ ] Interface type
+- [x] Interface type
 - [ ] Enum type
 - [ ] Function type
 - [ ] Union type
