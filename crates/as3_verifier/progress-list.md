@@ -25,6 +25,16 @@ Working with the following type is entirely dynamically typed and produces no er
 - [ ] `*`
 - [ ] `Object`
 
+## Proxy
+
+Recognize the `flash_proxy` namespace and the `flash.utils.Proxy` class. The `flash_proxy` namespace is defined by:
+
+```as3
+namespace flash_proxy = "http://www.adobe.com/2006/actionscript/flash/proxy";
+```
+
+- [ ] Operations overridable by `flash_proxy` are considered in the respective contexts.
+
 ## Expression verification
 
 * [ ] Value expectation

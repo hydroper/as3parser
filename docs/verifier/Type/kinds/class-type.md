@@ -56,6 +56,14 @@ A class instance delegate, also known as the class prototype object. This is not
 
 This returns a `Names` object.
 
+### `super_class()`
+
+The super class or `None`. The only class with no super class is `Object`.
+
+### `set_super_class()`
+
+A setter for the `super_class()` property.
+
 ## Supported traits
 
 ### `ToString`
