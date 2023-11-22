@@ -6,17 +6,15 @@ The `ClassType` type kind represents a class. It consists of:
 * An optional parent `Type`
   * It may be a `Package` type or
 * A sequence of type parameters
-*
-*
-*
-*
-*
-*
-*
-*
-*
-*
-*
+* Static properties `Names` object
+  * `prototype` is a static read-only `prototype: *` property
+* An instance `Delegate`
+* Optional super class `Type`
+  * The only class with no super class is `Object`
+* A sequence of implemented interfaces
+* Limited known subclasses
+* Constructor function property
+* Modifiers such as `final` and `static`
 
 ## Supported methods
 
