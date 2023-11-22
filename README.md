@@ -37,6 +37,7 @@ Documentation:
     * [Undefined type](docs/verifier/Type/kinds/undefined-type.md)
     * [Void type](docs/verifier/Type/kinds/void-type.md)
     * [Never type](docs/verifier/Type/kinds/never-type.md)
+    * [Class type](docs/verifier/Type/kinds/class-type.md)
 * [TypeHost](docs/verifier/TypeHost.md)
 * [Vector type](docs/verifier/vector.md)
 

@@ -18,6 +18,13 @@
 > Prints undefined property and function calls; also performs compile-time
 type checking on assignments and options supplied to method calls.
 
+## Strictness exceptions
+
+Working with the following type is entirely dynamically typed and produces no errors such as undefined properties and function calls, nor incompatible unary/binary operations:
+
+- [ ] `*`
+- [ ] `Object`
+
 ## Expression verification
 
 * [ ] Value expectation

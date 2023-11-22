@@ -37,7 +37,6 @@ Type kinds:
   - [ ] The `Frame` type kind represents a lexical scope. A `Frame` contains an optional reference to a parent frame, a collection of package imports (specific properties, wildcard and recursive) and a `Names` object.
 - [ ] Value
   - [ ] The `Value` type kind represents a value with a static type and various variations.
-- [ ] Delegate
 - [ ] Unresolved
   - [ ] The `Unresolved` type kind represents an unresolved symbol that is eventually replaced by another type as the verifier finishes tasks.
 
