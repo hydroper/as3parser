@@ -15,6 +15,9 @@ The `ClassType` type kind represents a class. It consists of:
 * Limited known subclasses
 * Constructor function property
 * Modifiers such as `final` and `static`
+* Reserved namespaces (`public`, `private`, `protected`, `internal`)
+* An external toggle
+* Meta data
 
 ## Supported methods
 

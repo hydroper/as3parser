@@ -18,6 +18,7 @@ Type kinds:
 - [ ] Record type
 - [ ] Nullable type
 - [ ] Non-nullable type
+* [ ] Type parameter
 - [ ] Type with arguments
 - [ ] String literal type 
 - [ ] Number literal type
