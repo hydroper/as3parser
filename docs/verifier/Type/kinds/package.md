@@ -61,9 +61,17 @@ An optional ASDoc comment applying to the package.
 
 A setter for the `asdoc()` property.
 
-### `add_subpackage()`
+### `get_or_create_package()`
 
-Adds a new subpackage with the specified name string, returning a `Package` type.
+Lookups a package given an array of name strings, or creates it if it does not exist, returning a `Package` type.
+
+```rust
+// Lookups a subpackage "x", then a subpackage "y" from the "x" package,
+// and finally a "z" subpackage from the "x.y" package.
+// If any of the segments does not exist as a subpackage, a new subpackage
+// is created from the previous segment.
+let xyz: Option<Package> = type_host.global_package().get_or_create_package(["x", "y", "z"]);
+```
 
 ### `get_package()`
 
