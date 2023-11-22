@@ -8,7 +8,7 @@ Type kinds:
 - [x] Undefined type
 - [x] Void type
 - [x] Never type
-- [ ] Class type
+- [x] Class type
 - [ ] Interface type
 - [ ] Enum type
 - [ ] Function type
