@@ -10,8 +10,8 @@ The `InterfaceType` type kind represents an `interface` definition. It consists 
 * A set of super interfaces
 * A set of known implementors
   * Used by the ASDoc tool
-* Reserved namespace for the prototype delegate (`interface_body_namespace`)
-  * Similiar to `public`, but not a system namespace
+* Reserved namespace (`interface_block_namespace`)
+  * Similiar to `public`, but an user namespace and not a system namespace
 * An external toggle
 * Meta data
 

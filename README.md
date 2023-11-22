@@ -38,6 +38,7 @@ Documentation:
     * [Void type](docs/verifier/Type/kinds/void-type.md)
     * [Never type](docs/verifier/Type/kinds/never-type.md)
     * [Class type](docs/verifier/Type/kinds/class-type.md)
+    * [Interface type](docs/verifier/Type/kinds/interface-type.md)
 * [TypeHost](docs/verifier/TypeHost.md)
 * [Vector type](docs/verifier/vector.md)
 
