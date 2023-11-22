@@ -1,6 +1,6 @@
 # Type
 
-The `Type` object represents a type or one of several traits.
+The `Type` object represents a type or one of several traits. Unsupported operations on `Type` either return a placeholder value or panic.
 
 ## Memory management
 
