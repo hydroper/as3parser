@@ -23,7 +23,7 @@ Handwritten ActionScript 3 parser in the Rust language.
 
 ## Verifier
 
-The verifier is a work in progress.
+The verifier is a work in progress. ([Documentation progress list](crates/as3_verifier/doc-progress.md), [misc.](crates/as3_verifier/progress-list.md))
 
 Documentation:
 

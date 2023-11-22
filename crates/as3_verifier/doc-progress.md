@@ -23,8 +23,13 @@ Type kinds:
 - [ ] Number literal type
 - [ ] Variable property
   - [ ] Read only
+- [ ] Variable property from type with arguments
 - [ ] Virtual property
+- [ ] Virtual property from type with arguments
 - [ ] Function property
+  - [ ] Sequence of type parameters
+- [ ] Function property with type arguments
+- [ ] Function property from type with arguments
 - [ ] Alias
   - [ ] The `Alias` type kind represents an alias to a type or property.
 - [ ] Frame

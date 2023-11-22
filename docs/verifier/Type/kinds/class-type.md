@@ -1,6 +1,22 @@
 # Class type
 
-The `ClassType` type kind represents a class. 
+The `ClassType` type kind represents a class. It consists of:
+
+* A `Name`
+* An optional parent `Type`
+  * It may be a `Package` type or
+* A sequence of type parameters
+*
+*
+*
+*
+*
+*
+*
+*
+*
+*
+*
 
 ## Supported methods
 
