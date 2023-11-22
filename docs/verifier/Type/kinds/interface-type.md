@@ -87,4 +87,4 @@ Adds meta data.
 
 ### `ToString`
 
-The `to_string()` method returns the fully qualified name of the class (including its qualifier namespace) and any type arguments (`.<T1, ...TN>`).
+The `to_string()` method returns the fully qualified name of the interface (including its qualifier namespace) and any type arguments (`.<T1, ...TN>`).
