@@ -4,7 +4,7 @@ The `Type` object represents a type or one of several traits.
 
 ## Memory management
 
-The `Type` object is reference counted in an arena. Use `WeakTypeRef` for weak references.
+The `Type` object is reference counted in an arena. `Type` itself is a weak reference; it contains an internal `Weak<TypeKind>` inside, and operations over `Type` will upgrade it to a strong reference internally. The `TypeHost` always holds a strong reference to each `TypeKind`.
 
 ## Assertion
 
