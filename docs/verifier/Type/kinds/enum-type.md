@@ -5,6 +5,8 @@ The `EnumType` type kind represents an enum. It consists of:
 * A `Name`
 * An optional parent `Type`
   * It may be a `Package` type
+* A `[Set]` modifier
+* A number type
 * Static properties `Names` object
   * ECMA-262 `prototype` is a static read-only `prototype: *` property
 * Prototype `Names` delegate
@@ -26,6 +28,14 @@ The parent of the enum, or `None`. If any, it is a `Package` type.
 ### `set_parent()`
 
 A setter for the `parent()` property.
+
+### `is_set()`
+
+Whether the enum is a set enum. Set enums are indicated by the `[Set]` meta data, representing a combination of members, using bitwise representation.
+
+### `enum_number_type()`
+
+The enum's number type. Non set enums use `Number` as the default number type, and set enums use `uint` as the default number type. It can be changed through the `[Number(numberType)]` meta data, where `numberType` is one of the language's supported numeric types.
 
 ### `static_properties()`
 
