@@ -40,6 +40,7 @@ Documentation:
     * [Class type](docs/verifier/Type/kinds/class-type.md)
     * [Interface type](docs/verifier/Type/kinds/interface-type.md)
     * [Enum type](docs/verifier/Type/kinds/enum-type.md)
+    * [Function type](docs/verifier/Type/kinds/function-type.md)
 * [TypeHost](docs/verifier/TypeHost.md)
 * [Vector type](docs/verifier/vector.md)
 

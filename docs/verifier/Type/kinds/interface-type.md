@@ -15,6 +15,16 @@ The `InterfaceType` type kind represents an `interface` definition. It consists 
 * An external toggle
 * Meta data
 
+## Implicit conversions
+
+* Subinterface implicitly converts to super interface
+* `I.<T>` implicitly converts to `I.<*>`
+
+## Generics
+
+* Referring to `I` is equivalent to `I.<*>`.
+* `I.<T>` is equivalent to `I`.
+
 ## Supported methods
 
 ### `is_interface_type()`

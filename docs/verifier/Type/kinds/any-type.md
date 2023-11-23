@@ -2,6 +2,10 @@
 
 The `AnyType` type kind represents the wildcard (`*`) type.
 
+## Implicit conversions
+
+`*` and any other type implicitly convert to each other.
+
 ## Supported methods
 
 ### `asdoc()`

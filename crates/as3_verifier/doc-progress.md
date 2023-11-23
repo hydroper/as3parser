@@ -11,7 +11,7 @@ Type kinds:
 - [x] Class type
 - [x] Interface type
 - [x] Enum type
-- [ ] Function type
+- [x] Function type
 - [ ] Union type
 - [ ] Complement type
 - [ ] Tuple type
@@ -33,6 +33,7 @@ Type kinds:
 - [ ] Function property from type with arguments
 - [ ] Alias
   - [ ] The `Alias` type kind represents an alias to a type or property.
+  - [ ] ASDoc
 - [ ] Frame
   - [ ] The `Frame` type kind represents a lexical scope. A `Frame` contains an optional reference to a parent frame, a collection of package imports (specific properties, wildcard and recursive) and a `Names` object.
 - [ ] Value

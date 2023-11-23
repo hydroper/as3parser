@@ -20,6 +20,18 @@ The `ClassType` type kind represents a class. It consists of:
 * An external toggle
 * Meta data
 
+## Implicit conversions
+
+* `Object` and any other type implicitly convert to each other.
+* Subclass implicitly converts to super class
+* Implementor implicitly converts to implementing interface
+* `C.<T>` implicitly converts to `C.<*>`
+
+## Generics
+
+* Referring to `C` is equivalent to `C.<*>`.
+* `C.<T>` is equivalent to `C`.
+
 ## Supported methods
 
 ### `is_class_type()`
