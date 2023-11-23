@@ -4,6 +4,10 @@ The `Package` type kind represents a package as consisting of a name string (exc
 
 ## Supported methods
 
+### `is_package()`
+
+Returns true.
+
 ### `name_string()`
 
 The name string of the package. This is a single identifier; therefore it does not contain the dot character. For example, it returns `y` for a package `x.y`.

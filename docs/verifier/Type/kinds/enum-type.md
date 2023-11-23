@@ -17,6 +17,10 @@ The `EnumType` type kind represents an enum. It consists of:
 
 ## Supported methods
 
+### `is_enum_type()`
+
+Returns true.
+
 ### `name()`
 
 The qualified name of this enum.

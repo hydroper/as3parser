@@ -4,6 +4,10 @@ The `NeverType` type kind represents the `never` type. The `never` type contains
 
 ## Supported methods
 
+### `is_never_type()`
+
+Returns true.
+
 ### `asdoc()`
 
 Returns `None`.

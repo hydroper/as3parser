@@ -4,6 +4,10 @@ The `VoidType` type kind represents the `void` type. The `void` type is literall
 
 ## Supported methods
 
+### `is_void_type()`
+
+Returns true.
+
 ### `asdoc()`
 
 Returns `None`.

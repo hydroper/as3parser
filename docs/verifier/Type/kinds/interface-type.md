@@ -17,6 +17,10 @@ The `InterfaceType` type kind represents an `interface` definition. It consists 
 
 ## Supported methods
 
+### `is_interface_type()`
+
+Returns true.
+
 ### `name()`
 
 The qualified name of this interface.

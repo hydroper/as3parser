@@ -22,6 +22,10 @@ The `ClassType` type kind represents a class. It consists of:
 
 ## Supported methods
 
+### `is_class_type()`
+
+Returns true.
+
 ### `name()`
 
 The qualified name of this class.

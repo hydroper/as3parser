@@ -4,6 +4,10 @@ The `UndefinedType` type kind represents the `undefined` type. The `undefined` t
 
 ## Supported methods
 
+### `is_undefined_type()`
+
+Returns true.
+
 ### `asdoc()`
 
 Returns `None`.
