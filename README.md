@@ -23,7 +23,9 @@ Handwritten ActionScript 3 parser in the Rust language.
 
 ## Verifier
 
-The verifier is a work in progress. ([Documentation progress list](crates/as3_verifier/doc-progress.md), [misc.](crates/as3_verifier/progress-list.md))
+ActionScript execution consists of parsing, verification and evaluation. Verification can be performed ahead of time, as is already done by the existing initial compilers of the language (ASC 2 and Apache Flex's MXML compiler), deriving control flow graph and a static type host. This project might be integrated with a verifier in the future.
+
+Details: [Documentation progress list](crates/as3_verifier/doc-progress.md), [misc.](crates/as3_verifier/progress-list.md)
 
 Documentation:
 
