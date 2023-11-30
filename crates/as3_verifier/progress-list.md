@@ -18,6 +18,10 @@
 > Prints undefined property and function calls; also performs compile-time
 type checking on assignments and options supplied to method calls.
 
+## Conditional compilation
+
+* [ ] Support constructs such as `CONFIG::name { ... }` (configuration constant followed by block). When used in a type's block, it expands to the outer block.
+
 ## Strictness exceptions
 
 Working with the following types is entirely dynamically typed and produces no errors such as undefined properties, function calls, and incompatible unary or binary operations:
