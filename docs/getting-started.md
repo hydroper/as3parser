@@ -56,3 +56,4 @@ The parser attaches ASDoc comments to supported elements and recognizes tags bef
 ## Building your own compiler
 
 * Reading and writing SWFs: the Ruffle player contains a [`swf` package](https://github.com/ruffle-rs/ruffle/tree/master/swf) that reads and writes SWF from/into structures.
+* Detect [domain memory operations](https://obtw.wordpress.com/2013/04/03/making-bytearray-faster) to generate optimized AVM2 instructions.
