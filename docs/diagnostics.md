@@ -1,4 +1,4 @@
-# Diagnostics
+# Working with diagnostics
 
 The parser typically takes a `Source` object and produces a program structure. Diagnostics are emitted to that `Source` rather than being returned by the parser. You can obtain them as follows:
 

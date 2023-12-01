@@ -1,4 +1,4 @@
-# Embedded ActionScript
+# Working with embedded ActionScript
 
 If an ActionScript source is embedded in a place such as inside a MXML file and you wish to maintain line numbers and columns respective to that file, you may simply add a prefix of line breaks and initial whitespace to the source text before constructing the `Source` object.
 

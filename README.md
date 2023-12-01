@@ -9,17 +9,21 @@
   </a>
 </p>
 
-Handwritten ActionScript 3 parser in the Rust language.
+ActionScript 3 parser in the Rust language.
 
 ## Documentation
 
 * [Getting started](docs/getting-started.md)
-* [Diagnostics](docs/diagnostics.md)
-* [Embedded ActionScript](docs/embedded-actionscript.md)
+* [Working with diagnostics](docs/diagnostics.md)
+* [Working with embedded ActionScript](docs/embedded-actionscript.md)
 * [Standards](docs/standards.md)
 * [Features](docs/features.md)
-  * [Feature syntax summary](docs/feature-syntax-summary.md)
+* [Feature syntax summary](docs/feature-syntax-summary.md)
 * [Tests](docs/tests.md)
+
+## Future improvements
+
+* [ ] ASDoc: attach first line and column to the main body and each tag.
 
 ## Verifier
 
