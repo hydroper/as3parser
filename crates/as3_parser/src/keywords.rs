@@ -74,6 +74,7 @@ pub fn reserved_word_token(name: &str) -> Option<Token> {
                 "extends" => Some(Token::Extends),
                 "finally" => Some(Token::Finally),
                 "package" => Some(Token::Package),
+                "private" => Some(Token::Private),
                 _ => None,
             }
         },
