@@ -29,7 +29,7 @@ pub enum OperatorPrecedence {
 
 impl OperatorPrecedence {
     pub fn add_one(&self) -> Option<Self> {
-        FromPrimitive::from_u32(*self as u32 - 1)
+        FromPrimitive::from_u32(*self as u32 + 1)
     }
 
     pub fn value_of(&self) -> u32 {
