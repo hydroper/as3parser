@@ -958,7 +958,7 @@ impl<'input> Parser<'input> {
         } else if self.peek(Token::Super) && context.min_precedence.includes(&OperatorPrecedence::Postfix) {
             Ok(Some(self.parse_super_expression_followed_by_property_operator()?))
         // AwaitExpression
-        } else if self.peek(Token::Await) && context.min_precedence.includes(&OperatorPrecedence::Postfix) {
+        } else if self.peek(Token::Await) && context.min_precedence.includes(&OperatorPrecedence::Unary) {
             self.mark_location();
             let operator_token = self.token.clone();
             self.next()?;
