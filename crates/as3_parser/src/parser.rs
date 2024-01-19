@@ -997,7 +997,7 @@ impl<'input> Parser<'input> {
             })))
         // Miscellaneous prefix unary expressions
         } else if let Some((operator, subexp_precedence)) = self.check_prefix_operator() {
-            if context.min_precedence.includes(&OperatorPrecedence::Postfix) {
+            if context.min_precedence.includes(&OperatorPrecedence::Unary) {
                 self.mark_location();
                 self.next()?;
                 let base = self.parse_expression(ExpressionContext { min_precedence: subexp_precedence, ..default() })?;
