@@ -374,7 +374,7 @@ impl<'input> Parser<'input> {
                     location: self.pop_location(),
                     kind: ast::ExpressionKind::Conditional { test: base, consequent, alternative },
                 });
-            } else if let Some((required_precedence, operator, right_precedence)) = self.check_binary_operator() {
+            } else if let Some((required_precedence, operator, right_precedence)) = self.check_binary_operator(context.clone()) {
                 if context.min_precedence.includes(&required_precedence) {
                     self.next()?;
                     base = self.parse_binary_operator(base, operator, right_precedence, context.clone())?;
@@ -473,8 +473,11 @@ impl<'input> Parser<'input> {
     }
 
     /// Returns either None or Some((required_precedence, operator, right_precedence))
-    fn check_binary_operator(&self) -> Option<(OperatorPrecedence, Operator, OperatorPrecedence)> {
+    fn check_binary_operator(&self, context: ExpressionContext) -> Option<(OperatorPrecedence, Operator, OperatorPrecedence)> {
         if let Some(operator) = self.token.0.to_binary_operator() {
+            if operator == Operator::In && !context.allow_in {
+                return None;
+            }
             let (precedence, associativity) = operator.binary_position().unwrap();
             // If associativity is left-to-right, right precedence is `required_precedence` plus one
             let mut right_precedence = precedence;
