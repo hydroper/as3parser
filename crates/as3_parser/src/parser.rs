@@ -2598,7 +2598,7 @@ impl<'input> Parser<'input> {
         } else if self.peek(Token::Return) {
             self.parse_return_statement(context)
         // ThrowStatement
-        } else if self.peek(Token::Return) {
+        } else if self.peek(Token::Throw) {
             self.parse_throw_statement(context)
         // TryStatement
         } else if self.peek(Token::Try) {
