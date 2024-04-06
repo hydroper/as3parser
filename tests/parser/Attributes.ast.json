@@ -1,0 +1,104 @@
+{
+  "location": {},
+  "packages": [],
+  "directives": [
+    {
+      "VariableDefinition": {
+        "location": {},
+        "asdoc": null,
+        "attributes": [
+          {
+            "Expression": {
+              "Member": {
+                "location": {},
+                "base": {
+                  "QualifiedIdentifier": {
+                    "location": {},
+                    "attribute": false,
+                    "qualifier": null,
+                    "id": {
+                      "Id": [
+                        "q",
+                        {}
+                      ]
+                    }
+                  }
+                },
+                "identifier": {
+                  "location": {},
+                  "attribute": false,
+                  "qualifier": null,
+                  "id": {
+                    "Id": [
+                      "x",
+                      {}
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "kind": [
+          "Var",
+          {}
+        ],
+        "bindings": [
+          {
+            "destructuring": {
+              "location": {},
+              "destructuring": {
+                "QualifiedIdentifier": {
+                  "location": {},
+                  "attribute": false,
+                  "qualifier": null,
+                  "id": {
+                    "Id": [
+                      "y",
+                      {}
+                    ]
+                  }
+                }
+              },
+              "type_annotation": null
+            },
+            "initializer": null
+          }
+        ]
+      }
+    },
+    {
+      "Block": {
+        "location": {},
+        "metadata": [
+          {
+            "Metadata": {
+              "location": {},
+              "asdoc": null,
+              "name": [
+                "N1",
+                {}
+              ],
+              "entries": [
+                {
+                  "location": {},
+                  "key": [
+                    "x",
+                    {}
+                  ],
+                  "value": {
+                    "String": [
+                      "y",
+                      {}
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "directives": []
+      }
+    }
+  ]
+}

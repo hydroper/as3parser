@@ -1,0 +1,35 @@
+{
+  "location": {},
+  "packages": [],
+  "directives": [
+    {
+      "NamespaceDefinition": {
+        "location": {},
+        "asdoc": null,
+        "attributes": [],
+        "left": [
+          "ns1",
+          {}
+        ],
+        "right": null
+      }
+    },
+    {
+      "NamespaceDefinition": {
+        "location": {},
+        "asdoc": null,
+        "attributes": [],
+        "left": [
+          "ns2",
+          {}
+        ],
+        "right": {
+          "StringLiteral": {
+            "location": {},
+            "value": "http://www.samsung.com"
+          }
+        }
+      }
+    }
+  ]
+}

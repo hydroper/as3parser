@@ -1,0 +1,72 @@
+{
+  "location": {},
+  "packages": [],
+  "directives": [
+    {
+      "VariableDefinition": {
+        "location": {},
+        "asdoc": {
+          "location": {},
+          "main_body": [
+            "Main body.",
+            {}
+          ],
+          "tags": [
+            [
+              {
+                "Copy": {
+                  "base": {
+                    "QualifiedIdentifier": {
+                      "location": {},
+                      "attribute": false,
+                      "qualifier": null,
+                      "id": {
+                        "Id": [
+                          "C1",
+                          {}
+                        ]
+                      }
+                    }
+                  },
+                  "instance_property": "x"
+                }
+              },
+              {}
+            ],
+            [
+              "InheritDoc",
+              {}
+            ]
+          ]
+        },
+        "attributes": [],
+        "kind": [
+          "Var",
+          {}
+        ],
+        "bindings": [
+          {
+            "destructuring": {
+              "location": {},
+              "destructuring": {
+                "QualifiedIdentifier": {
+                  "location": {},
+                  "attribute": false,
+                  "qualifier": null,
+                  "id": {
+                    "Id": [
+                      "x",
+                      {}
+                    ]
+                  }
+                }
+              },
+              "type_annotation": null
+            },
+            "initializer": null
+          }
+        ]
+      }
+    }
+  ]
+}
