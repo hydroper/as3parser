@@ -80,6 +80,8 @@ enum E1 {
     const M1
     const M2 = "m2"
     const M3 = ["m3", 10]
+
+    function f1(): void {}
 }
 [Set]
 enum E2 {
