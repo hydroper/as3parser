@@ -218,3 +218,12 @@ type A1 = [T]
 ```
 type T1 = [E1, E2]
 ```
+
+## Aliasing Imports
+
+```
+import x = ns.y;
+
+// Open public of ns and alias it
+import ns1 = ns.*;
+```
