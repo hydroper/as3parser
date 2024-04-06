@@ -22,6 +22,7 @@ To do:
 - [x] Namespace definition
   - [x] Detect "namespace" keyword everywhere where "type" is detected
 - [x] Use namespace definition
+- [x] `new <T> []` expression
 - [ ] Include directive
   - [ ] Prevent include cycle
   - [ ] Contribute nested compilation unit to surrounding compilation unit

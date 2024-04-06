@@ -992,12 +992,46 @@ impl<'input> Parser<'input> {
 
     fn parse_new_expression(&mut self, start: Location) -> Result<Rc<Expression>, ParsingFailure> {
         self.push_location(&start);
-        let base = self.parse_new_subexpression()?;
-        let arguments = if self.peek(Token::LeftParen) { Some(self.parse_arguments()?) } else { None };
-        Ok(Rc::new(Expression::New(NewExpression {
-            location: self.pop_location(),
-            base, arguments,
-        })))
+        if self.consume(Token::Lt)? {
+            let element_type = self.parse_type_expression()?;
+            self.expect_type_parameters_gt()?;
+            self.expect(Token::LeftBracket)?;
+            let mut elements: Vec<Element> = vec![];
+
+            while !self.peek(Token::RightBracket) {
+                if self.peek(Token::Ellipsis) {
+                    self.mark_location();
+                    self.next()?;
+                    elements.push(Element::Rest((self.parse_expression(ParsingExpressionContext {
+                        allow_in: true,
+                        min_precedence: OperatorPrecedence::AssignmentAndOther,
+                        ..default()
+                    })?, self.pop_location())));
+                } else {
+                    elements.push(Element::Expression(self.parse_expression(ParsingExpressionContext {
+                        allow_in: true,
+                        min_precedence: OperatorPrecedence::AssignmentAndOther,
+                        ..default()
+                    })?));
+                }
+                if !self.consume(Token::Comma)? {
+                    break;
+                }
+            }
+            self.expect(Token::RightBracket)?;
+            Ok(Rc::new(Expression::VectorLiteral(VectorLiteral {
+                location: self.pop_location(),
+                element_type,
+                elements,
+            })))
+        } else {
+            let base = self.parse_new_subexpression()?;
+            let arguments = if self.peek(Token::LeftParen) { Some(self.parse_arguments()?) } else { None };
+            Ok(Rc::new(Expression::New(NewExpression {
+                location: self.pop_location(),
+                base, arguments,
+            })))
+        }
     }
 
     fn parse_new_expression_start(&mut self) -> Result<Rc<Expression>, ParsingFailure> {

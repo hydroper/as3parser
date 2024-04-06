@@ -23,6 +23,8 @@ mod xml_expression;
 pub use xml_expression::*;
 mod array_literal;
 pub use array_literal::*;
+mod vector_literal;
+pub use vector_literal::*;
 mod object_initializer;
 pub use object_initializer::*;
 mod function_expression;

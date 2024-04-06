@@ -30,6 +30,30 @@
           }
         }
       }
+    },
+    {
+      "ExpressionStatement": {
+        "location": {},
+        "expression": {
+          "VectorLiteral": {
+            "location": {},
+            "element_type": {
+              "QualifiedIdentifier": {
+                "location": {},
+                "attribute": false,
+                "qualifier": null,
+                "id": {
+                  "Id": [
+                    "T",
+                    {}
+                  ]
+                }
+              }
+            },
+            "elements": []
+          }
+        }
+      }
     }
   ]
 }
