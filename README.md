@@ -13,12 +13,17 @@ ActionScript 3 parser in the Rust language.
 
 ## Documentation
 
-* [Getting started](docs/getting-started.md)
-* [Working with diagnostics](docs/diagnostics.md)
-* [Working with interpolated ActionScript](docs/interpolation.md)
-* [Standards](docs/standards.md)
-* [New Syntax](docs/new-syntax.md)
-* [Removed Syntax](docs/removed-syntax.md)
+[Getting started](docs/getting-started.md)
+
+[Working with diagnostics](docs/diagnostics.md)
+
+[Working with interpolated ActionScript](docs/interpolation.md)
+
+[Standards](docs/standards.md)
+
+[New Syntax](docs/new-syntax.md)
+
+[Removed Syntax](docs/removed-syntax.md)
 
 ## Verifier
 
