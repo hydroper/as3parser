@@ -1,0 +1,359 @@
+{
+  "location": {},
+  "packages": [],
+  "directives": [
+    {
+      "ExpressionStatement": {
+        "location": {},
+        "expression": {
+          "QualifiedIdentifier": {
+            "location": {},
+            "attribute": false,
+            "qualifier": null,
+            "id": {
+              "Id": [
+                "*",
+                {}
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "ExpressionStatement": {
+        "location": {},
+        "expression": {
+          "QualifiedIdentifier": {
+            "location": {},
+            "attribute": false,
+            "qualifier": {
+              "Paren": {
+                "location": {},
+                "expression": {
+                  "QualifiedIdentifier": {
+                    "location": {},
+                    "attribute": false,
+                    "qualifier": null,
+                    "id": {
+                      "Id": [
+                        "q",
+                        {}
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "id": {
+              "Id": [
+                "x",
+                {}
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "ExpressionStatement": {
+        "location": {},
+        "expression": {
+          "Member": {
+            "location": {},
+            "base": {
+              "QualifiedIdentifier": {
+                "location": {},
+                "attribute": false,
+                "qualifier": null,
+                "id": {
+                  "Id": [
+                    "o",
+                    {}
+                  ]
+                }
+              }
+            },
+            "identifier": {
+              "location": {},
+              "attribute": false,
+              "qualifier": null,
+              "id": {
+                "Id": [
+                  "*",
+                  {}
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "ExpressionStatement": {
+        "location": {},
+        "expression": {
+          "Member": {
+            "location": {},
+            "base": {
+              "QualifiedIdentifier": {
+                "location": {},
+                "attribute": false,
+                "qualifier": null,
+                "id": {
+                  "Id": [
+                    "o",
+                    {}
+                  ]
+                }
+              }
+            },
+            "identifier": {
+              "location": {},
+              "attribute": false,
+              "qualifier": null,
+              "id": {
+                "Id": [
+                  "public",
+                  {}
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "ExpressionStatement": {
+        "location": {},
+        "expression": {
+          "Member": {
+            "location": {},
+            "base": {
+              "QualifiedIdentifier": {
+                "location": {},
+                "attribute": false,
+                "qualifier": null,
+                "id": {
+                  "Id": [
+                    "o",
+                    {}
+                  ]
+                }
+              }
+            },
+            "identifier": {
+              "location": {},
+              "attribute": false,
+              "qualifier": {
+                "QualifiedIdentifier": {
+                  "location": {},
+                  "attribute": false,
+                  "qualifier": null,
+                  "id": {
+                    "Id": [
+                      "public",
+                      {}
+                    ]
+                  }
+                }
+              },
+              "id": {
+                "Id": [
+                  "x",
+                  {}
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "ExpressionStatement": {
+        "location": {},
+        "expression": {
+          "Member": {
+            "location": {},
+            "base": {
+              "QualifiedIdentifier": {
+                "location": {},
+                "attribute": false,
+                "qualifier": null,
+                "id": {
+                  "Id": [
+                    "o",
+                    {}
+                  ]
+                }
+              }
+            },
+            "identifier": {
+              "location": {},
+              "attribute": false,
+              "qualifier": {
+                "Paren": {
+                  "location": {},
+                  "expression": {
+                    "QualifiedIdentifier": {
+                      "location": {},
+                      "attribute": false,
+                      "qualifier": null,
+                      "id": {
+                        "Id": [
+                          "q",
+                          {}
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "id": {
+                "Id": [
+                  "x",
+                  {}
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "ExpressionStatement": {
+        "location": {},
+        "expression": {
+          "Member": {
+            "location": {},
+            "base": {
+              "QualifiedIdentifier": {
+                "location": {},
+                "attribute": false,
+                "qualifier": null,
+                "id": {
+                  "Id": [
+                    "o",
+                    {}
+                  ]
+                }
+              }
+            },
+            "identifier": {
+              "location": {},
+              "attribute": false,
+              "qualifier": {
+                "QualifiedIdentifier": {
+                  "location": {},
+                  "attribute": false,
+                  "qualifier": null,
+                  "id": {
+                    "Id": [
+                      "q",
+                      {}
+                    ]
+                  }
+                }
+              },
+              "id": {
+                "Id": [
+                  "x",
+                  {}
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "ExpressionStatement": {
+        "location": {},
+        "expression": {
+          "Member": {
+            "location": {},
+            "base": {
+              "QualifiedIdentifier": {
+                "location": {},
+                "attribute": false,
+                "qualifier": null,
+                "id": {
+                  "Id": [
+                    "o",
+                    {}
+                  ]
+                }
+              }
+            },
+            "identifier": {
+              "location": {},
+              "attribute": false,
+              "qualifier": {
+                "QualifiedIdentifier": {
+                  "location": {},
+                  "attribute": false,
+                  "qualifier": null,
+                  "id": {
+                    "Id": [
+                      "q",
+                      {}
+                    ]
+                  }
+                }
+              },
+              "id": {
+                "Brackets": {
+                  "QualifiedIdentifier": {
+                    "location": {},
+                    "attribute": false,
+                    "qualifier": null,
+                    "id": {
+                      "Id": [
+                        "k",
+                        {}
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "ExpressionStatement": {
+        "location": {},
+        "expression": {
+          "Member": {
+            "location": {},
+            "base": {
+              "QualifiedIdentifier": {
+                "location": {},
+                "attribute": false,
+                "qualifier": null,
+                "id": {
+                  "Id": [
+                    "o",
+                    {}
+                  ]
+                }
+              }
+            },
+            "identifier": {
+              "location": {},
+              "attribute": true,
+              "qualifier": null,
+              "id": {
+                "Id": [
+                  "x",
+                  {}
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

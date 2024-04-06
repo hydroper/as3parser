@@ -2710,7 +2710,14 @@ impl<'input> Parser<'input> {
         if let Token::Identifier(id) = &self.token.0 {
             let id = (id.clone(), self.token_location());
             self.next()?;
-            if self.peek_annotatable_directive_identifier_name() || self.lookbehind_is_annotatable_directive_identifier_name() {
+
+            // If there is a line break or offending token is "::",
+            // do not proceed into parsing an expression attribute or annotatble directive.
+            let eligible_attribute_or_directive
+                =  !self.previous_token.1.line_break(&self.token.1)
+                && !(matches!(self.token.0, Token::ColonColon));
+
+            if eligible_attribute_or_directive && (self.peek_annotatable_directive_identifier_name() || self.lookbehind_is_annotatable_directive_identifier_name()) {
                 let mut context1: AnnotatableContext;
                 if ["enum", "type", "namespace"].contains(&id.0.as_ref()) && id.1.character_count() == id.0.len() {
                     context1 = AnnotatableContext {
@@ -2722,10 +2729,29 @@ impl<'input> Parser<'input> {
                     };
                     // self.parse_attribute_keywords_or_expressions(&mut context)?;
                 } else {
+                    let first_attr = self.keyword_or_expression_attribute_from_previous_token()?.unwrap();
+
+                    // Do not proceed into parsing an annotatable directive
+                    // if there is a line break after an expression attribute,
+                    // or if the offending token is not an identifier name.
+                    if self.previous_token.1.line_break(&self.token.1) || !(matches!(self.token.0, Token::Identifier(_)) || self.token.0.is_reserved_word()) {
+                        if let Attribute::Expression(exp) = &first_attr {
+                            self.push_location(&exp.location());
+                            let exp = self.parse_subexpressions(exp.clone(), ParsingExpressionContext {
+                                allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
+                            })?;
+                            let semicolon_inserted = self.parse_semicolon()?;
+                            return Ok((Rc::new(Directive::ExpressionStatement(ExpressionStatement {
+                                location: self.pop_location(),
+                                expression: exp,
+                            })), semicolon_inserted));
+                        }
+                    }
+
                     context1 = AnnotatableContext {
                         start_location: id.1.clone(),
                         asdoc,
-                        attributes: vec![self.keyword_or_expression_attribute_from_previous_token()?.unwrap()],
+                        attributes: vec![first_attr],
                         context: context.clone(),
                         directive_context_keyword: None,
                     };
