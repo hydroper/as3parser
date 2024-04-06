@@ -10,11 +10,11 @@ as3_parser = "0.4"
 Parse programs or expressions through the `ParserFacade` structure of the `as3_parser` crate:
 
 ```rust
-use as3_parser::*;
+use as3_parser::ns::*;
 
 let source = CompilationUnit::new(None, "x ** y".into(), &CompilerOptions::new());
 if let Some(program) = ParserFacade::parse_program(&source) {
-    // program: Rc<ast::Program>
+    // program: Rc<Program>
 }
 ```
 
