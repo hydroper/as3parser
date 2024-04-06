@@ -228,3 +228,16 @@ import x = ns.y;
 import ns1 = ns.*;
 ns1::y
 ```
+
+## Negated In/Is
+
+```
+k not in o
+v is not T
+```
+
+## Exponentiation
+
+```
+n ** p
+```
