@@ -224,6 +224,7 @@ type T1 = [E1, E2]
 ```
 import x = ns.y;
 
-// Open public of ns and alias it
+// Open public of ns and set "ns1" to NamespaceSet(ns public, ns internal)
 import ns1 = ns.*;
+ns1::y
 ```
