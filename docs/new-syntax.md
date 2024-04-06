@@ -144,7 +144,7 @@ switch type (o) {
 
 ## Configuration Directive
 
-`configuration { ... }` means conditional compilation. A limited set of expressions are valid and translate to a different syntactic construct:
+`configuration { ... }` means conditional compilation with `if`, `else if` and `else` branches. A limited set of expressions are valid and translate to a different syntactic construct:
 
 * `q::x` translates to an identifier whose name is literally `"q::x"` without a qualifier.
 * `x` asks whether a constant `x` is present.
