@@ -241,3 +241,30 @@ v is not T
 ```
 n ** p
 ```
+
+## Function Body
+
+* Function bodies may consist of an expression. 
+
+```
+const f = function(): Number (10)
+```
+
+## Numeric Literal
+
+* Binary literal
+* Underscore separators
+
+```
+0b1011
+10_000
+```
+
+## Regular Expression
+
+* Line terminators allowed within a regular expression literal.
+
+```
+/(?:)
+./m
+```
