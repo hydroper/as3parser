@@ -3,6 +3,24 @@
   "packages": [],
   "directives": [
     {
+      "DefaultXmlNamespaceStatement": {
+        "location": {},
+        "right": {
+          "QualifiedIdentifier": {
+            "location": {},
+            "attribute": false,
+            "qualifier": null,
+            "id": {
+              "Id": [
+                "myxmlns",
+                {}
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
       "ExpressionStatement": {
         "location": {},
         "expression": {

@@ -239,6 +239,55 @@
           }
         }
       }
+    },
+    {
+      "ExpressionStatement": {
+        "location": {},
+        "expression": {
+          "Conditional": {
+            "location": {},
+            "test": {
+              "QualifiedIdentifier": {
+                "location": {},
+                "attribute": false,
+                "qualifier": null,
+                "id": {
+                  "Id": [
+                    "x",
+                    {}
+                  ]
+                }
+              }
+            },
+            "consequent": {
+              "QualifiedIdentifier": {
+                "location": {},
+                "attribute": false,
+                "qualifier": null,
+                "id": {
+                  "Id": [
+                    "y",
+                    {}
+                  ]
+                }
+              }
+            },
+            "alternative": {
+              "QualifiedIdentifier": {
+                "location": {},
+                "attribute": false,
+                "qualifier": null,
+                "id": {
+                  "Id": [
+                    "z",
+                    {}
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
     }
   ]
 }

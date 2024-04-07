@@ -8,3 +8,5 @@ v is not T
 v instanceof T
 k in o
 k not in o
+
+x ? y : z

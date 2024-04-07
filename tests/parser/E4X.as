@@ -1,3 +1,5 @@
+default xml namespace = myxmlns;
+
 <!-- Comment --> ;
 <? ?> ;
 <![CDATA[ Characters ]]> ;
