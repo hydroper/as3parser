@@ -440,7 +440,7 @@ impl<'input> Parser<'input> {
             if operator == Operator::In && !context.allow_in {
                 return None;
             }
-            Some(BinaryOperator::try_from(operator).unwrap())
+            BinaryOperator::try_from(operator).ok()
         } else {
             None
         }
@@ -607,27 +607,7 @@ impl<'input> Parser<'input> {
         if let Token::Identifier(id) = self.token.0.clone() {
             let id_location = self.token_location();
             self.next()?;
-
-            // EmbedExpression
-            if self.peek(Token::LeftBrace) && id == "embed" && self.previous_token.1.character_count() == "embed".len() {
-                return Ok(Some(self.finish_embed_expression(id_location)?));
-            }
-
-            let id = Rc::new(Expression::QualifiedIdentifier(QualifiedIdentifier {
-                location: id_location.clone(),
-                attribute: false,
-                qualifier: None,
-                id: QualifiedIdentifierIdentifier::Id((id, id_location.clone())),
-            }));
-            if self.peek(Token::ColonColon) {
-                self.push_location(&id_location.clone());
-                self.duplicate_location();
-                let ql = self.pop_location();
-                let id = self.finish_qualified_identifier(false, ql, id)?;
-                Ok(Some(Rc::new(Expression::QualifiedIdentifier(id))))
-            } else {
-                Ok(Some(id))
-            }
+            Ok(Some(self.parse_expression_starting_with_identifier((id, id_location))?))
         } else if self.peek(Token::Null) {
             self.mark_location();
             self.next()?;
@@ -795,6 +775,32 @@ impl<'input> Parser<'input> {
             }))))
         } else {
             Ok(None)
+        }
+    }
+
+    fn parse_expression_starting_with_identifier(&mut self, id: (String, Location)) -> Result<Rc<Expression>, ParsingFailure> {
+        let id_location = id.1.clone();
+        let id = id.0;
+
+        // EmbedExpression
+        if self.peek(Token::LeftBrace) && id == "embed" && self.previous_token.1.character_count() == "embed".len() {
+            return Ok(self.finish_embed_expression(id_location)?);
+        }
+
+        let id = Rc::new(Expression::QualifiedIdentifier(QualifiedIdentifier {
+            location: id_location.clone(),
+            attribute: false,
+            qualifier: None,
+            id: QualifiedIdentifierIdentifier::Id((id, id_location.clone())),
+        }));
+        if self.peek(Token::ColonColon) {
+            self.push_location(&id_location.clone());
+            self.duplicate_location();
+            let ql = self.pop_location();
+            let id = self.finish_qualified_identifier(false, ql, id)?;
+            Ok(Rc::new(Expression::QualifiedIdentifier(id)))
+        } else {
+            Ok(id)
         }
     }
 
@@ -2729,27 +2735,28 @@ impl<'input> Parser<'input> {
                     };
                     // self.parse_attribute_keywords_or_expressions(&mut context)?;
                 } else {
-                    let first_attr = self.keyword_or_expression_attribute_from_previous_token()?.unwrap();
+                    let mut first_attr_expr = self.parse_expression_starting_with_identifier(id)?;
+                    first_attr_expr = self.parse_subexpressions(first_attr_expr, ParsingExpressionContext {
+                        allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
+                    })?;
 
                     // Do not proceed into parsing an annotatable directive
                     // if there is a line break after an expression attribute,
-                    // or if the offending token is not an identifier name.
-                    if self.previous_token.1.line_break(&self.token.1) || !(matches!(self.token.0, Token::Identifier(_)) || self.token.0.is_reserved_word()) {
-                        if let Attribute::Expression(exp) = &first_attr {
-                            self.push_location(&exp.location());
-                            let exp = self.parse_subexpressions(exp.clone(), ParsingExpressionContext {
-                                allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
-                            })?;
-                            let semicolon_inserted = self.parse_semicolon()?;
-                            return Ok((Rc::new(Directive::ExpressionStatement(ExpressionStatement {
-                                location: self.pop_location(),
-                                expression: exp,
-                            })), semicolon_inserted));
-                        }
+                    // or if the offending token is not an identifier name,
+                    // or if the expression attribute is not a valid access modifier.
+                    if !first_attr_expr.valid_access_modifier() || self.previous_token.1.line_break(&self.token.1) || !(matches!(self.token.0, Token::Identifier(_)) || self.token.0.is_reserved_word()) {
+                        self.push_location(&first_attr_expr.location());
+                        let semicolon_inserted = self.parse_semicolon()?;
+                        return Ok((Rc::new(Directive::ExpressionStatement(ExpressionStatement {
+                            location: self.pop_location(),
+                            expression: first_attr_expr,
+                        })), semicolon_inserted));
                     }
 
+                    let first_attr = self.keyword_or_expression_attribute_from_expression(&first_attr_expr);
+
                     context1 = AnnotatableContext {
-                        start_location: id.1.clone(),
+                        start_location: first_attr.location(),
                         asdoc,
                         attributes: vec![first_attr],
                         context: context.clone(),
@@ -3702,11 +3709,31 @@ impl<'input> Parser<'input> {
         }
     }
 
+    fn keyword_or_expression_attribute_from_expression(&self, expr: &Rc<Expression>) -> Attribute {
+        match expr.as_ref() {
+            Expression::QualifiedIdentifier(id) => {
+                if id.qualifier.is_some() || id.attribute {
+                    return Attribute::Expression(expr.clone());
+                }
+                match &id.id {
+                    QualifiedIdentifierIdentifier::Id((id, location)) => {
+                        if let Some(attr) = Attribute::from_identifier_name(&id, &location) {
+                            return attr;
+                        }
+                        Attribute::Expression(expr.clone())
+                    },
+                    _ => Attribute::Expression(expr.clone()),
+                }
+            },
+            _ => Attribute::Expression(expr.clone()),
+        }
+    }
+
     fn keyword_attribute_from_previous_token(&self) -> Option<Attribute> {
         self.previous_token.0.to_attribute(&self.previous_token.1)
     }
 
-    fn keyword_or_expression_attribute_from_previous_token(&mut self) -> Result<Option<Attribute>, ParsingFailure> {
+    fn _keyword_or_expression_attribute_from_previous_token(&mut self) -> Result<Option<Attribute>, ParsingFailure> {
         if let Some(a) = self.keyword_attribute_from_previous_token() {
             return Ok(Some(a));
         }

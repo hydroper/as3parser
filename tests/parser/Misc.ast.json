@@ -54,6 +54,191 @@
           }
         }
       }
+    },
+    {
+      "ExpressionStatement": {
+        "location": {},
+        "expression": {
+          "Binary": {
+            "location": {},
+            "operator": "Is",
+            "left": {
+              "QualifiedIdentifier": {
+                "location": {},
+                "attribute": false,
+                "qualifier": null,
+                "id": {
+                  "Id": [
+                    "v",
+                    {}
+                  ]
+                }
+              }
+            },
+            "right": {
+              "QualifiedIdentifier": {
+                "location": {},
+                "attribute": false,
+                "qualifier": null,
+                "id": {
+                  "Id": [
+                    "T",
+                    {}
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "ExpressionStatement": {
+        "location": {},
+        "expression": {
+          "Binary": {
+            "location": {},
+            "operator": "IsNot",
+            "left": {
+              "QualifiedIdentifier": {
+                "location": {},
+                "attribute": false,
+                "qualifier": null,
+                "id": {
+                  "Id": [
+                    "v",
+                    {}
+                  ]
+                }
+              }
+            },
+            "right": {
+              "QualifiedIdentifier": {
+                "location": {},
+                "attribute": false,
+                "qualifier": null,
+                "id": {
+                  "Id": [
+                    "T",
+                    {}
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "ExpressionStatement": {
+        "location": {},
+        "expression": {
+          "Binary": {
+            "location": {},
+            "operator": "Instanceof",
+            "left": {
+              "QualifiedIdentifier": {
+                "location": {},
+                "attribute": false,
+                "qualifier": null,
+                "id": {
+                  "Id": [
+                    "v",
+                    {}
+                  ]
+                }
+              }
+            },
+            "right": {
+              "QualifiedIdentifier": {
+                "location": {},
+                "attribute": false,
+                "qualifier": null,
+                "id": {
+                  "Id": [
+                    "T",
+                    {}
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "ExpressionStatement": {
+        "location": {},
+        "expression": {
+          "Binary": {
+            "location": {},
+            "operator": "In",
+            "left": {
+              "QualifiedIdentifier": {
+                "location": {},
+                "attribute": false,
+                "qualifier": null,
+                "id": {
+                  "Id": [
+                    "k",
+                    {}
+                  ]
+                }
+              }
+            },
+            "right": {
+              "QualifiedIdentifier": {
+                "location": {},
+                "attribute": false,
+                "qualifier": null,
+                "id": {
+                  "Id": [
+                    "o",
+                    {}
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "ExpressionStatement": {
+        "location": {},
+        "expression": {
+          "Binary": {
+            "location": {},
+            "operator": "NotIn",
+            "left": {
+              "QualifiedIdentifier": {
+                "location": {},
+                "attribute": false,
+                "qualifier": null,
+                "id": {
+                  "Id": [
+                    "k",
+                    {}
+                  ]
+                }
+              }
+            },
+            "right": {
+              "QualifiedIdentifier": {
+                "location": {},
+                "attribute": false,
+                "qualifier": null,
+                "id": {
+                  "Id": [
+                    "o",
+                    {}
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
     }
   ]
 }

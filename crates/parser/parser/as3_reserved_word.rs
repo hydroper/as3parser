@@ -100,6 +100,7 @@ impl As3ReservedWord {
             10 => {
                 match name {
                     "implements" => Some(Token::Implements),
+                    "instanceof" => Some(Token::Instanceof),
                     _ => None,
                 }
             },
