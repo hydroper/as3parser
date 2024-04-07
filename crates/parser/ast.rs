@@ -111,6 +111,8 @@ mod import_directive;
 pub use import_directive::*;
 mod use_namespace_directive;
 pub use use_namespace_directive::*;
+mod include_directive;
+pub use include_directive::*;
 
 // Miscellaneous
 mod attributes;
