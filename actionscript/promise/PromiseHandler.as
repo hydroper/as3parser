@@ -1,4 +1,4 @@
-package org.as3.lang.internals {
+package __AS3__.promise {
     /**
      * @private
      */
