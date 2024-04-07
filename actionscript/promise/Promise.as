@@ -1,6 +1,6 @@
 package {
     import flash.utils.setTimeout;
-    import org.as3.lang.internals.*;
+    import __AS3__.promise.*;
 
     /**
      * The Promise object represents the eventual completion (or failure)
@@ -11,14 +11,14 @@ package {
      * # Examples
      * 
      * ```
-     * const promise = new Promise.<void>((resolve, reject) => {
+     * const promise = new Promise.<*>(function(resolve: Function, reject: Function): void {
      *     //
      * });
      * 
      * promise
-     *     .then(() => {})
-     *     .catch(error => {})
-     *     .finally(() => {});
+     *     .then(function(): * {})
+     *     .catch(function(error: *): * {})
+     *     .finally(function(): void {});
      * ```
      */
     public final class Promise.<T> {
@@ -149,11 +149,11 @@ package {
          *
          * ```
          * const promise1 = Promise.<Number>.resolve(3);
-         * const promise2 = new Promise.<Number>((resolve, reject) => {
+         * const promise2 = new Promise.<Number>(function(resolve: Function, reject: Function): void {
          *     setTimeout(reject, 100, "foo");
          * });
          * Promise.<Number>.allSettled([promise1, promise2])
-         *     .then(results => {
+         *     .then(function(results: Array): void {
          *         for each (const result in results) {
          *             trace(result.status);
          *         }
@@ -265,8 +265,8 @@ package {
             return this.then(null, onRejected);
         }
 
-        public function then.<U, E>(onFulfilled: (data: T) => U, onRejected: (error: *) => E = null):Promise.<T> {
-            var prom = new Promise.<T>(function(_a:*, _b:*):void {});
+        public function then(onFulfilled: function(data: T): U, onRejected: function(error: *): E = null):Promise.<*> {
+            var prom = new Promise.<*>(function(_a:*, _b:*):void {});
             Promise.<T>.handle(this, new PromiseHandler(onFulfilled, onRejected, prom));
             return prom;
         }
@@ -274,7 +274,7 @@ package {
         /**
          * [developer.mozilla.org](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/all)
          */
-        public static function all(promises:Array):Promise.<T> {
+        public static function all(promises: Array):Promise.<T> {
             return new Promise(function(resolve:Function, reject:Function):void {
                 var args:Array = promises.slice(0);
                 if (args.length === 0) {
@@ -287,7 +287,7 @@ package {
                     try {
                         if (val is Promise) {
                             Promise(val).then(
-                                val => {
+                                function(val): * {
                                     res(i, val);
                                 },
                                 reject
@@ -318,7 +318,7 @@ package {
                 return Promise.<T>(value);
             }
 
-            return new Promise.<T>((resolve, reject) => {
+            return new Promise.<T>(function(resolve: Function, reject: Function): void {
                 resolve(value);
             });
         }
@@ -327,7 +327,7 @@ package {
          * [developer.mozilla.org](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/reject)
          */
         public static function reject(value: *): Promise.<T> {
-            return new Promise((resolve, reject) => {
+            return new Promise(function(resolve: Function, reject: Function): void {
                 reject(value);
             });
         }
