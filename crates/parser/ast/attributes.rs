@@ -14,6 +14,7 @@ pub enum Attribute {
     Static(Location),
     Abstract(Location),
     Override(Location),
+    Dynamic(Location),
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -60,6 +61,7 @@ impl Attribute {
             Self::Static(a) => a.clone(),
             Self::Abstract(a) => a.clone(),
             Self::Override(a) => a.clone(),
+            Self::Dynamic(a) => a.clone(),
         }
     }
 
@@ -110,6 +112,7 @@ impl Attribute {
     pub fn find_static(list: &Vec<Attribute>) -> Option<Location> { for a in list { match &a { Self::Static(l) => return Some(l.clone()), _ => return None } }; None }
     pub fn find_abstract(list: &Vec<Attribute>) -> Option<Location> { for a in list { match &a { Self::Abstract(l) => return Some(l.clone()), _ => return None } }; None }
     pub fn find_override(list: &Vec<Attribute>) -> Option<Location> { for a in list { match &a { Self::Override(l) => return Some(l.clone()), _ => return None } }; None }
+    pub fn find_dynamic(list: &Vec<Attribute>) -> Option<Location> { for a in list { match &a { Self::Dynamic(l) => return Some(l.clone()), _ => return None } }; None }
 
     pub fn has(list: &Vec<Attribute>, attribute: &Attribute) -> bool {
         match attribute {
@@ -122,6 +125,7 @@ impl Attribute {
             Self::Static(_) => Self::find_static(list).is_some(),
             Self::Abstract(_) => Self::find_abstract(list).is_some(),
             Self::Override(_) => Self::find_override(list).is_some(),
+            Self::Dynamic(_) => Self::find_dynamic(list).is_some(),
             _ => false,
         }
     }
@@ -147,6 +151,7 @@ impl Attribute {
     pub fn is_static(&self) -> bool { matches!(self, Self::Static(_)) }
     pub fn is_abstract(&self) -> bool { matches!(self, Self::Abstract(_)) }
     pub fn is_override(&self) -> bool { matches!(self, Self::Override(_)) }
+    pub fn is_dynamic(&self) -> bool { matches!(self, Self::Dynamic(_)) }
 
     pub fn from_identifier_name(name: &str, location: &Location) -> Option<Attribute> {
         if location.character_count() != name.chars().count() {
@@ -158,6 +163,7 @@ impl Attribute {
             "static" => Some(Attribute::Static(location.clone())),
             "abstract" => Some(Attribute::Abstract(location.clone())),
             "override" => Some(Attribute::Override(location.clone())),
+            "dynamic" => Some(Attribute::Dynamic(location.clone())),
             _ => None,
         }
     }

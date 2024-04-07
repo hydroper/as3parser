@@ -3282,6 +3282,7 @@ impl<'input> Parser<'input> {
             match a {
                 Attribute::Static(_) => {},
                 Attribute::Final(_) => {},
+                Attribute::Dynamic(_) => {},
                 Attribute::Abstract(_) => {},
 
                 Attribute::Expression(_) |

@@ -99,6 +99,33 @@
         ],
         "directives": []
       }
+    },
+    {
+      "ClassDefinition": {
+        "location": {},
+        "asdoc": null,
+        "attributes": [
+          {
+            "Dynamic": {}
+          },
+          {
+            "Final": {}
+          }
+        ],
+        "allow_literal": false,
+        "name": [
+          "C1",
+          {}
+        ],
+        "type_parameters": null,
+        "extends_clause": null,
+        "implements_clause": null,
+        "block": {
+          "location": {},
+          "metadata": null,
+          "directives": []
+        }
+      }
     }
   ]
 }
