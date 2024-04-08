@@ -3304,20 +3304,10 @@ impl<'input> Parser<'input> {
             self.add_syntax_error(&name.1, DiagnosticKind::NestedClassesNotAllowed, diagnostic_arguments![]);
         }
 
-        let mut allow_literal = false;
-        let metadata = Attribute::find_metadata(&attributes);
-        for metadata in metadata {
-            if metadata.name.0 == "Literal" {
-                allow_literal = true;
-                Attribute::remove_metadata(&mut attributes, &metadata);
-            }
-        }
-
         let node = Rc::new(Directive::ClassDefinition(ClassDefinition {
             location: self.pop_location(),
             asdoc,
             attributes,
-            allow_literal,
             name: name.clone(),
             type_parameters,
             extends_clause,
