@@ -1,0 +1,2401 @@
+{
+  "location": {},
+  "packages": [
+    {
+      "location": {},
+      "asdoc": null,
+      "name": [],
+      "block": {
+        "location": {},
+        "metadata": null,
+        "directives": [
+          {
+            "ImportDirective": {
+              "location": {},
+              "alias": null,
+              "package_name": [
+                [
+                  "flash",
+                  {}
+                ],
+                [
+                  "display",
+                  {}
+                ]
+              ],
+              "import_specifier": {
+                "Identifier": [
+                  "Bitmap",
+                  {}
+                ]
+              }
+            }
+          },
+          {
+            "ImportDirective": {
+              "location": {},
+              "alias": null,
+              "package_name": [
+                [
+                  "flash",
+                  {}
+                ],
+                [
+                  "display",
+                  {}
+                ]
+              ],
+              "import_specifier": {
+                "Identifier": [
+                  "BitmapData",
+                  {}
+                ]
+              }
+            }
+          },
+          {
+            "ImportDirective": {
+              "location": {},
+              "alias": null,
+              "package_name": [
+                [
+                  "flash",
+                  {}
+                ],
+                [
+                  "display",
+                  {}
+                ]
+              ],
+              "import_specifier": {
+                "Identifier": [
+                  "Loader",
+                  {}
+                ]
+              }
+            }
+          },
+          {
+            "ImportDirective": {
+              "location": {},
+              "alias": null,
+              "package_name": [
+                [
+                  "flash",
+                  {}
+                ],
+                [
+                  "display",
+                  {}
+                ]
+              ],
+              "import_specifier": {
+                "Identifier": [
+                  "Sprite",
+                  {}
+                ]
+              }
+            }
+          },
+          {
+            "ImportDirective": {
+              "location": {},
+              "alias": null,
+              "package_name": [
+                [
+                  "flash",
+                  {}
+                ],
+                [
+                  "events",
+                  {}
+                ]
+              ],
+              "import_specifier": {
+                "Wildcard": {}
+              }
+            }
+          },
+          {
+            "ImportDirective": {
+              "location": {},
+              "alias": null,
+              "package_name": [
+                [
+                  "flash",
+                  {}
+                ],
+                [
+                  "geom",
+                  {}
+                ]
+              ],
+              "import_specifier": {
+                "Identifier": [
+                  "Point",
+                  {}
+                ]
+              }
+            }
+          },
+          {
+            "ImportDirective": {
+              "location": {},
+              "alias": null,
+              "package_name": [
+                [
+                  "flash",
+                  {}
+                ],
+                [
+                  "geom",
+                  {}
+                ]
+              ],
+              "import_specifier": {
+                "Identifier": [
+                  "Rectangle",
+                  {}
+                ]
+              }
+            }
+          },
+          {
+            "ImportDirective": {
+              "location": {},
+              "alias": null,
+              "package_name": [
+                [
+                  "flash",
+                  {}
+                ],
+                [
+                  "net",
+                  {}
+                ]
+              ],
+              "import_specifier": {
+                "Identifier": [
+                  "URLRequest",
+                  {}
+                ]
+              }
+            }
+          },
+          {
+            "ClassDefinition": {
+              "location": {},
+              "asdoc": null,
+              "attributes": [
+                {
+                  "Public": {}
+                }
+              ],
+              "name": [
+                "BitmapExample",
+                {}
+              ],
+              "type_parameters": null,
+              "extends_clause": {
+                "QualifiedIdentifier": {
+                  "location": {},
+                  "attribute": false,
+                  "qualifier": null,
+                  "id": {
+                    "Id": [
+                      "Sprite",
+                      {}
+                    ]
+                  }
+                }
+              },
+              "implements_clause": null,
+              "block": {
+                "location": {},
+                "metadata": null,
+                "directives": [
+                  {
+                    "VariableDefinition": {
+                      "location": {},
+                      "asdoc": null,
+                      "attributes": [
+                        {
+                          "Private": {}
+                        }
+                      ],
+                      "kind": [
+                        "Var",
+                        {}
+                      ],
+                      "bindings": [
+                        {
+                          "destructuring": {
+                            "location": {},
+                            "destructuring": {
+                              "QualifiedIdentifier": {
+                                "location": {},
+                                "attribute": false,
+                                "qualifier": null,
+                                "id": {
+                                  "Id": [
+                                    "url",
+                                    {}
+                                  ]
+                                }
+                              }
+                            },
+                            "type_annotation": {
+                              "QualifiedIdentifier": {
+                                "location": {},
+                                "attribute": false,
+                                "qualifier": null,
+                                "id": {
+                                  "Id": [
+                                    "String",
+                                    {}
+                                  ]
+                                }
+                              }
+                            }
+                          },
+                          "initializer": {
+                            "StringLiteral": {
+                              "location": {},
+                              "value": "Image.gif"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "VariableDefinition": {
+                      "location": {},
+                      "asdoc": null,
+                      "attributes": [
+                        {
+                          "Private": {}
+                        }
+                      ],
+                      "kind": [
+                        "Var",
+                        {}
+                      ],
+                      "bindings": [
+                        {
+                          "destructuring": {
+                            "location": {},
+                            "destructuring": {
+                              "QualifiedIdentifier": {
+                                "location": {},
+                                "attribute": false,
+                                "qualifier": null,
+                                "id": {
+                                  "Id": [
+                                    "size",
+                                    {}
+                                  ]
+                                }
+                              }
+                            },
+                            "type_annotation": {
+                              "QualifiedIdentifier": {
+                                "location": {},
+                                "attribute": false,
+                                "qualifier": null,
+                                "id": {
+                                  "Id": [
+                                    "uint",
+                                    {}
+                                  ]
+                                }
+                              }
+                            }
+                          },
+                          "initializer": {
+                            "NumericLiteral": {
+                              "location": {},
+                              "value": "80"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "FunctionDefinition": {
+                      "location": {},
+                      "asdoc": null,
+                      "attributes": [
+                        {
+                          "Public": {}
+                        }
+                      ],
+                      "name": {
+                        "Constructor": [
+                          "BitmapExample",
+                          {}
+                        ]
+                      },
+                      "common": {
+                        "location": {},
+                        "contains_yield": false,
+                        "contains_await": false,
+                        "signature": {
+                          "location": {},
+                          "parameters": [],
+                          "result_type": null
+                        },
+                        "body": {
+                          "Block": {
+                            "location": {},
+                            "metadata": null,
+                            "directives": [
+                              {
+                                "ExpressionStatement": {
+                                  "location": {},
+                                  "expression": {
+                                    "Call": {
+                                      "location": {},
+                                      "base": {
+                                        "QualifiedIdentifier": {
+                                          "location": {},
+                                          "attribute": false,
+                                          "qualifier": null,
+                                          "id": {
+                                            "Id": [
+                                              "configureAssets",
+                                              {}
+                                            ]
+                                          }
+                                        }
+                                      },
+                                      "arguments": []
+                                    }
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "FunctionDefinition": {
+                      "location": {},
+                      "asdoc": null,
+                      "attributes": [
+                        {
+                          "Private": {}
+                        }
+                      ],
+                      "name": {
+                        "Identifier": [
+                          "configureAssets",
+                          {}
+                        ]
+                      },
+                      "common": {
+                        "location": {},
+                        "contains_yield": false,
+                        "contains_await": false,
+                        "signature": {
+                          "location": {},
+                          "parameters": [],
+                          "result_type": {
+                            "VoidType": {
+                              "location": {}
+                            }
+                          }
+                        },
+                        "body": {
+                          "Block": {
+                            "location": {},
+                            "metadata": null,
+                            "directives": [
+                              {
+                                "VariableDefinition": {
+                                  "location": {},
+                                  "asdoc": null,
+                                  "attributes": [],
+                                  "kind": [
+                                    "Var",
+                                    {}
+                                  ],
+                                  "bindings": [
+                                    {
+                                      "destructuring": {
+                                        "location": {},
+                                        "destructuring": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "loader",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        },
+                                        "type_annotation": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "Loader",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "initializer": {
+                                        "New": {
+                                          "location": {},
+                                          "base": {
+                                            "QualifiedIdentifier": {
+                                              "location": {},
+                                              "attribute": false,
+                                              "qualifier": null,
+                                              "id": {
+                                                "Id": [
+                                                  "Loader",
+                                                  {}
+                                                ]
+                                              }
+                                            }
+                                          },
+                                          "arguments": []
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "ExpressionStatement": {
+                                  "location": {},
+                                  "expression": {
+                                    "Call": {
+                                      "location": {},
+                                      "base": {
+                                        "Member": {
+                                          "location": {},
+                                          "base": {
+                                            "Member": {
+                                              "location": {},
+                                              "base": {
+                                                "QualifiedIdentifier": {
+                                                  "location": {},
+                                                  "attribute": false,
+                                                  "qualifier": null,
+                                                  "id": {
+                                                    "Id": [
+                                                      "loader",
+                                                      {}
+                                                    ]
+                                                  }
+                                                }
+                                              },
+                                              "identifier": {
+                                                "location": {},
+                                                "attribute": false,
+                                                "qualifier": null,
+                                                "id": {
+                                                  "Id": [
+                                                    "contentLoaderInfo",
+                                                    {}
+                                                  ]
+                                                }
+                                              }
+                                            }
+                                          },
+                                          "identifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "addEventListener",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "arguments": [
+                                        {
+                                          "Member": {
+                                            "location": {},
+                                            "base": {
+                                              "QualifiedIdentifier": {
+                                                "location": {},
+                                                "attribute": false,
+                                                "qualifier": null,
+                                                "id": {
+                                                  "Id": [
+                                                    "Event",
+                                                    {}
+                                                  ]
+                                                }
+                                              }
+                                            },
+                                            "identifier": {
+                                              "location": {},
+                                              "attribute": false,
+                                              "qualifier": null,
+                                              "id": {
+                                                "Id": [
+                                                  "COMPLETE",
+                                                  {}
+                                                ]
+                                              }
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "completeHandler",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "ExpressionStatement": {
+                                  "location": {},
+                                  "expression": {
+                                    "Call": {
+                                      "location": {},
+                                      "base": {
+                                        "Member": {
+                                          "location": {},
+                                          "base": {
+                                            "Member": {
+                                              "location": {},
+                                              "base": {
+                                                "QualifiedIdentifier": {
+                                                  "location": {},
+                                                  "attribute": false,
+                                                  "qualifier": null,
+                                                  "id": {
+                                                    "Id": [
+                                                      "loader",
+                                                      {}
+                                                    ]
+                                                  }
+                                                }
+                                              },
+                                              "identifier": {
+                                                "location": {},
+                                                "attribute": false,
+                                                "qualifier": null,
+                                                "id": {
+                                                  "Id": [
+                                                    "contentLoaderInfo",
+                                                    {}
+                                                  ]
+                                                }
+                                              }
+                                            }
+                                          },
+                                          "identifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "addEventListener",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "arguments": [
+                                        {
+                                          "Member": {
+                                            "location": {},
+                                            "base": {
+                                              "QualifiedIdentifier": {
+                                                "location": {},
+                                                "attribute": false,
+                                                "qualifier": null,
+                                                "id": {
+                                                  "Id": [
+                                                    "IOErrorEvent",
+                                                    {}
+                                                  ]
+                                                }
+                                              }
+                                            },
+                                            "identifier": {
+                                              "location": {},
+                                              "attribute": false,
+                                              "qualifier": null,
+                                              "id": {
+                                                "Id": [
+                                                  "IO_ERROR",
+                                                  {}
+                                                ]
+                                              }
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "ioErrorHandler",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "VariableDefinition": {
+                                  "location": {},
+                                  "asdoc": null,
+                                  "attributes": [],
+                                  "kind": [
+                                    "Var",
+                                    {}
+                                  ],
+                                  "bindings": [
+                                    {
+                                      "destructuring": {
+                                        "location": {},
+                                        "destructuring": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "request",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        },
+                                        "type_annotation": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "URLRequest",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "initializer": {
+                                        "New": {
+                                          "location": {},
+                                          "base": {
+                                            "QualifiedIdentifier": {
+                                              "location": {},
+                                              "attribute": false,
+                                              "qualifier": null,
+                                              "id": {
+                                                "Id": [
+                                                  "URLRequest",
+                                                  {}
+                                                ]
+                                              }
+                                            }
+                                          },
+                                          "arguments": [
+                                            {
+                                              "QualifiedIdentifier": {
+                                                "location": {},
+                                                "attribute": false,
+                                                "qualifier": null,
+                                                "id": {
+                                                  "Id": [
+                                                    "url",
+                                                    {}
+                                                  ]
+                                                }
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "ExpressionStatement": {
+                                  "location": {},
+                                  "expression": {
+                                    "Assignment": {
+                                      "location": {},
+                                      "compound": null,
+                                      "left": {
+                                        "Member": {
+                                          "location": {},
+                                          "base": {
+                                            "QualifiedIdentifier": {
+                                              "location": {},
+                                              "attribute": false,
+                                              "qualifier": null,
+                                              "id": {
+                                                "Id": [
+                                                  "loader",
+                                                  {}
+                                                ]
+                                              }
+                                            }
+                                          },
+                                          "identifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "x",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "right": {
+                                        "Binary": {
+                                          "location": {},
+                                          "operator": "Multiply",
+                                          "left": {
+                                            "QualifiedIdentifier": {
+                                              "location": {},
+                                              "attribute": false,
+                                              "qualifier": null,
+                                              "id": {
+                                                "Id": [
+                                                  "size",
+                                                  {}
+                                                ]
+                                              }
+                                            }
+                                          },
+                                          "right": {
+                                            "QualifiedIdentifier": {
+                                              "location": {},
+                                              "attribute": false,
+                                              "qualifier": null,
+                                              "id": {
+                                                "Id": [
+                                                  "numChildren",
+                                                  {}
+                                                ]
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "ExpressionStatement": {
+                                  "location": {},
+                                  "expression": {
+                                    "Call": {
+                                      "location": {},
+                                      "base": {
+                                        "Member": {
+                                          "location": {},
+                                          "base": {
+                                            "QualifiedIdentifier": {
+                                              "location": {},
+                                              "attribute": false,
+                                              "qualifier": null,
+                                              "id": {
+                                                "Id": [
+                                                  "loader",
+                                                  {}
+                                                ]
+                                              }
+                                            }
+                                          },
+                                          "identifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "load",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "arguments": [
+                                        {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "request",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "ExpressionStatement": {
+                                  "location": {},
+                                  "expression": {
+                                    "Call": {
+                                      "location": {},
+                                      "base": {
+                                        "QualifiedIdentifier": {
+                                          "location": {},
+                                          "attribute": false,
+                                          "qualifier": null,
+                                          "id": {
+                                            "Id": [
+                                              "addChild",
+                                              {}
+                                            ]
+                                          }
+                                        }
+                                      },
+                                      "arguments": [
+                                        {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "loader",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "FunctionDefinition": {
+                      "location": {},
+                      "asdoc": null,
+                      "attributes": [
+                        {
+                          "Private": {}
+                        }
+                      ],
+                      "name": {
+                        "Identifier": [
+                          "duplicateImage",
+                          {}
+                        ]
+                      },
+                      "common": {
+                        "location": {},
+                        "contains_yield": false,
+                        "contains_await": false,
+                        "signature": {
+                          "location": {},
+                          "parameters": [
+                            {
+                              "location": {},
+                              "kind": "Required",
+                              "destructuring": {
+                                "location": {},
+                                "destructuring": {
+                                  "QualifiedIdentifier": {
+                                    "location": {},
+                                    "attribute": false,
+                                    "qualifier": null,
+                                    "id": {
+                                      "Id": [
+                                        "original",
+                                        {}
+                                      ]
+                                    }
+                                  }
+                                },
+                                "type_annotation": {
+                                  "QualifiedIdentifier": {
+                                    "location": {},
+                                    "attribute": false,
+                                    "qualifier": null,
+                                    "id": {
+                                      "Id": [
+                                        "Bitmap",
+                                        {}
+                                      ]
+                                    }
+                                  }
+                                }
+                              },
+                              "default_value": null
+                            }
+                          ],
+                          "result_type": {
+                            "QualifiedIdentifier": {
+                              "location": {},
+                              "attribute": false,
+                              "qualifier": null,
+                              "id": {
+                                "Id": [
+                                  "Bitmap",
+                                  {}
+                                ]
+                              }
+                            }
+                          }
+                        },
+                        "body": {
+                          "Block": {
+                            "location": {},
+                            "metadata": null,
+                            "directives": [
+                              {
+                                "VariableDefinition": {
+                                  "location": {},
+                                  "asdoc": null,
+                                  "attributes": [],
+                                  "kind": [
+                                    "Var",
+                                    {}
+                                  ],
+                                  "bindings": [
+                                    {
+                                      "destructuring": {
+                                        "location": {},
+                                        "destructuring": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "image",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        },
+                                        "type_annotation": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "Bitmap",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "initializer": {
+                                        "New": {
+                                          "location": {},
+                                          "base": {
+                                            "QualifiedIdentifier": {
+                                              "location": {},
+                                              "attribute": false,
+                                              "qualifier": null,
+                                              "id": {
+                                                "Id": [
+                                                  "Bitmap",
+                                                  {}
+                                                ]
+                                              }
+                                            }
+                                          },
+                                          "arguments": [
+                                            {
+                                              "Call": {
+                                                "location": {},
+                                                "base": {
+                                                  "Member": {
+                                                    "location": {},
+                                                    "base": {
+                                                      "Member": {
+                                                        "location": {},
+                                                        "base": {
+                                                          "QualifiedIdentifier": {
+                                                            "location": {},
+                                                            "attribute": false,
+                                                            "qualifier": null,
+                                                            "id": {
+                                                              "Id": [
+                                                                "original",
+                                                                {}
+                                                              ]
+                                                            }
+                                                          }
+                                                        },
+                                                        "identifier": {
+                                                          "location": {},
+                                                          "attribute": false,
+                                                          "qualifier": null,
+                                                          "id": {
+                                                            "Id": [
+                                                              "bitmapData",
+                                                              {}
+                                                            ]
+                                                          }
+                                                        }
+                                                      }
+                                                    },
+                                                    "identifier": {
+                                                      "location": {},
+                                                      "attribute": false,
+                                                      "qualifier": null,
+                                                      "id": {
+                                                        "Id": [
+                                                          "clone",
+                                                          {}
+                                                        ]
+                                                      }
+                                                    }
+                                                  }
+                                                },
+                                                "arguments": []
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "ExpressionStatement": {
+                                  "location": {},
+                                  "expression": {
+                                    "Assignment": {
+                                      "location": {},
+                                      "compound": null,
+                                      "left": {
+                                        "Member": {
+                                          "location": {},
+                                          "base": {
+                                            "QualifiedIdentifier": {
+                                              "location": {},
+                                              "attribute": false,
+                                              "qualifier": null,
+                                              "id": {
+                                                "Id": [
+                                                  "image",
+                                                  {}
+                                                ]
+                                              }
+                                            }
+                                          },
+                                          "identifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "x",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "right": {
+                                        "Binary": {
+                                          "location": {},
+                                          "operator": "Multiply",
+                                          "left": {
+                                            "QualifiedIdentifier": {
+                                              "location": {},
+                                              "attribute": false,
+                                              "qualifier": null,
+                                              "id": {
+                                                "Id": [
+                                                  "size",
+                                                  {}
+                                                ]
+                                              }
+                                            }
+                                          },
+                                          "right": {
+                                            "QualifiedIdentifier": {
+                                              "location": {},
+                                              "attribute": false,
+                                              "qualifier": null,
+                                              "id": {
+                                                "Id": [
+                                                  "numChildren",
+                                                  {}
+                                                ]
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "ExpressionStatement": {
+                                  "location": {},
+                                  "expression": {
+                                    "Call": {
+                                      "location": {},
+                                      "base": {
+                                        "QualifiedIdentifier": {
+                                          "location": {},
+                                          "attribute": false,
+                                          "qualifier": null,
+                                          "id": {
+                                            "Id": [
+                                              "addChild",
+                                              {}
+                                            ]
+                                          }
+                                        }
+                                      },
+                                      "arguments": [
+                                        {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "image",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "ReturnStatement": {
+                                  "location": {},
+                                  "expression": {
+                                    "QualifiedIdentifier": {
+                                      "location": {},
+                                      "attribute": false,
+                                      "qualifier": null,
+                                      "id": {
+                                        "Id": [
+                                          "image",
+                                          {}
+                                        ]
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "FunctionDefinition": {
+                      "location": {},
+                      "asdoc": null,
+                      "attributes": [
+                        {
+                          "Private": {}
+                        }
+                      ],
+                      "name": {
+                        "Identifier": [
+                          "completeHandler",
+                          {}
+                        ]
+                      },
+                      "common": {
+                        "location": {},
+                        "contains_yield": false,
+                        "contains_await": false,
+                        "signature": {
+                          "location": {},
+                          "parameters": [
+                            {
+                              "location": {},
+                              "kind": "Required",
+                              "destructuring": {
+                                "location": {},
+                                "destructuring": {
+                                  "QualifiedIdentifier": {
+                                    "location": {},
+                                    "attribute": false,
+                                    "qualifier": null,
+                                    "id": {
+                                      "Id": [
+                                        "event",
+                                        {}
+                                      ]
+                                    }
+                                  }
+                                },
+                                "type_annotation": {
+                                  "QualifiedIdentifier": {
+                                    "location": {},
+                                    "attribute": false,
+                                    "qualifier": null,
+                                    "id": {
+                                      "Id": [
+                                        "Event",
+                                        {}
+                                      ]
+                                    }
+                                  }
+                                }
+                              },
+                              "default_value": null
+                            }
+                          ],
+                          "result_type": {
+                            "VoidType": {
+                              "location": {}
+                            }
+                          }
+                        },
+                        "body": {
+                          "Block": {
+                            "location": {},
+                            "metadata": null,
+                            "directives": [
+                              {
+                                "VariableDefinition": {
+                                  "location": {},
+                                  "asdoc": null,
+                                  "attributes": [],
+                                  "kind": [
+                                    "Var",
+                                    {}
+                                  ],
+                                  "bindings": [
+                                    {
+                                      "destructuring": {
+                                        "location": {},
+                                        "destructuring": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "loader",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        },
+                                        "type_annotation": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "Loader",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "initializer": {
+                                        "Call": {
+                                          "location": {},
+                                          "base": {
+                                            "QualifiedIdentifier": {
+                                              "location": {},
+                                              "attribute": false,
+                                              "qualifier": null,
+                                              "id": {
+                                                "Id": [
+                                                  "Loader",
+                                                  {}
+                                                ]
+                                              }
+                                            }
+                                          },
+                                          "arguments": [
+                                            {
+                                              "Member": {
+                                                "location": {},
+                                                "base": {
+                                                  "Member": {
+                                                    "location": {},
+                                                    "base": {
+                                                      "QualifiedIdentifier": {
+                                                        "location": {},
+                                                        "attribute": false,
+                                                        "qualifier": null,
+                                                        "id": {
+                                                          "Id": [
+                                                            "event",
+                                                            {}
+                                                          ]
+                                                        }
+                                                      }
+                                                    },
+                                                    "identifier": {
+                                                      "location": {},
+                                                      "attribute": false,
+                                                      "qualifier": null,
+                                                      "id": {
+                                                        "Id": [
+                                                          "target",
+                                                          {}
+                                                        ]
+                                                      }
+                                                    }
+                                                  }
+                                                },
+                                                "identifier": {
+                                                  "location": {},
+                                                  "attribute": false,
+                                                  "qualifier": null,
+                                                  "id": {
+                                                    "Id": [
+                                                      "loader",
+                                                      {}
+                                                    ]
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "VariableDefinition": {
+                                  "location": {},
+                                  "asdoc": null,
+                                  "attributes": [],
+                                  "kind": [
+                                    "Var",
+                                    {}
+                                  ],
+                                  "bindings": [
+                                    {
+                                      "destructuring": {
+                                        "location": {},
+                                        "destructuring": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "image",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        },
+                                        "type_annotation": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "Bitmap",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "initializer": {
+                                        "Call": {
+                                          "location": {},
+                                          "base": {
+                                            "QualifiedIdentifier": {
+                                              "location": {},
+                                              "attribute": false,
+                                              "qualifier": null,
+                                              "id": {
+                                                "Id": [
+                                                  "Bitmap",
+                                                  {}
+                                                ]
+                                              }
+                                            }
+                                          },
+                                          "arguments": [
+                                            {
+                                              "Member": {
+                                                "location": {},
+                                                "base": {
+                                                  "QualifiedIdentifier": {
+                                                    "location": {},
+                                                    "attribute": false,
+                                                    "qualifier": null,
+                                                    "id": {
+                                                      "Id": [
+                                                        "loader",
+                                                        {}
+                                                      ]
+                                                    }
+                                                  }
+                                                },
+                                                "identifier": {
+                                                  "location": {},
+                                                  "attribute": false,
+                                                  "qualifier": null,
+                                                  "id": {
+                                                    "Id": [
+                                                      "content",
+                                                      {}
+                                                    ]
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "VariableDefinition": {
+                                  "location": {},
+                                  "asdoc": null,
+                                  "attributes": [],
+                                  "kind": [
+                                    "Var",
+                                    {}
+                                  ],
+                                  "bindings": [
+                                    {
+                                      "destructuring": {
+                                        "location": {},
+                                        "destructuring": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "duplicate",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        },
+                                        "type_annotation": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "Bitmap",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "initializer": {
+                                        "Call": {
+                                          "location": {},
+                                          "base": {
+                                            "QualifiedIdentifier": {
+                                              "location": {},
+                                              "attribute": false,
+                                              "qualifier": null,
+                                              "id": {
+                                                "Id": [
+                                                  "duplicateImage",
+                                                  {}
+                                                ]
+                                              }
+                                            }
+                                          },
+                                          "arguments": [
+                                            {
+                                              "QualifiedIdentifier": {
+                                                "location": {},
+                                                "attribute": false,
+                                                "qualifier": null,
+                                                "id": {
+                                                  "Id": [
+                                                    "image",
+                                                    {}
+                                                  ]
+                                                }
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "VariableDefinition": {
+                                  "location": {},
+                                  "asdoc": null,
+                                  "attributes": [],
+                                  "kind": [
+                                    "Var",
+                                    {}
+                                  ],
+                                  "bindings": [
+                                    {
+                                      "destructuring": {
+                                        "location": {},
+                                        "destructuring": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "bitmapData",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        },
+                                        "type_annotation": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "BitmapData",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "initializer": {
+                                        "Member": {
+                                          "location": {},
+                                          "base": {
+                                            "QualifiedIdentifier": {
+                                              "location": {},
+                                              "attribute": false,
+                                              "qualifier": null,
+                                              "id": {
+                                                "Id": [
+                                                  "duplicate",
+                                                  {}
+                                                ]
+                                              }
+                                            }
+                                          },
+                                          "identifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "bitmapData",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "VariableDefinition": {
+                                  "location": {},
+                                  "asdoc": null,
+                                  "attributes": [],
+                                  "kind": [
+                                    "Var",
+                                    {}
+                                  ],
+                                  "bindings": [
+                                    {
+                                      "destructuring": {
+                                        "location": {},
+                                        "destructuring": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "sourceRect",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        },
+                                        "type_annotation": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "Rectangle",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "initializer": {
+                                        "New": {
+                                          "location": {},
+                                          "base": {
+                                            "QualifiedIdentifier": {
+                                              "location": {},
+                                              "attribute": false,
+                                              "qualifier": null,
+                                              "id": {
+                                                "Id": [
+                                                  "Rectangle",
+                                                  {}
+                                                ]
+                                              }
+                                            }
+                                          },
+                                          "arguments": [
+                                            {
+                                              "NumericLiteral": {
+                                                "location": {},
+                                                "value": "0"
+                                              }
+                                            },
+                                            {
+                                              "NumericLiteral": {
+                                                "location": {},
+                                                "value": "0"
+                                              }
+                                            },
+                                            {
+                                              "Member": {
+                                                "location": {},
+                                                "base": {
+                                                  "QualifiedIdentifier": {
+                                                    "location": {},
+                                                    "attribute": false,
+                                                    "qualifier": null,
+                                                    "id": {
+                                                      "Id": [
+                                                        "bitmapData",
+                                                        {}
+                                                      ]
+                                                    }
+                                                  }
+                                                },
+                                                "identifier": {
+                                                  "location": {},
+                                                  "attribute": false,
+                                                  "qualifier": null,
+                                                  "id": {
+                                                    "Id": [
+                                                      "width",
+                                                      {}
+                                                    ]
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            {
+                                              "Member": {
+                                                "location": {},
+                                                "base": {
+                                                  "QualifiedIdentifier": {
+                                                    "location": {},
+                                                    "attribute": false,
+                                                    "qualifier": null,
+                                                    "id": {
+                                                      "Id": [
+                                                        "bitmapData",
+                                                        {}
+                                                      ]
+                                                    }
+                                                  }
+                                                },
+                                                "identifier": {
+                                                  "location": {},
+                                                  "attribute": false,
+                                                  "qualifier": null,
+                                                  "id": {
+                                                    "Id": [
+                                                      "height",
+                                                      {}
+                                                    ]
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "VariableDefinition": {
+                                  "location": {},
+                                  "asdoc": null,
+                                  "attributes": [],
+                                  "kind": [
+                                    "Var",
+                                    {}
+                                  ],
+                                  "bindings": [
+                                    {
+                                      "destructuring": {
+                                        "location": {},
+                                        "destructuring": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "destPoint",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        },
+                                        "type_annotation": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "Point",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "initializer": {
+                                        "New": {
+                                          "location": {},
+                                          "base": {
+                                            "QualifiedIdentifier": {
+                                              "location": {},
+                                              "attribute": false,
+                                              "qualifier": null,
+                                              "id": {
+                                                "Id": [
+                                                  "Point",
+                                                  {}
+                                                ]
+                                              }
+                                            }
+                                          },
+                                          "arguments": []
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "VariableDefinition": {
+                                  "location": {},
+                                  "asdoc": null,
+                                  "attributes": [],
+                                  "kind": [
+                                    "Var",
+                                    {}
+                                  ],
+                                  "bindings": [
+                                    {
+                                      "destructuring": {
+                                        "location": {},
+                                        "destructuring": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "operation",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        },
+                                        "type_annotation": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "String",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "initializer": {
+                                        "StringLiteral": {
+                                          "location": {},
+                                          "value": ">="
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "VariableDefinition": {
+                                  "location": {},
+                                  "asdoc": null,
+                                  "attributes": [],
+                                  "kind": [
+                                    "Var",
+                                    {}
+                                  ],
+                                  "bindings": [
+                                    {
+                                      "destructuring": {
+                                        "location": {},
+                                        "destructuring": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "threshold",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        },
+                                        "type_annotation": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "uint",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "initializer": {
+                                        "NumericLiteral": {
+                                          "location": {},
+                                          "value": "0xCCCCCCCC"
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "VariableDefinition": {
+                                  "location": {},
+                                  "asdoc": null,
+                                  "attributes": [],
+                                  "kind": [
+                                    "Var",
+                                    {}
+                                  ],
+                                  "bindings": [
+                                    {
+                                      "destructuring": {
+                                        "location": {},
+                                        "destructuring": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "color",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        },
+                                        "type_annotation": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "uint",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "initializer": {
+                                        "NumericLiteral": {
+                                          "location": {},
+                                          "value": "0xFFFFFF00"
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "VariableDefinition": {
+                                  "location": {},
+                                  "asdoc": null,
+                                  "attributes": [],
+                                  "kind": [
+                                    "Var",
+                                    {}
+                                  ],
+                                  "bindings": [
+                                    {
+                                      "destructuring": {
+                                        "location": {},
+                                        "destructuring": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "mask",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        },
+                                        "type_annotation": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "uint",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "initializer": {
+                                        "NumericLiteral": {
+                                          "location": {},
+                                          "value": "0x000000FF"
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "VariableDefinition": {
+                                  "location": {},
+                                  "asdoc": null,
+                                  "attributes": [],
+                                  "kind": [
+                                    "Var",
+                                    {}
+                                  ],
+                                  "bindings": [
+                                    {
+                                      "destructuring": {
+                                        "location": {},
+                                        "destructuring": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "copySource",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        },
+                                        "type_annotation": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "Boolean",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "initializer": {
+                                        "BooleanLiteral": {
+                                          "location": {},
+                                          "value": true
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "ExpressionStatement": {
+                                  "location": {},
+                                  "expression": {
+                                    "Call": {
+                                      "location": {},
+                                      "base": {
+                                        "Member": {
+                                          "location": {},
+                                          "base": {
+                                            "QualifiedIdentifier": {
+                                              "location": {},
+                                              "attribute": false,
+                                              "qualifier": null,
+                                              "id": {
+                                                "Id": [
+                                                  "bitmapData",
+                                                  {}
+                                                ]
+                                              }
+                                            }
+                                          },
+                                          "identifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "threshold",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "arguments": [
+                                        {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "bitmapData",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "sourceRect",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "destPoint",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "operation",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "threshold",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "color",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "mask",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "copySource",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "FunctionDefinition": {
+                      "location": {},
+                      "asdoc": null,
+                      "attributes": [
+                        {
+                          "Private": {}
+                        }
+                      ],
+                      "name": {
+                        "Identifier": [
+                          "ioErrorHandler",
+                          {}
+                        ]
+                      },
+                      "common": {
+                        "location": {},
+                        "contains_yield": false,
+                        "contains_await": false,
+                        "signature": {
+                          "location": {},
+                          "parameters": [
+                            {
+                              "location": {},
+                              "kind": "Required",
+                              "destructuring": {
+                                "location": {},
+                                "destructuring": {
+                                  "QualifiedIdentifier": {
+                                    "location": {},
+                                    "attribute": false,
+                                    "qualifier": null,
+                                    "id": {
+                                      "Id": [
+                                        "event",
+                                        {}
+                                      ]
+                                    }
+                                  }
+                                },
+                                "type_annotation": {
+                                  "QualifiedIdentifier": {
+                                    "location": {},
+                                    "attribute": false,
+                                    "qualifier": null,
+                                    "id": {
+                                      "Id": [
+                                        "IOErrorEvent",
+                                        {}
+                                      ]
+                                    }
+                                  }
+                                }
+                              },
+                              "default_value": null
+                            }
+                          ],
+                          "result_type": {
+                            "VoidType": {
+                              "location": {}
+                            }
+                          }
+                        },
+                        "body": {
+                          "Block": {
+                            "location": {},
+                            "metadata": null,
+                            "directives": [
+                              {
+                                "ExpressionStatement": {
+                                  "location": {},
+                                  "expression": {
+                                    "Call": {
+                                      "location": {},
+                                      "base": {
+                                        "QualifiedIdentifier": {
+                                          "location": {},
+                                          "attribute": false,
+                                          "qualifier": null,
+                                          "id": {
+                                            "Id": [
+                                              "trace",
+                                              {}
+                                            ]
+                                          }
+                                        }
+                                      },
+                                      "arguments": [
+                                        {
+                                          "Binary": {
+                                            "location": {},
+                                            "operator": "Add",
+                                            "left": {
+                                              "StringLiteral": {
+                                                "location": {},
+                                                "value": "Unable to load image: "
+                                              }
+                                            },
+                                            "right": {
+                                              "QualifiedIdentifier": {
+                                                "location": {},
+                                                "attribute": false,
+                                                "qualifier": null,
+                                                "id": {
+                                                  "Id": [
+                                                    "url",
+                                                    {}
+                                                  ]
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "directives": []
+}

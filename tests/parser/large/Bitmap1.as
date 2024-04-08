@@ -1,3 +1,4 @@
+// Example provided by ActionScriptExamples.com.
 const IMAGE_URL:String = "http://www.helpexamples.com/flash/images/logo.png";
  
 var ldr:Loader = new Loader();
