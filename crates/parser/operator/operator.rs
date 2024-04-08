@@ -101,6 +101,7 @@ impl TryFrom<Operator> for BinaryOperator {
             Operator::Gt => Ok(BinaryOperator(value, OperatorPrecedence::Relational, BinaryAssociativity::LeftToRight)),
             Operator::Le => Ok(BinaryOperator(value, OperatorPrecedence::Relational, BinaryAssociativity::LeftToRight)),
             Operator::Ge => Ok(BinaryOperator(value, OperatorPrecedence::Relational, BinaryAssociativity::LeftToRight)),
+            Operator::As => Ok(BinaryOperator(value, OperatorPrecedence::Relational, BinaryAssociativity::LeftToRight)),
             Operator::In => Ok(BinaryOperator(value, OperatorPrecedence::Relational, BinaryAssociativity::LeftToRight)),
             Operator::NotIn => Ok(BinaryOperator(value, OperatorPrecedence::Relational, BinaryAssociativity::LeftToRight)),
             Operator::Instanceof => Ok(BinaryOperator(value, OperatorPrecedence::Relational, BinaryAssociativity::LeftToRight)),

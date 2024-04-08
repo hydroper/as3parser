@@ -401,6 +401,7 @@ impl Token {
             Self::Gt => Some(Operator::Gt),
             Self::Le => Some(Operator::Le),
             Self::Ge => Some(Operator::Ge),
+            Self::As => Some(Operator::As),
             Self::In => Some(Operator::In),
             Self::Is => Some(Operator::Is),
             Self::Instanceof => Some(Operator::Instanceof),
