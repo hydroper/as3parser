@@ -2711,7 +2711,7 @@ impl<'input> Parser<'input> {
     }
 
     fn parse_directive(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParsingFailure> {
-        let asdoc: Option<Rc<AsDoc>> = self.parse_asdoc()?;
+        let asdoc: Option<Rc<AsDoc>> = if self.peek(Token::LeftBracket) { None } else { self.parse_asdoc()? };
         // ConfigurationDirective or Statement
         if let Token::Identifier(id) = &self.token.0 {
             let id = (id.clone(), self.token_location());
@@ -2782,7 +2782,7 @@ impl<'input> Parser<'input> {
                     Ok(Some(metadata)) => {
                         let mut context = AnnotatableContext {
                             start_location: self.pop_location(),
-                            asdoc,
+                            asdoc: self.parse_asdoc()?,
                             attributes: metadata,
                             context: context.clone(),
                             directive_context_keyword: None,
@@ -3259,7 +3259,7 @@ impl<'input> Parser<'input> {
     }
 
     fn parse_class_definition(&mut self, context: AnnotatableContext) -> Result<(Rc<Directive>, bool), ParsingFailure> {
-        let AnnotatableContext { start_location, asdoc, mut attributes, context, .. } = context;
+        let AnnotatableContext { start_location, asdoc, attributes, context, .. } = context;
         self.push_location(&start_location);
         let name = self.expect_identifier(true)?;
         let type_parameters = self.parse_type_parameters_opt()?;

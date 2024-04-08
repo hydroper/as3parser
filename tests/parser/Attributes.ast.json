@@ -68,6 +68,131 @@
       }
     },
     {
+      "VariableDefinition": {
+        "location": {},
+        "asdoc": {
+          "location": {},
+          "main_body": [
+            "X",
+            {}
+          ],
+          "tags": []
+        },
+        "attributes": [
+          {
+            "Metadata": {
+              "location": {},
+              "asdoc": {
+                "location": {},
+                "main_body": [
+                  "N1",
+                  {}
+                ],
+                "tags": []
+              },
+              "name": [
+                "N1",
+                {}
+              ],
+              "entries": null
+            }
+          },
+          {
+            "Metadata": {
+              "location": {},
+              "asdoc": {
+                "location": {},
+                "main_body": [
+                  "N2",
+                  {}
+                ],
+                "tags": []
+              },
+              "name": [
+                "N2",
+                {}
+              ],
+              "entries": null
+            }
+          }
+        ],
+        "kind": [
+          "Var",
+          {}
+        ],
+        "bindings": [
+          {
+            "destructuring": {
+              "location": {},
+              "destructuring": {
+                "QualifiedIdentifier": {
+                  "location": {},
+                  "attribute": false,
+                  "qualifier": null,
+                  "id": {
+                    "Id": [
+                      "x",
+                      {}
+                    ]
+                  }
+                }
+              },
+              "type_annotation": null
+            },
+            "initializer": null
+          }
+        ]
+      }
+    },
+    {
+      "VariableDefinition": {
+        "location": {},
+        "asdoc": null,
+        "attributes": [
+          {
+            "Metadata": {
+              "location": {},
+              "asdoc": null,
+              "name": [
+                "N1",
+                {}
+              ],
+              "entries": null
+            }
+          },
+          {
+            "Internal": {}
+          }
+        ],
+        "kind": [
+          "Var",
+          {}
+        ],
+        "bindings": [
+          {
+            "destructuring": {
+              "location": {},
+              "destructuring": {
+                "QualifiedIdentifier": {
+                  "location": {},
+                  "attribute": false,
+                  "qualifier": null,
+                  "id": {
+                    "Id": [
+                      "z",
+                      {}
+                    ]
+                  }
+                }
+              },
+              "type_annotation": null
+            },
+            "initializer": null
+          }
+        ]
+      }
+    },
+    {
       "Block": {
         "location": {},
         "metadata": [
@@ -112,7 +237,6 @@
             "Final": {}
           }
         ],
-        "allow_literal": false,
         "name": [
           "C1",
           {}
