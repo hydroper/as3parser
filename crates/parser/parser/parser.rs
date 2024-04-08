@@ -3889,6 +3889,17 @@ impl<'input> Parser<'input> {
                 building_content_tag_name = Some((tag_name.into(), tag_name_location));
                 let tag_content_location = Location::with_offsets(self.compilation_unit(), line.location.first_offset() + tag_prefix.len() + tag_name.len(), line.location.last_offset());
                 building_content.push((tag_content.into(), tag_content_location));
+
+                if ["private", "inheritDoc"].contains(&tag_name) {
+                    self.parse_asdoc_tag_or_main_body(
+                        &mut building_content_tag_name,
+                        &mut building_content,
+                        &mut main_body,
+                        &mut tags,
+                    );
+                    building_content_tag_name = None;
+                    building_content.clear();
+                }
             } else {
                 if regex_is_match!(r"^[\s\t]*```([^`]|$)", &line.content) {
                     inside_code_block = !inside_code_block;
@@ -4069,6 +4080,19 @@ impl<'input> Parser<'input> {
                     }
 
                     tags.push((AsDocTag::Private, location));
+                },
+
+                // @productversion text
+                "productversion" => {
+                    let (text, location) = join_asdoc_content(building_content);
+                    let location = tag_location.combine_with(location);
+
+                    // Content must be non empty
+                    if regex_is_match!(r"^\s*$", &text) {
+                        self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.clone())]);
+                    }
+
+                    tags.push((AsDocTag::Productversion(text), location));
                 },
 
                 // @return text

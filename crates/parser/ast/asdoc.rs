@@ -28,6 +28,7 @@ pub enum AsDocTag {
         description: String,
     },
     Private,
+    Productversion(String),
     Return(String),
     See {
         reference: Rc<AsDocReference>,
