@@ -272,3 +272,11 @@ const f = function(): Number (10)
 /(?:)
 ./m
 ```
+
+## Float Suffix
+
+Samsung HARMAN introduced a `f` suffix to the *NumericLiteral* productions.
+
+```
+0f
+```

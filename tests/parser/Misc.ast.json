@@ -288,6 +288,30 @@
           }
         }
       }
+    },
+    {
+      "ExpressionStatement": {
+        "location": {},
+        "expression": {
+          "NumericLiteral": {
+            "location": {},
+            "value": "10",
+            "suffix": "None"
+          }
+        }
+      }
+    },
+    {
+      "ExpressionStatement": {
+        "location": {},
+        "expression": {
+          "NumericLiteral": {
+            "location": {},
+            "value": "10",
+            "suffix": "F"
+          }
+        }
+      }
     }
   ]
 }

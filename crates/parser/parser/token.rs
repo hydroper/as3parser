@@ -9,7 +9,7 @@ pub enum Token {
     /// Numeric literal token.
     /// The numeric value is in character representation, which may be parsed
     /// through data type specific methods such as [`NumericLiteral::parse_double()`].
-    NumericLiteral(String),
+    NumericLiteral(String, NumberSuffix),
     RegExpLiteral {
         body: String,
         flags: String,
@@ -169,7 +169,7 @@ impl ToString for Token {
             Token::Eof => "end of program",
             Token::Identifier(_) => "identifier",
             Token::StringLiteral(_) => "string",
-            Token::NumericLiteral(_) => "number",
+            Token::NumericLiteral(_, _) => "number",
             Token::RegExpLiteral { .. } => "regular expression",
 
             // Punctuators

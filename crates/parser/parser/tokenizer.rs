@@ -756,12 +756,18 @@ impl<'input> Tokenizer<'input> {
             }
         }
 
+        let string = self.compilation_unit.text[start.first_offset..self.characters.index()].to_owned();
+
+        let mut suffix = NumberSuffix::None;
+        if self.characters.peek_or_zero() == 'f' || self.characters.peek_or_zero() == 'F' {
+            suffix = NumberSuffix::F;
+            self.characters.next();
+        }
         self.unallow_numeric_suffix();
 
         let location = start.combine_with(self.cursor_location());
-        let string = self.compilation_unit.text[location.first_offset..location.last_offset].to_owned();
 
-        Ok(Some((Token::NumericLiteral(string), location)))
+        Ok(Some((Token::NumericLiteral(string, suffix), location)))
     }
 
     fn scan_hex_literal(&mut self, start: Location) -> Result<Option<(Token, Location)>, ParsingFailure> {
@@ -774,11 +780,12 @@ impl<'input> Tokenizer<'input> {
             self.consume_underscore_followed_by_hex_digit()?;
         }
 
+        let suffix = NumberSuffix::None;
         self.unallow_numeric_suffix();
 
         let location = start.combine_with(self.cursor_location());
         let s = self.compilation_unit.text[location.first_offset..location.last_offset].to_owned();
-        Ok(Some((Token::NumericLiteral(s), location)))
+        Ok(Some((Token::NumericLiteral(s, suffix), location)))
     }
 
     fn scan_bin_literal(&mut self, start: Location) -> Result<Option<(Token, Location)>, ParsingFailure> {
@@ -791,11 +798,12 @@ impl<'input> Tokenizer<'input> {
             self.consume_underscore_followed_by_bin_digit()?;
         }
 
+        let suffix = NumberSuffix::None;
         self.unallow_numeric_suffix();
 
         let location = start.combine_with(self.cursor_location());
         let s = self.compilation_unit.text[location.first_offset..location.last_offset].to_owned();
-        Ok(Some((Token::NumericLiteral(s), location)))
+        Ok(Some((Token::NumericLiteral(s, suffix), location)))
     }
 
     fn consume_underscore_followed_by_dec_digit(&mut self) -> Result<(), ParsingFailure> {
@@ -1341,11 +1349,12 @@ mod tests {
             1e-3
             0x00_00
             0b0000_0000
+            0f
         "###.into(), &CompilerOptions::new());
         let mut tokenizer = Tokenizer::new(&source);
         for n in numbers {
-            let Ok((Token::NumericLiteral(n2), location)) = tokenizer.scan_ie_div() else { panic!() };
-            assert_eq!(n, NumericLiteral { value: n2, location }.parse_double(false).unwrap());
+            let Ok((Token::NumericLiteral(n2, suffix), location)) = tokenizer.scan_ie_div() else { panic!() };
+            assert_eq!(n, NumericLiteral { value: n2, location, suffix }.parse_double(false).unwrap());
         }
     }
 

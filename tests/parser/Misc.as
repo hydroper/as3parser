@@ -10,3 +10,6 @@ k in o
 k not in o
 
 x ? y : z
+
+10
+10f

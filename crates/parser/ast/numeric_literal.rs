@@ -11,6 +11,13 @@ pub struct NumericLiteral {
     /// The numeric value in character representation. Such representation may be parsed
     /// through data type specific methods such as [`NumericLiteral::parse_double()`].
     pub value: String,
+    pub suffix: NumberSuffix,
+}
+
+#[derive(Debug, Copy, Clone, Serialize, Deserialize, PartialEq)]
+pub enum NumberSuffix {
+    None,
+    F,
 }
 
 impl NumericLiteral {
@@ -103,6 +110,7 @@ mod tests {
         let literal = NumericLiteral {
             location: Location::with_offset(&Rc::new(CompilationUnit::default()), 0),
             value: "0x8000_0000_0000_0000".to_owned(),
+            suffix: NumberSuffix::None,
         };
         assert_eq!(i64::MIN, literal.parse_long(true).unwrap());
 
@@ -110,6 +118,7 @@ mod tests {
         let literal = NumericLiteral {
             location: Location::with_offset(&Rc::new(CompilationUnit::default()), 0),
             value: "0x7FFF_FFFF_FFFF_FFFF".to_owned(),
+            suffix: NumberSuffix::None,
         };
         assert_eq!(i64::MAX, literal.parse_long(false).unwrap());
     }

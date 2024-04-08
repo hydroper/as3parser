@@ -628,12 +628,13 @@ impl<'input> Parser<'input> {
                 location: self.pop_location(),
                 value: true,
             }))))
-        } else if let Token::NumericLiteral(n) = self.token.0.clone() {
+        } else if let Token::NumericLiteral(n, suffix) = self.token.0.clone() {
             self.mark_location();
             self.next()?;
             Ok(Some(Rc::new(Expression::NumericLiteral(NumericLiteral {
                 location: self.pop_location(),
                 value: n,
+                suffix,
             }))))
         } else if let Token::StringLiteral(ref s) = self.token.0.clone() {
             self.mark_location();
@@ -971,12 +972,13 @@ impl<'input> Parser<'input> {
                 location: location.clone(),
                 value: value.clone(),
             }))), location))
-        } else if let Token::NumericLiteral(value) = &self.token.0.clone() {
+        } else if let Token::NumericLiteral(value, suffix) = &self.token.0.clone() {
             let location = self.token_location();
             self.next()?;
             Ok((FieldName::NumericLiteral(Rc::new(Expression::NumericLiteral(NumericLiteral {
                 location: location.clone(),
                 value: value.clone(),
+                suffix: *suffix,
             }))), location))
         } else if self.peek(Token::LeftBracket) {
             self.mark_location();
@@ -1170,12 +1172,13 @@ impl<'input> Parser<'input> {
                 location: self.pop_location(),
                 value: true,
             })))
-        } else if let Token::NumericLiteral(n) = self.token.0.clone() {
+        } else if let Token::NumericLiteral(n, suffix) = self.token.0.clone() {
             self.mark_location();
             self.next()?;
             Ok(Rc::new(Expression::NumericLiteral(NumericLiteral {
                 location: self.pop_location(),
                 value: n,
+                suffix,
             })))
         } else if let Token::StringLiteral(ref s) = self.token.0.clone() {
             self.mark_location();
