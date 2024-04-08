@@ -152,6 +152,10 @@ switch type (o) {
 * `k=v` translates to `k == "v"`.
 * `k!="v"` goes as is.
 * `k!=v` translates to `k != "v"`.
+* `x && y`
+* `x || y`
+* `(x)`
+* `!x`
 
 ```
 configuration {
