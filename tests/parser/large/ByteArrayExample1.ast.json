@@ -1,0 +1,1450 @@
+{
+  "location": {},
+  "packages": [
+    {
+      "location": {},
+      "asdoc": null,
+      "name": [],
+      "block": {
+        "location": {},
+        "metadata": null,
+        "directives": [
+          {
+            "ImportDirective": {
+              "location": {},
+              "alias": null,
+              "package_name": [
+                [
+                  "flash",
+                  {}
+                ],
+                [
+                  "display",
+                  {}
+                ]
+              ],
+              "import_specifier": {
+                "Identifier": [
+                  "Sprite",
+                  {}
+                ]
+              }
+            }
+          },
+          {
+            "ImportDirective": {
+              "location": {},
+              "alias": null,
+              "package_name": [
+                [
+                  "flash",
+                  {}
+                ],
+                [
+                  "utils",
+                  {}
+                ]
+              ],
+              "import_specifier": {
+                "Identifier": [
+                  "ByteArray",
+                  {}
+                ]
+              }
+            }
+          },
+          {
+            "ImportDirective": {
+              "location": {},
+              "alias": null,
+              "package_name": [
+                [
+                  "flash",
+                  {}
+                ],
+                [
+                  "errors",
+                  {}
+                ]
+              ],
+              "import_specifier": {
+                "Identifier": [
+                  "EOFError",
+                  {}
+                ]
+              }
+            }
+          },
+          {
+            "ClassDefinition": {
+              "location": {},
+              "asdoc": null,
+              "attributes": [
+                {
+                  "Public": {}
+                }
+              ],
+              "name": [
+                "ByteArrayExample",
+                {}
+              ],
+              "type_parameters": null,
+              "extends_clause": {
+                "QualifiedIdentifier": {
+                  "location": {},
+                  "attribute": false,
+                  "qualifier": null,
+                  "id": {
+                    "Id": [
+                      "Sprite",
+                      {}
+                    ]
+                  }
+                }
+              },
+              "implements_clause": null,
+              "block": {
+                "location": {},
+                "metadata": null,
+                "directives": [
+                  {
+                    "FunctionDefinition": {
+                      "location": {},
+                      "asdoc": null,
+                      "attributes": [
+                        {
+                          "Public": {}
+                        }
+                      ],
+                      "name": {
+                        "Constructor": [
+                          "ByteArrayExample",
+                          {}
+                        ]
+                      },
+                      "common": {
+                        "location": {},
+                        "contains_yield": false,
+                        "contains_await": false,
+                        "signature": {
+                          "location": {},
+                          "parameters": [],
+                          "result_type": null
+                        },
+                        "body": {
+                          "Block": {
+                            "location": {},
+                            "metadata": null,
+                            "directives": [
+                              {
+                                "VariableDefinition": {
+                                  "location": {},
+                                  "asdoc": null,
+                                  "attributes": [],
+                                  "kind": [
+                                    "Var",
+                                    {}
+                                  ],
+                                  "bindings": [
+                                    {
+                                      "destructuring": {
+                                        "location": {},
+                                        "destructuring": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "byteArr",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        },
+                                        "type_annotation": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "ByteArray",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "initializer": {
+                                        "New": {
+                                          "location": {},
+                                          "base": {
+                                            "QualifiedIdentifier": {
+                                              "location": {},
+                                              "attribute": false,
+                                              "qualifier": null,
+                                              "id": {
+                                                "Id": [
+                                                  "ByteArray",
+                                                  {}
+                                                ]
+                                              }
+                                            }
+                                          },
+                                          "arguments": []
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "ExpressionStatement": {
+                                  "location": {},
+                                  "expression": {
+                                    "Call": {
+                                      "location": {},
+                                      "base": {
+                                        "Member": {
+                                          "location": {},
+                                          "base": {
+                                            "QualifiedIdentifier": {
+                                              "location": {},
+                                              "attribute": false,
+                                              "qualifier": null,
+                                              "id": {
+                                                "Id": [
+                                                  "byteArr",
+                                                  {}
+                                                ]
+                                              }
+                                            }
+                                          },
+                                          "identifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "writeBoolean",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "arguments": [
+                                        {
+                                          "BooleanLiteral": {
+                                            "location": {},
+                                            "value": false
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "ExpressionStatement": {
+                                  "location": {},
+                                  "expression": {
+                                    "Call": {
+                                      "location": {},
+                                      "base": {
+                                        "QualifiedIdentifier": {
+                                          "location": {},
+                                          "attribute": false,
+                                          "qualifier": null,
+                                          "id": {
+                                            "Id": [
+                                              "trace",
+                                              {}
+                                            ]
+                                          }
+                                        }
+                                      },
+                                      "arguments": [
+                                        {
+                                          "Member": {
+                                            "location": {},
+                                            "base": {
+                                              "QualifiedIdentifier": {
+                                                "location": {},
+                                                "attribute": false,
+                                                "qualifier": null,
+                                                "id": {
+                                                  "Id": [
+                                                    "byteArr",
+                                                    {}
+                                                  ]
+                                                }
+                                              }
+                                            },
+                                            "identifier": {
+                                              "location": {},
+                                              "attribute": false,
+                                              "qualifier": null,
+                                              "id": {
+                                                "Id": [
+                                                  "length",
+                                                  {}
+                                                ]
+                                              }
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "ExpressionStatement": {
+                                  "location": {},
+                                  "expression": {
+                                    "Call": {
+                                      "location": {},
+                                      "base": {
+                                        "QualifiedIdentifier": {
+                                          "location": {},
+                                          "attribute": false,
+                                          "qualifier": null,
+                                          "id": {
+                                            "Id": [
+                                              "trace",
+                                              {}
+                                            ]
+                                          }
+                                        }
+                                      },
+                                      "arguments": [
+                                        {
+                                          "ComputedMember": {
+                                            "location": {},
+                                            "base": {
+                                              "QualifiedIdentifier": {
+                                                "location": {},
+                                                "attribute": false,
+                                                "qualifier": null,
+                                                "id": {
+                                                  "Id": [
+                                                    "byteArr",
+                                                    {}
+                                                  ]
+                                                }
+                                              }
+                                            },
+                                            "asdoc": null,
+                                            "key": {
+                                              "NumericLiteral": {
+                                                "location": {},
+                                                "value": "0"
+                                              }
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "ExpressionStatement": {
+                                  "location": {},
+                                  "expression": {
+                                    "Call": {
+                                      "location": {},
+                                      "base": {
+                                        "Member": {
+                                          "location": {},
+                                          "base": {
+                                            "QualifiedIdentifier": {
+                                              "location": {},
+                                              "attribute": false,
+                                              "qualifier": null,
+                                              "id": {
+                                                "Id": [
+                                                  "byteArr",
+                                                  {}
+                                                ]
+                                              }
+                                            }
+                                          },
+                                          "identifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "writeDouble",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "arguments": [
+                                        {
+                                          "Member": {
+                                            "location": {},
+                                            "base": {
+                                              "QualifiedIdentifier": {
+                                                "location": {},
+                                                "attribute": false,
+                                                "qualifier": null,
+                                                "id": {
+                                                  "Id": [
+                                                    "Math",
+                                                    {}
+                                                  ]
+                                                }
+                                              }
+                                            },
+                                            "identifier": {
+                                              "location": {},
+                                              "attribute": false,
+                                              "qualifier": null,
+                                              "id": {
+                                                "Id": [
+                                                  "PI",
+                                                  {}
+                                                ]
+                                              }
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "ExpressionStatement": {
+                                  "location": {},
+                                  "expression": {
+                                    "Call": {
+                                      "location": {},
+                                      "base": {
+                                        "QualifiedIdentifier": {
+                                          "location": {},
+                                          "attribute": false,
+                                          "qualifier": null,
+                                          "id": {
+                                            "Id": [
+                                              "trace",
+                                              {}
+                                            ]
+                                          }
+                                        }
+                                      },
+                                      "arguments": [
+                                        {
+                                          "Member": {
+                                            "location": {},
+                                            "base": {
+                                              "QualifiedIdentifier": {
+                                                "location": {},
+                                                "attribute": false,
+                                                "qualifier": null,
+                                                "id": {
+                                                  "Id": [
+                                                    "byteArr",
+                                                    {}
+                                                  ]
+                                                }
+                                              }
+                                            },
+                                            "identifier": {
+                                              "location": {},
+                                              "attribute": false,
+                                              "qualifier": null,
+                                              "id": {
+                                                "Id": [
+                                                  "length",
+                                                  {}
+                                                ]
+                                              }
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "ExpressionStatement": {
+                                  "location": {},
+                                  "expression": {
+                                    "Call": {
+                                      "location": {},
+                                      "base": {
+                                        "QualifiedIdentifier": {
+                                          "location": {},
+                                          "attribute": false,
+                                          "qualifier": null,
+                                          "id": {
+                                            "Id": [
+                                              "trace",
+                                              {}
+                                            ]
+                                          }
+                                        }
+                                      },
+                                      "arguments": [
+                                        {
+                                          "ComputedMember": {
+                                            "location": {},
+                                            "base": {
+                                              "QualifiedIdentifier": {
+                                                "location": {},
+                                                "attribute": false,
+                                                "qualifier": null,
+                                                "id": {
+                                                  "Id": [
+                                                    "byteArr",
+                                                    {}
+                                                  ]
+                                                }
+                                              }
+                                            },
+                                            "asdoc": null,
+                                            "key": {
+                                              "NumericLiteral": {
+                                                "location": {},
+                                                "value": "0"
+                                              }
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "ExpressionStatement": {
+                                  "location": {},
+                                  "expression": {
+                                    "Call": {
+                                      "location": {},
+                                      "base": {
+                                        "QualifiedIdentifier": {
+                                          "location": {},
+                                          "attribute": false,
+                                          "qualifier": null,
+                                          "id": {
+                                            "Id": [
+                                              "trace",
+                                              {}
+                                            ]
+                                          }
+                                        }
+                                      },
+                                      "arguments": [
+                                        {
+                                          "ComputedMember": {
+                                            "location": {},
+                                            "base": {
+                                              "QualifiedIdentifier": {
+                                                "location": {},
+                                                "attribute": false,
+                                                "qualifier": null,
+                                                "id": {
+                                                  "Id": [
+                                                    "byteArr",
+                                                    {}
+                                                  ]
+                                                }
+                                              }
+                                            },
+                                            "asdoc": null,
+                                            "key": {
+                                              "NumericLiteral": {
+                                                "location": {},
+                                                "value": "1"
+                                              }
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "ExpressionStatement": {
+                                  "location": {},
+                                  "expression": {
+                                    "Call": {
+                                      "location": {},
+                                      "base": {
+                                        "QualifiedIdentifier": {
+                                          "location": {},
+                                          "attribute": false,
+                                          "qualifier": null,
+                                          "id": {
+                                            "Id": [
+                                              "trace",
+                                              {}
+                                            ]
+                                          }
+                                        }
+                                      },
+                                      "arguments": [
+                                        {
+                                          "ComputedMember": {
+                                            "location": {},
+                                            "base": {
+                                              "QualifiedIdentifier": {
+                                                "location": {},
+                                                "attribute": false,
+                                                "qualifier": null,
+                                                "id": {
+                                                  "Id": [
+                                                    "byteArr",
+                                                    {}
+                                                  ]
+                                                }
+                                              }
+                                            },
+                                            "asdoc": null,
+                                            "key": {
+                                              "NumericLiteral": {
+                                                "location": {},
+                                                "value": "2"
+                                              }
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "ExpressionStatement": {
+                                  "location": {},
+                                  "expression": {
+                                    "Call": {
+                                      "location": {},
+                                      "base": {
+                                        "QualifiedIdentifier": {
+                                          "location": {},
+                                          "attribute": false,
+                                          "qualifier": null,
+                                          "id": {
+                                            "Id": [
+                                              "trace",
+                                              {}
+                                            ]
+                                          }
+                                        }
+                                      },
+                                      "arguments": [
+                                        {
+                                          "ComputedMember": {
+                                            "location": {},
+                                            "base": {
+                                              "QualifiedIdentifier": {
+                                                "location": {},
+                                                "attribute": false,
+                                                "qualifier": null,
+                                                "id": {
+                                                  "Id": [
+                                                    "byteArr",
+                                                    {}
+                                                  ]
+                                                }
+                                              }
+                                            },
+                                            "asdoc": null,
+                                            "key": {
+                                              "NumericLiteral": {
+                                                "location": {},
+                                                "value": "3"
+                                              }
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "ExpressionStatement": {
+                                  "location": {},
+                                  "expression": {
+                                    "Call": {
+                                      "location": {},
+                                      "base": {
+                                        "QualifiedIdentifier": {
+                                          "location": {},
+                                          "attribute": false,
+                                          "qualifier": null,
+                                          "id": {
+                                            "Id": [
+                                              "trace",
+                                              {}
+                                            ]
+                                          }
+                                        }
+                                      },
+                                      "arguments": [
+                                        {
+                                          "ComputedMember": {
+                                            "location": {},
+                                            "base": {
+                                              "QualifiedIdentifier": {
+                                                "location": {},
+                                                "attribute": false,
+                                                "qualifier": null,
+                                                "id": {
+                                                  "Id": [
+                                                    "byteArr",
+                                                    {}
+                                                  ]
+                                                }
+                                              }
+                                            },
+                                            "asdoc": null,
+                                            "key": {
+                                              "NumericLiteral": {
+                                                "location": {},
+                                                "value": "4"
+                                              }
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "ExpressionStatement": {
+                                  "location": {},
+                                  "expression": {
+                                    "Call": {
+                                      "location": {},
+                                      "base": {
+                                        "QualifiedIdentifier": {
+                                          "location": {},
+                                          "attribute": false,
+                                          "qualifier": null,
+                                          "id": {
+                                            "Id": [
+                                              "trace",
+                                              {}
+                                            ]
+                                          }
+                                        }
+                                      },
+                                      "arguments": [
+                                        {
+                                          "ComputedMember": {
+                                            "location": {},
+                                            "base": {
+                                              "QualifiedIdentifier": {
+                                                "location": {},
+                                                "attribute": false,
+                                                "qualifier": null,
+                                                "id": {
+                                                  "Id": [
+                                                    "byteArr",
+                                                    {}
+                                                  ]
+                                                }
+                                              }
+                                            },
+                                            "asdoc": null,
+                                            "key": {
+                                              "NumericLiteral": {
+                                                "location": {},
+                                                "value": "5"
+                                              }
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "ExpressionStatement": {
+                                  "location": {},
+                                  "expression": {
+                                    "Call": {
+                                      "location": {},
+                                      "base": {
+                                        "QualifiedIdentifier": {
+                                          "location": {},
+                                          "attribute": false,
+                                          "qualifier": null,
+                                          "id": {
+                                            "Id": [
+                                              "trace",
+                                              {}
+                                            ]
+                                          }
+                                        }
+                                      },
+                                      "arguments": [
+                                        {
+                                          "ComputedMember": {
+                                            "location": {},
+                                            "base": {
+                                              "QualifiedIdentifier": {
+                                                "location": {},
+                                                "attribute": false,
+                                                "qualifier": null,
+                                                "id": {
+                                                  "Id": [
+                                                    "byteArr",
+                                                    {}
+                                                  ]
+                                                }
+                                              }
+                                            },
+                                            "asdoc": null,
+                                            "key": {
+                                              "NumericLiteral": {
+                                                "location": {},
+                                                "value": "6"
+                                              }
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "ExpressionStatement": {
+                                  "location": {},
+                                  "expression": {
+                                    "Call": {
+                                      "location": {},
+                                      "base": {
+                                        "QualifiedIdentifier": {
+                                          "location": {},
+                                          "attribute": false,
+                                          "qualifier": null,
+                                          "id": {
+                                            "Id": [
+                                              "trace",
+                                              {}
+                                            ]
+                                          }
+                                        }
+                                      },
+                                      "arguments": [
+                                        {
+                                          "ComputedMember": {
+                                            "location": {},
+                                            "base": {
+                                              "QualifiedIdentifier": {
+                                                "location": {},
+                                                "attribute": false,
+                                                "qualifier": null,
+                                                "id": {
+                                                  "Id": [
+                                                    "byteArr",
+                                                    {}
+                                                  ]
+                                                }
+                                              }
+                                            },
+                                            "asdoc": null,
+                                            "key": {
+                                              "NumericLiteral": {
+                                                "location": {},
+                                                "value": "7"
+                                              }
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "ExpressionStatement": {
+                                  "location": {},
+                                  "expression": {
+                                    "Call": {
+                                      "location": {},
+                                      "base": {
+                                        "QualifiedIdentifier": {
+                                          "location": {},
+                                          "attribute": false,
+                                          "qualifier": null,
+                                          "id": {
+                                            "Id": [
+                                              "trace",
+                                              {}
+                                            ]
+                                          }
+                                        }
+                                      },
+                                      "arguments": [
+                                        {
+                                          "ComputedMember": {
+                                            "location": {},
+                                            "base": {
+                                              "QualifiedIdentifier": {
+                                                "location": {},
+                                                "attribute": false,
+                                                "qualifier": null,
+                                                "id": {
+                                                  "Id": [
+                                                    "byteArr",
+                                                    {}
+                                                  ]
+                                                }
+                                              }
+                                            },
+                                            "asdoc": null,
+                                            "key": {
+                                              "NumericLiteral": {
+                                                "location": {},
+                                                "value": "8"
+                                              }
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "ExpressionStatement": {
+                                  "location": {},
+                                  "expression": {
+                                    "Assignment": {
+                                      "location": {},
+                                      "compound": null,
+                                      "left": {
+                                        "Member": {
+                                          "location": {},
+                                          "base": {
+                                            "QualifiedIdentifier": {
+                                              "location": {},
+                                              "attribute": false,
+                                              "qualifier": null,
+                                              "id": {
+                                                "Id": [
+                                                  "byteArr",
+                                                  {}
+                                                ]
+                                              }
+                                            }
+                                          },
+                                          "identifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "position",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "right": {
+                                        "NumericLiteral": {
+                                          "location": {},
+                                          "value": "0"
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "TryStatement": {
+                                  "location": {},
+                                  "block": {
+                                    "location": {},
+                                    "metadata": null,
+                                    "directives": [
+                                      {
+                                        "ExpressionStatement": {
+                                          "location": {},
+                                          "expression": {
+                                            "Call": {
+                                              "location": {},
+                                              "base": {
+                                                "QualifiedIdentifier": {
+                                                  "location": {},
+                                                  "attribute": false,
+                                                  "qualifier": null,
+                                                  "id": {
+                                                    "Id": [
+                                                      "trace",
+                                                      {}
+                                                    ]
+                                                  }
+                                                }
+                                              },
+                                              "arguments": [
+                                                {
+                                                  "Binary": {
+                                                    "location": {},
+                                                    "operator": "Equals",
+                                                    "left": {
+                                                      "Call": {
+                                                        "location": {},
+                                                        "base": {
+                                                          "Member": {
+                                                            "location": {},
+                                                            "base": {
+                                                              "QualifiedIdentifier": {
+                                                                "location": {},
+                                                                "attribute": false,
+                                                                "qualifier": null,
+                                                                "id": {
+                                                                  "Id": [
+                                                                    "byteArr",
+                                                                    {}
+                                                                  ]
+                                                                }
+                                                              }
+                                                            },
+                                                            "identifier": {
+                                                              "location": {},
+                                                              "attribute": false,
+                                                              "qualifier": null,
+                                                              "id": {
+                                                                "Id": [
+                                                                  "readBoolean",
+                                                                  {}
+                                                                ]
+                                                              }
+                                                            }
+                                                          }
+                                                        },
+                                                        "arguments": []
+                                                      }
+                                                    },
+                                                    "right": {
+                                                      "BooleanLiteral": {
+                                                        "location": {},
+                                                        "value": false
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  "catch_clauses": [
+                                    {
+                                      "location": {},
+                                      "parameter": {
+                                        "location": {},
+                                        "destructuring": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "e",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        },
+                                        "type_annotation": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "EOFError",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "block": {
+                                        "location": {},
+                                        "metadata": null,
+                                        "directives": [
+                                          {
+                                            "ExpressionStatement": {
+                                              "location": {},
+                                              "expression": {
+                                                "Call": {
+                                                  "location": {},
+                                                  "base": {
+                                                    "QualifiedIdentifier": {
+                                                      "location": {},
+                                                      "attribute": false,
+                                                      "qualifier": null,
+                                                      "id": {
+                                                        "Id": [
+                                                          "trace",
+                                                          {}
+                                                        ]
+                                                      }
+                                                    }
+                                                  },
+                                                  "arguments": [
+                                                    {
+                                                      "QualifiedIdentifier": {
+                                                        "location": {},
+                                                        "attribute": false,
+                                                        "qualifier": null,
+                                                        "id": {
+                                                          "Id": [
+                                                            "e",
+                                                            {}
+                                                          ]
+                                                        }
+                                                      }
+                                                    }
+                                                  ]
+                                                }
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ],
+                                  "finally_clause": null
+                                }
+                              },
+                              {
+                                "TryStatement": {
+                                  "location": {},
+                                  "block": {
+                                    "location": {},
+                                    "metadata": null,
+                                    "directives": [
+                                      {
+                                        "ExpressionStatement": {
+                                          "location": {},
+                                          "expression": {
+                                            "Call": {
+                                              "location": {},
+                                              "base": {
+                                                "QualifiedIdentifier": {
+                                                  "location": {},
+                                                  "attribute": false,
+                                                  "qualifier": null,
+                                                  "id": {
+                                                    "Id": [
+                                                      "trace",
+                                                      {}
+                                                    ]
+                                                  }
+                                                }
+                                              },
+                                              "arguments": [
+                                                {
+                                                  "Call": {
+                                                    "location": {},
+                                                    "base": {
+                                                      "Member": {
+                                                        "location": {},
+                                                        "base": {
+                                                          "QualifiedIdentifier": {
+                                                            "location": {},
+                                                            "attribute": false,
+                                                            "qualifier": null,
+                                                            "id": {
+                                                              "Id": [
+                                                                "byteArr",
+                                                                {}
+                                                              ]
+                                                            }
+                                                          }
+                                                        },
+                                                        "identifier": {
+                                                          "location": {},
+                                                          "attribute": false,
+                                                          "qualifier": null,
+                                                          "id": {
+                                                            "Id": [
+                                                              "readDouble",
+                                                              {}
+                                                            ]
+                                                          }
+                                                        }
+                                                      }
+                                                    },
+                                                    "arguments": []
+                                                  }
+                                                }
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  "catch_clauses": [
+                                    {
+                                      "location": {},
+                                      "parameter": {
+                                        "location": {},
+                                        "destructuring": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "e",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        },
+                                        "type_annotation": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "EOFError",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "block": {
+                                        "location": {},
+                                        "metadata": null,
+                                        "directives": [
+                                          {
+                                            "ExpressionStatement": {
+                                              "location": {},
+                                              "expression": {
+                                                "Call": {
+                                                  "location": {},
+                                                  "base": {
+                                                    "QualifiedIdentifier": {
+                                                      "location": {},
+                                                      "attribute": false,
+                                                      "qualifier": null,
+                                                      "id": {
+                                                        "Id": [
+                                                          "trace",
+                                                          {}
+                                                        ]
+                                                      }
+                                                    }
+                                                  },
+                                                  "arguments": [
+                                                    {
+                                                      "QualifiedIdentifier": {
+                                                        "location": {},
+                                                        "attribute": false,
+                                                        "qualifier": null,
+                                                        "id": {
+                                                          "Id": [
+                                                            "e",
+                                                            {}
+                                                          ]
+                                                        }
+                                                      }
+                                                    }
+                                                  ]
+                                                }
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ],
+                                  "finally_clause": null
+                                }
+                              },
+                              {
+                                "TryStatement": {
+                                  "location": {},
+                                  "block": {
+                                    "location": {},
+                                    "metadata": null,
+                                    "directives": [
+                                      {
+                                        "ExpressionStatement": {
+                                          "location": {},
+                                          "expression": {
+                                            "Call": {
+                                              "location": {},
+                                              "base": {
+                                                "QualifiedIdentifier": {
+                                                  "location": {},
+                                                  "attribute": false,
+                                                  "qualifier": null,
+                                                  "id": {
+                                                    "Id": [
+                                                      "trace",
+                                                      {}
+                                                    ]
+                                                  }
+                                                }
+                                              },
+                                              "arguments": [
+                                                {
+                                                  "Call": {
+                                                    "location": {},
+                                                    "base": {
+                                                      "Member": {
+                                                        "location": {},
+                                                        "base": {
+                                                          "QualifiedIdentifier": {
+                                                            "location": {},
+                                                            "attribute": false,
+                                                            "qualifier": null,
+                                                            "id": {
+                                                              "Id": [
+                                                                "byteArr",
+                                                                {}
+                                                              ]
+                                                            }
+                                                          }
+                                                        },
+                                                        "identifier": {
+                                                          "location": {},
+                                                          "attribute": false,
+                                                          "qualifier": null,
+                                                          "id": {
+                                                            "Id": [
+                                                              "readDouble",
+                                                              {}
+                                                            ]
+                                                          }
+                                                        }
+                                                      }
+                                                    },
+                                                    "arguments": []
+                                                  }
+                                                }
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  "catch_clauses": [
+                                    {
+                                      "location": {},
+                                      "parameter": {
+                                        "location": {},
+                                        "destructuring": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "e",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        },
+                                        "type_annotation": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "EOFError",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "block": {
+                                        "location": {},
+                                        "metadata": null,
+                                        "directives": [
+                                          {
+                                            "ExpressionStatement": {
+                                              "location": {},
+                                              "expression": {
+                                                "Call": {
+                                                  "location": {},
+                                                  "base": {
+                                                    "QualifiedIdentifier": {
+                                                      "location": {},
+                                                      "attribute": false,
+                                                      "qualifier": null,
+                                                      "id": {
+                                                        "Id": [
+                                                          "trace",
+                                                          {}
+                                                        ]
+                                                      }
+                                                    }
+                                                  },
+                                                  "arguments": [
+                                                    {
+                                                      "QualifiedIdentifier": {
+                                                        "location": {},
+                                                        "attribute": false,
+                                                        "qualifier": null,
+                                                        "id": {
+                                                          "Id": [
+                                                            "e",
+                                                            {}
+                                                          ]
+                                                        }
+                                                      }
+                                                    }
+                                                  ]
+                                                }
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ],
+                                  "finally_clause": null
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "directives": []
+}

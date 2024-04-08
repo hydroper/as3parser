@@ -1,0 +1,2152 @@
+{
+  "location": {},
+  "packages": [
+    {
+      "location": {},
+      "asdoc": null,
+      "name": [],
+      "block": {
+        "location": {},
+        "metadata": null,
+        "directives": [
+          {
+            "ImportDirective": {
+              "location": {},
+              "alias": null,
+              "package_name": [
+                [
+                  "flash",
+                  {}
+                ],
+                [
+                  "display",
+                  {}
+                ]
+              ],
+              "import_specifier": {
+                "Identifier": [
+                  "Sprite",
+                  {}
+                ]
+              }
+            }
+          },
+          {
+            "ImportDirective": {
+              "location": {},
+              "alias": null,
+              "package_name": [
+                [
+                  "flash",
+                  {}
+                ],
+                [
+                  "filters",
+                  {}
+                ]
+              ],
+              "import_specifier": {
+                "Wildcard": {}
+              }
+            }
+          },
+          {
+            "ClassDefinition": {
+              "location": {},
+              "asdoc": null,
+              "attributes": [
+                {
+                  "Public": {}
+                }
+              ],
+              "name": [
+                "BitmapFilterExample",
+                {}
+              ],
+              "type_parameters": null,
+              "extends_clause": {
+                "QualifiedIdentifier": {
+                  "location": {},
+                  "attribute": false,
+                  "qualifier": null,
+                  "id": {
+                    "Id": [
+                      "Sprite",
+                      {}
+                    ]
+                  }
+                }
+              },
+              "implements_clause": null,
+              "block": {
+                "location": {},
+                "metadata": null,
+                "directives": [
+                  {
+                    "FunctionDefinition": {
+                      "location": {},
+                      "asdoc": null,
+                      "attributes": [
+                        {
+                          "Public": {}
+                        }
+                      ],
+                      "name": {
+                        "Constructor": [
+                          "BitmapFilterExample",
+                          {}
+                        ]
+                      },
+                      "common": {
+                        "location": {},
+                        "contains_yield": false,
+                        "contains_await": false,
+                        "signature": {
+                          "location": {},
+                          "parameters": [],
+                          "result_type": null
+                        },
+                        "body": {
+                          "Block": {
+                            "location": {},
+                            "metadata": null,
+                            "directives": [
+                              {
+                                "ExpressionStatement": {
+                                  "location": {},
+                                  "expression": {
+                                    "Call": {
+                                      "location": {},
+                                      "base": {
+                                        "QualifiedIdentifier": {
+                                          "location": {},
+                                          "attribute": false,
+                                          "qualifier": null,
+                                          "id": {
+                                            "Id": [
+                                              "trace",
+                                              {}
+                                            ]
+                                          }
+                                        }
+                                      },
+                                      "arguments": [
+                                        {
+                                          "Member": {
+                                            "location": {},
+                                            "base": {
+                                              "Member": {
+                                                "location": {},
+                                                "base": {
+                                                  "ThisLiteral": {
+                                                    "location": {}
+                                                  }
+                                                },
+                                                "identifier": {
+                                                  "location": {},
+                                                  "attribute": false,
+                                                  "qualifier": null,
+                                                  "id": {
+                                                    "Id": [
+                                                      "filters",
+                                                      {}
+                                                    ]
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "identifier": {
+                                              "location": {},
+                                              "attribute": false,
+                                              "qualifier": null,
+                                              "id": {
+                                                "Id": [
+                                                  "length",
+                                                  {}
+                                                ]
+                                              }
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "VariableDefinition": {
+                                  "location": {},
+                                  "asdoc": null,
+                                  "attributes": [],
+                                  "kind": [
+                                    "Var",
+                                    {}
+                                  ],
+                                  "bindings": [
+                                    {
+                                      "destructuring": {
+                                        "location": {},
+                                        "destructuring": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "tmpFilters",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        },
+                                        "type_annotation": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "Array",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "initializer": {
+                                        "Member": {
+                                          "location": {},
+                                          "base": {
+                                            "ThisLiteral": {
+                                              "location": {}
+                                            }
+                                          },
+                                          "identifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "filters",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "ExpressionStatement": {
+                                  "location": {},
+                                  "expression": {
+                                    "Call": {
+                                      "location": {},
+                                      "base": {
+                                        "Member": {
+                                          "location": {},
+                                          "base": {
+                                            "QualifiedIdentifier": {
+                                              "location": {},
+                                              "attribute": false,
+                                              "qualifier": null,
+                                              "id": {
+                                                "Id": [
+                                                  "tmpFilters",
+                                                  {}
+                                                ]
+                                              }
+                                            }
+                                          },
+                                          "identifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "push",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "arguments": [
+                                        {
+                                          "Call": {
+                                            "location": {},
+                                            "base": {
+                                              "Member": {
+                                                "location": {},
+                                                "base": {
+                                                  "QualifiedIdentifier": {
+                                                    "location": {},
+                                                    "attribute": false,
+                                                    "qualifier": null,
+                                                    "id": {
+                                                      "Id": [
+                                                        "FilterFactory",
+                                                        {}
+                                                      ]
+                                                    }
+                                                  }
+                                                },
+                                                "identifier": {
+                                                  "location": {},
+                                                  "attribute": false,
+                                                  "qualifier": null,
+                                                  "id": {
+                                                    "Id": [
+                                                      "createFilter",
+                                                      {}
+                                                    ]
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "arguments": [
+                                              {
+                                                "Member": {
+                                                  "location": {},
+                                                  "base": {
+                                                    "QualifiedIdentifier": {
+                                                      "location": {},
+                                                      "attribute": false,
+                                                      "qualifier": null,
+                                                      "id": {
+                                                        "Id": [
+                                                          "FilterFactory",
+                                                          {}
+                                                        ]
+                                                      }
+                                                    }
+                                                  },
+                                                  "identifier": {
+                                                    "location": {},
+                                                    "attribute": false,
+                                                    "qualifier": null,
+                                                    "id": {
+                                                      "Id": [
+                                                        "BEVEL_FILTER",
+                                                        {}
+                                                      ]
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "ExpressionStatement": {
+                                  "location": {},
+                                  "expression": {
+                                    "Call": {
+                                      "location": {},
+                                      "base": {
+                                        "Member": {
+                                          "location": {},
+                                          "base": {
+                                            "QualifiedIdentifier": {
+                                              "location": {},
+                                              "attribute": false,
+                                              "qualifier": null,
+                                              "id": {
+                                                "Id": [
+                                                  "tmpFilters",
+                                                  {}
+                                                ]
+                                              }
+                                            }
+                                          },
+                                          "identifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "push",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "arguments": [
+                                        {
+                                          "Call": {
+                                            "location": {},
+                                            "base": {
+                                              "Member": {
+                                                "location": {},
+                                                "base": {
+                                                  "QualifiedIdentifier": {
+                                                    "location": {},
+                                                    "attribute": false,
+                                                    "qualifier": null,
+                                                    "id": {
+                                                      "Id": [
+                                                        "FilterFactory",
+                                                        {}
+                                                      ]
+                                                    }
+                                                  }
+                                                },
+                                                "identifier": {
+                                                  "location": {},
+                                                  "attribute": false,
+                                                  "qualifier": null,
+                                                  "id": {
+                                                    "Id": [
+                                                      "createFilter",
+                                                      {}
+                                                    ]
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "arguments": [
+                                              {
+                                                "Member": {
+                                                  "location": {},
+                                                  "base": {
+                                                    "QualifiedIdentifier": {
+                                                      "location": {},
+                                                      "attribute": false,
+                                                      "qualifier": null,
+                                                      "id": {
+                                                        "Id": [
+                                                          "FilterFactory",
+                                                          {}
+                                                        ]
+                                                      }
+                                                    }
+                                                  },
+                                                  "identifier": {
+                                                    "location": {},
+                                                    "attribute": false,
+                                                    "qualifier": null,
+                                                    "id": {
+                                                      "Id": [
+                                                        "GLOW_FILTER",
+                                                        {}
+                                                      ]
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "ExpressionStatement": {
+                                  "location": {},
+                                  "expression": {
+                                    "Assignment": {
+                                      "location": {},
+                                      "compound": null,
+                                      "left": {
+                                        "Member": {
+                                          "location": {},
+                                          "base": {
+                                            "ThisLiteral": {
+                                              "location": {}
+                                            }
+                                          },
+                                          "identifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "filters",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "right": {
+                                        "QualifiedIdentifier": {
+                                          "location": {},
+                                          "attribute": false,
+                                          "qualifier": null,
+                                          "id": {
+                                            "Id": [
+                                              "tmpFilters",
+                                              {}
+                                            ]
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "ExpressionStatement": {
+                                  "location": {},
+                                  "expression": {
+                                    "Call": {
+                                      "location": {},
+                                      "base": {
+                                        "QualifiedIdentifier": {
+                                          "location": {},
+                                          "attribute": false,
+                                          "qualifier": null,
+                                          "id": {
+                                            "Id": [
+                                              "trace",
+                                              {}
+                                            ]
+                                          }
+                                        }
+                                      },
+                                      "arguments": [
+                                        {
+                                          "Member": {
+                                            "location": {},
+                                            "base": {
+                                              "Member": {
+                                                "location": {},
+                                                "base": {
+                                                  "ThisLiteral": {
+                                                    "location": {}
+                                                  }
+                                                },
+                                                "identifier": {
+                                                  "location": {},
+                                                  "attribute": false,
+                                                  "qualifier": null,
+                                                  "id": {
+                                                    "Id": [
+                                                      "filters",
+                                                      {}
+                                                    ]
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "identifier": {
+                                              "location": {},
+                                              "attribute": false,
+                                              "qualifier": null,
+                                              "id": {
+                                                "Id": [
+                                                  "length",
+                                                  {}
+                                                ]
+                                              }
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "ExpressionStatement": {
+                                  "location": {},
+                                  "expression": {
+                                    "Call": {
+                                      "location": {},
+                                      "base": {
+                                        "QualifiedIdentifier": {
+                                          "location": {},
+                                          "attribute": false,
+                                          "qualifier": null,
+                                          "id": {
+                                            "Id": [
+                                              "trace",
+                                              {}
+                                            ]
+                                          }
+                                        }
+                                      },
+                                      "arguments": [
+                                        {
+                                          "Binary": {
+                                            "location": {},
+                                            "operator": "Is",
+                                            "left": {
+                                              "ComputedMember": {
+                                                "location": {},
+                                                "base": {
+                                                  "Member": {
+                                                    "location": {},
+                                                    "base": {
+                                                      "ThisLiteral": {
+                                                        "location": {}
+                                                      }
+                                                    },
+                                                    "identifier": {
+                                                      "location": {},
+                                                      "attribute": false,
+                                                      "qualifier": null,
+                                                      "id": {
+                                                        "Id": [
+                                                          "filters",
+                                                          {}
+                                                        ]
+                                                      }
+                                                    }
+                                                  }
+                                                },
+                                                "asdoc": null,
+                                                "key": {
+                                                  "NumericLiteral": {
+                                                    "location": {},
+                                                    "value": "0"
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "right": {
+                                              "QualifiedIdentifier": {
+                                                "location": {},
+                                                "attribute": false,
+                                                "qualifier": null,
+                                                "id": {
+                                                  "Id": [
+                                                    "BitmapFilter",
+                                                    {}
+                                                  ]
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "ExpressionStatement": {
+                                  "location": {},
+                                  "expression": {
+                                    "Call": {
+                                      "location": {},
+                                      "base": {
+                                        "QualifiedIdentifier": {
+                                          "location": {},
+                                          "attribute": false,
+                                          "qualifier": null,
+                                          "id": {
+                                            "Id": [
+                                              "trace",
+                                              {}
+                                            ]
+                                          }
+                                        }
+                                      },
+                                      "arguments": [
+                                        {
+                                          "Binary": {
+                                            "location": {},
+                                            "operator": "Is",
+                                            "left": {
+                                              "ComputedMember": {
+                                                "location": {},
+                                                "base": {
+                                                  "Member": {
+                                                    "location": {},
+                                                    "base": {
+                                                      "ThisLiteral": {
+                                                        "location": {}
+                                                      }
+                                                    },
+                                                    "identifier": {
+                                                      "location": {},
+                                                      "attribute": false,
+                                                      "qualifier": null,
+                                                      "id": {
+                                                        "Id": [
+                                                          "filters",
+                                                          {}
+                                                        ]
+                                                      }
+                                                    }
+                                                  }
+                                                },
+                                                "asdoc": null,
+                                                "key": {
+                                                  "NumericLiteral": {
+                                                    "location": {},
+                                                    "value": "0"
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "right": {
+                                              "QualifiedIdentifier": {
+                                                "location": {},
+                                                "attribute": false,
+                                                "qualifier": null,
+                                                "id": {
+                                                  "Id": [
+                                                    "BevelFilter",
+                                                    {}
+                                                  ]
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "ExpressionStatement": {
+                                  "location": {},
+                                  "expression": {
+                                    "Call": {
+                                      "location": {},
+                                      "base": {
+                                        "QualifiedIdentifier": {
+                                          "location": {},
+                                          "attribute": false,
+                                          "qualifier": null,
+                                          "id": {
+                                            "Id": [
+                                              "trace",
+                                              {}
+                                            ]
+                                          }
+                                        }
+                                      },
+                                      "arguments": [
+                                        {
+                                          "Binary": {
+                                            "location": {},
+                                            "operator": "Is",
+                                            "left": {
+                                              "ComputedMember": {
+                                                "location": {},
+                                                "base": {
+                                                  "Member": {
+                                                    "location": {},
+                                                    "base": {
+                                                      "ThisLiteral": {
+                                                        "location": {}
+                                                      }
+                                                    },
+                                                    "identifier": {
+                                                      "location": {},
+                                                      "attribute": false,
+                                                      "qualifier": null,
+                                                      "id": {
+                                                        "Id": [
+                                                          "filters",
+                                                          {}
+                                                        ]
+                                                      }
+                                                    }
+                                                  }
+                                                },
+                                                "asdoc": null,
+                                                "key": {
+                                                  "NumericLiteral": {
+                                                    "location": {},
+                                                    "value": "1"
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "right": {
+                                              "QualifiedIdentifier": {
+                                                "location": {},
+                                                "attribute": false,
+                                                "qualifier": null,
+                                                "id": {
+                                                  "Id": [
+                                                    "BitmapFilter",
+                                                    {}
+                                                  ]
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "ExpressionStatement": {
+                                  "location": {},
+                                  "expression": {
+                                    "Call": {
+                                      "location": {},
+                                      "base": {
+                                        "QualifiedIdentifier": {
+                                          "location": {},
+                                          "attribute": false,
+                                          "qualifier": null,
+                                          "id": {
+                                            "Id": [
+                                              "trace",
+                                              {}
+                                            ]
+                                          }
+                                        }
+                                      },
+                                      "arguments": [
+                                        {
+                                          "Binary": {
+                                            "location": {},
+                                            "operator": "Is",
+                                            "left": {
+                                              "ComputedMember": {
+                                                "location": {},
+                                                "base": {
+                                                  "Member": {
+                                                    "location": {},
+                                                    "base": {
+                                                      "ThisLiteral": {
+                                                        "location": {}
+                                                      }
+                                                    },
+                                                    "identifier": {
+                                                      "location": {},
+                                                      "attribute": false,
+                                                      "qualifier": null,
+                                                      "id": {
+                                                        "Id": [
+                                                          "filters",
+                                                          {}
+                                                        ]
+                                                      }
+                                                    }
+                                                  }
+                                                },
+                                                "asdoc": null,
+                                                "key": {
+                                                  "NumericLiteral": {
+                                                    "location": {},
+                                                    "value": "1"
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "right": {
+                                              "QualifiedIdentifier": {
+                                                "location": {},
+                                                "attribute": false,
+                                                "qualifier": null,
+                                                "id": {
+                                                  "Id": [
+                                                    "GlowFilter",
+                                                    {}
+                                                  ]
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "directives": [
+    {
+      "ImportDirective": {
+        "location": {},
+        "alias": null,
+        "package_name": [
+          [
+            "flash",
+            {}
+          ],
+          [
+            "filters",
+            {}
+          ]
+        ],
+        "import_specifier": {
+          "Wildcard": {}
+        }
+      }
+    },
+    {
+      "ClassDefinition": {
+        "location": {},
+        "asdoc": null,
+        "attributes": [],
+        "name": [
+          "FilterFactory",
+          {}
+        ],
+        "type_parameters": null,
+        "extends_clause": null,
+        "implements_clause": null,
+        "block": {
+          "location": {},
+          "metadata": null,
+          "directives": [
+            {
+              "VariableDefinition": {
+                "location": {},
+                "asdoc": null,
+                "attributes": [
+                  {
+                    "Public": {}
+                  },
+                  {
+                    "Static": {}
+                  }
+                ],
+                "kind": [
+                  "Var",
+                  {}
+                ],
+                "bindings": [
+                  {
+                    "destructuring": {
+                      "location": {},
+                      "destructuring": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "BEVEL_FILTER",
+                              {}
+                            ]
+                          }
+                        }
+                      },
+                      "type_annotation": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "String",
+                              {}
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "initializer": {
+                      "StringLiteral": {
+                        "location": {},
+                        "value": "BevelFilter"
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "VariableDefinition": {
+                "location": {},
+                "asdoc": null,
+                "attributes": [
+                  {
+                    "Public": {}
+                  },
+                  {
+                    "Static": {}
+                  }
+                ],
+                "kind": [
+                  "Var",
+                  {}
+                ],
+                "bindings": [
+                  {
+                    "destructuring": {
+                      "location": {},
+                      "destructuring": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "BevelFilterConstructor",
+                              {}
+                            ]
+                          }
+                        }
+                      },
+                      "type_annotation": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "Class",
+                              {}
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "initializer": {
+                      "QualifiedIdentifier": {
+                        "location": {},
+                        "attribute": false,
+                        "qualifier": null,
+                        "id": {
+                          "Id": [
+                            "BevelFilter",
+                            {}
+                          ]
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "VariableDefinition": {
+                "location": {},
+                "asdoc": null,
+                "attributes": [
+                  {
+                    "Public": {}
+                  },
+                  {
+                    "Static": {}
+                  }
+                ],
+                "kind": [
+                  "Var",
+                  {}
+                ],
+                "bindings": [
+                  {
+                    "destructuring": {
+                      "location": {},
+                      "destructuring": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "BLUR_FILTER",
+                              {}
+                            ]
+                          }
+                        }
+                      },
+                      "type_annotation": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "String",
+                              {}
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "initializer": {
+                      "StringLiteral": {
+                        "location": {},
+                        "value": "BlurFilter"
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "VariableDefinition": {
+                "location": {},
+                "asdoc": null,
+                "attributes": [
+                  {
+                    "Public": {}
+                  },
+                  {
+                    "Static": {}
+                  }
+                ],
+                "kind": [
+                  "Var",
+                  {}
+                ],
+                "bindings": [
+                  {
+                    "destructuring": {
+                      "location": {},
+                      "destructuring": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "BlurFilterConstructor",
+                              {}
+                            ]
+                          }
+                        }
+                      },
+                      "type_annotation": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "Class",
+                              {}
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "initializer": {
+                      "QualifiedIdentifier": {
+                        "location": {},
+                        "attribute": false,
+                        "qualifier": null,
+                        "id": {
+                          "Id": [
+                            "BlurFilter",
+                            {}
+                          ]
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "VariableDefinition": {
+                "location": {},
+                "asdoc": null,
+                "attributes": [
+                  {
+                    "Public": {}
+                  },
+                  {
+                    "Static": {}
+                  }
+                ],
+                "kind": [
+                  "Var",
+                  {}
+                ],
+                "bindings": [
+                  {
+                    "destructuring": {
+                      "location": {},
+                      "destructuring": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "COLOR_MATRIX_FILTER",
+                              {}
+                            ]
+                          }
+                        }
+                      },
+                      "type_annotation": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "String",
+                              {}
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "initializer": {
+                      "StringLiteral": {
+                        "location": {},
+                        "value": "ColorMatrixFilter"
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "VariableDefinition": {
+                "location": {},
+                "asdoc": null,
+                "attributes": [
+                  {
+                    "Public": {}
+                  },
+                  {
+                    "Static": {}
+                  }
+                ],
+                "kind": [
+                  "Var",
+                  {}
+                ],
+                "bindings": [
+                  {
+                    "destructuring": {
+                      "location": {},
+                      "destructuring": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "ColorMatrixFilterConstructor",
+                              {}
+                            ]
+                          }
+                        }
+                      },
+                      "type_annotation": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "Class",
+                              {}
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "initializer": {
+                      "QualifiedIdentifier": {
+                        "location": {},
+                        "attribute": false,
+                        "qualifier": null,
+                        "id": {
+                          "Id": [
+                            "ColorMatrixFilter",
+                            {}
+                          ]
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "VariableDefinition": {
+                "location": {},
+                "asdoc": null,
+                "attributes": [
+                  {
+                    "Public": {}
+                  },
+                  {
+                    "Static": {}
+                  }
+                ],
+                "kind": [
+                  "Var",
+                  {}
+                ],
+                "bindings": [
+                  {
+                    "destructuring": {
+                      "location": {},
+                      "destructuring": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "CONVOLUTION_FILTER",
+                              {}
+                            ]
+                          }
+                        }
+                      },
+                      "type_annotation": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "String",
+                              {}
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "initializer": {
+                      "StringLiteral": {
+                        "location": {},
+                        "value": "ConvolutionFilter"
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "VariableDefinition": {
+                "location": {},
+                "asdoc": null,
+                "attributes": [
+                  {
+                    "Public": {}
+                  },
+                  {
+                    "Static": {}
+                  }
+                ],
+                "kind": [
+                  "Var",
+                  {}
+                ],
+                "bindings": [
+                  {
+                    "destructuring": {
+                      "location": {},
+                      "destructuring": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "ConvolutionFilterConstructor",
+                              {}
+                            ]
+                          }
+                        }
+                      },
+                      "type_annotation": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "Class",
+                              {}
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "initializer": {
+                      "QualifiedIdentifier": {
+                        "location": {},
+                        "attribute": false,
+                        "qualifier": null,
+                        "id": {
+                          "Id": [
+                            "ConvolutionFilter",
+                            {}
+                          ]
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "VariableDefinition": {
+                "location": {},
+                "asdoc": null,
+                "attributes": [
+                  {
+                    "Public": {}
+                  },
+                  {
+                    "Static": {}
+                  }
+                ],
+                "kind": [
+                  "Var",
+                  {}
+                ],
+                "bindings": [
+                  {
+                    "destructuring": {
+                      "location": {},
+                      "destructuring": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "DISPLACEMENT_MAP_FILTER",
+                              {}
+                            ]
+                          }
+                        }
+                      },
+                      "type_annotation": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "String",
+                              {}
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "initializer": {
+                      "StringLiteral": {
+                        "location": {},
+                        "value": "DisplacementMapFilter"
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "VariableDefinition": {
+                "location": {},
+                "asdoc": null,
+                "attributes": [
+                  {
+                    "Public": {}
+                  },
+                  {
+                    "Static": {}
+                  }
+                ],
+                "kind": [
+                  "Var",
+                  {}
+                ],
+                "bindings": [
+                  {
+                    "destructuring": {
+                      "location": {},
+                      "destructuring": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "DisplacementMapFilterConstructor",
+                              {}
+                            ]
+                          }
+                        }
+                      },
+                      "type_annotation": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "Class",
+                              {}
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "initializer": {
+                      "QualifiedIdentifier": {
+                        "location": {},
+                        "attribute": false,
+                        "qualifier": null,
+                        "id": {
+                          "Id": [
+                            "DisplacementMapFilter",
+                            {}
+                          ]
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "VariableDefinition": {
+                "location": {},
+                "asdoc": null,
+                "attributes": [
+                  {
+                    "Public": {}
+                  },
+                  {
+                    "Static": {}
+                  }
+                ],
+                "kind": [
+                  "Var",
+                  {}
+                ],
+                "bindings": [
+                  {
+                    "destructuring": {
+                      "location": {},
+                      "destructuring": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "DROP_SHADOW_FILTER",
+                              {}
+                            ]
+                          }
+                        }
+                      },
+                      "type_annotation": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "String",
+                              {}
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "initializer": {
+                      "StringLiteral": {
+                        "location": {},
+                        "value": "DropShadowFilter"
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "VariableDefinition": {
+                "location": {},
+                "asdoc": null,
+                "attributes": [
+                  {
+                    "Public": {}
+                  },
+                  {
+                    "Static": {}
+                  }
+                ],
+                "kind": [
+                  "Var",
+                  {}
+                ],
+                "bindings": [
+                  {
+                    "destructuring": {
+                      "location": {},
+                      "destructuring": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "DropShadowFilterConstructor",
+                              {}
+                            ]
+                          }
+                        }
+                      },
+                      "type_annotation": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "Class",
+                              {}
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "initializer": {
+                      "QualifiedIdentifier": {
+                        "location": {},
+                        "attribute": false,
+                        "qualifier": null,
+                        "id": {
+                          "Id": [
+                            "DropShadowFilter",
+                            {}
+                          ]
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "VariableDefinition": {
+                "location": {},
+                "asdoc": null,
+                "attributes": [
+                  {
+                    "Public": {}
+                  },
+                  {
+                    "Static": {}
+                  }
+                ],
+                "kind": [
+                  "Var",
+                  {}
+                ],
+                "bindings": [
+                  {
+                    "destructuring": {
+                      "location": {},
+                      "destructuring": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "GLOW_FILTER",
+                              {}
+                            ]
+                          }
+                        }
+                      },
+                      "type_annotation": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "String",
+                              {}
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "initializer": {
+                      "StringLiteral": {
+                        "location": {},
+                        "value": "GlowFilter"
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "VariableDefinition": {
+                "location": {},
+                "asdoc": null,
+                "attributes": [
+                  {
+                    "Public": {}
+                  },
+                  {
+                    "Static": {}
+                  }
+                ],
+                "kind": [
+                  "Var",
+                  {}
+                ],
+                "bindings": [
+                  {
+                    "destructuring": {
+                      "location": {},
+                      "destructuring": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "GlowFilterConstructor",
+                              {}
+                            ]
+                          }
+                        }
+                      },
+                      "type_annotation": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "Class",
+                              {}
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "initializer": {
+                      "QualifiedIdentifier": {
+                        "location": {},
+                        "attribute": false,
+                        "qualifier": null,
+                        "id": {
+                          "Id": [
+                            "GlowFilter",
+                            {}
+                          ]
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "VariableDefinition": {
+                "location": {},
+                "asdoc": null,
+                "attributes": [
+                  {
+                    "Public": {}
+                  },
+                  {
+                    "Static": {}
+                  }
+                ],
+                "kind": [
+                  "Var",
+                  {}
+                ],
+                "bindings": [
+                  {
+                    "destructuring": {
+                      "location": {},
+                      "destructuring": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "GRADIENT_BEVEL_FILTER",
+                              {}
+                            ]
+                          }
+                        }
+                      },
+                      "type_annotation": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "String",
+                              {}
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "initializer": {
+                      "StringLiteral": {
+                        "location": {},
+                        "value": "GradientBevelFilter"
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "VariableDefinition": {
+                "location": {},
+                "asdoc": null,
+                "attributes": [
+                  {
+                    "Public": {}
+                  },
+                  {
+                    "Static": {}
+                  }
+                ],
+                "kind": [
+                  "Var",
+                  {}
+                ],
+                "bindings": [
+                  {
+                    "destructuring": {
+                      "location": {},
+                      "destructuring": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "GradientBevelFilterConstructor",
+                              {}
+                            ]
+                          }
+                        }
+                      },
+                      "type_annotation": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "Class",
+                              {}
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "initializer": {
+                      "QualifiedIdentifier": {
+                        "location": {},
+                        "attribute": false,
+                        "qualifier": null,
+                        "id": {
+                          "Id": [
+                            "GradientBevelFilter",
+                            {}
+                          ]
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "VariableDefinition": {
+                "location": {},
+                "asdoc": null,
+                "attributes": [
+                  {
+                    "Public": {}
+                  },
+                  {
+                    "Static": {}
+                  }
+                ],
+                "kind": [
+                  "Var",
+                  {}
+                ],
+                "bindings": [
+                  {
+                    "destructuring": {
+                      "location": {},
+                      "destructuring": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "GRADIENT_GLOW_FILTER",
+                              {}
+                            ]
+                          }
+                        }
+                      },
+                      "type_annotation": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "String",
+                              {}
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "initializer": {
+                      "StringLiteral": {
+                        "location": {},
+                        "value": "GradientGlowFilter"
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "VariableDefinition": {
+                "location": {},
+                "asdoc": null,
+                "attributes": [
+                  {
+                    "Public": {}
+                  },
+                  {
+                    "Static": {}
+                  }
+                ],
+                "kind": [
+                  "Var",
+                  {}
+                ],
+                "bindings": [
+                  {
+                    "destructuring": {
+                      "location": {},
+                      "destructuring": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "GradientGlowFilterConstructor",
+                              {}
+                            ]
+                          }
+                        }
+                      },
+                      "type_annotation": {
+                        "QualifiedIdentifier": {
+                          "location": {},
+                          "attribute": false,
+                          "qualifier": null,
+                          "id": {
+                            "Id": [
+                              "Class",
+                              {}
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "initializer": {
+                      "QualifiedIdentifier": {
+                        "location": {},
+                        "attribute": false,
+                        "qualifier": null,
+                        "id": {
+                          "Id": [
+                            "GradientGlowFilter",
+                            {}
+                          ]
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "FunctionDefinition": {
+                "location": {},
+                "asdoc": null,
+                "attributes": [
+                  {
+                    "Public": {}
+                  },
+                  {
+                    "Static": {}
+                  }
+                ],
+                "name": {
+                  "Identifier": [
+                    "createFilter",
+                    {}
+                  ]
+                },
+                "common": {
+                  "location": {},
+                  "contains_yield": false,
+                  "contains_await": false,
+                  "signature": {
+                    "location": {},
+                    "parameters": [
+                      {
+                        "location": {},
+                        "kind": "Required",
+                        "destructuring": {
+                          "location": {},
+                          "destructuring": {
+                            "QualifiedIdentifier": {
+                              "location": {},
+                              "attribute": false,
+                              "qualifier": null,
+                              "id": {
+                                "Id": [
+                                  "type",
+                                  {}
+                                ]
+                              }
+                            }
+                          },
+                          "type_annotation": {
+                            "QualifiedIdentifier": {
+                              "location": {},
+                              "attribute": false,
+                              "qualifier": null,
+                              "id": {
+                                "Id": [
+                                  "String",
+                                  {}
+                                ]
+                              }
+                            }
+                          }
+                        },
+                        "default_value": null
+                      }
+                    ],
+                    "result_type": {
+                      "QualifiedIdentifier": {
+                        "location": {},
+                        "attribute": false,
+                        "qualifier": null,
+                        "id": {
+                          "Id": [
+                            "BitmapFilter",
+                            {}
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  "body": {
+                    "Block": {
+                      "location": {},
+                      "metadata": null,
+                      "directives": [
+                        {
+                          "ReturnStatement": {
+                            "location": {},
+                            "expression": {
+                              "New": {
+                                "location": {},
+                                "base": {
+                                  "ComputedMember": {
+                                    "location": {},
+                                    "base": {
+                                      "QualifiedIdentifier": {
+                                        "location": {},
+                                        "attribute": false,
+                                        "qualifier": null,
+                                        "id": {
+                                          "Id": [
+                                            "FilterFactory",
+                                            {}
+                                          ]
+                                        }
+                                      }
+                                    },
+                                    "asdoc": null,
+                                    "key": {
+                                      "Binary": {
+                                        "location": {},
+                                        "operator": "Add",
+                                        "left": {
+                                          "QualifiedIdentifier": {
+                                            "location": {},
+                                            "attribute": false,
+                                            "qualifier": null,
+                                            "id": {
+                                              "Id": [
+                                                "type",
+                                                {}
+                                              ]
+                                            }
+                                          }
+                                        },
+                                        "right": {
+                                          "StringLiteral": {
+                                            "location": {},
+                                            "value": "Constructor"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "arguments": []
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
