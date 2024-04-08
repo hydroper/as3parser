@@ -27,7 +27,7 @@ ActionScript 3 parser in the Rust language.
 
 ## Verifier
 
-ActionScript execution consists of parsing, verification, and evaluation. Verification can be performed ahead of time, as is already done by the existing initial compilers of the language (ASC 2 and Apache Flex's MXML compiler), deriving control flow graph, and a static type host. This project might be integrated with a verifier in the future.
+ActionScript execution consists of parsing, verification, and evaluation. Verification can be performed ahead of time, as is already done by the existing initial compilers of the language (ASC 2 and Apache Flex's MXML compiler), reporting errors and warnings, deriving a control flow graph for every activation, and attaching symbols to syntactic nodes. This project might be integrated with a verifier in the future.
 
 ## License
 
