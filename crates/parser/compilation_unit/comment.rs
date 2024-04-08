@@ -44,7 +44,7 @@ impl Comment {
     pub fn is_asdoc(&self, location_to_precede: &Location) -> bool {
         if self.multiline && self.content.borrow().starts_with('*') {
             let mut i: usize = self.location.borrow().last_offset;
-            for (i_1, ch) in self.location.borrow().compilation_unit().text[i..].char_indices() {
+            for (i_1, ch) in self.location.borrow().compilation_unit().text()[i..].char_indices() {
                 i = i_1;
                 if !(CharacterValidator::is_whitespace(ch) || CharacterValidator::is_line_terminator(ch)) {
                     break;

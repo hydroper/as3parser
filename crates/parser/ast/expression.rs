@@ -43,6 +43,7 @@ pub enum Expression {
     ArrayType(ArrayTypeExpression),
     TupleType(TupleTypeExpression),
     FunctionType(FunctionTypeExpression),
+    Invalidated(InvalidatedExpression),
 }
 
 impl Expression {
@@ -87,6 +88,7 @@ impl Expression {
             Self::ArrayType(e) => e.location.clone(),
             Self::TupleType(e) => e.location.clone(),
             Self::FunctionType(e) => e.location.clone(),
+            Self::Invalidated(e) => e.location.clone(),
         }
     }
 

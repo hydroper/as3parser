@@ -61,6 +61,8 @@ mod sequence_expression;
 pub use sequence_expression::*;
 mod type_expression;
 pub use type_expression::*;
+mod invalidated_expression;
+pub use invalidated_expression::*;
 
 // Destructuring
 mod destructuring;
@@ -105,6 +107,8 @@ pub use default_xml_namespace_statement::*;
 // Directives
 mod directive;
 pub use directive::*;
+mod invalidated_directive;
+pub use invalidated_directive::*;
 mod configuration_directive;
 pub use configuration_directive::*;
 mod import_directive;

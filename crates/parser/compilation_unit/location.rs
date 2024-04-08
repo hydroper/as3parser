@@ -113,16 +113,6 @@ impl Location {
         self.compilation_unit.get_line_number(self.last_offset)
     }
 
-    /// First line offset, counted from one.
-    pub fn first_line_offset(&self) -> usize {
-        self.compilation_unit.get_line_offset_from_offset(self.first_offset())
-    }
-
-    /// Last line offset, counted from one.
-    pub fn last_line_offset(&self) -> usize {
-        self.compilation_unit.get_line_offset_from_offset(self.last_offset())
-    }
-
     // The first byte offset of this location.
     pub fn first_offset(&self) -> usize {
         self.first_offset
@@ -135,34 +125,16 @@ impl Location {
 
     /// Zero based first column of the location in code points.
     pub fn first_column(&self) -> usize {
-        let line_offset = self.first_line_offset();
-        let target_offset = self.first_offset;
-        if line_offset > target_offset {
-            return 0;
-        }
-        let mut i = 0;
-        for _ in self.compilation_unit.text[line_offset..target_offset].chars() {
-            i += 1;
-        }
-        i
+        self.compilation_unit.get_column(self.first_offset)
     }
 
     /// Zero based last column of the location in code points.
     pub fn last_column(&self) -> usize {
-        let line_offset = self.last_line_offset();
-        let target_offset = self.last_offset;
-        if line_offset > target_offset {
-            return 0;
-        }
-        let mut i = 0;
-        for _ in self.compilation_unit.text[line_offset..target_offset].chars() {
-            i += 1;
-        }
-        i
+        self.compilation_unit.get_column(self.last_offset)
     }
 
     pub fn character_count(&self) -> usize {
-        self.compilation_unit.text[self.first_offset..self.last_offset].chars().count()
+        self.compilation_unit.text()[self.first_offset..self.last_offset].chars().count()
     }
 
     /// Indicates whether a previous location and a next location

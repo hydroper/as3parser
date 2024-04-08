@@ -9,7 +9,7 @@ pub struct Tokenizer<'input> {
 impl<'input> Tokenizer<'input> {
     /// Constructs a tokenizer.
     pub fn new(compilation_unit: &'input Rc<CompilationUnit>) -> Self {
-        let text: &'input str = compilation_unit.text.as_ref();
+        let text: &'input str = compilation_unit.text();
         let compilation_unit = compilation_unit.clone();
         assert!(!compilation_unit.already_tokenized.get(), "A CompilationUnit must be tokenized at most once.");
         compilation_unit.already_tokenized.set(true);
@@ -414,7 +414,8 @@ impl<'input> Tokenizer<'input> {
             _ => {
                 if self.characters.has_remaining() {
                     self.add_unexpected_error();
-                    return Err(ParsingFailure);
+                    self.characters.next();
+                    return self.scan_ie_div();
                 // Eof
                 } else {
                     return Ok((Token::Eof, start))
@@ -471,13 +472,19 @@ impl<'input> Tokenizer<'input> {
     }
 
     fn character_ahead_location(&self) -> Location {
+        if self.characters.reached_end() {
+            return Location::with_offset(&self.compilation_unit, self.compilation_unit.text().len());
+        }
         let offset = self.characters.index();
         let mut next_characters = self.characters.clone();
         next_characters.next().unwrap();
         Location::with_offsets(&self.compilation_unit, offset, next_characters.index() + 1)
     }
 
-    fn cursor_location(&self) -> Location {
+    pub fn cursor_location(&self) -> Location {
+        if self.characters.reached_end() {
+            return Location::with_offset(&self.compilation_unit, self.compilation_unit.text().len());
+        }
         let offset = self.characters.index();
         Location::with_offset(&self.compilation_unit, offset)
     }
@@ -496,13 +503,11 @@ impl<'input> Tokenizer<'input> {
         if ch == '\x0D' && self.characters.peek_at_or_zero(1) == '\x0A' {
             self.characters.skip_count_in_place(2);
             self.line_number += 1;
-            self.compilation_unit.push_line_skip(self.line_number, self.characters.index());
             return true;
         }
         if CharacterValidator::is_line_terminator(ch) {
             self.characters.next();
             self.line_number += 1;
-            self.compilation_unit.push_line_skip(self.line_number, self.characters.index());
             return true;
         }
         false
@@ -525,7 +530,7 @@ impl<'input> Tokenizer<'input> {
 
             self.compilation_unit.comments.borrow_mut().push(Rc::new(Comment {
                 multiline: false,
-                content: RefCell::new(self.compilation_unit.text[(location.first_offset() + 2)..location.last_offset()].to_owned()),
+                content: RefCell::new(self.compilation_unit.text()[(location.first_offset() + 2)..location.last_offset()].to_owned()),
                 location: RefCell::new(location),
             }));
 
@@ -553,7 +558,7 @@ impl<'input> Tokenizer<'input> {
 
             self.compilation_unit.comments.borrow_mut().push(Rc::new(Comment {
                 multiline: true,
-                content: RefCell::new(self.compilation_unit.text[(location.first_offset() + 2)..(location.last_offset() - 2)].to_owned()),
+                content: RefCell::new(self.compilation_unit.text()[(location.first_offset() + 2)..(location.last_offset() - 2)].to_owned()),
                 location: RefCell::new(location),
             }));
 
@@ -618,7 +623,7 @@ impl<'input> Tokenizer<'input> {
         let start = self.cursor_location();
         if self.characters.peek_or_zero() != 'u' {
             self.add_unexpected_error();
-            return Err(ParsingFailure);
+            return Ok('\x5F');
         }
         self.characters.next();
 
@@ -630,7 +635,7 @@ impl<'input> Tokenizer<'input> {
                 | self.expect_hex_digit()?);
             let Some(r) = r else {
                 self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&start.combine_with(self.cursor_location()), DiagnosticKind::UnexpectedOrInvalidToken, vec![]));
-                return Err(ParsingFailure);
+                return Ok('\x5F');
             };
             return Ok(r);
         }
@@ -638,7 +643,7 @@ impl<'input> Tokenizer<'input> {
         // Scan \u{}
         if self.characters.peek_or_zero() != '{' {
             self.add_unexpected_error();
-            return Err(ParsingFailure);
+            return Ok('\x5F');
         }
         self.characters.next();
         while CharacterValidator::is_hex_digit(self.characters.peek_or_zero()) {
@@ -646,19 +651,19 @@ impl<'input> Tokenizer<'input> {
         }
         if self.characters.peek_or_zero() != '}' {
             self.add_unexpected_error();
-            return Err(ParsingFailure);
+            return Ok('\x5F');
         }
         self.characters.next();
         let location = start.combine_with(self.cursor_location());
-        let r = u32::from_str_radix(&self.compilation_unit.text[(start.first_offset + 2)..(location.last_offset - 1)], 16);
+        let r = u32::from_str_radix(&self.compilation_unit.text()[(start.first_offset + 2)..(location.last_offset - 1)], 16);
         let Ok(r) = r else {
             self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&location, DiagnosticKind::UnexpectedOrInvalidToken, vec![]));
-            return Err(ParsingFailure);
+            return Ok('\x5F');
         };
         let r = char::from_u32(r);
         let Some(r) = r else {
             self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&location, DiagnosticKind::UnexpectedOrInvalidToken, vec![]));
-            return Err(ParsingFailure);
+            return Ok('\x5F');
         };
         Ok(r)
     }
@@ -668,7 +673,7 @@ impl<'input> Tokenizer<'input> {
         let mv = CharacterValidator::hex_digit_mv(ch);
         if mv.is_none() {
             self.add_unexpected_error();
-            return Err(ParsingFailure);
+            return Ok(0x5F);
         }
         self.characters.next();
         Ok(mv.unwrap())
@@ -732,7 +737,6 @@ impl<'input> Tokenizer<'input> {
             self.characters.next();
             if !CharacterValidator::is_dec_digit(self.characters.peek_or_zero()) {
                 self.add_unexpected_error();
-                return Err(ParsingFailure);
             }
             while CharacterValidator::is_dec_digit(self.characters.peek_or_zero()) {
                 self.characters.next();
@@ -748,7 +752,6 @@ impl<'input> Tokenizer<'input> {
             }
             if !CharacterValidator::is_dec_digit(self.characters.peek_or_zero()) {
                 self.add_unexpected_error();
-                return Err(ParsingFailure);
             }
             while CharacterValidator::is_dec_digit(self.characters.peek_or_zero()) {
                 self.characters.next();
@@ -756,7 +759,7 @@ impl<'input> Tokenizer<'input> {
             }
         }
 
-        let string = self.compilation_unit.text[start.first_offset..self.characters.index()].to_owned();
+        let string = self.compilation_unit.text()[start.first_offset..self.characters.index()].to_owned();
 
         let mut suffix = NumberSuffix::None;
         if self.characters.peek_or_zero() == 'f' || self.characters.peek_or_zero() == 'F' {
@@ -773,7 +776,6 @@ impl<'input> Tokenizer<'input> {
     fn scan_hex_literal(&mut self, start: Location) -> Result<Option<(Token, Location)>, ParsingFailure> {
         if !CharacterValidator::is_hex_digit(self.characters.peek_or_zero()) {
             self.add_unexpected_error();
-            return Err(ParsingFailure);
         }
         while CharacterValidator::is_hex_digit(self.characters.peek_or_zero()) {
             self.characters.next();
@@ -784,14 +786,13 @@ impl<'input> Tokenizer<'input> {
         self.unallow_numeric_suffix();
 
         let location = start.combine_with(self.cursor_location());
-        let s = self.compilation_unit.text[location.first_offset..location.last_offset].to_owned();
+        let s = self.compilation_unit.text()[location.first_offset..location.last_offset].to_owned();
         Ok(Some((Token::NumericLiteral(s, suffix), location)))
     }
 
     fn scan_bin_literal(&mut self, start: Location) -> Result<Option<(Token, Location)>, ParsingFailure> {
         if !CharacterValidator::is_bin_digit(self.characters.peek_or_zero()) {
             self.add_unexpected_error();
-            return Err(ParsingFailure);
         }
         while CharacterValidator::is_bin_digit(self.characters.peek_or_zero()) {
             self.characters.next();
@@ -802,7 +803,7 @@ impl<'input> Tokenizer<'input> {
         self.unallow_numeric_suffix();
 
         let location = start.combine_with(self.cursor_location());
-        let s = self.compilation_unit.text[location.first_offset..location.last_offset].to_owned();
+        let s = self.compilation_unit.text()[location.first_offset..location.last_offset].to_owned();
         Ok(Some((Token::NumericLiteral(s, suffix), location)))
     }
 
@@ -811,7 +812,6 @@ impl<'input> Tokenizer<'input> {
             self.characters.next();
             if !CharacterValidator::is_dec_digit(self.characters.peek_or_zero()) {
                 self.add_unexpected_error();
-                return Err(ParsingFailure);
             }
             self.characters.next();
         }
@@ -823,7 +823,6 @@ impl<'input> Tokenizer<'input> {
             self.characters.next();
             if !CharacterValidator::is_hex_digit(self.characters.peek_or_zero()) {
                 self.add_unexpected_error();
-                return Err(ParsingFailure);
             }
             self.characters.next();
         }
@@ -835,7 +834,6 @@ impl<'input> Tokenizer<'input> {
             self.characters.next();
             if !CharacterValidator::is_bin_digit(self.characters.peek_or_zero()) {
                 self.add_unexpected_error();
-                return Err(ParsingFailure);
             }
             self.characters.next();
         }
@@ -1060,7 +1058,7 @@ impl<'input> Tokenizer<'input> {
                 self.characters.next();
             }
             let location = start.combine_with(self.cursor_location());
-            let name = self.compilation_unit.text[location.first_offset..location.last_offset].to_owned();
+            let name = self.compilation_unit.text()[location.first_offset..location.last_offset].to_owned();
             return Ok((Token::XmlName(name), location));
         }
 
@@ -1095,6 +1093,14 @@ impl<'input> Tokenizer<'input> {
                 self.characters.next();
                 if self.characters.peek_or_zero() != '>' {
                     self.add_unexpected_error();
+                    while self.characters.has_remaining() {
+                        self.characters.next();
+                        if self.characters.peek_or_zero() == '>' {
+                            self.characters.next();
+                            let location = start.combine_with(self.cursor_location());
+                            return Ok((Token::XmlSlashGt, location));
+                        }
+                    }
                     return Err(ParsingFailure);
                 }
                 self.characters.next();
@@ -1115,7 +1121,7 @@ impl<'input> Tokenizer<'input> {
                     self.add_unexpected_error();
                     return Err(ParsingFailure)
                 }
-                let value = self.compilation_unit.text[(start.first_offset + 1)..self.cursor_location().first_offset].to_owned();
+                let value = self.compilation_unit.text()[(start.first_offset + 1)..self.cursor_location().first_offset].to_owned();
                 self.characters.next();
                 
                 let location = start.combine_with(self.cursor_location());
@@ -1131,7 +1137,8 @@ impl<'input> Tokenizer<'input> {
 
             _ => {
                 self.add_unexpected_error();
-                Err(ParsingFailure)
+                self.characters.next();
+                self.scan_ie_xml_tag()
             },
         }
     }
@@ -1187,7 +1194,7 @@ impl<'input> Tokenizer<'input> {
                 }
 
                 let location = start.combine_with(self.cursor_location());
-                let content = self.compilation_unit.text[location.first_offset..location.last_offset].to_owned();
+                let content = self.compilation_unit.text()[location.first_offset..location.last_offset].to_owned();
                 Ok((Token::XmlText(content), location))
             },
         }
@@ -1213,7 +1220,7 @@ impl<'input> Tokenizer<'input> {
             }
 
             let location = start.combine_with(self.cursor_location());
-            let content = self.compilation_unit.text[location.first_offset..location.last_offset].to_owned();
+            let content = self.compilation_unit.text()[location.first_offset..location.last_offset].to_owned();
 
             return Ok(Some((Token::XmlMarkup(content), location)));
         }
@@ -1236,7 +1243,7 @@ impl<'input> Tokenizer<'input> {
             }
 
             let location = start.combine_with(self.cursor_location());
-            let content = self.compilation_unit.text[location.first_offset..location.last_offset].to_owned();
+            let content = self.compilation_unit.text()[location.first_offset..location.last_offset].to_owned();
 
             return Ok(Some((Token::XmlMarkup(content), location)));
         }
@@ -1259,7 +1266,7 @@ impl<'input> Tokenizer<'input> {
             }
 
             let location = start.combine_with(self.cursor_location());
-            let content = self.compilation_unit.text[location.first_offset..location.last_offset].to_owned();
+            let content = self.compilation_unit.text()[location.first_offset..location.last_offset].to_owned();
 
             return Ok(Some((Token::XmlMarkup(content), location)));
         }
