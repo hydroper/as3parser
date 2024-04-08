@@ -4057,6 +4057,19 @@ impl<'input> Parser<'input> {
                     tags.push((AsDocTag::Internal(text), location));
                 },
 
+                // @langversion text
+                "langversion" => {
+                    let (text, location) = join_asdoc_content(building_content);
+                    let location = tag_location.combine_with(location);
+
+                    // Content must be non empty
+                    if regex_is_match!(r"^\s*$", &text) {
+                        self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.clone())]);
+                    }
+
+                    tags.push((AsDocTag::Langversion(text), location));
+                },
+
                 // @param paramName description
                 "param" => {
                     let (content, location) = join_asdoc_content(building_content);
@@ -4067,6 +4080,19 @@ impl<'input> Parser<'input> {
                     } else {
                         tags.push((AsDocTag::Param { name: content, description: "".into() }, location));
                     }
+                },
+
+                // @playerversion text
+                "playerversion" => {
+                    let (text, location) = join_asdoc_content(building_content);
+                    let location = tag_location.combine_with(location);
+
+                    // Content must be non empty
+                    if regex_is_match!(r"^\s*$", &text) {
+                        self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.clone())]);
+                    }
+
+                    tags.push((AsDocTag::Playerversion(text), location));
                 },
 
                 // @private

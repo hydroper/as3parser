@@ -23,10 +23,12 @@ pub enum AsDocTag {
     Example(String),
     InheritDoc,
     Internal(String),
+    Langversion(String),
     Param {
         name: String,
         description: String,
     },
+    Playerversion(String),
     Private,
     Productversion(String),
     Return(String),
