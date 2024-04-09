@@ -1,5 +1,11 @@
 # Getting started
 
+Switch to nightly Rust:
+
+```sh
+rustup default nightly
+```
+
 Install `as3_parser` in your Cargo project with `cargo add as3_parser`, or add this to your `Cargo.toml` file:
 
 ```toml
