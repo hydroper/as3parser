@@ -2976,7 +2976,6 @@ impl<'input> Parser<'input> {
                     location: self.pop_location(),
                     base: result, identifier: id
                 }));
-                println!("{}", result.location().first_column() + 1);
             } else if self.consume(Token::LeftBracket)? {
                 self.push_location(&result.location());
                 let key = self.parse_expression(ParsingExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
