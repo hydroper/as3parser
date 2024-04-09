@@ -3998,6 +3998,29 @@ impl<'input> Parser<'input> {
                 break;
             }
         }
+        // For meta-data that are not one of { "Event" },
+        // delegate the respective ASDoc to the annotatable directive.
+        if context.asdoc.is_none() {
+            let mut new_attributes = Vec::<Attribute>::new();
+            for attr in &context.attributes {
+                if let Attribute::Metadata(metadata) = attr {
+                    if metadata.name.0 != "Event" && metadata.asdoc.is_some() {
+                        new_attributes.push(Attribute::Metadata(Rc::new(Metadata {
+                            location: metadata.location.clone(),
+                            asdoc: None,
+                            name: metadata.name.clone(),
+                            entries: metadata.entries.clone(),
+                        })));
+                        context.asdoc = metadata.asdoc.clone();
+                    } else {
+                        new_attributes.push(attr.clone());
+                    }
+                } else {
+                    new_attributes.push(attr.clone());
+                }
+            }
+            context.attributes = new_attributes;
+        }
         Ok(())
     }
 

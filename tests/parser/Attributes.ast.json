@@ -70,83 +70,6 @@
     {
       "VariableDefinition": {
         "location": {},
-        "asdoc": {
-          "location": {},
-          "main_body": [
-            "X",
-            {}
-          ],
-          "tags": []
-        },
-        "attributes": [
-          {
-            "Metadata": {
-              "location": {},
-              "asdoc": {
-                "location": {},
-                "main_body": [
-                  "N1",
-                  {}
-                ],
-                "tags": []
-              },
-              "name": [
-                "N1",
-                {}
-              ],
-              "entries": null
-            }
-          },
-          {
-            "Metadata": {
-              "location": {},
-              "asdoc": {
-                "location": {},
-                "main_body": [
-                  "N2",
-                  {}
-                ],
-                "tags": []
-              },
-              "name": [
-                "N2",
-                {}
-              ],
-              "entries": null
-            }
-          }
-        ],
-        "kind": [
-          "Var",
-          {}
-        ],
-        "bindings": [
-          {
-            "destructuring": {
-              "location": {},
-              "destructuring": {
-                "QualifiedIdentifier": {
-                  "location": {},
-                  "attribute": false,
-                  "qualifier": null,
-                  "id": {
-                    "Id": [
-                      "x",
-                      {}
-                    ]
-                  }
-                }
-              },
-              "type_annotation": null
-            },
-            "initializer": null
-          }
-        ]
-      }
-    },
-    {
-      "VariableDefinition": {
-        "location": {},
         "asdoc": null,
         "attributes": [
           {
@@ -235,6 +158,124 @@
           },
           {
             "Final": {}
+          }
+        ],
+        "name": [
+          "C1",
+          {}
+        ],
+        "type_parameters": null,
+        "extends_clause": null,
+        "implements_clause": null,
+        "block": {
+          "location": {},
+          "metadata": null,
+          "directives": []
+        }
+      }
+    },
+    {
+      "ClassDefinition": {
+        "location": {},
+        "asdoc": {
+          "location": {},
+          "main_body": [
+            "Foo",
+            {}
+          ],
+          "tags": []
+        },
+        "attributes": [
+          {
+            "Metadata": {
+              "location": {},
+              "asdoc": null,
+              "name": [
+                "N1",
+                {}
+              ],
+              "entries": null
+            }
+          },
+          {
+            "Metadata": {
+              "location": {},
+              "asdoc": {
+                "location": {},
+                "main_body": [
+                  "",
+                  {}
+                ],
+                "tags": [
+                  [
+                    {
+                      "EventType": {
+                        "Member": {
+                          "location": {},
+                          "base": {
+                            "QualifiedIdentifier": {
+                              "location": {},
+                              "attribute": false,
+                              "qualifier": null,
+                              "id": {
+                                "Id": [
+                                  "FooEvent",
+                                  {}
+                                ]
+                              }
+                            }
+                          },
+                          "identifier": {
+                            "location": {},
+                            "attribute": false,
+                            "qualifier": null,
+                            "id": {
+                              "Id": [
+                                "FOO",
+                                {}
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {}
+                  ]
+                ]
+              },
+              "name": [
+                "Event",
+                {}
+              ],
+              "entries": [
+                {
+                  "location": {},
+                  "key": [
+                    "name",
+                    {}
+                  ],
+                  "value": {
+                    "String": [
+                      "foo",
+                      {}
+                    ]
+                  }
+                },
+                {
+                  "location": {},
+                  "key": [
+                    "type",
+                    {}
+                  ],
+                  "value": {
+                    "String": [
+                      "FooEvent",
+                      {}
+                    ]
+                  }
+                }
+              ]
+            }
           }
         ],
         "name": [
