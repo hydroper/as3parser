@@ -3267,7 +3267,7 @@ impl<'input> Parser<'input> {
         self.tokenizer.compilation_unit().add_nested_compilation_unit(nested_compilation_unit.clone());
 
         // Parse directives from replacement source
-        let nested_directives = parse_include_directive_source(nested_compilation_unit.clone(), context);
+        let (nested_packages, nested_directives) = parse_include_directive_source(nested_compilation_unit.clone(), context);
 
         // Delegate sub compilation unit errors to super compilation unit
         if nested_compilation_unit.invalidated() {
@@ -3277,6 +3277,7 @@ impl<'input> Parser<'input> {
         let node = Rc::new(Directive::IncludeDirective(IncludeDirective {
             location: self.pop_location(),
             source,
+            nested_packages,
             nested_directives,
             nested_compilation_unit: nested_compilation_unit.clone(),
         }));
@@ -4071,27 +4072,31 @@ impl<'input> Parser<'input> {
         Ok(())
     }
 
+    pub fn parse_package_definition(&mut self) -> Result<Rc<PackageDefinition>, ParsingFailure> {
+        self.mark_location();
+        let asdoc = self.parse_asdoc()?;
+        self.expect(Token::Package)?;
+        let mut name = vec![];
+        if let Some(name1) = self.consume_identifier(false)? {
+            name.push(name1.clone());
+            while self.consume(Token::Dot)? {
+                name.push(self.expect_identifier(true)?);
+            }
+        }
+        let block = Rc::new(self.parse_block(ParsingDirectiveContext::PackageBlock)?);
+        Ok(Rc::new(PackageDefinition {
+            location: self.pop_location(),
+            asdoc,
+            name,
+            block,
+        }))
+    }
+
     pub fn parse_program(&mut self) -> Result<Rc<Program>, ParsingFailure> {
         self.mark_location();
         let mut packages = vec![];
         while self.peek(Token::Package) {
-            self.mark_location();
-            let asdoc = self.parse_asdoc()?;
-            self.next()?;
-            let mut name = vec![];
-            if let Some(name1) = self.consume_identifier(false)? {
-                name.push(name1.clone());
-                while self.consume(Token::Dot)? {
-                    name.push(self.expect_identifier(true)?);
-                }
-            }
-            let block = Rc::new(self.parse_block(ParsingDirectiveContext::PackageBlock)?);
-            packages.push(Rc::new(PackageDefinition {
-                location: self.pop_location(),
-                asdoc,
-                name,
-                block,
-            }));
+            packages.push(self.parse_package_definition()?);
         }
         let directives = self.parse_directives(ParsingDirectiveContext::TopLevel)?;
         Ok(Rc::new(Program {
@@ -4478,12 +4483,28 @@ impl<'input> Parser<'input> {
     }
 }
 
-fn parse_include_directive_source(nested_compilation_unit: Rc<CompilationUnit>, context: ParsingDirectiveContext) -> Vec<Rc<Directive>> {
+fn parse_include_directive_source(nested_compilation_unit: Rc<CompilationUnit>, context: ParsingDirectiveContext) -> (Vec<Rc<PackageDefinition>>, Vec<Rc<Directive>>) {
     let mut parser = Parser::new(&nested_compilation_unit);
     if parser.next().is_ok() {
-        parser.parse_directives(context).unwrap_or(vec![])
+        let mut packages = vec![];
+        let mut failure = false;
+        if matches!(context, ParsingDirectiveContext::TopLevel) {
+            while parser.peek(Token::Package) {
+                if let Ok(package) = parser.parse_package_definition() {
+                    packages.push(package);
+                } else {
+                    failure = true;
+                    break;
+                }
+            }
+        }
+        if failure {
+            (packages, vec![])
+        } else {
+            (packages, parser.parse_directives(context).unwrap_or(vec![]))
+        }
     } else {
-        vec![]
+        (vec![], vec![])
     }
 }
 

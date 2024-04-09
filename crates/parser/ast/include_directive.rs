@@ -7,5 +7,6 @@ pub struct IncludeDirective {
     pub source: String,
     #[serde(skip)]
     pub nested_compilation_unit: Rc<CompilationUnit>,
+    pub nested_packages: Vec<Rc<PackageDefinition>>,
     pub nested_directives: Vec<Rc<Directive>>,
 }
