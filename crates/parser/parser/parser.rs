@@ -3925,6 +3925,7 @@ impl<'input> Parser<'input> {
 
     fn parse_keyword_or_expression_attribute(&mut self) -> Result<Option<Attribute>, ParsingFailure> {
         if let Some(a) = self.token.0.to_attribute(&self.token.1) {
+            self.next()?;
             return Ok(Some(a));
         }
         match &self.token.0 {
@@ -3985,7 +3986,7 @@ impl<'input> Parser<'input> {
                     self.add_syntax_error(&a.location(), DiagnosticKind::DuplicateAccessModifier, diagnostic_arguments![]);
                 }
                 context.attributes.push(a);
-                self.next()?;
+                // self.next()?;
             } else {
                 if let Some(id) = self.peek_identifier(false)? {
                     self.forbid_line_break_before_token();
