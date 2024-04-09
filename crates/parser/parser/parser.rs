@@ -3965,6 +3965,15 @@ impl<'input> Parser<'input> {
         }
         loop {
             if let Some(a) = self.parse_keyword_or_expression_attribute()? {
+                if let Attribute::Expression(e) = &a {
+                    let id = e.to_identifier_name();
+                    if let Some(id) = id {
+                        if ["enum", "type", "namespace"].contains(&id.0.as_ref()) {
+                            context.directive_context_keyword = Some(id);
+                            break;
+                        }
+                    }
+                }
                 let last_attribute_is_identifier = context.attributes.last().map_or(false, |a| !a.is_metadata());
                 if last_attribute_is_identifier {
                     self.forbid_line_break_before_token();

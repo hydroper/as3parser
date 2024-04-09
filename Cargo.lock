@@ -61,7 +61,7 @@ dependencies = [
 
 [[package]]
 name = "as3_parser"
-version = "0.4.17"
+version = "0.4.18"
 dependencies = [
  "bitflags",
  "by_address",
@@ -92,6 +92,13 @@ dependencies = [
  "maplit",
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "asdoc-example"
+version = "0.1.0"
+dependencies = [
+ "as3_parser",
 ]
 
 [[package]]

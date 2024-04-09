@@ -2,5 +2,6 @@
 members = [
     "crates/parser",
     "crates/parser_test",
+    "examples/asdoc",
 ]
 resolver = "2"
