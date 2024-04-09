@@ -14,6 +14,7 @@ pub struct CompilationUnit {
     pub(crate) invalidated: Cell<bool>,
     pub(crate) compiler_options: Rc<CompilerOptions>,
     pub(crate) comments: RefCell<Vec<Rc<Comment>>>,
+    pub(crate) included_from: RefCell<Option<Rc<CompilationUnit>>>,
     pub(crate) nested_compilation_units: RefCell<Vec<Rc<CompilationUnit>>>,
 }
 
@@ -30,6 +31,7 @@ impl Default for CompilationUnit {
             compiler_options: CompilerOptions::new(),
             comments: RefCell::new(vec![]),
             nested_compilation_units: RefCell::new(vec![]),
+            included_from: RefCell::new(None),
         }
     }
 }
@@ -48,6 +50,7 @@ impl CompilationUnit {
             compiler_options: compiler_options.clone(),
             comments: RefCell::new(vec![]),
             nested_compilation_units: RefCell::new(vec![]),
+            included_from: RefCell::new(None),
         })
     }
 
@@ -107,6 +110,26 @@ impl CompilationUnit {
         }
     }
 
+    /// If this compilation unit is subsequent of an include directive in another
+    /// compilation unit, returns the compilation unit of that include directive.
+    pub fn included_from(&self) -> Option<Rc<CompilationUnit>> {
+        self.included_from.borrow().clone()
+    }
+
+    pub(crate) fn set_included_from(&self, included_from: Option<Rc<CompilationUnit>>) {
+        self.included_from.replace(included_from);
+    }
+
+    pub(crate) fn include_directive_is_circular(&self, file_path: &str) -> bool {
+        if canonicalize_path(&self.file_path.clone().unwrap_or("".into())) == canonicalize_path(file_path) {
+            return true;
+        }
+        if let Some(included_from) = self.included_from() {
+            return included_from.include_directive_is_circular(file_path);
+        }
+        return false;
+    }
+
     pub fn nested_compilation_units(&self) -> Vec<Rc<CompilationUnit>> {
         let mut result = vec![];
         for unit in self.nested_compilation_units.borrow().iter() {
@@ -163,4 +186,8 @@ impl CompilationUnit {
         let indent = CharacterValidator::indent_count(&self.source_text.contents[line_offset..]);
         indent - line_offset
     }
+}
+
+fn canonicalize_path(path: &str) -> String {
+    std::path::Path::new(path).canonicalize().unwrap_or(std::path::PathBuf::new()).to_string_lossy().into_owned()
 }

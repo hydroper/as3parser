@@ -23,7 +23,7 @@ ActionScript 3 parser in the Rust language.
 
 [New Syntax](docs/new-syntax.md)
 
-[Removed Syntax](docs/removed-syntax.md)
+[Processing Deviations](docs/processing-deviations.md)
 
 ## Verifier
 

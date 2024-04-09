@@ -46,6 +46,9 @@ lazy_static! {
         DiagnosticKind::EnumMembersMustBeConst.id() => "Enumeration members must be 'const'".into(),
         DiagnosticKind::ConstructorMustNotSpecifyResultType.id() => "Constructor must not specify result type".into(),
         DiagnosticKind::UnrecognizedMetadataSyntax.id() => "Unrecognized meta-data syntax".into(),
+        DiagnosticKind::FailedToIncludeFile.id() => "Failed to include file".into(),
+        DiagnosticKind::ParentSourceIsNotAFile.id() => "Parent source is not a file".into(),
+        DiagnosticKind::CircularIncludeDirective.id() => "Circular include directive".into(),
         // DiagnosticKind::K.id() => "".into(),
     };
 }

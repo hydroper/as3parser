@@ -2822,6 +2822,10 @@ impl<'input> Parser<'input> {
             let id = (id.clone(), self.token_location());
             self.next()?;
 
+            if id.0 == "include" && id.1.character_count() == "include".len() && matches!(self.token.0, Token::StringLiteral(_)) && !self.previous_token.1.line_break(&self.token.1) {
+                return self.parse_include_directive(context, id.1);
+            }
+
             // If there is a line break or offending token is "::",
             // do not proceed into parsing an expression attribute or annotatble directive.
             let eligible_attribute_or_directive
@@ -3162,6 +3166,75 @@ impl<'input> Parser<'input> {
     
             Ok((node, semicolon))
         }
+    }
+
+    fn parse_include_directive(&mut self, context: ParsingDirectiveContext, start: Location) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+        self.push_location(&start);
+        let source_path_location = self.token_location();
+        let Token::StringLiteral(source) = &self.token.0.clone() else {
+            panic!();
+        };
+        let source = source.clone();
+        self.next()?;
+        let semicolon = self.parse_semicolon()?;
+
+        let nested_compilation_unit: Rc<CompilationUnit>;
+
+        // Select origin file path
+        let origin_file_path = if let Some(file_path) = self.tokenizer.compilation_unit().file_path.clone() {
+            Some(file_path)
+        } else {
+            std::env::current_dir().ok().map(|d| d.to_string_lossy().into_owned())
+        };
+
+        // Resolve source
+        if let Some(origin_file_path) = origin_file_path {
+            let sub_file_path = file_paths::FlexPath::from_n_native([origin_file_path.as_ref(), "..", source.as_ref()]).to_string_with_flex_separator();
+            if self.tokenizer.compilation_unit().include_directive_is_circular(&sub_file_path) {
+                self.add_syntax_error(&source_path_location.clone(), DiagnosticKind::CircularIncludeDirective, vec![]);
+
+                // Use a placeholder compilation unit
+                nested_compilation_unit = CompilationUnit::new(None, "".into(), &self.tokenizer.compilation_unit().compiler_options);
+            } else {
+                if let Ok(content) = std::fs::read_to_string(&sub_file_path) {
+                    nested_compilation_unit = CompilationUnit::new(Some(sub_file_path.clone()), content, &self.tokenizer.compilation_unit().compiler_options);
+                } else {
+                    self.add_syntax_error(&source_path_location.clone(), DiagnosticKind::FailedToIncludeFile, vec![]);
+
+                    // Use a placeholder compilation unit
+                    nested_compilation_unit = CompilationUnit::new(None, "".into(), &self.tokenizer.compilation_unit().compiler_options);
+                }
+            }
+        } else {
+            self.add_syntax_error(&source_path_location.clone(), DiagnosticKind::ParentSourceIsNotAFile, vec![]);
+
+            // Use a placeholder compilation unit
+            nested_compilation_unit = CompilationUnit::new(None, "".into(), &self.tokenizer.compilation_unit().compiler_options);
+        }
+
+        // Let it be such that the sub compilation unit is subsequent of
+        // the super compilation unit.
+        nested_compilation_unit.set_included_from(Some(self.tokenizer.compilation_unit().clone()));
+
+        // Add sub compilation unit to super compilation unit
+        self.tokenizer.compilation_unit().add_nested_compilation_unit(nested_compilation_unit.clone());
+
+        // Parse directives from replacement source
+        let nested_directives = parse_include_directive_source(nested_compilation_unit.clone(), context);
+
+        // Delegate sub compilation unit errors to super compilation unit
+        if nested_compilation_unit.invalidated() {
+            self.tokenizer.compilation_unit().invalidated.set(true);
+        }
+
+        let node = Rc::new(Directive::IncludeDirective(IncludeDirective {
+            location: self.pop_location(),
+            source,
+            nested_directives,
+            nested_compilation_unit: nested_compilation_unit.clone(),
+        }));
+
+        Ok((node, semicolon))
     }
 
     fn parse_use_namespace_directive(&mut self) -> Result<(Rc<Directive>, bool), ParsingFailure> {
@@ -4322,6 +4395,15 @@ impl<'input> Parser<'input> {
             return None;
         }
         Some(Rc::new(AsDocReference { base, instance_property, }))
+    }
+}
+
+fn parse_include_directive_source(nested_compilation_unit: Rc<CompilationUnit>, context: ParsingDirectiveContext) -> Vec<Rc<Directive>> {
+    let mut parser = Parser::new(&nested_compilation_unit);
+    if parser.next().is_ok() {
+        parser.parse_directives(context).unwrap_or(vec![])
+    } else {
+        vec![]
     }
 }
 

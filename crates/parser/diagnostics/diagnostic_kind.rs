@@ -42,6 +42,9 @@ pub enum DiagnosticKind {
     EnumMembersMustBeConst = 1062,
     ConstructorMustNotSpecifyResultType = 1063,
     UnrecognizedMetadataSyntax = 1064,
+    FailedToIncludeFile = 1065,
+    ParentSourceIsNotAFile = 1066,
+    CircularIncludeDirective = 1067,
 }
 
 impl DiagnosticKind {

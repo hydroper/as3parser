@@ -6,6 +6,6 @@ pub struct IncludeDirective {
     pub location: Location,
     pub source: String,
     #[serde(skip)]
-    pub nested_compilation_unit: RefCell<Option<Rc<CompilationUnit>>>,
-    pub nested_directives: RefCell<Vec<Rc<Directive>>>,
+    pub nested_compilation_unit: Rc<CompilationUnit>,
+    pub nested_directives: Vec<Rc<Directive>>,
 }
