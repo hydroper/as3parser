@@ -1,12 +1,12 @@
 use std::cell::RefMut;
 use crate::ns::*;
-use sourcefile::SourceFile;
+use hydroper_source_text::SourceText;
 
 /// `CompilationUnit` identifies an AS3 compilation unit and contains
 /// a source text.
 pub struct CompilationUnit {
     pub(crate) file_path: Option<String>,
-    pub(crate) source_file: SourceFile,
+    pub(crate) source_text: SourceText,
     pub(crate) already_tokenized: Cell<bool>,
     diagnostics: RefCell<Vec<Diagnostic>>,
     pub(crate) error_count: Cell<u32>,
@@ -21,7 +21,7 @@ impl Default for CompilationUnit {
     fn default() -> Self {
         Self {
             file_path: None,
-            source_file: SourceFile::new(),
+            source_text: SourceText::new("".into()),
             already_tokenized: Cell::new(false),
             diagnostics: RefCell::new(vec![]),
             invalidated: Cell::new(false),
@@ -37,11 +37,9 @@ impl Default for CompilationUnit {
 impl CompilationUnit {
     /// Constructs a source file in unparsed and non verified state.
     pub fn new(file_path: Option<String>, text: String, compiler_options: &Rc<CompilerOptions>) -> Rc<Self> {
-        let mut source_file = SourceFile::new();
-        source_file.add_file_raw(file_path.clone().unwrap_or("".into()), text);
         Rc::new(Self {
             file_path,
-            source_file,
+            source_text: SourceText::new(text),
             already_tokenized: Cell::new(false),
             diagnostics: RefCell::new(vec![]),
             invalidated: Cell::new(false),
@@ -60,7 +58,7 @@ impl CompilationUnit {
 
     /// Source text.
     pub fn text(&self) -> &String {
-        &self.source_file.contents
+        &self.source_text.contents
     }
 
     /// Whether the source contains any errors after parsing
@@ -142,29 +140,11 @@ impl CompilationUnit {
     /// Retrieves line number from an offset. The resulting line number
     /// is counted from one.
     pub fn get_line_number(&self, offset: usize) -> usize {
-        if offset == self.source_file.contents.len() {
-            return self.source_file.resolve_offset(offset - 1).unwrap().line + 1;
-        }
-        self.source_file.resolve_offset(offset).unwrap().line + 1
+        self.source_text.get_line_number(offset)
     }
 
     /// Returns the zero based column of an offset.
     pub fn get_column(&self, offset: usize) -> usize {
-        if offset == self.source_file.contents.len() {
-            if offset == 0 {
-                return 0;
-            }
-            let mut i = offset;
-            let s = self.source_file.contents.as_bytes();
-            while i != 0 {
-                i -= 1;
-                let ch = s[i];
-                if ch >> 5 == 0b110 || ch >> 7 == 0 {
-                    break;
-                }
-            }
-            return self.source_file.resolve_offset(i).unwrap().col + 1;
-        }
-        self.source_file.resolve_offset(offset).unwrap().col
+        self.source_text.get_column(offset)
     }
 }

@@ -4380,7 +4380,8 @@ impl ParserFacade {
         let mut parser = Parser::new(compilation_unit);
         if parser.next().is_ok() {
             let program = parser.parse_program().ok();
-            if compilation_unit.invalidated() { None } else { program }
+            /* if compilation_unit.invalidated() { None } else { program } */
+            program
         } else {
             None
         }
@@ -4396,7 +4397,7 @@ impl ParserFacade {
             if exp.is_some() {
                 let _ = parser.expect_eof();
             }
-            if compilation_unit.invalidated() { None } else { exp }
+            exp
         } else {
             None
         }
@@ -4410,7 +4411,7 @@ impl ParserFacade {
             if exp.is_some() {
                 let _ = parser.expect_eof();
             }
-            if compilation_unit.invalidated() { None } else { exp }
+            exp
         } else {
             None
         }
@@ -4420,8 +4421,7 @@ impl ParserFacade {
     pub fn parse_directives(compilation_unit: &Rc<CompilationUnit>, context: ParsingDirectiveContext) -> Option<Vec<Rc<Directive>>> {
         let mut parser = Parser::new(compilation_unit);
         if parser.next().is_ok() {
-            let directives = parser.parse_directives(context).ok();
-            if compilation_unit.invalidated() { None } else { directives }
+            parser.parse_directives(context).ok()
         } else {
             None
         }

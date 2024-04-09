@@ -4,6 +4,7 @@ use std::str::CharIndices;
 /// in a string with miscellaneous operation methods.
 #[derive(Clone)]
 pub struct CharacterReader<'a> {
+    length: usize,
     char_indices: CharIndices<'a>,
 }
 
@@ -35,7 +36,7 @@ impl<'a> CharacterReader<'a> {
 
     /// Returns the current index in the string.
     pub fn index(&self) -> usize {
-        self.clone().char_indices.next().map_or(0, |(i, _)| i)
+        self.clone().char_indices.next().map_or(self.length, |(i, _)| i)
     }
 
     /// Returns the next code point. If there are no code points
@@ -98,21 +99,21 @@ impl<'a> CharacterReader<'a> {
                 break;
             }
         }
-        CharacterReader { char_indices: indices }
+        CharacterReader { length: string.len() - index, char_indices: indices }
     }
 }
 
 impl<'a> From<&'a str> for CharacterReader<'a> {
     /// Constructs a `CharacterReader` from a string.
     fn from(value: &'a str) -> Self {
-        CharacterReader { char_indices: value.char_indices() }
+        CharacterReader { length: value.len(), char_indices: value.char_indices() }
     }
 }
 
 impl<'a> From<&'a String> for CharacterReader<'a> {
     /// Constructs a `CharacterReader` from a string.
     fn from(value: &'a String) -> Self {
-        CharacterReader { char_indices: value.char_indices() }
+        CharacterReader { length: value.len(), char_indices: value.char_indices() }
     }
 }
 

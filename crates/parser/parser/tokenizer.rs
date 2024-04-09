@@ -473,7 +473,7 @@ impl<'input> Tokenizer<'input> {
 
     fn character_ahead_location(&self) -> Location {
         if self.characters.reached_end() {
-            return Location::with_offset(&self.compilation_unit, self.compilation_unit.text().len());
+            return self.cursor_location();
         }
         let offset = self.characters.index();
         let mut next_characters = self.characters.clone();
@@ -482,9 +482,6 @@ impl<'input> Tokenizer<'input> {
     }
 
     pub fn cursor_location(&self) -> Location {
-        if self.characters.reached_end() {
-            return Location::with_offset(&self.compilation_unit, self.compilation_unit.text().len());
-        }
         let offset = self.characters.index();
         Location::with_offset(&self.compilation_unit, offset)
     }
