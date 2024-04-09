@@ -2873,6 +2873,10 @@ impl<'input> Parser<'input> {
                 return self.parse_include_directive(context, id.1);
             }
 
+            if self.peek(Token::LeftBrace) && &id.0 == "configuration" && id.1.character_count() == "configuration".len() {
+                return self.parse_configuration_directive(context, id.1);
+            }
+
             // If there is a line break or offending token is "::",
             // do not proceed into parsing an expression attribute or annotatble directive.
             let eligible_attribute_or_directive
@@ -2921,8 +2925,6 @@ impl<'input> Parser<'input> {
                     self.parse_attribute_keywords_or_expressions(&mut context1)?;
                 }
                 return self.parse_annotatable_directive(context1);
-            } else if self.peek(Token::LeftBrace) && &id.0 == "configuration" && id.1.character_count() == "configuration".len() {
-                self.parse_configuration_directive(context, id.1)
             } else {
                 self.parse_statement_starting_with_identifier(context, id)
             }
