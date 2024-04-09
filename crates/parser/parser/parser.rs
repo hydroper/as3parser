@@ -1648,7 +1648,7 @@ impl<'input> Parser<'input> {
 
         self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectedIdentifier, diagnostic_arguments![Token(self.token.0.clone())]);
         Ok(QualifiedIdentifier {
-            location: self.tokenizer.cursor_location(),
+            location: self.pop_location(),
             attribute: false,
             qualifier: None,
             id: QualifiedIdentifierIdentifier::Id(("".into(), self.tokenizer.cursor_location())),
@@ -1710,7 +1710,7 @@ impl<'input> Parser<'input> {
 
         self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectedIdentifier, diagnostic_arguments![Token(self.token.0.clone())]);
         Ok(QualifiedIdentifier {
-            location: self.tokenizer.cursor_location(),
+            location: self.pop_location(),
             attribute: false,
             qualifier: None,
             id: QualifiedIdentifierIdentifier::Id(("".into(), self.tokenizer.cursor_location())),
