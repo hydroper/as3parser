@@ -147,4 +147,20 @@ impl CompilationUnit {
     pub fn get_column(&self, offset: usize) -> usize {
         self.source_text.get_column(offset)
     }
+
+    /// Retrieves offset from line number (counted from one).
+    pub fn get_line_offset(&self, line: usize) -> Option<usize> {
+        self.source_text.get_line_offset(line)
+    }
+
+    /// Retrieves the offset from the corresponding line of an offset.
+    pub fn get_line_offset_from_offset(&self, offset: usize) -> usize {
+        self.source_text.get_line_offset_from_offset(offset)
+    }
+
+    pub fn get_line_indent(&self, line: usize) -> usize {
+        let line_offset = self.get_line_offset(line).unwrap();
+        let indent = CharacterValidator::indent_count(&self.source_text.contents[line_offset..]);
+        indent - line_offset
+    }
 }
