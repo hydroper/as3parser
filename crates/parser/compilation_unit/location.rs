@@ -1,12 +1,12 @@
 use std::cmp::Ordering;
 use std::fmt::Debug;
-use serde::{Serialize, Deserialize};
+use serde::{Serialize, Deserialize, Serializer};
 use std::rc::Rc;
 use crate::compilation_unit::*;
 
 /// Represents a source location. This location includes
 /// spanning lines and columns and the reference compilation unit.
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Deserialize)]
 pub struct Location {
     /// The compilation unit that this location belongs to.
     #[serde(skip)]
@@ -19,6 +19,15 @@ pub struct Location {
     /// Last UTF-8 offset.
     #[serde(skip)]
     pub(crate) last_offset: usize,
+}
+
+impl Serialize for Location {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&format!("{}:{}-{}:{}", self.first_line_number(), self.first_column() + 1, self.last_line_number(), self.last_column() + 1))
+    }
 }
 
 impl Debug for Location {
