@@ -44,6 +44,7 @@ pub enum Expression {
     TupleType(TupleTypeExpression),
     FunctionType(FunctionTypeExpression),
     Invalidated(InvalidatedExpression),
+    ReservedNamespace(ReservedNamespaceExpression),
 }
 
 impl Expression {
@@ -89,6 +90,7 @@ impl Expression {
             Self::TupleType(e) => e.location.clone(),
             Self::FunctionType(e) => e.location.clone(),
             Self::Invalidated(e) => e.location.clone(),
+            Self::ReservedNamespace(e) => e.location(),
         }
     }
 
@@ -140,6 +142,14 @@ impl Expression {
             Self::Member(e) => e.base.valid_access_modifier(),
             Self::ComputedMember(e) => e.base.valid_access_modifier(),
             _ => false,
+        }
+    }
+
+    pub(crate) fn to_reserved_namespace_string(&self) -> Option<String> {
+        if let Self::ReservedNamespace(e) = self {
+            Some(e.to_string())
+        } else {
+            None
         }
     }
 }

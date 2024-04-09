@@ -63,6 +63,8 @@ mod type_expression;
 pub use type_expression::*;
 mod invalidated_expression;
 pub use invalidated_expression::*;
+mod reserved_namespace_expression;
+pub use reserved_namespace_expression::*;
 
 // Destructuring
 mod destructuring;

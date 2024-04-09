@@ -146,16 +146,8 @@
               "location": {},
               "attribute": false,
               "qualifier": {
-                "QualifiedIdentifier": {
-                  "location": {},
-                  "attribute": false,
-                  "qualifier": null,
-                  "id": {
-                    "Id": [
-                      "public",
-                      {}
-                    ]
-                  }
+                "ReservedNamespace": {
+                  "Public": {}
                 }
               },
               "id": {

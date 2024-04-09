@@ -1584,6 +1584,21 @@ impl<'input> Parser<'input> {
         self.finish_paren_list_expr_or_qual_id(start, expr)
     }
 
+    fn parse_opt_reserved_namespace(&mut self) -> Result<Option<Rc<Expression>>, ParsingFailure> {
+        let loc = self.token.1.clone();
+        if self.consume(Token::Public)? {
+            Ok(Some(Rc::new(Expression::ReservedNamespace(ReservedNamespaceExpression::Public(loc)))))
+        } else if self.consume(Token::Private)? {
+            Ok(Some(Rc::new(Expression::ReservedNamespace(ReservedNamespaceExpression::Private(loc)))))
+        } else if self.consume(Token::Protected)? {
+            Ok(Some(Rc::new(Expression::ReservedNamespace(ReservedNamespaceExpression::Protected(loc)))))
+        } else if self.consume(Token::Internal)? {
+            Ok(Some(Rc::new(Expression::ReservedNamespace(ReservedNamespaceExpression::Internal(loc)))))
+        } else {
+            Ok(None)
+        }
+    }
+
     fn parse_qualified_identifier(&mut self) -> Result<QualifiedIdentifier, ParsingFailure> {
         self.mark_location();
 
@@ -1596,6 +1611,22 @@ impl<'input> Parser<'input> {
                 qualifier: None,
                 id: QualifiedIdentifierIdentifier::Brackets(brackets),
             });
+        }
+
+        // public, private, protected, internal
+        if let Some(qual) = self.parse_opt_reserved_namespace()? {
+            if self.peek(Token::ColonColon) {
+                let ql = self.pop_location();
+                return self.finish_qualified_identifier(attribute, ql, qual);
+            } else {
+                let id = QualifiedIdentifier {
+                    location: self.pop_location(),
+                    attribute,
+                    qualifier: None,
+                    id: QualifiedIdentifierIdentifier::Id((qual.to_reserved_namespace_string().unwrap(), qual.location())),
+                };
+                return Ok(id);
+            }
         }
 
         let mut id: Option<String> = None;
@@ -1659,6 +1690,22 @@ impl<'input> Parser<'input> {
         self.mark_location();
 
         let attribute = false;
+
+        // public, private, protected, internal
+        if let Some(qual) = self.parse_opt_reserved_namespace()? {
+            if self.peek(Token::ColonColon) {
+                let ql = self.pop_location();
+                return self.finish_qualified_identifier(attribute, ql, qual);
+            } else {
+                let id = QualifiedIdentifier {
+                    location: self.pop_location(),
+                    attribute,
+                    qualifier: None,
+                    id: QualifiedIdentifierIdentifier::Id((qual.to_reserved_namespace_string().unwrap(), qual.location())),
+                };
+                return Ok(id);
+            }
+        }
 
         let mut id: Option<String> = None;
 
