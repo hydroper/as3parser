@@ -156,13 +156,14 @@ impl<'input> Parser<'input> {
     fn expect(&mut self, token: Token) -> Result<(), ParsingFailure> {
         if self.token.0 != token {
             self.add_syntax_error(&self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![Token(token.clone()), Token(self.token.0.clone())]);
-            while self.token.0 != Token::Eof {
+            let expecting_identifier_name = token.is_identifier_name();
+            while self.token.0 != Token::Eof && (if expecting_identifier_name { self.token.0.is_identifier_name() } else { true }) {
                 self.next()?;
                 if self.token.0 == token {
                     return Ok(());
                 }
             }
-            Err(ParsingFailure)
+            Ok(())
         } else {
             self.next()?;
             Ok(())
@@ -178,7 +179,7 @@ impl<'input> Parser<'input> {
                     return Ok(());
                 }
             }
-            Err(ParsingFailure)
+            Ok(())
         } else {
             self.next_ie_xml_tag()?;
             Ok(())
@@ -194,7 +195,7 @@ impl<'input> Parser<'input> {
                     return Ok(());
                 }
             }
-            Err(ParsingFailure)
+            Ok(())
         } else {
             self.next_ie_xml_content()?;
             Ok(())
@@ -216,16 +217,11 @@ impl<'input> Parser<'input> {
             }
             self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectedIdentifier, diagnostic_arguments![Token(self.token.0.clone())]);
             /*
-            let mut count = 0;
-            while self.token.0 != Token::Eof {
+            while self.token.0 != Token::Eof && self.token.0.is_identifier_name() {
                 if let Some(id) = self.consume_identifier(reserved_words)? {
                     return Ok(id);
                 } else {
                     self.next()?;
-                    if count >= 1 {
-                        break;
-                    }
-                    count += 1;
                 }
             }
             */
@@ -241,14 +237,14 @@ impl<'input> Parser<'input> {
             }
         }
         self.add_syntax_error(&self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![String(name.into()), Token(self.token.0.clone())]);
-        while self.token.0 != Token::Eof {
+        while self.token.0 != Token::Eof && self.token.0.is_identifier_name() {
             if self.consume_context_keyword(name)? {
                 return Ok(());
             } else {
                 self.next()?;
             }
         }
-        Err(ParsingFailure)
+        Ok(())
     }
 
     /// Expects a greater-than symbol. If the facing token is not greater-than,
@@ -293,7 +289,7 @@ impl<'input> Parser<'input> {
                         return Ok(());
                     }
                 }
-                Err(ParsingFailure)
+                Ok(())
             },
         }
     }
@@ -777,7 +773,6 @@ impl<'input> Parser<'input> {
             }));
             if self.peek(Token::ColonColon) {
                 self.push_location(&id_location.clone());
-                self.duplicate_location();
                 let ql = self.pop_location();
                 let id = self.finish_qualified_identifier(false, ql, id)?;
                 Ok(Some(Rc::new(Expression::QualifiedIdentifier(id))))
@@ -897,7 +892,6 @@ impl<'input> Parser<'input> {
         }));
         if self.peek(Token::ColonColon) {
             self.push_location(&id_location.clone());
-            self.duplicate_location();
             let ql = self.pop_location();
             let id = self.finish_qualified_identifier(false, ql, id)?;
             Ok(Rc::new(Expression::QualifiedIdentifier(id)))
@@ -1246,7 +1240,6 @@ impl<'input> Parser<'input> {
             }));
             if self.peek(Token::ColonColon) {
                 self.push_location(&id_location.clone());
-                self.duplicate_location();
                 let ql = self.pop_location();
                 let id = self.finish_qualified_identifier(false, ql, id)?;
                 Ok(Rc::new(Expression::QualifiedIdentifier(id)))
@@ -1321,7 +1314,6 @@ impl<'input> Parser<'input> {
             }));
             if self.peek(Token::ColonColon) {
                 self.push_location(&id_location.clone());
-                self.duplicate_location();
                 let ql = self.pop_location();
                 let id = self.finish_qualified_identifier(false, ql, id)?;
                 Ok(Rc::new(Expression::QualifiedIdentifier(id)))
@@ -2231,7 +2223,6 @@ impl<'input> Parser<'input> {
             }));
             if self.peek(Token::ColonColon) {
                 self.push_location(&id_location.clone());
-                self.duplicate_location();
                 let ql = self.pop_location();
                 let id = self.finish_qualified_identifier(false, ql, id)?;
                 exp = Rc::new(Expression::QualifiedIdentifier(id));
@@ -2243,6 +2234,44 @@ impl<'input> Parser<'input> {
         exp = self.parse_subexpressions(exp, ParsingExpressionContext {
             allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
         })?;
+        let semicolon_inserted = self.parse_semicolon()?;
+        Ok((Rc::new(Directive::ExpressionStatement(ExpressionStatement {
+            location: self.pop_location(),
+            expression: exp,
+        })), semicolon_inserted))
+    }
+
+    fn parse_qualified_identifier_statement_or_one_branch_config(&mut self, context: ParsingDirectiveContext, id: (String, Location)) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+        self.push_location(&id.1);
+        let id_location = id.1.clone();
+        let id = Rc::new(Expression::QualifiedIdentifier(QualifiedIdentifier {
+            location: id_location.clone(),
+            attribute: false,
+            qualifier: None,
+            id: QualifiedIdentifierIdentifier::Id(id.clone()),
+        }));
+        self.push_location(&id_location.clone());
+        let ql = self.pop_location();
+        let id = self.finish_qualified_identifier(false, ql, id)?;
+        let mut exp = Rc::new(Expression::QualifiedIdentifier(id));
+        exp = self.parse_subexpressions(exp, ParsingExpressionContext {
+            allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
+        })?;
+
+        // Parse CONFIG::VAR_NAME
+        if self.peek(Token::LeftBrace) {
+            if let Some((q, constant_name)) = exp.to_one_branch_configuration_identifier() {
+                self.push_location(&exp.location());
+                let block = self.parse_block(context)?;
+                return Ok((Rc::new(Directive::OneBranchConfigurationDirective(OneBranchConfigurationDirective {
+                    location: self.pop_location(),
+                    qualifier: q,
+                    constant_name,
+                    block: Rc::new(block),
+                })), true));
+            }
+        }
+
         let semicolon_inserted = self.parse_semicolon()?;
         Ok((Rc::new(Directive::ExpressionStatement(ExpressionStatement {
             location: self.pop_location(),
@@ -2399,7 +2428,7 @@ impl<'input> Parser<'input> {
 
     fn parse_type_case_elements(&mut self, context: ParsingDirectiveContext) -> Result<Vec<TypeCase>, ParsingFailure> {
         let mut cases = vec![];
-        while !self.peek(Token::RightBrace) {
+        while !self.peek(Token::RightBrace) && !self.peek(Token::Eof) {
             if self.peek(Token::Default) {
                 self.mark_location();
                 self.next()?;
@@ -2899,6 +2928,20 @@ impl<'input> Parser<'input> {
                     // or if the expression attribute is not a valid access modifier.
                     if !first_attr_expr.valid_access_modifier() || self.previous_token.1.line_break(&self.token.1) || !(matches!(self.token.0, Token::Identifier(_)) || self.token.0.is_reserved_word()) {
                         self.push_location(&first_attr_expr.location());
+
+                        // Parse CONFIG::VAR_NAME
+                        if self.peek(Token::LeftBrace) {
+                            if let Some((q, constant_name)) = first_attr_expr.to_one_branch_configuration_identifier() {
+                                let block = self.parse_block(context)?;
+                                return Ok((Rc::new(Directive::OneBranchConfigurationDirective(OneBranchConfigurationDirective {
+                                    location: self.pop_location(),
+                                    qualifier: q,
+                                    constant_name,
+                                    block: Rc::new(block),
+                                })), true));
+                            }
+                        }
+
                         let semicolon_inserted = self.parse_semicolon()?;
                         return Ok((Rc::new(Directive::ExpressionStatement(ExpressionStatement {
                             location: self.pop_location(),
@@ -2918,6 +2961,8 @@ impl<'input> Parser<'input> {
                     self.parse_attribute_keywords_or_expressions(&mut context1)?;
                 }
                 return self.parse_annotatable_directive(context1);
+            } else if self.peek(Token::ColonColon) {
+                self.parse_qualified_identifier_statement_or_one_branch_config(context, id)
             } else {
                 self.parse_statement_starting_with_identifier(context, id)
             }

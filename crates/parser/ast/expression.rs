@@ -229,4 +229,21 @@ impl Expression {
             _ => false,
         }
     }
+
+    /// `CONFIG::VAR_NAME`
+    pub(crate) fn to_one_branch_configuration_identifier(&self) -> Option<((String, Location), (String, Location))> {
+        if let Self::QualifiedIdentifier(id) = self {
+            if id.attribute {
+                return None;
+            }
+            if let Some(q) = &id.qualifier {
+                if let Some(q) = q.to_identifier_name() {
+                    if let QualifiedIdentifierIdentifier::Id(id) = &id.id {
+                        return Some((q, id.clone()));
+                    }
+                }
+            }
+        }
+        None
+    }
 }

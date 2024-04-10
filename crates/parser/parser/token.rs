@@ -308,6 +308,10 @@ impl Token {
         self.reserved_word_name().is_some()
     }
 
+    pub fn is_identifier_name(&self) -> bool {
+        matches!(self, Token::Identifier(_)) || self.is_reserved_word()
+    }
+
     /// Tests whether the token is a reserved word and returns
     /// its *IdentifierName* string.
     pub fn reserved_word_name(&self) -> Option<String> {
