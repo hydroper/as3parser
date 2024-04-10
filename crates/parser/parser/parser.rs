@@ -2269,7 +2269,7 @@ impl<'input> Parser<'input> {
         self.expect(Token::LeftBrace)?;
         let mut directives = vec![];
         let mut semicolon_inserted = false;
-        while !self.peek(Token::RightBrace) {
+        while !self.peek(Token::RightBrace) && !self.peek(Token::Eof) {
             if !directives.is_empty() && !semicolon_inserted {
                 self.expect(Token::Semicolon)?;
             }
