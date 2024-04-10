@@ -431,12 +431,10 @@ main #ast {
     color: var(--code-block-foreground)
 }
 
-/*
 .ace-custom-theme .ace_indent-guide {
-    background: url("../custom-theme-1.png") right repeat-y;
+    background: url("data:image;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAIAAAAW4yFwAAAAEElEQVQYlWOIjIxkYmBgAAAGUgEO8bDbTwAAAABJRU5ErkJggg==") right repeat-y;
 }
 
 .ace-custom-theme .ace_indent-guide-active {
-    background: url("../custom-theme-2.png") right repeat-y;
-} 
-*/
+    background: url("data:image;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAIAAAAW4yFwAAAAEElEQVQYlWOIjIxkYmBgAAAGUgEO8bDbTwAAAABJRU5ErkJggg==") right repeat-y;
+}
