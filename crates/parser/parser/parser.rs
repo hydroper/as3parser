@@ -4095,13 +4095,19 @@ impl<'input> Parser<'input> {
 
     pub fn parse_program(&mut self) -> Result<Rc<Program>, ParsingFailure> {
         self.mark_location();
+        let just_eof = self.peek(Token::Eof);
         let mut packages = vec![];
         while self.peek(Token::Package) {
             packages.push(self.parse_package_definition()?);
         }
         let directives = self.parse_directives(ParsingDirectiveContext::TopLevel)?;
         Ok(Rc::new(Program {
-            location: self.pop_location(),
+            location: if just_eof {
+                self.pop_location();
+                self.token.1.clone()
+            } else {
+                self.pop_location()
+            },
             packages,
             directives,
         }))
