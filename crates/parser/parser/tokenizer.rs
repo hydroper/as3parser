@@ -1134,6 +1134,9 @@ impl<'input> Tokenizer<'input> {
 
             _ => {
                 self.add_unexpected_error();
+                if self.characters.reached_end() {
+                    return Err(ParsingFailure);
+                }
                 self.characters.next();
                 self.scan_ie_xml_tag()
             },
