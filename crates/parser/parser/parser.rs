@@ -4472,7 +4472,10 @@ impl<'input> Parser<'input> {
                 },
             }
         } else if !building_content.is_empty() {
-            *main_body = Some(join_asdoc_content(building_content));
+            let content = join_asdoc_content(building_content);
+            if !content.0.is_empty() {
+                *main_body = Some(content);
+            }
         }
 
         *building_content_tag_name = None;
