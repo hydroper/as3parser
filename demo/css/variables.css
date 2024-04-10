@@ -4,14 +4,14 @@
     --menubar-height: 38px;
     --content-max-width: 750px;
 
-    --common-font: Arial, serif;
+    --common-font: Noto Sans, serif;
     --common-font-size: 0.87rem;
     --code-font: Courier New, monospace;
     --code-font-size: 1.0rem;
 
     --page-background: #fff;
     --background: #fff;
-    --foreground: #000;
+    --foreground: #222;
 
     --code-block-background: #c0c0c0;
     --code-block-foreground: #111;
@@ -25,8 +25,8 @@
     --scroll-thumb: #c0c0c0;
 
     --button-background: #d0d0d0;
-    --button-foreground: #000;
-    --button-pressed-foreground: #000;
+    --button-foreground: #222;
+    --button-pressed-foreground: #777;
 
     --table-border: #000;
     --table-header-background: #c0c0c0;
@@ -44,7 +44,7 @@
 html[data-dark="true"] {
     --page-background: #aeaeae;
     --background: #aeaeae;
-    --foreground: #080808;
+    --foreground: #555;
 
     --code-block-background: #585858;
     --code-block-foreground: #fff;

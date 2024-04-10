@@ -152,4 +152,12 @@ impl Expression {
             None
         }
     }
+
+    pub(crate) fn to_reserved_namespace_attribute(&self) -> Option<Attribute> {
+        if let Self::ReservedNamespace(e) = self {
+            Some(e.to_attribute())
+        } else {
+            None
+        }
+    }
 }

@@ -4,16 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ActionScript 3 Parser Demo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/index.css">
 </head>
 <body>
     <main>
         <h1>ActionScript 3 Parser Demo</h1>
-        <div id="parserControls">
+        <div id="parserControls" style="display: none">
             <div id="links">
                 <span>© Hydroper</span>
                 <a href="https://github.com/hydroper/as3parser">Parser repository</a>
-                <a href="https://github.com/hydroper/as3parser-demo">Demo repository</a>
             </div>
             <div id="editor" class="ace-custom-theme"></div>
             <div id="messageLog"></div>
@@ -24,13 +26,16 @@
     <script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
     <script src="ace/mode-actionscript.js" type="text/javascript" charset="utf-8"></script>
     <script type="module">
-        import init, { parse } from "./dist/as3parser_demo.js";
+        import init, { parse } from "./dist/as3_parser_demo.js";
         class Main {
             constructor() {
                 this.editor = null;
                 this.messageLog = document.querySelector("main #messageLog");
                 this.ast = document.querySelector("main #ast");
                 this.timeout = null;
+
+                // Display the parser controls
+                document.querySelector("main #parserControls").style.display = "flex";
 
                 // Ace Editor
                 this.editor = ace.edit("editor", {
@@ -58,7 +63,21 @@
 
             parse() {
                 const result = JSON.parse(parse(this.editor.getValue()));
-                this.messageLog.innerText = result.diagnostics.join("\n");
+                // this.messageLog.innerText = result.diagnostics.join("\n");
+                const diagnostics1 = [];
+                this.editor.getSession().clearAnnotations();
+                for (const diagnostic of result.diagnostics) {
+                    /*
+                    this.editor.getSession().setAnnotations({
+                        column: diagnostic.column1,
+                        row: diagnostic.line1,
+                        text: diagnostic.message,
+                        type: diagnostic.warning ? "warning" : "error",
+                    });
+                    */
+                    diagnostics1.push("<div class=\"problem\"><div class=\"" + (diagnostic.warning ? "warning" : "error") + "-icon\"></div>" + diagnostic.line1 + ":" + diagnostic.column1 + ": " + diagnostic.message.replace(/\&/g, "&amp;").replace(/\</g, "&lt;") + "</div>");
+                }
+                this.messageLog.innerHTML = diagnostics1.join("");
                 this.ast.innerText = result.program == null ? '"Failed to parse"' : JSON.stringify(result.program, null, 2);
             }
         }

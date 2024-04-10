@@ -2979,10 +2979,29 @@ impl<'input> Parser<'input> {
         } else if self.peek(Token::Public) || self.peek(Token::Private) || self.peek(Token::Protected)
         || self.peek(Token::Internal) || self.peek(Token::Var) || self.peek(Token::Const)
         || self.peek(Token::Function) || self.peek(Token::Class) || self.peek(Token::Interface) {
+            let rns = self.parse_opt_reserved_namespace()?;
+            let mut attributes: Vec<Attribute> = vec![];
+            if let Some(rns) = rns {
+                // Do not proceed into parsing an annotatable directive
+                // if there is a "::" token.
+                if matches!(self.token.0, Token::ColonColon) {
+                    self.push_location(&rns.location());
+                    let rns = Rc::new(Expression::QualifiedIdentifier(self.finish_qualified_identifier(false, rns.location(), rns)?));
+                    let rns = self.parse_subexpressions(rns, ParsingExpressionContext {
+                        allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
+                    })?;
+                    let semicolon = self.parse_semicolon()?;
+                    return Ok((Rc::new(Directive::ExpressionStatement(ExpressionStatement {
+                        location: self.pop_location(),
+                        expression: rns,
+                    })), semicolon));
+                }
+                attributes.push(rns.to_reserved_namespace_attribute().unwrap());
+            }
             let mut context = AnnotatableContext {
                 start_location: self.token_location(),
                 asdoc,
-                attributes: vec![],
+                attributes,
                 context: context.clone(),
                 directive_context_keyword: None,
             };
