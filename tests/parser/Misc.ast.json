@@ -1,31 +1,31 @@
 {
-  "location": {},
+  "location": "10:1-15:4",
   "packages": [],
   "directives": [
     {
       "NamespaceDefinition": {
-        "location": {},
+        "location": "1:1-2:1",
         "asdoc": null,
         "attributes": [],
         "left": [
           "ns1",
-          {}
+          "1:11-1:14"
         ],
         "right": null
       }
     },
     {
       "NamespaceDefinition": {
-        "location": {},
+        "location": "2:1-4:1",
         "asdoc": null,
         "attributes": [],
         "left": [
           "ns2",
-          {}
+          "2:11-2:14"
         ],
         "right": {
           "StringLiteral": {
-            "location": {},
+            "location": "2:17-4:1",
             "value": "http://www.samsung.com"
           }
         }
@@ -33,19 +33,19 @@
     },
     {
       "ExpressionStatement": {
-        "location": {},
+        "location": "4:1-6:1",
         "expression": {
           "VectorLiteral": {
-            "location": {},
+            "location": "4:1-6:1",
             "element_type": {
               "QualifiedIdentifier": {
-                "location": {},
+                "location": "4:6-4:7",
                 "attribute": false,
                 "qualifier": null,
                 "id": {
                   "Id": [
                     "T",
-                    {}
+                    "4:6-4:7"
                   ]
                 }
               }
@@ -57,33 +57,33 @@
     },
     {
       "ExpressionStatement": {
-        "location": {},
+        "location": "6:1-7:1",
         "expression": {
           "Binary": {
-            "location": {},
+            "location": "6:1-7:1",
             "operator": "Is",
             "left": {
               "QualifiedIdentifier": {
-                "location": {},
+                "location": "6:1-6:2",
                 "attribute": false,
                 "qualifier": null,
                 "id": {
                   "Id": [
                     "v",
-                    {}
+                    "6:1-6:2"
                   ]
                 }
               }
             },
             "right": {
               "QualifiedIdentifier": {
-                "location": {},
+                "location": "6:6-6:7",
                 "attribute": false,
                 "qualifier": null,
                 "id": {
                   "Id": [
                     "T",
-                    {}
+                    "6:6-6:7"
                   ]
                 }
               }
@@ -94,33 +94,33 @@
     },
     {
       "ExpressionStatement": {
-        "location": {},
+        "location": "7:1-8:1",
         "expression": {
           "Binary": {
-            "location": {},
+            "location": "7:1-8:1",
             "operator": "IsNot",
             "left": {
               "QualifiedIdentifier": {
-                "location": {},
+                "location": "7:1-7:2",
                 "attribute": false,
                 "qualifier": null,
                 "id": {
                   "Id": [
                     "v",
-                    {}
+                    "7:1-7:2"
                   ]
                 }
               }
             },
             "right": {
               "QualifiedIdentifier": {
-                "location": {},
+                "location": "7:10-7:11",
                 "attribute": false,
                 "qualifier": null,
                 "id": {
                   "Id": [
                     "T",
-                    {}
+                    "7:10-7:11"
                   ]
                 }
               }
@@ -131,33 +131,33 @@
     },
     {
       "ExpressionStatement": {
-        "location": {},
+        "location": "8:1-9:1",
         "expression": {
           "Binary": {
-            "location": {},
+            "location": "8:1-9:1",
             "operator": "Instanceof",
             "left": {
               "QualifiedIdentifier": {
-                "location": {},
+                "location": "8:1-8:2",
                 "attribute": false,
                 "qualifier": null,
                 "id": {
                   "Id": [
                     "v",
-                    {}
+                    "8:1-8:2"
                   ]
                 }
               }
             },
             "right": {
               "QualifiedIdentifier": {
-                "location": {},
+                "location": "8:14-8:15",
                 "attribute": false,
                 "qualifier": null,
                 "id": {
                   "Id": [
                     "T",
-                    {}
+                    "8:14-8:15"
                   ]
                 }
               }
@@ -168,33 +168,33 @@
     },
     {
       "ExpressionStatement": {
-        "location": {},
+        "location": "9:1-10:1",
         "expression": {
           "Binary": {
-            "location": {},
+            "location": "9:1-10:1",
             "operator": "In",
             "left": {
               "QualifiedIdentifier": {
-                "location": {},
+                "location": "9:1-9:2",
                 "attribute": false,
                 "qualifier": null,
                 "id": {
                   "Id": [
                     "k",
-                    {}
+                    "9:1-9:2"
                   ]
                 }
               }
             },
             "right": {
               "QualifiedIdentifier": {
-                "location": {},
+                "location": "9:6-9:7",
                 "attribute": false,
                 "qualifier": null,
                 "id": {
                   "Id": [
                     "o",
-                    {}
+                    "9:6-9:7"
                   ]
                 }
               }
@@ -205,33 +205,33 @@
     },
     {
       "ExpressionStatement": {
-        "location": {},
+        "location": "10:1-12:1",
         "expression": {
           "Binary": {
-            "location": {},
+            "location": "10:1-12:1",
             "operator": "NotIn",
             "left": {
               "QualifiedIdentifier": {
-                "location": {},
+                "location": "10:1-10:2",
                 "attribute": false,
                 "qualifier": null,
                 "id": {
                   "Id": [
                     "k",
-                    {}
+                    "10:1-10:2"
                   ]
                 }
               }
             },
             "right": {
               "QualifiedIdentifier": {
-                "location": {},
+                "location": "10:10-10:11",
                 "attribute": false,
                 "qualifier": null,
                 "id": {
                   "Id": [
                     "o",
-                    {}
+                    "10:10-10:11"
                   ]
                 }
               }
@@ -242,45 +242,45 @@
     },
     {
       "ExpressionStatement": {
-        "location": {},
+        "location": "12:1-14:1",
         "expression": {
           "Conditional": {
-            "location": {},
+            "location": "12:1-14:1",
             "test": {
               "QualifiedIdentifier": {
-                "location": {},
+                "location": "12:1-12:2",
                 "attribute": false,
                 "qualifier": null,
                 "id": {
                   "Id": [
                     "x",
-                    {}
+                    "12:1-12:2"
                   ]
                 }
               }
             },
             "consequent": {
               "QualifiedIdentifier": {
-                "location": {},
+                "location": "12:5-12:6",
                 "attribute": false,
                 "qualifier": null,
                 "id": {
                   "Id": [
                     "y",
-                    {}
+                    "12:5-12:6"
                   ]
                 }
               }
             },
             "alternative": {
               "QualifiedIdentifier": {
-                "location": {},
+                "location": "12:9-12:10",
                 "attribute": false,
                 "qualifier": null,
                 "id": {
                   "Id": [
                     "z",
-                    {}
+                    "12:9-12:10"
                   ]
                 }
               }
@@ -291,10 +291,10 @@
     },
     {
       "ExpressionStatement": {
-        "location": {},
+        "location": "14:1-15:1",
         "expression": {
           "NumericLiteral": {
-            "location": {},
+            "location": "14:1-15:1",
             "value": "10",
             "suffix": "None"
           }
@@ -303,10 +303,10 @@
     },
     {
       "ExpressionStatement": {
-        "location": {},
+        "location": "15:1-15:4",
         "expression": {
           "NumericLiteral": {
-            "location": {},
+            "location": "15:1-15:4",
             "value": "10",
             "suffix": "F"
           }
