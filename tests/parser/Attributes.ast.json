@@ -1,37 +1,37 @@
 {
-  "location": {},
+  "location": "5:1-17:12",
   "packages": [],
   "directives": [
     {
       "VariableDefinition": {
-        "location": {},
+        "location": "1:1-3:1",
         "asdoc": null,
         "attributes": [
           {
             "Expression": {
               "Member": {
-                "location": {},
+                "location": "1:1-1:5",
                 "base": {
                   "QualifiedIdentifier": {
-                    "location": {},
+                    "location": "1:1-1:2",
                     "attribute": false,
                     "qualifier": null,
                     "id": {
                       "Id": [
                         "q",
-                        {}
+                        "1:1-1:2"
                       ]
                     }
                   }
                 },
                 "identifier": {
-                  "location": {},
+                  "location": "1:3-1:5",
                   "attribute": false,
                   "qualifier": null,
                   "id": {
                     "Id": [
                       "x",
-                      {}
+                      "1:3-1:4"
                     ]
                   }
                 }
@@ -41,21 +41,21 @@
         ],
         "kind": [
           "Var",
-          {}
+          "1:5-1:8"
         ],
         "bindings": [
           {
             "destructuring": {
-              "location": {},
+              "location": "1:9-3:1",
               "destructuring": {
                 "QualifiedIdentifier": {
-                  "location": {},
+                  "location": "1:9-1:10",
                   "attribute": false,
                   "qualifier": null,
                   "id": {
                     "Id": [
                       "y",
-                      {}
+                      "1:9-1:10"
                     ]
                   }
                 }
@@ -69,41 +69,41 @@
     },
     {
       "VariableDefinition": {
-        "location": {},
+        "location": "3:1-5:1",
         "asdoc": null,
         "attributes": [
           {
             "Metadata": {
-              "location": {},
+              "location": "3:2-3:4",
               "asdoc": null,
               "name": [
                 "N1",
-                {}
+                "3:2-3:4"
               ],
               "entries": null
             }
           },
           {
-            "Internal": {}
+            "Internal": "3:6-3:14"
           }
         ],
         "kind": [
           "Var",
-          {}
+          "3:15-3:18"
         ],
         "bindings": [
           {
             "destructuring": {
-              "location": {},
+              "location": "3:19-5:1",
               "destructuring": {
                 "QualifiedIdentifier": {
-                  "location": {},
+                  "location": "3:19-3:20",
                   "attribute": false,
                   "qualifier": null,
                   "id": {
                     "Id": [
                       "z",
-                      {}
+                      "3:19-3:20"
                     ]
                   }
                 }
@@ -117,27 +117,27 @@
     },
     {
       "Block": {
-        "location": {},
+        "location": "5:15-7:1",
         "metadata": [
           {
             "Metadata": {
-              "location": {},
+              "location": "5:2-5:13",
               "asdoc": null,
               "name": [
                 "N1",
-                {}
+                "5:2-5:4"
               ],
               "entries": [
                 {
-                  "location": {},
+                  "location": "5:5-5:12",
                   "key": [
                     "x",
-                    {}
+                    "5:5-5:6"
                   ],
                   "value": {
                     "String": [
                       "y",
-                      {}
+                      "5:9-5:12"
                     ]
                   }
                 }
@@ -150,25 +150,25 @@
     },
     {
       "ClassDefinition": {
-        "location": {},
+        "location": "7:1-12:1",
         "asdoc": null,
         "attributes": [
           {
-            "Dynamic": {}
+            "Dynamic": "7:1-7:8"
           },
           {
-            "Final": {}
+            "Final": "7:9-7:14"
           }
         ],
         "name": [
           "C1",
-          {}
+          "7:21-7:23"
         ],
         "type_parameters": null,
         "extends_clause": null,
         "implements_clause": null,
         "block": {
-          "location": {},
+          "location": "7:24-12:1",
           "metadata": null,
           "directives": []
         }
@@ -176,101 +176,98 @@
     },
     {
       "ClassDefinition": {
-        "location": {},
+        "location": "12:1-17:12",
         "asdoc": {
-          "location": {},
+          "location": "9:4-11:2",
           "main_body": [
             "Foo",
-            {}
+            "9:4-11:2"
           ],
           "tags": []
         },
         "attributes": [
           {
             "Metadata": {
-              "location": {},
+              "location": "12:2-12:4",
               "asdoc": null,
               "name": [
                 "N1",
-                {}
+                "12:2-12:4"
               ],
               "entries": null
             }
           },
           {
             "Metadata": {
-              "location": {},
+              "location": "16:2-16:40",
               "asdoc": {
-                "location": {},
-                "main_body": [
-                  "",
-                  {}
-                ],
+                "location": "13:4-15:2",
+                "main_body": null,
                 "tags": [
                   [
                     {
                       "EventType": {
                         "Member": {
-                          "location": {},
+                          "location": "1:1-1:13",
                           "base": {
                             "QualifiedIdentifier": {
-                              "location": {},
+                              "location": "1:1-1:9",
                               "attribute": false,
                               "qualifier": null,
                               "id": {
                                 "Id": [
                                   "FooEvent",
-                                  {}
+                                  "1:1-1:9"
                                 ]
                               }
                             }
                           },
                           "identifier": {
-                            "location": {},
+                            "location": "1:10-1:13",
                             "attribute": false,
                             "qualifier": null,
                             "id": {
                               "Id": [
                                 "FOO",
-                                {}
+                                "1:10-1:13"
                               ]
                             }
                           }
                         }
                       }
                     },
-                    {}
+                    "14:4-15:2"
                   ]
                 ]
               },
               "name": [
                 "Event",
-                {}
+                "16:2-16:7"
               ],
               "entries": [
                 {
-                  "location": {},
+                  "location": "16:8-16:20",
                   "key": [
                     "name",
-                    {}
+                    "16:8-16:12"
                   ],
                   "value": {
                     "String": [
                       "foo",
-                      {}
+                      "16:15-16:20"
                     ]
                   }
                 },
                 {
-                  "location": {},
+                  "location": "16:22-16:39",
                   "key": [
                     "type",
-                    {}
+                    "16:22-16:26"
                   ],
                   "value": {
                     "String": [
                       "FooEvent",
-                      {}
+                      "16:29-16:39"
                     ]
                   }
                 }
@@ -280,13 +277,13 @@
         ],
         "name": [
           "C1",
-          {}
+          "17:7-17:9"
         ],
         "type_parameters": null,
         "extends_clause": null,
         "implements_clause": null,
         "block": {
-          "location": {},
+          "location": "17:10-17:12",
           "metadata": null,
           "directives": []
         }

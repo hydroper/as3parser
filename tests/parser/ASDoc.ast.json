@@ -1,5 +1,5 @@
 {
-  "location": "6:1-19:6",
+  "location": "6:1-16:6",
   "packages": [],
   "directives": [
     {
@@ -70,12 +70,12 @@
     },
     {
       "VariableDefinition": {
-        "location": "11:1-19:6",
+        "location": "11:1-16:6",
         "asdoc": {
-          "location": "16:4-18:2",
+          "location": "12:4-14:2",
           "main_body": [
-            "X",
-            "16:4-18:2"
+            "N2",
+            "12:4-14:2"
           ],
           "tags": []
         },
@@ -83,14 +83,7 @@
           {
             "Metadata": {
               "location": "11:2-11:4",
-              "asdoc": {
-                "location": "8:4-10:2",
-                "main_body": [
-                  "N1",
-                  "8:4-10:2"
-                ],
-                "tags": []
-              },
+              "asdoc": null,
               "name": [
                 "N1",
                 "11:2-11:4"
@@ -101,14 +94,7 @@
           {
             "Metadata": {
               "location": "15:2-15:4",
-              "asdoc": {
-                "location": "12:4-14:2",
-                "main_body": [
-                  "N2",
-                  "12:4-14:2"
-                ],
-                "tags": []
-              },
+              "asdoc": null,
               "name": [
                 "N2",
                 "15:2-15:4"
@@ -119,21 +105,21 @@
         ],
         "kind": [
           "Var",
-          "19:1-19:4"
+          "16:1-16:4"
         ],
         "bindings": [
           {
             "destructuring": {
-              "location": "19:5-19:6",
+              "location": "16:5-16:6",
               "destructuring": {
                 "QualifiedIdentifier": {
-                  "location": "19:5-19:6",
+                  "location": "16:5-16:6",
                   "attribute": false,
                   "qualifier": null,
                   "id": {
                     "Id": [
                       "y",
-                      "19:5-19:6"
+                      "16:5-16:6"
                     ]
                   }
                 }
