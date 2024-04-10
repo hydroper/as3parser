@@ -1886,13 +1886,6 @@ impl<'input> Parser<'input> {
         loop {
             if self.consume(Token::Dot)? {
                 base = self.parse_dot_subexpression(base)?;
-            } else if self.consume(Token::LeftBracket)? {
-                self.push_location(&base.location());
-                let key = self.parse_expression(ParsingExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
-                self.expect(Token::RightBracket)?;
-                base = Rc::new(Expression::ComputedMember(ComputedMemberExpression {
-                    base, asdoc: None, key, location: self.pop_location()
-                }));
             } else if self.consume(Token::Question)? {
                 self.push_location(&base.location());
                 base = Rc::new(Expression::NullableType(NullableTypeExpression {
