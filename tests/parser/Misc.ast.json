@@ -4,7 +4,7 @@
   "directives": [
     {
       "NamespaceDefinition": {
-        "location": "1:1-2:1",
+        "location": "1:1-1:14",
         "asdoc": null,
         "attributes": [],
         "left": [
@@ -16,7 +16,7 @@
     },
     {
       "NamespaceDefinition": {
-        "location": "2:1-4:1",
+        "location": "2:1-2:41",
         "asdoc": null,
         "attributes": [],
         "left": [
@@ -25,7 +25,7 @@
         ],
         "right": {
           "StringLiteral": {
-            "location": "2:17-4:1",
+            "location": "2:17-2:41",
             "value": "http://www.samsung.com"
           }
         }
@@ -33,10 +33,10 @@
     },
     {
       "ExpressionStatement": {
-        "location": "4:1-6:1",
+        "location": "4:1-4:11",
         "expression": {
           "VectorLiteral": {
-            "location": "4:1-6:1",
+            "location": "4:1-4:11",
             "element_type": {
               "QualifiedIdentifier": {
                 "location": "4:6-4:7",
@@ -57,10 +57,10 @@
     },
     {
       "ExpressionStatement": {
-        "location": "6:1-7:1",
+        "location": "6:1-6:7",
         "expression": {
           "Binary": {
-            "location": "6:1-7:1",
+            "location": "6:1-6:7",
             "operator": "Is",
             "left": {
               "QualifiedIdentifier": {
@@ -94,10 +94,10 @@
     },
     {
       "ExpressionStatement": {
-        "location": "7:1-8:1",
+        "location": "7:1-7:11",
         "expression": {
           "Binary": {
-            "location": "7:1-8:1",
+            "location": "7:1-7:11",
             "operator": "IsNot",
             "left": {
               "QualifiedIdentifier": {
@@ -131,10 +131,10 @@
     },
     {
       "ExpressionStatement": {
-        "location": "8:1-9:1",
+        "location": "8:1-8:15",
         "expression": {
           "Binary": {
-            "location": "8:1-9:1",
+            "location": "8:1-8:15",
             "operator": "Instanceof",
             "left": {
               "QualifiedIdentifier": {
@@ -168,10 +168,10 @@
     },
     {
       "ExpressionStatement": {
-        "location": "9:1-10:1",
+        "location": "9:1-9:7",
         "expression": {
           "Binary": {
-            "location": "9:1-10:1",
+            "location": "9:1-9:7",
             "operator": "In",
             "left": {
               "QualifiedIdentifier": {
@@ -205,10 +205,10 @@
     },
     {
       "ExpressionStatement": {
-        "location": "10:1-12:1",
+        "location": "10:1-10:11",
         "expression": {
           "Binary": {
-            "location": "10:1-12:1",
+            "location": "10:1-10:11",
             "operator": "NotIn",
             "left": {
               "QualifiedIdentifier": {
@@ -242,10 +242,10 @@
     },
     {
       "ExpressionStatement": {
-        "location": "12:1-14:1",
+        "location": "12:1-12:10",
         "expression": {
           "Conditional": {
-            "location": "12:1-14:1",
+            "location": "12:1-12:10",
             "test": {
               "QualifiedIdentifier": {
                 "location": "12:1-12:2",
@@ -291,10 +291,10 @@
     },
     {
       "ExpressionStatement": {
-        "location": "14:1-15:1",
+        "location": "14:1-14:3",
         "expression": {
           "NumericLiteral": {
-            "location": "14:1-15:1",
+            "location": "14:1-14:3",
             "value": "10",
             "suffix": "None"
           }
