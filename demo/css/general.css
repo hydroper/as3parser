@@ -247,8 +247,13 @@ main #editor {
 }
 
 main #ast {
+    position: relative;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 100%;
     height: 26rem;
-    overflow-y: scroll;
 }
 
 /* Ace Editor */

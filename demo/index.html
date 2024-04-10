@@ -19,19 +19,18 @@
             </div>
             <div id="editor" class="ace-custom-theme"></div>
             <div id="messageLog"></div>
-            <pre id="ast"></pre>
+            <div id="ast" class="ace-custom-theme"></div>
             <button id="parseButton" class="button">Parse</button>
         </div>
     </main>
     <script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
-    <script src="ace/mode-actionscript.js" type="text/javascript" charset="utf-8"></script>
     <script type="module">
         import init, { parse } from "./dist/as3_parser_demo.js";
         class Main {
             constructor() {
                 this.editor = null;
                 this.messageLog = document.querySelector("main #messageLog");
-                this.ast = document.querySelector("main #ast");
+                this.ast = null;
                 this.timeout = null;
 
                 // Display the parser controls
@@ -43,6 +42,15 @@
                     selectionStyle: "text"
                 });
                 this.editor.setOptions({
+                    autoScrollEditorIntoView: true,
+                    copyWithEmptySelection: true,
+                });
+                this.ast = ace.edit(document.querySelector("main #parserControls #ast"), {
+                    mode: "ace/mode/json",
+                    selectionStyle: "text",
+                    readOnly: true,
+                });
+                this.ast.setOptions({
                     autoScrollEditorIntoView: true,
                     copyWithEmptySelection: true,
                 });
@@ -59,11 +67,12 @@
                         this.parse();
                     }, 500);
                 });
+
+                this.parse();
             }
 
             parse() {
                 const result = JSON.parse(parse(this.editor.getValue()));
-                // this.messageLog.innerText = result.diagnostics.join("\n");
                 const diagnostics1 = [];
                 this.editor.getSession().clearAnnotations();
                 for (const diagnostic of result.diagnostics) {
@@ -78,7 +87,8 @@
                     diagnostics1.push("<div class=\"problem\"><div class=\"" + (diagnostic.warning ? "warning" : "error") + "-icon\"></div>" + diagnostic.line1 + ":" + diagnostic.column1 + ": " + diagnostic.message.replace(/\&/g, "&amp;").replace(/\</g, "&lt;") + "</div>");
                 }
                 this.messageLog.innerHTML = diagnostics1.join("");
-                this.ast.innerText = result.program == null ? '"Failed to parse"' : JSON.stringify(result.program, null, 2);
+                this.ast.setValue(result.program == null ? '"Failed to parse"' : JSON.stringify(result.program, null, 2));
+                this.ast.clearSelection();
             }
         }
         (async () => {
