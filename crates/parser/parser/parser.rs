@@ -218,6 +218,8 @@ impl<'input> Parser<'input> {
             while self.token.0 != Token::Eof {
                 if let Some(id) = self.consume_identifier(reserved_words)? {
                     return Ok(id);
+                } else {
+                    self.next()?;
                 }
             }
             Err(ParsingFailure)
@@ -235,6 +237,8 @@ impl<'input> Parser<'input> {
         while self.token.0 != Token::Eof {
             if self.consume_context_keyword(name)? {
                 return Ok(());
+            } else {
+                self.next()?;
             }
         }
         Err(ParsingFailure)
