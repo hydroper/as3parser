@@ -4,23 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ActionScript 3 Parser Demo</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/index.css">
 </head>
 <body>
     <main>
-        <h1>ActionScript 3 Parser Demo</h1>
         <div id="parserControls" style="display: none">
-            <div id="links">
-                <span>© Hydroper</span>
-                <a href="https://github.com/hydroper/as3parser">Parser repository</a>
-            </div>
+            <h1>ActionScript 3 Parser Demo</h1>
             <div id="editor" class="ace-custom-theme"></div>
             <div id="messageLog"></div>
             <div id="ast" class="ace-custom-theme"></div>
             <button id="parseButton" class="button">Parse</button>
+            <div id="links">
+                <span>© Hydroper</span>
+                <a href="https://github.com/hydroper/as3parser">Repository</a>
+            </div>
         </div>
     </main>
     <script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
@@ -41,6 +38,7 @@
                     mode: "ace/mode/actionscript",
                     selectionStyle: "text"
                 });
+                /* this.editor.setTheme("ace/theme/dreamweaver"); */
                 this.editor.setOptions({
                     autoScrollEditorIntoView: true,
                     copyWithEmptySelection: true,
@@ -50,6 +48,7 @@
                     selectionStyle: "text",
                     readOnly: true,
                 });
+                /* this.ast.setTheme("ace/theme/dreamweaver"); */
                 this.ast.setOptions({
                     autoScrollEditorIntoView: true,
                     copyWithEmptySelection: true,

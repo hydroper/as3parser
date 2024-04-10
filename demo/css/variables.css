@@ -4,72 +4,37 @@
     --menubar-height: 38px;
     --content-max-width: 750px;
 
-    --common-font: Noto Sans, serif;
-    --common-font-size: 0.87rem;
+    --common-font: Verdana, Geneva, Arial, Helvetica, sans-serif;
+    --common-font-size: 0.68rem;
     --code-font: Courier New, monospace;
-    --code-font-size: 1.0rem;
-
-    --page-background: #fff;
-    --background: #fff;
-    --foreground: #222;
-
-    --code-block-background: #c0c0c0;
-    --code-block-foreground: #111;
-    --code-block-selection: #777;
-
-    --heading-letter-spacing: 0.12rem;
-    --header-1: #8e8e8e;
-    --header-2: #555555;
-    --header-3: var(--header-2);
-
-    --scroll-thumb: #c0c0c0;
-
-    --button-background: #d0d0d0;
-    --button-foreground: #222;
-    --button-pressed-foreground: #777;
-
-    --table-border: #000;
-    --table-header-background: #c0c0c0;
-    --table-header-foreground: #050505;
-
-    --sidebar-toggle-border: #888;
-    --sidebar-toggle-background: var(--background);
-    --sidebar-toggle-foreground: #888;
-
-    --links: #575757;
-
-    --textarea-focus: #7af;
+    --code-font-size: 0.8rem;
 }
 
 html[data-dark="true"] {
     --page-background: #aeaeae;
-    --background: #aeaeae;
-    --foreground: #555;
+    --background: #444;
+    --foreground: #eee;
 
-    --code-block-background: #585858;
-    --code-block-foreground: #fff;
-    --code-block-selection: #707070;
+    --code-block-background: #949494;
+    --code-block-foreground: #000;
+    --code-block-selection: #24F;
 
-    --heading-letter-spacing: 0.12rem;
-    --header-1: #404040;
-    --header-2: #242424;
+    --heading-letter-spacing: 0rem;
+    --header-1: #eee;
+    --header-2: #eee;
     --header-3: var(--header-2);
 
     --scroll-thumb: #585858;
 
-    --button-background: #484848;
-    --button-foreground: #fff;
-    --button-pressed-foreground: #000;
+    --button-background: linear-gradient(-180deg, rgba(145,145,145,1) 0%, rgba(96,96,96,1) 100%);
+    --button-hover-background: linear-gradient(-180deg, rgba(82,82,82,1) 0%, rgba(61,61,61,1) 100%);
+    --button-foreground: #eee;
 
     --table-border: #222;
     --table-header-background: #444;
     --table-header-foreground: #fff;
 
-    --sidebar-toggle-border: #555;
-    --sidebar-toggle-background: var(--background);
-    --sidebar-toggle-foreground: #555;
-
-    --links: #626262;
+    --links: var(--foreground);
 
     --textarea-focus: #7af;
 }
