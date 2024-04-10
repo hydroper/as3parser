@@ -58,5 +58,5 @@ diagnostic.set_custom_id(Some("myMessage"));
 Finish formatting your own message by attaching additional information with:
 
 ```
-diagnostic.format_with_message("My message")
+diagnostic.format_with_message("My message", Some(custom_id_number))
 ```
