@@ -105,7 +105,7 @@ impl Diagnostic {
     }
 
     /// Formats the diagnostic by overriding the message text.
-    pub fn format_with_message(&self, message: &str) -> String {
+    pub fn format_with_message(&self, message: &str, id: Option<i32>) -> String {
         let category = (if self.is_verify_error {
             "Verify error"
         } else if self.is_warning {
@@ -117,13 +117,16 @@ impl Diagnostic {
         let file_path = self.location.compilation_unit.file_path.clone().map_or("".to_owned(), |s| format!("{s}:"));
         let line = self.location.first_line_number();
         let column = self.location.first_column() + 1;
-        let id = self.id().to_string();
-        format!("{file_path}{line}:{column}: {category} #{id}: {message}")
+        if let Some(id) = id {
+            format!("{file_path}{line}:{column}: {category} #{}: {message}", id.to_string())
+        } else {
+            format!("{file_path}{line}:{column}: {category}: {message}")
+        }
     }
 
     /// Formats the diagnostic in English.
     pub fn format_english(&self) -> String {
-        self.format_with_message(&self.format_message_english())
+        self.format_with_message(self.format_message_english(), Some(self.id()))
     }
 
     pub fn format_message_english(&self) -> String {
