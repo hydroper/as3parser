@@ -1885,29 +1885,14 @@ impl<'input> Parser<'input> {
 
         loop {
             if self.consume(Token::Dot)? {
+                base = self.parse_dot_subexpression(base)?;
+            } else if self.consume(Token::LeftBracket)? {
                 self.push_location(&base.location());
-                if self.consume(Token::Lt)? {
-                    let mut arguments = vec![self.parse_type_expression()?];
-                    while self.consume(Token::Comma)? {
-                        arguments.push(self.parse_type_expression()?);
-                    }
-                    self.expect_type_parameters_gt()?;
-                    base = Rc::new(Expression::WithTypeArguments(ExpressionWithTypeArguments {
-                        location: self.pop_location(),
-                        base, arguments,
-                    }));
-                } else {
-                    let id = self.expect_identifier(true)?;
-                    base = Rc::new(Expression::Member(MemberExpression {
-                        location: self.pop_location(),
-                        base, identifier: QualifiedIdentifier {
-                            location: id.1.clone(),
-                            attribute: false,
-                            qualifier: None,
-                            id: QualifiedIdentifierIdentifier::Id(id),
-                        },
-                    }));
-                }
+                let key = self.parse_expression(ParsingExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
+                self.expect(Token::RightBracket)?;
+                base = Rc::new(Expression::ComputedMember(ComputedMemberExpression {
+                    base, asdoc: None, key, location: self.pop_location()
+                }));
             } else if self.consume(Token::Question)? {
                 self.push_location(&base.location());
                 base = Rc::new(Expression::NullableType(NullableTypeExpression {
@@ -1994,13 +1979,8 @@ impl<'input> Parser<'input> {
             })), wrap_nullable));
         // Identifier
         } else {
-            let id = self.expect_identifier(false)?;
-            Ok((Rc::new(Expression::QualifiedIdentifier(QualifiedIdentifier {
-                location: id.1.clone(),
-                attribute: false,
-                qualifier: None,
-                id: QualifiedIdentifierIdentifier::Id(id),
-            })), wrap_nullable))
+            let id = self.parse_qualified_identifier()?;
+            Ok((Rc::new(Expression::QualifiedIdentifier(id)), wrap_nullable))
         }
     }
 
