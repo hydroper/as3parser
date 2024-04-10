@@ -11,9 +11,7 @@
 
 ActionScript 3 parser in the Rust language.
 
-## Demo
-
-Click [here](https://hydroper.github.io/as3parser-demo) to access the online demo.
+[Online demo](https://hydroper.github.io/as3parser/demo)
 
 ## Documentation
 

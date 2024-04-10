@@ -1,0 +1,421 @@
+html, body {
+    padding: 0;
+    margin: 0;
+}
+
+html {
+    background: var(--page-background);
+    color: var(--foreground);
+    font-family: var(--common-font);
+    font-size: var(--common-font-size);
+    letter-spacing: 0.3px;
+}
+
+::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+::-webkit-scrollbar, ::-webkit-scrollbar-track {
+    background: var(--page-background);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--scroll-thumb);
+    border-radius: 15px;
+}
+
+button, button:hover, button:active {
+    background: none;
+    border: none;
+    opacity: 1;
+    color: var(--foreground);
+    font-family: var(--common-font);
+    font-size: var(--common-font-size);
+}
+
+button {
+    padding: 0;
+}
+
+button:focus {
+    border: none;
+    outline: none;
+}
+
+.button, .button:hover, .button:active, .button:disabled {
+    background: var(--button-background);
+    color: var(--button-foreground);
+}
+
+.button {
+    border-radius: 0;
+    padding: 0.4rem 1rem;
+}
+
+.button:active {
+    color: var(--button-pressed-foreground);
+    border-radius: 0;
+}
+
+a, a:visited {
+    color: var(--links);
+}
+
+textarea:focus {
+    outline: 1px solid var(--textarea-focus);
+}
+
+pre, .code-input {
+    width: 100%;
+    background: var(--code-block-background);
+    color: var(--code-block-foreground);
+    padding: 2px;
+    overflow-x: auto;
+}
+
+pre::-webkit-scrollbar, pre::-webkit-scrollbar-track,
+.code-input::-webkit-scrollbar, .code-input::-webkit-scrollbar-track {
+    background: var(--code-block-background);
+}
+
+pre::-webkit-scrollbar-thumb,
+.code-input::-webkit-scrollbar-thumb {
+    background: var(--code-block-foreground);
+}
+
+pre, code, .code-input {
+    font-family: var(--code-font) !important;
+    font-size: var(--code-font-size);
+    letter-spacing: 0.2px;
+}
+
+h1, h2, h3 {
+    letter-spacing: var(--heading-letter-spacing);
+}
+
+h1 {
+    border-bottom: 1px solid var(--header-1);
+}
+
+h1, h1 a {
+    color: var(--header-1) !important;
+}
+
+h2, h2 a {
+    color: var(--header-2) !important;
+}
+
+h3, h3 a {
+    color: var(--header-3) !important;
+}
+
+/* Don't change font size in headers. */
+h1 code, h2 code, h3 code, h4 code, h5 code, h6 code {
+    font-size: unset;
+}
+
+p {
+    margin: 0.7rem 0;
+}
+
+h1 {
+    font-size: 1.55rem;
+    margin: 0.7rem 0;
+    margin-top: 1.4rem;
+    padding: 0;
+    padding-bottom: 0.15rem;
+}
+
+h2 {
+    font-size: 1.45rem;
+    padding: 0;
+    margin: 1rem 0;
+}
+
+h3 {
+    font-size: 1.2rem;
+    padding: 0;
+    margin: 1rem 0;
+}
+
+h1 .sec-title-number {
+    display: inline-block;
+    min-width: 3.5rem;
+}
+
+h2 .sec-title-number {
+    display: inline-block;
+    min-width: 3.8rem;
+}
+
+h3 .sec-title-number {
+    display: inline-block;
+    min-width: 4.2rem;
+}
+
+table {
+    margin: 2rem auto;
+    min-width: 25rem;
+    border-collapse: collapse;
+    border: 1px solid var(--table-border);
+}
+table th {
+    font-weight: bold;
+    font-style: italic;
+    text-align: left;
+}
+table th, td {
+    padding: 5px 7px;
+    border: 1px solid var(--table-border);
+}
+table thead td {
+    font-weight: 700;
+}
+table thead tr,
+table td[colspan="2"] {
+    background: var(--table-header-background);
+    color: var(--table-header-foreground);
+}
+table tbody tr:nth-child(even) {
+    background: var(--background);
+}
+table tbody tr:nth-child(odd) {
+    background: var(--background);
+}
+
+ul li, ol li {
+    margin: 0.4rem 0;
+}
+
+ol li {
+    position: relaive;
+    padding-left: 0.5rem;
+}
+
+ol li:before {
+    position: absolute;
+    left: -0.3rem;
+}
+
+/* Content */
+
+main {
+    margin: 0 auto;
+    max-width: 78rem;
+    padding: 1rem;
+}
+
+main #parserControls {
+    display: flex;
+    flex-direction: column;
+    gap: 1.8rem;
+}
+
+main #links {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+    justify-content: center;
+}
+
+main #editor {
+    position: relative;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    height: 15rem;
+}
+
+main #ast {
+    height: 26rem;
+    overflow-y: scroll;
+}
+
+/* Ace Editor */
+
+.ace-custom-theme .ace_gutter {
+    background: var(--code-block-background);
+    color: #333;
+}
+
+.ace-custom-theme .ace_print-margin {
+    width: 1px;
+    background: var(--code-block-background);
+}
+
+.ace-custom-theme {
+    background-color: var(--code-block-background);
+    font-family: var(--code-font) !important;
+    font-size: var(--code-font-size);
+    letter-spacing: 0.2px;
+    color: var(--code-block-foreground);
+}
+
+.ace-custom-theme .ace_fold {
+    background-color: #757AD8;
+}
+
+.ace-custom-theme .ace_cursor {
+    color: var(--code-block-foreground);
+}
+        
+.ace-custom-theme .ace_invisible {
+    color: var(--code-block-background);
+}
+
+.ace-custom-theme .ace_storage,
+.ace-custom-theme .ace_keyword {
+    color: var(--code-block-foreground);
+}
+
+.ace-custom-theme .ace_constant.ace_buildin {
+    color: var(--code-block-foreground);
+}
+
+.ace-custom-theme .ace_constant.ace_language {
+    color: var(--code-block-foreground);
+}
+
+.ace-custom-theme .ace_constant.ace_library {
+    color: var(--code-block-foreground);
+}
+
+.ace-custom-theme .ace_invalid {
+    color: var(--code-block-foreground);
+}
+
+.ace-custom-theme .ace_support.ace_function {
+    color: var(--code-block-foreground);
+}
+
+.ace-custom-theme .ace_support.ace_constant {
+    color: var(--code-block-foreground);
+}
+
+.ace-custom-theme .ace_support.ace_type,
+.ace-custom-theme .ace_support.ace_class {
+    color: var(--code-block-foreground);
+}
+
+.ace-custom-theme .ace_support.ace_php_tag {
+    color: var(--code-block-foreground);
+}
+
+.ace-custom-theme .ace_keyword.ace_operator {
+    color: var(--code-block-foreground);
+}
+
+.ace-custom-theme .ace_string {
+    color: var(--code-block-foreground);
+}
+
+.ace-custom-theme .ace_comment {
+    color: var(--code-block-foreground);
+}
+
+.ace-custom-theme .ace_comment.ace_doc {
+    color: var(--code-block-foreground);
+}
+
+.ace-custom-theme .ace_comment.ace_doc.ace_tag {
+    color: var(--code-block-foreground);
+}
+
+.ace-custom-theme .ace_constant.ace_numeric {
+    color: var(--code-block-foreground);
+}
+
+.ace-custom-theme .ace_variable {
+    color: var(--code-block-foreground);
+}
+
+.ace-custom-theme .ace_xml-pe {
+    color: var(--code-block-foreground);
+}
+
+.ace-custom-theme .ace_entity.ace_name.ace_function {
+    color: var(--code-block-foreground);
+}
+
+.ace-custom-theme .ace_heading {
+    color: var(--code-block-foreground);
+}
+
+.ace-custom-theme .ace_list {
+    color: var(--code-block-foreground);
+}
+
+.ace-custom-theme .ace_marker-layer .ace_selection {
+    background: var(--code-block-selection);
+    color: var(--code-block-foreground);
+}
+
+.ace-custom-theme .ace_marker-layer .ace_step {
+    background: var(--code-block-foreground);
+}
+
+.ace-custom-theme .ace_marker-layer .ace_stack {
+    background: var(--code-block-foreground);
+}
+
+.ace-custom-theme .ace_marker-layer .ace_bracket {
+    margin: -1px 0 0 -1px;
+    border: 1px solid var(--code-block-foreground);
+}
+
+.ace-custom-theme .ace_marker-layer .ace_active-line {
+    background: var(--code-block-background);
+}
+
+.ace-custom-theme .ace_gutter-active-line {
+    background-color : var(--code-block-background);
+}
+
+.ace-custom-theme .ace_marker-layer .ace_selected-word {
+    background: var(--code-block-selection);
+}
+
+.ace-custom-theme .ace_meta.ace_tag {
+    color: var(--code-block-foreground);
+}
+
+.ace-custom-theme .ace_meta.ace_tag.ace_anchor {
+    color: var(--code-block-foreground);
+}
+
+.ace-custom-theme .ace_meta.ace_tag.ace_form {
+    color: var(--code-block-foreground);
+}
+
+.ace-custom-theme .ace_meta.ace_tag.ace_image {
+    color: var(--code-block-foreground);
+}
+
+.ace-custom-theme .ace_meta.ace_tag.ace_script {
+    color: var(--code-block-foreground);
+}
+
+.ace-custom-theme .ace_meta.ace_tag.ace_style {
+    color: var(--code-block-foreground);
+}
+
+.ace-custom-theme .ace_meta.ace_tag.ace_table {
+    color: var(--code-block-foreground);
+}
+
+.ace-custom-theme .ace_string.ace_regex {
+    color: var(--code-block-foreground)
+}
+
+/*
+.ace-custom-theme .ace_indent-guide {
+background: url("../custom-theme-1.png") right repeat-y;
+}
+
+.ace-custom-theme .ace_indent-guide-active {
+background: url("../custom-theme-2.png") right repeat-y;
+} 
+*/

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" data-dark="true">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ActionScript 3 Parser Demo</title>
+    <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+    <main>
+        <h1>ActionScript 3 Parser Demo</h1>
+        <div id="parserControls">
+            <div id="links">
+                <span>© Hydroper</span>
+                <a href="https://github.com/hydroper/as3parser">Parser repository</a>
+                <a href="https://github.com/hydroper/as3parser-demo">Demo repository</a>
+            </div>
+            <div id="editor" class="ace-custom-theme"></div>
+            <div id="messageLog"></div>
+            <pre id="ast"></pre>
+            <button id="parseButton" class="button">Parse</button>
+        </div>
+    </main>
+    <script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src="ace/mode-actionscript.js" type="text/javascript" charset="utf-8"></script>
+    <script type="module">
+        import init, { parse } from "./dist/as3parser_demo.js";
+        class Main {
+            constructor() {
+                this.editor = null;
+                this.messageLog = document.querySelector("main #messageLog");
+                this.ast = document.querySelector("main #ast");
+                this.timeout = null;
+
+                // Ace Editor
+                this.editor = ace.edit("editor", {
+                    mode: "ace/mode/actionscript",
+                    selectionStyle: "text"
+                });
+                this.editor.setOptions({
+                    autoScrollEditorIntoView: true,
+                    copyWithEmptySelection: true,
+                });
+
+                document.querySelector("main #parseButton").addEventListener("click", _e => {
+                    this.parse();
+                });
+
+                this.editor.session.on("change", _delta => {
+                    if (this.timeout != null) {
+                        clearTimeout(this.timeout);
+                    }
+                    this.timeout = setTimeout(() => {
+                        this.parse();
+                    }, 500);
+                });
+            }
+
+            parse() {
+                const result = JSON.parse(parse(this.editor.getValue()));
+                this.messageLog.innerText = result.diagnostics.join("\n");
+                this.ast.innerText = result.program == null ? '"Failed to parse"' : JSON.stringify(result.program, null, 2);
+            }
+        }
+        (async () => {
+            await init();
+            new Main;
+        })();
+    </script>
+</body>
+</html>
