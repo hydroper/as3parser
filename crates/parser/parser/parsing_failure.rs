@@ -8,6 +8,10 @@ use crate::ns::*;
 #[derive(Copy, Clone, Debug)]
 pub struct ParsingFailure;
 
+/// Returns the identifier name that is specially reserved
+/// for invalidated identifiers that could not be parsed.
+pub const INVALIDATED_IDENTIFIER: &'static str = "\x00\x00\x00\x00\x00\x00\x00";
+
 #[derive(Clone)]
 pub(crate) enum MetadataRefineError {
     Syntax,

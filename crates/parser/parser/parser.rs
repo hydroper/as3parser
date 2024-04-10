@@ -215,14 +215,21 @@ impl<'input> Parser<'input> {
                 }
             }
             self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectedIdentifier, diagnostic_arguments![Token(self.token.0.clone())]);
+            /*
+            let mut count = 0;
             while self.token.0 != Token::Eof {
                 if let Some(id) = self.consume_identifier(reserved_words)? {
                     return Ok(id);
                 } else {
                     self.next()?;
+                    if count >= 1 {
+                        break;
+                    }
+                    count += 1;
                 }
             }
-            Err(ParsingFailure)
+            */
+            Ok((INVALIDATED_IDENTIFIER.to_owned(), self.token.1.clone()))
         }
     }
 
