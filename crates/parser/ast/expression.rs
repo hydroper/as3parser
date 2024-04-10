@@ -164,4 +164,69 @@ impl Expression {
     pub fn is_invalidated(&self) -> bool {
         matches!(self, Self::Invalidated(_))
     }
+
+    pub fn is_non_null_operation(&self) -> bool {
+        match self {
+            Self::Unary(expr) => expr.operator == Operator::NonNull,
+            _ => false,
+        }
+    }
+
+    pub fn is_valid_assignment_left_hand_side(&self) -> bool {
+        match self {
+            Self::Invalidated(_) => true,
+            Self::Unary(e) => e.expression.is_valid_assignment_left_hand_side(),
+            Self::ArrayLiteral(_) | Self::ObjectInitializer(_) => self.is_valid_destructuring(),
+            _ => true,
+        }
+    }
+
+    pub fn is_valid_destructuring(&self) -> bool {
+        match self {
+            Self::Invalidated(_) => true,
+            Self::QualifiedIdentifier(id) => !id.attribute && id.qualifier.is_none() && match &id.id {
+                QualifiedIdentifierIdentifier::Id(id) => id.0 != "*",
+                _ => false,
+            },
+            Self::ArrayLiteral(expr) => {
+                for el in &expr.elements {
+                    match el {
+                        Element::Elision => {},
+                        Element::Expression(expr) => {
+                            if !expr.is_valid_destructuring() {
+                                return false;
+                            }
+                        },
+                        Element::Rest((expr, _)) => {
+                            if !expr.is_valid_destructuring() {
+                                return false;
+                            }
+                        },
+                    }
+                }
+                true
+            },
+            Self::ObjectInitializer(init) => {
+                for field in init.fields.iter() {
+                    match field.as_ref() {
+                        InitializerField::Field { value, .. } => {
+                            if let Some(val) = value {
+                                if !val.is_valid_destructuring() {
+                                    return false;
+                                }
+                            }
+                        },
+                        InitializerField::Rest((expr, _)) => {
+                            if !expr.is_valid_destructuring() {
+                                return false;
+                            }
+                        },
+                    }
+                }
+                true
+            },
+            Self::Unary(expr) => expr.operator == Operator::NonNull && expr.expression.is_valid_destructuring(),
+            _ => false,
+        }
+    }
 }

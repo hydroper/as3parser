@@ -45,6 +45,7 @@ pub enum DiagnosticKind {
     FailedToIncludeFile = 1065,
     ParentSourceIsNotAFile = 1066,
     CircularIncludeDirective = 1067,
+    MalformedDestructuring = 1068,
 }
 
 impl DiagnosticKind {

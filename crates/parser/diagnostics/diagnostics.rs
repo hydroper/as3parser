@@ -126,7 +126,7 @@ impl Diagnostic {
 
     /// Formats the diagnostic in English.
     pub fn format_english(&self) -> String {
-        self.format_with_message(self.format_message_english(), Some(self.id()))
+        self.format_with_message(&self.format_message_english(), Some(self.id()))
     }
 
     pub fn format_message_english(&self) -> String {

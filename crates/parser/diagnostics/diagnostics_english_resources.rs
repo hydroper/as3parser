@@ -49,6 +49,7 @@ lazy_static! {
         DiagnosticKind::FailedToIncludeFile.id() => "Failed to include file".into(),
         DiagnosticKind::ParentSourceIsNotAFile.id() => "Parent source is not a file".into(),
         DiagnosticKind::CircularIncludeDirective.id() => "Circular include directive".into(),
+        DiagnosticKind::MalformedDestructuring.id() => "Malformed destructuring".into(),
         // DiagnosticKind::K.id() => "".into(),
     };
 }

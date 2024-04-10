@@ -456,6 +456,9 @@ impl<'input> Parser<'input> {
                 self.push_location(&base.location());
                 self.next()?;
                 let left = base.clone();
+                if !left.is_valid_assignment_left_hand_side() {
+                    self.add_syntax_error(&left.location(), DiagnosticKind::MalformedDestructuring, vec![])
+                }
                 let right = self.parse_expression(ParsingExpressionContext {
                     min_precedence: OperatorPrecedence::AssignmentAndOther,
                     ..context.clone()
@@ -1870,6 +1873,9 @@ impl<'input> Parser<'input> {
                 operator: Operator::NonNull,
                 expression: destructuring.clone(),
             }));
+        }
+        if !destructuring.is_valid_destructuring() {
+            self.add_syntax_error(&destructuring.location(), DiagnosticKind::MalformedDestructuring, vec![])
         }
         let type_annotation = if self.consume(Token::Colon)? { Some(self.parse_type_expression()?) } else { None };
         Ok(TypedDestructuring {
