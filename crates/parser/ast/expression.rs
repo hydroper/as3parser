@@ -160,4 +160,8 @@ impl Expression {
             None
         }
     }
+
+    pub fn is_invalidated(&self) -> bool {
+        matches!(self, Self::Invalidated(_))
+    }
 }
