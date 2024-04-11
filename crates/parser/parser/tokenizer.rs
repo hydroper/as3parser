@@ -848,7 +848,12 @@ impl<'input> Tokenizer<'input> {
         if !['"', '\''].contains(&delim) {
             return Ok(None);
         }
-        let start = self.cursor_location();
+        let mut start = self.cursor_location();
+        // Include the "@" punctuator as part of raw string literals
+        if raw {
+            start = Location::with_offset(&start.compilation_unit(), start.first_offset() - 1);
+        }
+
         self.characters.next();
 
         // Triple string literal
