@@ -1,7 +1,7 @@
 mod arena;
 pub use arena::*;
 
-pub use by_address::ByAddress as AstAsKey;
+pub use by_address::ByAddress as NodeAsKey;
 
 mod character_reader;
 pub use character_reader::*;
