@@ -265,7 +265,7 @@ package {
             return this.then(null, onRejected);
         }
 
-        public function then(onFulfilled: function(data: T): U, onRejected: function(error: *): E = null):Promise.<*> {
+        public function then(onFulfilled: function(T): U, onRejected: function(*): E = null):Promise.<*> {
             var prom = new Promise.<*>(function(_a:*, _b:*):void {});
             Promise.<T>.handle(this, new PromiseHandler(onFulfilled, onRejected, prom));
             return prom;

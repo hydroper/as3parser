@@ -684,18 +684,18 @@ impl<'input> Parser<'input> {
 
     /// Ensures a parameter list consists of zero or more required parameters followed by
     /// zero or more optional parameters optionally followed by a rest parameter.
-    fn validate_parameter_list(&mut self, params: &Vec<Rc<Parameter>>) -> Result<(), ParsingFailure> {
+    fn validate_parameter_list(&mut self, params: Vec<(ParameterKind, Location)>) -> Result<(), ParsingFailure> {
         let mut least_kind = ParameterKind::Required; 
         let mut has_rest = false;
-        for param in params {
-            if !least_kind.may_be_followed_by(param.kind) {
-                self.add_syntax_error(&param.location.clone(), DiagnosticKind::WrongParameterPosition, vec![]);
+        for (param_kind, param_loc) in params {
+            if !least_kind.may_be_followed_by(param_kind) {
+                self.add_syntax_error(&param_loc, DiagnosticKind::WrongParameterPosition, vec![]);
             }
-            least_kind = param.kind;
-            if param.kind == ParameterKind::Rest && has_rest {
-                self.add_syntax_error(&param.location.clone(), DiagnosticKind::DuplicateRestParameter, vec![]);
+            least_kind = param_kind;
+            if param_kind == ParameterKind::Rest && has_rest {
+                self.add_syntax_error(&param_loc, DiagnosticKind::DuplicateRestParameter, vec![]);
             }
-            has_rest = param.kind == ParameterKind::Rest;
+            has_rest = param_kind == ParameterKind::Rest;
         }
         Ok(())
     }
@@ -932,7 +932,7 @@ impl<'input> Parser<'input> {
             }
         }
         self.expect(Token::RightParen)?;
-        self.validate_parameter_list(&params)?;
+        self.validate_parameter_list(params.iter().map(|p| (p.kind, p.location.clone())).collect::<Vec<_>>())?;
 
         let return_annotation = if self.consume(Token::Colon)? { Some(self.parse_type_expression()?) } else { None };
 
@@ -1963,7 +1963,6 @@ impl<'input> Parser<'input> {
     fn parse_function_type_expression(&mut self) -> Result<Rc<Expression>, ParsingFailure> {
         self.mark_location();
         self.next()?;
-        self.mark_location();
 
         self.expect(Token::LeftParen)?;
         let mut parameters = vec![];
@@ -1974,41 +1973,30 @@ impl<'input> Parser<'input> {
             }
         }
         self.expect(Token::RightParen)?;
-        self.validate_parameter_list(&parameters)?;
+        self.validate_parameter_list(parameters.iter().map(|p| (p.kind, p.location.clone())).collect::<Vec<_>>())?;
 
         self.expect(Token::Colon)?;
         let result_type = self.parse_type_expression()?;
-        let signature_location = self.pop_location();
         Ok(Rc::new(Expression::FunctionType(FunctionTypeExpression {
             location: self.pop_location(),
-            signature: FunctionSignature {
-                location: signature_location,
-                parameters,
-                result_type: Some(result_type),
-            },
+            parameters,
+            result_type: Some(result_type),
         })))
     }
 
-    fn parse_function_type_parameter(&mut self) -> Result<Rc<Parameter>, ParsingFailure> {
+    fn parse_function_type_parameter(&mut self) -> Result<Rc<FunctionTypeParameter>, ParsingFailure> {
         self.mark_location();
         let rest = self.consume(Token::Ellipsis)?;
-        let id = self.expect_identifier(false)?;
-        let optional = !rest && self.consume(Token::Question)?;
-        let destructuring = TypedDestructuring {
-            location: id.1.clone(),
-            destructuring: Rc::new(Expression::QualifiedIdentifier(QualifiedIdentifier {
-                location: id.1.clone(),
-                attribute: false,
-                qualifier: None,
-                id: QualifiedIdentifierIdentifier::Id(id),
-            })),
-            type_annotation: if self.consume(Token::Colon)? { Some(self.parse_type_expression()?) } else { None },
+        let type_expression: Option<Rc<Expression>> = if rest && self.peek(Token::RightParen) {
+            None
+        } else {
+            Some(self.parse_type_expression()?)
         };
+        let optional = !rest && self.consume(Token::Assign)?;
         let location = self.pop_location();
-        Ok(Rc::new(Parameter {
+        Ok(Rc::new(FunctionTypeParameter {
             location,
-            destructuring,
-            default_value: None,
+            type_expression,
             kind: if rest {
                 ParameterKind::Rest
             } else if optional {

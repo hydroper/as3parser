@@ -181,8 +181,13 @@ class C1.<T> {}
 
 ## Function Type Expression
 
+The function type expression is as is in ECMAScript fourth edition, but not including the `this` parameter.
+
+A suffix `=` indicates an optional parameter.
+
 ```
-type F = function(a: T, b?: Number): void;
+type F = function(T, Number=, ...): T
+type F = function(T, Number=, ...[T]): T
 ```
 
 ## Meta Properties
