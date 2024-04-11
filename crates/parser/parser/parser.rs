@@ -761,24 +761,6 @@ impl<'input> Parser<'input> {
         // Parentheses
         } else if self.peek(Token::LeftParen) {
             return Ok(Some(self.parse_paren_list_expr_or_qual_id()?));
-        // `*`
-        } else if self.peek(Token::Times) {
-            let id_location = self.token_location();
-            self.next()?;
-            let id = Rc::new(Expression::QualifiedIdentifier(QualifiedIdentifier {
-                location: id_location.clone(),
-                attribute: false,
-                qualifier: None,
-                id: QualifiedIdentifierIdentifier::Id(("*".into(), id_location.clone())),
-            }));
-            if self.peek(Token::ColonColon) {
-                self.push_location(&id_location.clone());
-                let ql = self.pop_location();
-                let id = self.finish_qualified_identifier(false, ql, id)?;
-                Ok(Some(Rc::new(Expression::QualifiedIdentifier(id))))
-            } else {
-                Ok(Some(id))
-            }
         // XMLList, XMLElement, XMLMarkup
         } else if self.peek(Token::Lt) {
             if let Some(token) = self.tokenizer.scan_xml_markup(self.token_location())? {
@@ -870,6 +852,13 @@ impl<'input> Parser<'input> {
             Ok(Some(Rc::new(Expression::ImportMeta(ImportMeta {
                 location: self.pop_location(),
             }))))
+        // QualifiedIdentifier
+        } else if
+                self.peek(Token::Times)
+            ||  self.peek(Token::Public) || self.peek(Token::Private)
+            ||  self.peek(Token::Protected) || self.peek(Token::Internal) {
+            let id = self.parse_qualified_identifier()?;
+            Ok(Some(Rc::new(Expression::QualifiedIdentifier(id))))
         } else {
             Ok(None)
         }
@@ -1302,24 +1291,6 @@ impl<'input> Parser<'input> {
         // Parentheses
         } else if self.peek(Token::LeftParen) {
             return Ok(self.parse_paren_list_expr_or_qual_id()?);
-        // `*`
-        } else if self.peek(Token::Times) {
-            let id_location = self.token_location();
-            self.next()?;
-            let id = Rc::new(Expression::QualifiedIdentifier(QualifiedIdentifier {
-                location: id_location.clone(),
-                attribute: false,
-                qualifier: None,
-                id: QualifiedIdentifierIdentifier::Id(("*".into(), id_location.clone())),
-            }));
-            if self.peek(Token::ColonColon) {
-                self.push_location(&id_location.clone());
-                let ql = self.pop_location();
-                let id = self.finish_qualified_identifier(false, ql, id)?;
-                Ok(Rc::new(Expression::QualifiedIdentifier(id)))
-            } else {
-                Ok(id)
-            }
         // XMLList, XMLElement, XMLMarkup
         } else if self.peek(Token::Lt) {
             if let Some(token) = self.tokenizer.scan_xml_markup(self.token_location())? {
@@ -1341,6 +1312,13 @@ impl<'input> Parser<'input> {
             Ok(self.parse_array_initializer()?)
         } else if self.peek(Token::LeftBrace) {
             Ok(self.parse_object_initializer()?)
+        // QualifiedIdentifier
+        } else if
+                self.peek(Token::Times)
+            ||  self.peek(Token::Public) || self.peek(Token::Private)
+            ||  self.peek(Token::Protected) || self.peek(Token::Internal) {
+            let id = self.parse_qualified_identifier()?;
+            Ok(Rc::new(Expression::QualifiedIdentifier(id)))
         } else {
             self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectedExpression, diagnostic_arguments![Token(self.token.0.clone())]);
             Ok(self.create_invalidated_expression(&self.tokenizer.cursor_location()))
