@@ -1,3 +1,8 @@
+//! Defines the parser and the tokenizer.
+//!
+//! Using the methods of the `ParserFacade` structure is the most common way of parsing
+//! programs until end-of-file.
+
 mod character_validator;
 pub use character_validator::*;
 mod contexts;

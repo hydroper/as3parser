@@ -1,6 +1,6 @@
-//! The `ns` module is an union of all compiler modules.
+//! The `ns` module is an union of all of the parser modules.
 
-pub use crate::ast::*;
+pub use crate::tree::*;
 pub use crate::compilation_unit::*;
 pub use crate::compiler_options::*;
 pub use crate::diagnostics::*;

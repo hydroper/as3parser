@@ -1,3 +1,5 @@
+//! Defines the syntactic nodes produced by the parser.
+
 // Expressions
 mod expression;
 pub use expression::*;

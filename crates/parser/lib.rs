@@ -1,7 +1,7 @@
 #![feature(decl_macro)]
 #![feature(try_blocks)]
 
-pub mod ast;
+pub mod tree;
 pub mod compilation_unit;
 pub mod compiler_options;
 pub mod diagnostics;
