@@ -170,7 +170,7 @@ configuration {
 ## Embed Expression
 
 ```
-const o: ByteArray = embed { source: "data.bin", type: ByteArray }
+const o: ByteArray = embed { source: "data.bin", type: "application/octet-stream" }
 ```
 
 ## Parameterized Types
