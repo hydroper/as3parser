@@ -58,6 +58,7 @@ impl MxmlContent {
     pub fn location(&self) -> Location {
         match self {
             Self::Characters((_, l)) => l.clone(),
+            Self::Whitespace((_, l)) => l.clone(),
             Self::CData((_, l)) => l.clone(),
             Self::Comment((_, l)) => l.clone(),
             Self::ProcessingInstruction { location: l, .. } => l.clone(),
