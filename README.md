@@ -35,7 +35,7 @@ ActionScript execution consists of parsing, verification, and evaluation. Verifi
 
 Average parsing of XML documents such as MXML may be provided anytime in this project, and it should not be difficult at all as long as it deviates slightly from the XML specification, which is a bit large to read for a proper implementation.
 
-- [*] Define tree structures
+- [x] Define tree structures
 - [ ] Parse a XML document (UTF-8 support only).
 - [ ] Unescape entities through the `htmlentity` crate.
 
