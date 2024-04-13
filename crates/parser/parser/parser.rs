@@ -2873,7 +2873,10 @@ impl<'input> Parser<'input> {
 
             if eligible_attribute_or_directive && (self.peek_annotatable_directive_identifier_name() || self.lookbehind_is_annotatable_directive_identifier_name()) {
                 let mut context1: AnnotatableContext;
-                if ["enum", "type", "namespace"].contains(&id.0.as_ref()) && id.1.character_count() == id.0.len() {
+
+                if ["enum", "type", "namespace"].contains(&id.0.as_ref())
+                && id.1.character_count() == id.0.len()
+                && self.token.0.is_identifier_name() {
                     context1 = AnnotatableContext {
                         start_location: id.1.clone(),
                         asdoc,
