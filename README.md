@@ -39,6 +39,13 @@ Average parsing of XML documents such as MXML may be provided anytime in this pr
 - [ ] Parse a XML document (UTF-8 support only).
 - [ ] Unescape entities through the `htmlentity` crate.
 
+## CSS parsing
+
+MXML supports a subset of CSS.
+
+- [ ] Define tree structures
+- [ ] Parse a style sheet
+
 ## License
 
 Apache License 2.0, copyright 2024 Hydroper
