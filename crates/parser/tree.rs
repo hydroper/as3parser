@@ -151,3 +151,7 @@ mod package_definition;
 pub use package_definition::*;
 mod program;
 pub use program::*;
+
+// MXML document
+mod mxml_document;
+pub use mxml_document::*;
