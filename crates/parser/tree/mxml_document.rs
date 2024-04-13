@@ -39,6 +39,7 @@ pub struct MxmlAttribute {
 #[derive(Clone, Serialize, Deserialize)]
 pub enum MxmlContent {
     Characters((String, Location)),
+    Whitespace((String, Location)),
     /// A CDATA construct, including the first `<![CDATA[` characters
     /// and the last `]]>` characters.
     CData((String, Location)),
