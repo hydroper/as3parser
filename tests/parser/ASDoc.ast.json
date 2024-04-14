@@ -1,5 +1,5 @@
 {
-  "location": "6:1-16:6",
+  "location": "6:1-17:6",
   "packages": [],
   "directives": [
     {
@@ -9,7 +9,7 @@
           "location": "1:4-5:2",
           "main_body": [
             "Main body.",
-            "1:4-2:14"
+            "2:4-2:14"
           ],
           "tags": [
             [
@@ -70,12 +70,12 @@
     },
     {
       "VariableDefinition": {
-        "location": "11:1-16:6",
+        "location": "11:1-17:6",
         "asdoc": {
-          "location": "12:4-14:2",
+          "location": "12:4-15:2",
           "main_body": [
-            "N2",
-            "12:4-14:2"
+            "N2. Lorem\nipsum.",
+            "13:4-14:10"
           ],
           "tags": []
         },
@@ -93,11 +93,11 @@
           },
           {
             "Metadata": {
-              "location": "15:2-15:4",
+              "location": "16:2-16:4",
               "asdoc": null,
               "name": [
                 "N2",
-                "15:2-15:4"
+                "16:2-16:4"
               ],
               "entries": null
             }
@@ -105,21 +105,21 @@
         ],
         "kind": [
           "Var",
-          "16:1-16:4"
+          "17:1-17:4"
         ],
         "bindings": [
           {
             "destructuring": {
-              "location": "16:5-16:6",
+              "location": "17:5-17:6",
               "destructuring": {
                 "QualifiedIdentifier": {
-                  "location": "16:5-16:6",
+                  "location": "17:5-17:6",
                   "attribute": false,
                   "qualifier": null,
                   "id": {
                     "Id": [
                       "y",
-                      "16:5-16:6"
+                      "17:5-17:6"
                     ]
                   }
                 }

@@ -4546,9 +4546,37 @@ fn parse_include_directive_source(nested_compilation_unit: Rc<CompilationUnit>, 
 }
 
 fn join_asdoc_content(content: &Vec<(String, Location)>) -> (String, Location) {
-    let s: Vec<String> = content.iter().map(|c| c.0.clone()).collect();
+    // Ignore first empty lines
+    let mut i = 0usize;
+    for content1 in content.iter() {
+        if content1.0.trim().is_empty() {
+            i += 1;
+        } else {
+            break;
+        }
+    }
+
+    // Ignore last empty lines
+    let mut j = content.len();
+    for content1 in content.iter().rev() {
+        if content1.0.trim().is_empty() {
+            j -= 1;
+        } else {
+            break;
+        }
+    }
+
+    if i > j {
+        i = j;
+    }
+
+    let s: Vec<String> = content[i..j].iter().map(|c| c.0.clone()).collect();
     let s = s.join("\n").trim().to_owned();
-    let location = content.first().unwrap().1.combine_with(content.last().unwrap().1.clone());
+    let location = if i == j {
+        content[i].1.clone()
+    } else {
+        content[i].1.combine_with(content[i..j].last().unwrap().1.clone())
+    };
     (s, location)
 }
 

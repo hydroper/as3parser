@@ -6,11 +6,12 @@
 var x
 
 /**
- * N1
+ * N1.
  */
 [N1]
 /**
- * N2
+ * N2. Lorem
+ * ipsum.
  */
 [N2]
 var y
