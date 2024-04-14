@@ -19,21 +19,28 @@ pub enum XmlVersion {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct MxmlElement {
     pub location: Location,
-    pub name: (String, Location),
+    pub name: MxmlName,
     /// Attribute list, including `xmlns` and `xmlns:` namespace prefixes.
     pub attributes: Vec<Rc<MxmlAttribute>>,
     /// The namespace mapping relative to the XML element.
     #[serde(skip)]
     pub namespace: Rc<MxmlNamespace>,
     pub content: Option<Vec<Rc<MxmlContent>>>,
-    pub closing_name: Option<(String, Location)>,
+    pub closing_name: Option<MxmlName>,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct MxmlAttribute {
     pub location: Location,
-    pub name: (String, Location),
+    pub name: MxmlName,
     pub value: (String, Location),
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct MxmlName {
+    pub location: Location,
+    pub prefix: Option<Rc<String>>,
+    pub name: String,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
