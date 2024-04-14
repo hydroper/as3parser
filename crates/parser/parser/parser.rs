@@ -2207,7 +2207,7 @@ impl<'input> Parser<'input> {
         })), semicolon_inserted))
     }
 
-    fn parse_qualified_identifier_statement_or_one_branch_config(&mut self, context: ParsingDirectiveContext, id: (String, Location)) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+    fn parse_qualified_identifier_statement_or_one_branch_config(&mut self, context: ParsingDirectiveContext, id: (String, Location), asdoc: Option<Rc<AsDoc>>) -> Result<(Rc<Directive>, bool), ParsingFailure> {
         self.push_location(&id.1);
         let id_location = id.1.clone();
         let id = Rc::new(Expression::QualifiedIdentifier(QualifiedIdentifier {
@@ -2225,29 +2225,8 @@ impl<'input> Parser<'input> {
         })?;
 
         // Parse CONFIG::VAR_NAME
-        if !self.peek(Token::Eof) && (context.is_type_block() || matches!(context, ParsingDirectiveContext::PackageBlock)) {
-            if let Some((q, constant_name)) = exp.to_one_branch_configuration_identifier() {
-                self.push_location(&exp.location());
-                let (directive, semicolon) = self.parse_directive(context)?;
-                return Ok((Rc::new(Directive::OneBranchConfigurationDirective(OneBranchConfigurationDirective {
-                    location: self.pop_location(),
-                    namespace: q,
-                    constant_name,
-                    directive,
-                })), semicolon));
-            }
-        }
-        if self.peek(Token::LeftBrace) {
-            if let Some((q, constant_name)) = exp.to_one_branch_configuration_identifier() {
-                self.push_location(&exp.location());
-                let block = self.parse_block(context)?;
-                return Ok((Rc::new(Directive::OneBranchConfigurationDirective(OneBranchConfigurationDirective {
-                    location: self.pop_location(),
-                    namespace: q,
-                    constant_name,
-                    directive: Rc::new(Directive::Block(block)),
-                })), true));
-            }
+        if let Some(result) = self.parse_opt_one_branch_config(&exp, asdoc.clone(), context.clone())? {
+            return Ok(result);
         }
 
         let semicolon_inserted = self.parse_semicolon()?;
@@ -2255,6 +2234,48 @@ impl<'input> Parser<'input> {
             location: self.pop_location(),
             expression: exp,
         })), semicolon_inserted))
+    }
+
+    fn parse_opt_one_branch_config(&mut self, exp: &Rc<Expression>, asdoc: Option<Rc<AsDoc>>, context: ParsingDirectiveContext) -> Result<Option<(Rc<Directive>, bool)>, ParsingFailure> {
+        if self.peek_annotatable_directive_identifier_name() {
+            match exp.to_one_branch_configuration_identifier(self) {
+                Ok(Some((q, constant_name, metadata))) => {
+                    self.push_location(&exp.location());
+                    let mut context = AnnotatableContext {
+                        start_location: exp.location(),
+                        asdoc,
+                        attributes: metadata,
+                        context,
+                        directive_context_keyword: None,
+                    };
+                    self.parse_attribute_keywords_or_expressions(&mut context)?;
+                    let (directive, semicolon) = self.parse_annotatable_directive(context)?;
+                    return Ok(Some((Rc::new(Directive::OneBranchConfigurationDirective(OneBranchConfigurationDirective {
+                        location: self.pop_location(),
+                        namespace: q,
+                        constant_name,
+                        directive,
+                    })), semicolon)));
+                },
+                Ok(None) => {},
+                Err(MetadataRefineError1(MetadataRefineError::Syntax, loc)) => {
+                    self.add_syntax_error(&loc, DiagnosticKind::UnrecognizedMetadataSyntax, diagnostic_arguments![]);
+                },
+            }
+        }
+        if self.peek(Token::LeftBrace) {
+            if let Some((q, constant_name)) = exp.to_one_branch_configuration_identifier_no_metadata() {
+                self.push_location(&exp.location());
+                let block = self.parse_block(context)?;
+                return Ok(Some((Rc::new(Directive::OneBranchConfigurationDirective(OneBranchConfigurationDirective {
+                    location: self.pop_location(),
+                    namespace: q,
+                    constant_name,
+                    directive: Rc::new(Directive::Block(block)),
+                })), true)));
+            }
+        }
+        Ok(None)
     }
 
     fn parse_block(&mut self, context: ParsingDirectiveContext) -> Result<Block, ParsingFailure> {
@@ -2911,27 +2932,8 @@ impl<'input> Parser<'input> {
                         self.push_location(&first_attr_expr.location());
 
                         // Parse CONFIG::VAR_NAME
-                        if !self.peek(Token::Eof) && (context.is_type_block() || matches!(context, ParsingDirectiveContext::PackageBlock)) {
-                            if let Some((q, constant_name)) = first_attr_expr.to_one_branch_configuration_identifier() {
-                                let (directive, semicolon) = self.parse_directive(context)?;
-                                return Ok((Rc::new(Directive::OneBranchConfigurationDirective(OneBranchConfigurationDirective {
-                                    location: self.pop_location(),
-                                    namespace: q,
-                                    constant_name,
-                                    directive,
-                                })), semicolon));
-                            }
-                        }
-                        if self.peek(Token::LeftBrace) {
-                            if let Some((q, constant_name)) = first_attr_expr.to_one_branch_configuration_identifier() {
-                                let directive = self.parse_block(context)?;
-                                return Ok((Rc::new(Directive::OneBranchConfigurationDirective(OneBranchConfigurationDirective {
-                                    location: self.pop_location(),
-                                    namespace: q,
-                                    constant_name,
-                                    directive: Rc::new(Directive::Block(directive)),
-                                })), true));
-                            }
+                        if let Some(result) = self.parse_opt_one_branch_config(&first_attr_expr, asdoc.clone(), context.clone())? {
+                            return Ok(result);
                         }
 
                         let semicolon_inserted = self.parse_semicolon()?;
@@ -2954,7 +2956,7 @@ impl<'input> Parser<'input> {
                 }
                 return self.parse_annotatable_directive(context1);
             } else if self.peek(Token::ColonColon) {
-                self.parse_qualified_identifier_statement_or_one_branch_config(context, id)
+                self.parse_qualified_identifier_statement_or_one_branch_config(context, id, asdoc)
             } else {
                 self.parse_statement_starting_with_identifier(context, id)
             }

@@ -231,7 +231,36 @@ impl Expression {
     }
 
     /// `CONFIG::VAR_NAME`
-    pub(crate) fn to_one_branch_configuration_identifier(&self) -> Option<((String, Location), (String, Location))> {
+    pub(crate) fn to_one_branch_configuration_identifier(&self, parser: &Parser) -> Result<Option<((String, Location), (String, Location), Vec<Attribute>)>, MetadataRefineError1> {
+        if let Self::QualifiedIdentifier(id) = self {
+            if id.attribute {
+                return Ok(None);
+            }
+            if let Some(q) = &id.qualifier {
+                if let Some(q) = q.to_identifier_name() {
+                    if let QualifiedIdentifierIdentifier::Id(id) = &id.id {
+                        return Ok(Some((q, id.clone(), vec![])));
+                    }
+                }
+            }
+        }
+        if let Self::ComputedMember(ComputedMemberExpression { base, asdoc, key, .. }) = self {
+            let a = base.to_one_branch_configuration_identifier(parser)?;
+            if a.is_none() {
+                return Ok(None);
+            }
+            let (ns, name, mut a) = a.unwrap();
+            if matches!(key.as_ref(), Self::Sequence(_)) {
+                return Ok(None);
+            }
+            a.push(Attribute::Metadata(parser.refine_metadata(key, asdoc.clone()).map_err(|e| MetadataRefineError1(e, key.location()))?));
+            return Ok(Some((ns, name, a)));
+        }
+        Ok(None)
+    }
+
+    /// `CONFIG::VAR_NAME`
+    pub(crate) fn to_one_branch_configuration_identifier_no_metadata(&self) -> Option<((String, Location), (String, Location))> {
         if let Self::QualifiedIdentifier(id) = self {
             if id.attribute {
                 return None;
