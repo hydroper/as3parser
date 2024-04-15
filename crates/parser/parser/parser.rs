@@ -2119,7 +2119,7 @@ impl<'input> Parser<'input> {
             })), true))
         // Block
         } else if self.peek(Token::LeftBrace) {
-            let context = if matches!(context, ParsingDirectiveContext::TopLevel) {
+            let context = if context.is_top_level_or_package() || context.is_type_block() {
                 context.clone()
             } else {
                 context.override_control_context(true, ParsingControlContext {
