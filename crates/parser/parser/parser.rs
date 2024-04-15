@@ -2243,7 +2243,7 @@ impl<'input> Parser<'input> {
                     self.push_location(&exp.location());
                     let mut context = AnnotatableContext {
                         start_location: exp.location(),
-                        asdoc,
+                        asdoc: self.parse_asdoc()?.or(asdoc),
                         attributes: metadata,
                         context,
                         directive_context_keyword: None,
