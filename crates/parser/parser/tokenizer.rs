@@ -223,7 +223,7 @@ impl<'input> Tokenizer<'input> {
                     return Ok((Token::UnsignedRightShift, location));
                 }
                 // RightShift
-                if ch == '<' {
+                if ch == '>' {
                     self.characters.next();
                     let location = start.combine_with(self.cursor_location());
                     return Ok((Token::RightShift, location));

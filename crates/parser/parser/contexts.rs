@@ -29,9 +29,10 @@ pub enum ParsingDirectiveContext {
     InterfaceBlock,
     EnumBlock,
     ConstructorBlock {
-        super_statement_found: Cell<bool>,
+        super_statement_found: Rc<Cell<bool>>,
     },
     WithControl {
+        super_statement_found: Option<Rc<Cell<bool>>>,
         to_be_labeled: Option<String>,
         control_context: ParsingControlContext,
         labels: HashMap<String, ParsingControlContext>,
@@ -39,6 +40,30 @@ pub enum ParsingDirectiveContext {
 }
 
 impl ParsingDirectiveContext {
+    pub fn may_contain_super_statement(&self) -> bool {
+        matches!(self, Self::ConstructorBlock { .. }) || matches!(self, Self::WithControl { .. })
+    }
+
+    pub fn super_statement_found(&self) -> bool {
+        match self {
+            Self::ConstructorBlock { super_statement_found } => super_statement_found.get(),
+            Self::WithControl { super_statement_found, .. } => super_statement_found.as_ref().or(Some(&Rc::new(Cell::new(false)))).unwrap().get(),
+            _ => false,
+        }
+    }
+
+    pub fn set_super_statement_found(&self, value: bool) {
+        match self {
+            Self::ConstructorBlock { super_statement_found } => { super_statement_found.set(value) },
+            Self::WithControl { super_statement_found, .. } => {
+                if let Some(found) = super_statement_found.as_ref() {
+                    found.set(value);
+                }
+            },
+            _ => {},
+        }
+    }
+
     pub fn function_name_is_constructor(&self, name: &(String, Location)) -> bool {
         if let ParsingDirectiveContext::ClassBlock { name: ref name_1 } = self {
             &name.0 == name_1
@@ -70,10 +95,12 @@ impl ParsingDirectiveContext {
     pub fn override_control_context(&self, label_only: bool, mut context: ParsingControlContext) -> Self {
         let mut prev_context = None;
         let mut label = None;
+        let mut super_statement_found: Option<Rc<Cell<bool>>> = None;
         let mut labels = match self {
-            Self::WithControl { control_context, labels, to_be_labeled: label1 } => {
+            Self::WithControl { control_context, labels, to_be_labeled: label1, super_statement_found: super_found_1 } => {
                 prev_context = Some(control_context.clone());
                 label = label1.clone();
+                super_statement_found = super_found_1.clone();
                 labels.clone()
             },
             _ => HashMap::new(),
@@ -87,15 +114,16 @@ impl ParsingDirectiveContext {
                 iteration: false,
             });
         }
-        Self::WithControl { control_context: context, labels, to_be_labeled: None }
+        Self::WithControl { control_context: context, labels, to_be_labeled: None, super_statement_found }
     }
 
     pub fn put_label(&self, label: String) -> Self {
         match self {
-            Self::WithControl { control_context, labels, to_be_labeled: _ } => Self::WithControl {
+            Self::WithControl { control_context, labels, to_be_labeled: _, super_statement_found } => Self::WithControl {
                 to_be_labeled: Some(label),
                 control_context: control_context.clone(),
                 labels: labels.clone(),
+                super_statement_found: super_statement_found.clone(),
             },
             _ => Self::WithControl {
                 to_be_labeled: Some(label),
@@ -104,6 +132,10 @@ impl ParsingDirectiveContext {
                     iteration: false,
                 },
                 labels: HashMap::new(),
+                super_statement_found: match self {
+                    Self::ConstructorBlock { super_statement_found } => Some(super_statement_found.clone()),
+                    _ => None,
+                },
             },
         }
     }

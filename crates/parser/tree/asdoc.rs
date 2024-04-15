@@ -10,7 +10,9 @@ pub struct AsDoc {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub enum AsDocTag {
+    Author(String),
     Copy(Rc<AsDocReference>),
+    Created(String),
     Default(String),
     Deprecated {
         message: Option<String>,
@@ -40,6 +42,7 @@ pub enum AsDocTag {
         class_reference: Rc<Expression>,
         description: Option<String>,
     },
+    Version(String),
 }
 
 /// An ASDoc reference consisting of an optional base and

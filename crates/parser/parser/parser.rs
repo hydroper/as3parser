@@ -2043,11 +2043,11 @@ impl<'input> Parser<'input> {
             self.mark_location();
             self.next()?;
             let arguments = if self.peek(Token::LeftParen) { Some(self.parse_arguments()?) } else { None };
-            let mut semicolon_inserted = false;
+            let mut semicolon = false;
             if arguments.is_some() {
-                semicolon_inserted = self.parse_semicolon()?;
+                semicolon = self.parse_semicolon()?;
             }
-            if arguments.is_none() || (!semicolon_inserted && (self.peek(Token::Dot) || self.peek(Token::LeftBracket))) {
+            if !semicolon && (self.peek(Token::Dot) || self.peek(Token::LeftBracket)) {
                 if !(self.peek(Token::Dot) || self.peek(Token::LeftBracket)) {
                     self.expect(Token::Dot)?;
                 }
@@ -2062,11 +2062,11 @@ impl<'input> Parser<'input> {
                     min_precedence: OperatorPrecedence::List,
                     ..default()
                 })?;
-                let semicolon_inserted = self.parse_semicolon()?;
+                let semicolon = self.parse_semicolon()?;
                 Ok((Rc::new(Directive::ExpressionStatement(ExpressionStatement {
                     location: self.pop_location(),
                     expression: expr,
-                })), semicolon_inserted))
+                })), semicolon))
             } else {
                 // SuperStatement
                 let node = Rc::new(Directive::SuperStatement(SuperStatement {
@@ -2076,9 +2076,9 @@ impl<'input> Parser<'input> {
 
                 // Check whether super statement is allowed here
                 let allowed_here;
-                if let ParsingDirectiveContext::ConstructorBlock { super_statement_found } = &context {
-                    allowed_here = !super_statement_found.get();
-                    super_statement_found.set(true);
+                if context.may_contain_super_statement() {
+                    allowed_here = !context.super_statement_found();
+                    context.set_super_statement_found(true);
                 } else {
                     allowed_here = false;
                 }
@@ -2087,7 +2087,7 @@ impl<'input> Parser<'input> {
                     self.add_syntax_error(&node.location(), DiagnosticKind::NotAllowedHere, diagnostic_arguments![Token(Token::Super)]);
                 }
 
-                Ok((node, semicolon_inserted))
+                Ok((node, semicolon))
             }
         // EmptyStatement
         } else if self.peek(Token::Semicolon) {
@@ -3449,7 +3449,7 @@ impl<'input> Parser<'input> {
             FunctionName::Identifier(name)
         };
         let block_context = if constructor {
-            ParsingDirectiveContext::ConstructorBlock { super_statement_found: Cell::new(false) }
+            ParsingDirectiveContext::ConstructorBlock { super_statement_found: Rc::new(Cell::new(false)) }
         } else {
             ParsingDirectiveContext::Default
         };
@@ -4300,6 +4300,17 @@ impl<'input> Parser<'input> {
     ) {
         if let Some((tag_name, ref tag_location)) = building_content_tag_name.as_ref() {
             match tag_name.as_ref() {
+                // @author Author text
+                "author" => {
+                    let (content, location) = join_asdoc_content(building_content);
+                    // Content must be non empty
+                    if regex_is_match!(r"^\s*$", &content) {
+                        self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.clone())]);
+                    }
+                    let location = tag_location.combine_with(location);
+                    tags.push((AsDocTag::Author(content), location));
+                },
+
                 // @copy reference
                 "copy" => {
                     let (content, location) = join_asdoc_content(building_content);
@@ -4307,6 +4318,17 @@ impl<'input> Parser<'input> {
                     if let Some(reference) = self.parse_asdoc_reference(&content, &tag_location, &tag_name) {
                         tags.push((AsDocTag::Copy(reference), location));
                     }
+                },
+
+                // @created Date text
+                "created" => {
+                    let (content, location) = join_asdoc_content(building_content);
+                    // Content must be non empty
+                    if regex_is_match!(r"^\s*$", &content) {
+                        self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.clone())]);
+                    }
+                    let location = tag_location.combine_with(location);
+                    tags.push((AsDocTag::Created(content), location));
                 },
 
                 // @default value
@@ -4498,6 +4520,17 @@ impl<'input> Parser<'input> {
                     } else {
                         self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.clone())]);
                     }
+                },
+
+                // @version Version text
+                "version" => {
+                    let (content, location) = join_asdoc_content(building_content);
+                    // Content must be non empty
+                    if regex_is_match!(r"^\s*$", &content) {
+                        self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.clone())]);
+                    }
+                    let location = tag_location.combine_with(location);
+                    tags.push((AsDocTag::Version(content), location));
                 },
 
                 // Unrecognized tag
