@@ -37,6 +37,8 @@ Average parsing of XML documents such as MXML may be provided anytime in this pr
 
 - [x] Define tree structures
 - [ ] Parse a XML document (UTF-8 support only).
+  - [ ] Filter whitespace nodes out of an element when it includes at least one child element.
+  - [ ] Create whitespace nodes solely for whitespace chunks beginning in a line and ending in the same or another line, such that whitespace intermixed with characters belong to them.
 - [ ] Unescape entities through the `htmlentity` crate.
 
 ## CSS parsing
