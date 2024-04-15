@@ -1,5 +1,5 @@
 {
-  "location": "10:1-15:4",
+  "location": "10:1-19:4",
   "packages": [],
   "directives": [
     {
@@ -291,7 +291,7 @@
     },
     {
       "ExpressionStatement": {
-        "location": "14:1-14:3",
+        "location": "14:1-14:6",
         "expression": {
           "NumericLiteral": {
             "location": "14:1-14:3",
@@ -303,12 +303,36 @@
     },
     {
       "ExpressionStatement": {
-        "location": "15:1-15:4",
+        "location": "15:1-15:7",
         "expression": {
           "NumericLiteral": {
             "location": "15:1-15:4",
             "value": "10",
             "suffix": "F"
+          }
+        }
+      }
+    },
+    {
+      "ExpressionStatement": {
+        "location": "17:1-17:12",
+        "expression": {
+          "RegExpLiteral": {
+            "location": "17:1-17:9",
+            "body": "(?:)",
+            "flags": "gi"
+          }
+        }
+      }
+    },
+    {
+      "ExpressionStatement": {
+        "location": "19:1-19:4",
+        "expression": {
+          "RegExpLiteral": {
+            "location": "19:1-19:4",
+            "body": "=",
+            "flags": ""
           }
         }
       }
