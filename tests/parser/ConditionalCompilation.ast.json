@@ -23,7 +23,7 @@
         "metadata": null,
         "directives": [
           {
-            "OneBranchConfigurationDirective": {
+            "NormalConfigurationDirective": {
               "location": "14:62-20:6",
               "namespace": [
                 "CONFIG",
@@ -143,7 +143,7 @@
                     "metadata": null,
                     "directives": [
                       {
-                        "OneBranchConfigurationDirective": {
+                        "NormalConfigurationDirective": {
                           "location": "15:9-18:10",
                           "namespace": [
                             "CONFIG",
@@ -315,7 +315,7 @@
                         }
                       },
                       {
-                        "OneBranchConfigurationDirective": {
+                        "NormalConfigurationDirective": {
                           "location": "19:9-19:45",
                           "namespace": [
                             "CONFIG",

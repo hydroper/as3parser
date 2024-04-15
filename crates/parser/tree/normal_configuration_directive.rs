@@ -3,7 +3,7 @@ use serde::{Serialize, Deserialize};
 
 /// Represents a `CONFIG::x ...` directive.
 #[derive(Clone, Serialize, Deserialize)]
-pub struct OneBranchConfigurationDirective {
+pub struct NormalConfigurationDirective {
     pub location: Location,
     /// The namespace, most commonly the `CONFIG` identifier.
     pub namespace: (String, Location),

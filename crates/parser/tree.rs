@@ -121,8 +121,8 @@ mod use_namespace_directive;
 pub use use_namespace_directive::*;
 mod include_directive;
 pub use include_directive::*;
-mod one_branch_configuration_directive;
-pub use one_branch_configuration_directive::*;
+mod normal_configuration_directive;
+pub use normal_configuration_directive::*;
 
 // Miscellaneous
 mod attributes;
