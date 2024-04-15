@@ -44,7 +44,6 @@ lazy_static! {
         DiagnosticKind::UnrecognizedAsDocTag.id() => "Unrecognized ASDoc tag: '@{1}'".into(),
         DiagnosticKind::UnrecognizedProxy.id() => "Unrecognized proxy: '{1}'".into(),
         DiagnosticKind::EnumMembersMustBeConst.id() => "Enumeration members must be 'const'".into(),
-        DiagnosticKind::ConstructorMustNotSpecifyResultType.id() => "Constructor must not specify result type".into(),
         DiagnosticKind::UnrecognizedMetadataSyntax.id() => "Unrecognized meta-data syntax".into(),
         DiagnosticKind::FailedToIncludeFile.id() => "Failed to include file".into(),
         DiagnosticKind::ParentSourceIsNotAFile.id() => "Parent source is not a file".into(),

@@ -1203,11 +1203,24 @@ impl<'input> Parser<'input> {
                 }));
             } else if self.consume(Token::Dot)? {
                 self.push_location(&base.location());
-                let identifier = self.parse_qualified_identifier()?;
-                base = Rc::new(Expression::Member(MemberExpression {
-                    location: self.pop_location(),
-                    base, identifier,
-                }));
+                if self.consume(Token::Lt)? {
+                    let mut arguments = vec![];
+                    arguments.push(self.parse_type_expression()?);
+                    while self.consume(Token::Comma)? {
+                        arguments.push(self.parse_type_expression()?);
+                    }
+                    self.expect_type_parameters_gt()?;
+                    base = Rc::new(Expression::WithTypeArguments(ExpressionWithTypeArguments {
+                        location: self.pop_location(),
+                        base, arguments
+                    }));
+                } else {
+                    let identifier = self.parse_qualified_identifier()?;
+                    base = Rc::new(Expression::Member(MemberExpression {
+                        location: self.pop_location(),
+                        base, identifier,
+                    }));
+                }
             } else {
                 break;
             }
@@ -2106,10 +2119,14 @@ impl<'input> Parser<'input> {
             })), true))
         // Block
         } else if self.peek(Token::LeftBrace) {
-            let context = context.override_control_context(true, ParsingControlContext {
-                breakable: true,
-                iteration: false,
-            });
+            let context = if matches!(context, ParsingDirectiveContext::TopLevel) {
+                context.clone()
+            } else {
+                context.override_control_context(true, ParsingControlContext {
+                    breakable: true,
+                    iteration: false,
+                })
+            };
             let block = self.parse_block(context)?;
             Ok((Rc::new(Directive::Block(block)), true))
         // IfStatement
@@ -3464,10 +3481,11 @@ impl<'input> Parser<'input> {
         let common = self.parse_function_common(false, block_context, true)?;
         let semicolon = if common.has_block_body() { true } else { self.parse_semicolon()? };
 
-        // Constructor must not contain a result type.
+        /*
         if constructor && common.signature.result_type.is_some() {
             self.add_syntax_error(&name.location(), DiagnosticKind::ConstructorMustNotSpecifyResultType, diagnostic_arguments![]);
         }
+        */
 
         // Not all kinds of functions may be generators.
         if common.contains_yield && (constructor || getter || setter) {
