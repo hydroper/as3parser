@@ -426,8 +426,7 @@ impl<'input> Tokenizer<'input> {
 
     /// Scans regular expression after a `/` or `/=` token has been scanned by
     /// `scan_ie_div`.
-    pub fn scan_regexp_literal(&mut self, start: Location) -> Result<(Token, Location), ParsingFailure> {
-        let mut body = String::new();
+    pub fn scan_regexp_literal(&mut self, start: Location, mut body: String) -> Result<(Token, Location), ParsingFailure> {
         loop {
             let ch = self.characters.peek_or_zero();
             if ch == '/' {
@@ -442,9 +441,11 @@ impl<'input> Tokenizer<'input> {
                     return Err(ParsingFailure);
                 } else if CharacterValidator::is_line_terminator(ch) {
                     self.add_unexpected_error();
+                    self.consume_line_terminator();
+                } else {
+                    self.characters.next();
+                    body.push(ch);
                 }
-                self.consume_line_terminator();
-                body.push(ch);
             } else if CharacterValidator::is_line_terminator(ch) {
                 body.push('\n');
                 self.consume_line_terminator();
@@ -1380,12 +1381,12 @@ mod tests {
         let mut tokenizer = Tokenizer::new(&source);
 
         let Ok((Token::Div, start)) = tokenizer.scan_ie_div() else { panic!() };
-        let Ok((Token::RegExpLiteral { body, flags }, _)) = tokenizer.scan_regexp_literal(start) else { panic!() };
+        let Ok((Token::RegExpLiteral { body, flags }, _)) = tokenizer.scan_regexp_literal(start, "".into()) else { panic!() };
         assert_eq!(body, "(?:)");
         assert_eq!(flags, "");
 
         let Ok((Token::Div, start)) = tokenizer.scan_ie_div() else { panic!() };
-        let Ok((Token::RegExpLiteral { body, flags }, _)) = tokenizer.scan_regexp_literal(start) else { panic!() };
+        let Ok((Token::RegExpLiteral { body, flags }, _)) = tokenizer.scan_regexp_literal(start, "".into()) else { panic!() };
         assert_eq!(body, "(?:)");
         assert_eq!(flags, "gi");
     }

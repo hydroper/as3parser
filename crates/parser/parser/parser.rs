@@ -746,8 +746,12 @@ impl<'input> Parser<'input> {
             Ok(Some(Rc::new(Expression::ThisLiteral(ThisLiteral {
                 location: self.pop_location(),
             }))))
-        } else if let Token::RegExpLiteral { ref body, ref flags } = self.token.0.clone() {
+        } else if self.peek(Token::Div) || self.peek(Token::DivideAssign) {
             self.mark_location();
+            self.token = self.tokenizer.scan_regexp_literal(self.token.1.clone(), if self.peek(Token::DivideAssign) { "=".into() } else { "".into() })?;
+            let Token::RegExpLiteral { ref body, ref flags } = self.token.0.clone() else {
+                panic!();
+            };
             self.next()?;
             Ok(Some(Rc::new(Expression::RegExpLiteral(RegExpLiteral {
                 location: self.pop_location(),
@@ -1276,8 +1280,12 @@ impl<'input> Parser<'input> {
             Ok(Rc::new(Expression::ThisLiteral(ThisLiteral {
                 location: self.pop_location(),
             })))
-        } else if let Token::RegExpLiteral { ref body, ref flags } = self.token.0.clone() {
+        } else if self.peek(Token::Div) || self.peek(Token::DivideAssign) {
             self.mark_location();
+            self.token = self.tokenizer.scan_regexp_literal(self.token.1.clone(), if self.peek(Token::DivideAssign) { "=".into() } else { "".into() })?;
+            let Token::RegExpLiteral { ref body, ref flags } = self.token.0.clone() else {
+                panic!();
+            };
             self.next()?;
             Ok(Rc::new(Expression::RegExpLiteral(RegExpLiteral {
                 location: self.pop_location(),
