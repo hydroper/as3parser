@@ -18,7 +18,11 @@ let text = r#"
 </s:Application>
 "#;
 let source = CompilationUnit::new(None, text.into(), &CompilerOptions::new());
+
+// Ignore whitespace chunks in a node list when at least one
+// element appears.
 let ignore_whitespace = true;
+
 if let Some(document) = ParserFacade::parse_mxml_document(&source, ignore_whitespace) {
     // document: Rc<MxmlDocument>
 }
@@ -33,3 +37,7 @@ Every element stores a reference to a semantic namespace set (`Rc<MxmlNamespace>
 Resolve a plain `XmlName` node to a (*uri*, *name*) string group by invoking `name.resolve_name(&namespace)`, where `namespace` is usually `&element.namespace`.
 
 There are additional useful methods available within `XmlName` other than `resolve_name()`.
+
+## Default namespace
+
+The prefix for the default namespace is the empty string, but referred to by the `MxmlNamespace::DEFAULT_NAMESPACE` constant.
