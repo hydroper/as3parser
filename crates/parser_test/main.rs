@@ -27,7 +27,7 @@ fn main() -> io::Result<()> {
     let source_path_ast_json = FlexPath::new_native(&source_path).change_extension(".ast.json").to_string_with_flex_separator();
     let source_path_diagnostics = FlexPath::new_native(&source_path).change_extension(".diag").to_string_with_flex_separator();
     let source_content = fs::read_to_string(&source_path)?;
-    let compilation_unit = CompilationUnit::new(Some(source_path), source_content, &CompilerOptions::new());
+    let compilation_unit = CompilationUnit::new(Some(source_path), source_content, &CompilerOptions::default());
     if arguments.mxml {
         if let Some(document) = ParserFacade::parse_mxml_document(&compilation_unit, true) {
             if arguments.file_log {

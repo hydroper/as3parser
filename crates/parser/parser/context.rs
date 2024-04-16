@@ -2,13 +2,13 @@ use crate::ns::*;
 
 /// Context used to control the parsing of an expression.
 #[derive(Clone)]
-pub struct ParsingExpressionContext {
+pub struct ParserExpressionContext {
     pub min_precedence: OperatorPrecedence,
     pub allow_in: bool,
     pub allow_assignment: bool,
 }
 
-impl Default for ParsingExpressionContext {
+impl Default for ParserExpressionContext {
     fn default() -> Self {
         Self {
             min_precedence: OperatorPrecedence::List,
@@ -19,7 +19,7 @@ impl Default for ParsingExpressionContext {
 }
 
 #[derive(Clone)]
-pub enum ParsingDirectiveContext {
+pub enum ParserDirectiveContext {
     Default,
     TopLevel,
     PackageBlock,
@@ -34,12 +34,12 @@ pub enum ParsingDirectiveContext {
     WithControl {
         super_statement_found: Option<Rc<Cell<bool>>>,
         to_be_labeled: Option<String>,
-        control_context: ParsingControlContext,
-        labels: HashMap<String, ParsingControlContext>,
+        control_context: ParserControlFlowContext,
+        labels: HashMap<String, ParserControlFlowContext>,
     },
 }
 
-impl ParsingDirectiveContext {
+impl ParserDirectiveContext {
     pub fn may_contain_super_statement(&self) -> bool {
         matches!(self, Self::ConstructorBlock { .. }) || matches!(self, Self::WithControl { .. })
     }
@@ -65,7 +65,7 @@ impl ParsingDirectiveContext {
     }
 
     pub fn function_name_is_constructor(&self, name: &(String, Location)) -> bool {
-        if let ParsingDirectiveContext::ClassBlock { name: ref name_1 } = self {
+        if let ParserDirectiveContext::ClassBlock { name: ref name_1 } = self {
             &name.0 == name_1
         } else {
             false
@@ -73,7 +73,7 @@ impl ParsingDirectiveContext {
     }
 
     pub fn is_top_level_or_package(&self) -> bool {
-        matches!(self, ParsingDirectiveContext::TopLevel) || matches!(self, ParsingDirectiveContext::PackageBlock)
+        matches!(self, ParserDirectiveContext::TopLevel) || matches!(self, ParserDirectiveContext::PackageBlock)
     }
 
     pub fn is_type_block(&self) -> bool {
@@ -92,7 +92,7 @@ impl ParsingDirectiveContext {
         }
     }
 
-    pub fn override_control_context(&self, label_only: bool, mut context: ParsingControlContext) -> Self {
+    pub fn override_control_context(&self, label_only: bool, mut context: ParserControlFlowContext) -> Self {
         let mut prev_context = None;
         let mut label = None;
         let mut super_statement_found: Option<Rc<Cell<bool>>> = None;
@@ -109,7 +109,7 @@ impl ParsingDirectiveContext {
             labels.insert(label, context.clone());
         }
         if label_only {
-            context = prev_context.unwrap_or(ParsingControlContext {
+            context = prev_context.unwrap_or(ParserControlFlowContext {
                 breakable: false,
                 iteration: false,
             });
@@ -127,7 +127,7 @@ impl ParsingDirectiveContext {
             },
             _ => Self::WithControl {
                 to_be_labeled: Some(label),
-                control_context: ParsingControlContext {
+                control_context: ParserControlFlowContext {
                     breakable: false,
                     iteration: false,
                 },
@@ -144,7 +144,7 @@ impl ParsingDirectiveContext {
         self.resolve_label(label).is_some()
     }
 
-    pub fn resolve_label(&self, label: String) -> Option<ParsingControlContext> {
+    pub fn resolve_label(&self, label: String) -> Option<ParserControlFlowContext> {
         if let Self::WithControl { labels, .. } = &self { labels.get(&label).map(|c| c.clone()) } else { None }
     }
 
@@ -168,7 +168,7 @@ impl ParsingDirectiveContext {
 }
 
 #[derive(Clone)]
-pub struct ParsingControlContext {
+pub struct ParserControlFlowContext {
     pub breakable: bool,
     pub iteration: bool,
 }

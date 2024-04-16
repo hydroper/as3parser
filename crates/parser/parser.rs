@@ -5,8 +5,8 @@
 
 mod character_validator;
 pub use character_validator::*;
-mod contexts;
-pub use contexts::*;
+mod context;
+pub use context::*;
 mod reserved_word;
 pub use reserved_word::*;
 mod parser;

@@ -1291,7 +1291,7 @@ mod tests {
     #[test]
     fn tokenize_n_per_n() {
         let _n = "n".to_owned();
-        let source = CompilationUnit::new(None, "n * n".into(), &CompilerOptions::new());
+        let source = CompilationUnit::new(None, "n * n".into(), &CompilerOptions::default());
         let mut tokenizer = Tokenizer::new(&source);
         let Ok((Token::Identifier(name), _)) = tokenizer.scan_ie_div() else { panic!() };
         assert_eq!(name, "n");
@@ -1306,7 +1306,7 @@ mod tests {
         let source = CompilationUnit::new(None, "
             // Single-line comment
             /* Multi-line comment */
-        ".into(), &CompilerOptions::new());
+        ".into(), &CompilerOptions::default());
         let mut tokenizer = Tokenizer::new(&source);
         assert!(matches!(tokenizer.scan_ie_div(), Ok((Token::Eof, _))));
         assert_eq!(source.comments()[0].content(), " Single-line comment");
@@ -1324,7 +1324,7 @@ mod tests {
             """
             "a\b"
             @"a\b"
-        "###.into(), &CompilerOptions::new());
+        "###.into(), &CompilerOptions::default());
         let mut tokenizer = Tokenizer::new(&source);
 
         let Ok((Token::StringLiteral(s), _)) = tokenizer.scan_ie_div() else { panic!() };
@@ -1366,7 +1366,7 @@ mod tests {
             0x00_00
             0b0000_0000
             0f
-        "###.into(), &CompilerOptions::new());
+        "###.into(), &CompilerOptions::default());
         let mut tokenizer = Tokenizer::new(&source);
         for n in numbers {
             let Ok((Token::NumericLiteral(n2, suffix), location)) = tokenizer.scan_ie_div() else { panic!() };
@@ -1379,7 +1379,7 @@ mod tests {
         let source = CompilationUnit::new(None, r###"
             /(?:)/
             /(?:)/gi
-        "###.into(), &CompilerOptions::new());
+        "###.into(), &CompilerOptions::default());
 
         let mut tokenizer = Tokenizer::new(&source);
 

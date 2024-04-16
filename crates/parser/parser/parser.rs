@@ -6,7 +6,7 @@ pub struct Parser<'input> {
     previous_token: (Token, Location),
     token: (Token, Location),
     locations: Vec<Location>,
-    activations: Vec<ParsingActivation>,
+    activations: Vec<ParserActivation>,
     ignore_xml_whitespace: bool,
 }
 
@@ -357,7 +357,7 @@ impl<'input> Parser<'input> {
         }))
     }
 
-    pub fn parse_expression(&mut self, context: ParsingExpressionContext) -> Result<Rc<Expression>, ParserError> {
+    pub fn parse_expression(&mut self, context: ParserExpressionContext) -> Result<Rc<Expression>, ParserError> {
         if let Some(exp) = self.parse_opt_expression(context)? {
             Ok(exp)
         } else {
@@ -366,7 +366,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    pub fn parse_opt_expression(&mut self, context: ParsingExpressionContext) -> Result<Option<Rc<Expression>>, ParserError> {
+    pub fn parse_opt_expression(&mut self, context: ParserExpressionContext) -> Result<Option<Rc<Expression>>, ParserError> {
         let exp: Option<Rc<Expression>> = self.parse_opt_start_expression(context.clone())?;
 
         // Parse subexpressions
@@ -376,7 +376,7 @@ impl<'input> Parser<'input> {
         Ok(None)
     }
 
-    fn parse_subexpressions(&mut self, mut base: Rc<Expression>, context: ParsingExpressionContext) -> Result<Rc<Expression>, ParserError> {
+    fn parse_subexpressions(&mut self, mut base: Rc<Expression>, context: ParserExpressionContext) -> Result<Rc<Expression>, ParserError> {
         loop {
             if self.consume(Token::Dot)? {
                 base = self.parse_dot_subexpression(base)?;
@@ -386,7 +386,7 @@ impl<'input> Parser<'input> {
                 let asdoc = self.parse_asdoc()?;
                 self.next()?;
                 self.push_location(&base.location());
-                let key = self.parse_expression(ParsingExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
+                let key = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
                 self.expect(Token::RightBracket)?;
                 base = Rc::new(Expression::ComputedMember(ComputedMemberExpression {
                     base, asdoc, key, location: self.pop_location()
@@ -440,12 +440,12 @@ impl<'input> Parser<'input> {
             } else if self.peek(Token::Question) && context.min_precedence.includes(&OperatorPrecedence::AssignmentAndOther) {
                 self.push_location(&base.location());
                 self.next()?;
-                let consequent = self.parse_expression(ParsingExpressionContext {
+                let consequent = self.parse_expression(ParserExpressionContext {
                     min_precedence: OperatorPrecedence::AssignmentAndOther,
                     ..context.clone()
                 })?;
                 self.expect(Token::Colon)?;
-                let alternative = self.parse_expression(ParsingExpressionContext {
+                let alternative = self.parse_expression(ParserExpressionContext {
                     min_precedence: OperatorPrecedence::AssignmentAndOther,
                     ..context.clone()
                 })?;
@@ -469,7 +469,7 @@ impl<'input> Parser<'input> {
                 if !left.is_valid_assignment_left_hand_side() {
                     self.add_syntax_error(&left.location(), DiagnosticKind::MalformedDestructuring, vec![])
                 }
-                let right = self.parse_expression(ParsingExpressionContext {
+                let right = self.parse_expression(ParserExpressionContext {
                     min_precedence: OperatorPrecedence::AssignmentAndOther,
                     ..context.clone()
                 })?;
@@ -483,7 +483,7 @@ impl<'input> Parser<'input> {
                     self.push_location(&base.location());
                     self.next()?;
                     let left = base.clone();
-                    let right = self.parse_expression(ParsingExpressionContext {
+                    let right = self.parse_expression(ParserExpressionContext {
                         min_precedence: OperatorPrecedence::AssignmentAndOther,
                         ..context.clone()
                     })?;
@@ -497,7 +497,7 @@ impl<'input> Parser<'input> {
             } else if self.peek(Token::Comma) && context.min_precedence.includes(&OperatorPrecedence::List) {
                 self.push_location(&base.location());
                 self.next()?;
-                let right = self.parse_expression(ParsingExpressionContext {
+                let right = self.parse_expression(ParserExpressionContext {
                     min_precedence: OperatorPrecedence::AssignmentAndOther,
                     ..context.clone()
                 })?;
@@ -513,7 +513,7 @@ impl<'input> Parser<'input> {
         Ok(base)
     }
 
-    fn parse_binary_operator(&mut self, base: Rc<Expression>, mut operator: Operator, right_precedence: OperatorPrecedence, context: ParsingExpressionContext) -> Result<Rc<Expression>, ParserError> {
+    fn parse_binary_operator(&mut self, base: Rc<Expression>, mut operator: Operator, right_precedence: OperatorPrecedence, context: ParserExpressionContext) -> Result<Rc<Expression>, ParserError> {
         // The left operand of a null-coalescing operation must not be
         // a logical AND, XOR or OR operation.
         if operator == Operator::NullCoalescing {
@@ -529,7 +529,7 @@ impl<'input> Parser<'input> {
         }
 
         self.push_location(&base.location());
-        let right = self.parse_expression(ParsingExpressionContext {
+        let right = self.parse_expression(ParserExpressionContext {
             min_precedence: right_precedence,
             ..context
         })?;
@@ -539,7 +539,7 @@ impl<'input> Parser<'input> {
         })))
     }
 
-    fn check_binary_operator(&self, context: ParsingExpressionContext) -> Option<BinaryOperator> {
+    fn check_binary_operator(&self, context: ParserExpressionContext) -> Option<BinaryOperator> {
         if let Some(operator) = self.token.0.to_binary_operator() {
             if operator == Operator::In && !context.allow_in {
                 return None;
@@ -580,7 +580,7 @@ impl<'input> Parser<'input> {
         } else if self.peek(Token::LeftBracket) {
             let asdoc = self.parse_asdoc()?;
             self.next()?;
-            let key = self.parse_expression(ParsingExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
+            let key = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
             self.expect(Token::RightBracket)?;
             operation = Rc::new(Expression::ComputedMember(ComputedMemberExpression {
                 location: self.pop_location(),
@@ -612,7 +612,7 @@ impl<'input> Parser<'input> {
             } else if self.peek(Token::LeftBracket) {
                 self.next()?;
                 self.push_location(&base.location());
-                let key = self.parse_expression(ParsingExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
+                let key = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
                 self.expect(Token::RightBracket)?;
                 base = Rc::new(Expression::ComputedMember(ComputedMemberExpression {
                     base, asdoc: None, key, location: self.pop_location()
@@ -707,7 +707,7 @@ impl<'input> Parser<'input> {
         Ok(())
     }
 
-    fn parse_opt_start_expression(&mut self, context: ParsingExpressionContext) -> Result<Option<Rc<Expression>>, ParserError> {
+    fn parse_opt_start_expression(&mut self, context: ParserExpressionContext) -> Result<Option<Rc<Expression>>, ParserError> {
         if let Token::Identifier(id) = self.token.0.clone() {
             let id_location = self.token_location();
             self.next()?;
@@ -808,7 +808,7 @@ impl<'input> Parser<'input> {
             self.mark_location();
             let operator_token = self.token.clone();
             self.next()?;
-            let base = self.parse_expression(ParsingExpressionContext {
+            let base = self.parse_expression(ParserExpressionContext {
                 allow_in: true,
                 min_precedence: OperatorPrecedence::Unary,
                 ..default()
@@ -827,7 +827,7 @@ impl<'input> Parser<'input> {
             self.mark_location();
             let operator_token = self.token.clone();
             self.next()?;
-            let base = self.parse_expression(ParsingExpressionContext {
+            let base = self.parse_expression(ParserExpressionContext {
                 allow_in: true,
                 min_precedence: OperatorPrecedence::AssignmentAndOther,
                 ..default()
@@ -846,7 +846,7 @@ impl<'input> Parser<'input> {
             if context.min_precedence.includes(&OperatorPrecedence::Unary) {
                 self.mark_location();
                 self.next()?;
-                let base = self.parse_expression(ParsingExpressionContext { min_precedence: subexp_precedence, ..default() })?;
+                let base = self.parse_expression(ParserExpressionContext { min_precedence: subexp_precedence, ..default() })?;
                 Ok(Some(Rc::new(Expression::Unary(UnaryExpression {
                     location: self.pop_location(),
                     expression: base, operator,
@@ -915,7 +915,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn parse_function_expression(&mut self, context: ParsingExpressionContext) -> Result<Rc<Expression>, ParserError> {
+    fn parse_function_expression(&mut self, context: ParserExpressionContext) -> Result<Rc<Expression>, ParserError> {
         self.mark_location();
         self.next()?;
         let mut name = None;
@@ -923,7 +923,7 @@ impl<'input> Parser<'input> {
             name = Some((id, self.token.1.clone()));
             self.next()?;
         }
-        let common = self.parse_function_common(true, ParsingDirectiveContext::Default, context.allow_in)?;
+        let common = self.parse_function_common(true, ParserDirectiveContext::Default, context.allow_in)?;
         Ok(Rc::new(Expression::Function(FunctionExpression {
             location: self.pop_location(),
             name,
@@ -931,7 +931,7 @@ impl<'input> Parser<'input> {
         })))
     }
 
-    fn parse_function_common(&mut self, function_expr: bool, block_context: ParsingDirectiveContext, allow_in: bool) -> Result<Rc<FunctionCommon>, ParserError> {
+    fn parse_function_common(&mut self, function_expr: bool, block_context: ParserDirectiveContext, allow_in: bool) -> Result<Rc<FunctionCommon>, ParserError> {
         self.mark_location();
         self.duplicate_location();
         self.expect(Token::LeftParen)?;
@@ -950,13 +950,13 @@ impl<'input> Parser<'input> {
         let signature_location = self.pop_location();
 
         // Enter activation
-        self.activations.push(ParsingActivation::new());
+        self.activations.push(ParserActivation::new());
 
         // Body
         let body = if self.peek(Token::LeftBrace) {
             Some(FunctionBody::Block(Rc::new(self.parse_block(block_context)?)))
         } else {
-            self.parse_opt_expression(ParsingExpressionContext {
+            self.parse_opt_expression(ParserExpressionContext {
                 allow_in,
                 min_precedence: OperatorPrecedence::AssignmentAndOther,
                 ..default()
@@ -1029,7 +1029,7 @@ impl<'input> Parser<'input> {
         if self.peek(Token::Ellipsis) {
             self.mark_location();
             self.next()?;
-            let subexp = self.parse_expression(ParsingExpressionContext {
+            let subexp = self.parse_expression(ParserExpressionContext {
                 allow_in: true,
                 min_precedence: OperatorPrecedence::AssignmentAndOther,
                 ..default()
@@ -1043,7 +1043,7 @@ impl<'input> Parser<'input> {
         let mut value = None;
 
         if self.consume(Token::Colon)? {
-            value = Some(self.parse_expression(ParsingExpressionContext {
+            value = Some(self.parse_expression(ParserExpressionContext {
                 allow_in: true,
                 min_precedence: OperatorPrecedence::AssignmentAndOther,
                 ..default()
@@ -1078,7 +1078,7 @@ impl<'input> Parser<'input> {
         } else if self.peek(Token::LeftBracket) {
             self.mark_location();
             self.next()?;
-            let key_expr = self.parse_expression(ParsingExpressionContext {
+            let key_expr = self.parse_expression(ParserExpressionContext {
                 allow_in: true,
                 min_precedence: OperatorPrecedence::List,
                 ..default()
@@ -1105,13 +1105,13 @@ impl<'input> Parser<'input> {
                 if self.peek(Token::Ellipsis) {
                     self.mark_location();
                     self.next()?;
-                    elements.push(Element::Rest((self.parse_expression(ParsingExpressionContext {
+                    elements.push(Element::Rest((self.parse_expression(ParserExpressionContext {
                         allow_in: true,
                         min_precedence: OperatorPrecedence::AssignmentAndOther,
                         ..default()
                     })?, self.pop_location())));
                 } else {
-                    elements.push(Element::Expression(self.parse_expression(ParsingExpressionContext {
+                    elements.push(Element::Expression(self.parse_expression(ParserExpressionContext {
                         allow_in: true,
                         min_precedence: OperatorPrecedence::AssignmentAndOther,
                         ..default()
@@ -1160,7 +1160,7 @@ impl<'input> Parser<'input> {
         }));
 
         if self.consume(Token::LeftBracket)? {
-            let key = self.parse_expression(ParsingExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
+            let key = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
             self.expect(Token::RightBracket)?;
             Ok(Rc::new(Expression::ComputedMember(ComputedMemberExpression {
                 location: self.pop_location(),
@@ -1180,13 +1180,13 @@ impl<'input> Parser<'input> {
         self.expect(Token::LeftParen)?;
         let mut arguments = vec![];
         if !self.peek(Token::RightParen) {
-            arguments.push(self.parse_expression(ParsingExpressionContext {
+            arguments.push(self.parse_expression(ParserExpressionContext {
                 allow_in: true,
                 min_precedence: OperatorPrecedence::AssignmentAndOther,
                 ..default()
             })?);
             while self.consume(Token::Comma)? {
-                arguments.push(self.parse_expression(ParsingExpressionContext {
+                arguments.push(self.parse_expression(ParserExpressionContext {
                     allow_in: true,
                     min_precedence: OperatorPrecedence::AssignmentAndOther,
                     ..default()
@@ -1202,7 +1202,7 @@ impl<'input> Parser<'input> {
         loop {
             if self.consume(Token::LeftBracket)? {
                 self.push_location(&base.location());
-                let key = self.parse_expression(ParsingExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
+                let key = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
                 self.expect(Token::RightBracket)?;
                 base = Rc::new(Expression::ComputedMember(ComputedMemberExpression {
                     location: self.pop_location(),
@@ -1384,13 +1384,13 @@ impl<'input> Parser<'input> {
                 if self.peek(Token::Ellipsis) {
                     self.mark_location();
                     self.next()?;
-                    elements.push(Element::Rest((self.parse_expression(ParsingExpressionContext {
+                    elements.push(Element::Rest((self.parse_expression(ParserExpressionContext {
                         allow_in: true,
                         min_precedence: OperatorPrecedence::AssignmentAndOther,
                         ..default()
                     })?, self.pop_location())));
                 } else {
-                    elements.push(Element::Expression(self.parse_expression(ParsingExpressionContext {
+                    elements.push(Element::Expression(self.parse_expression(ParserExpressionContext {
                         allow_in: true,
                         min_precedence: OperatorPrecedence::AssignmentAndOther,
                         ..default()
@@ -1438,7 +1438,7 @@ impl<'input> Parser<'input> {
         let mut attribute_expression: Option<Rc<Expression>> = None;
         while self.consume_and_ie_xml_tag(Token::XmlWhitespace)? {
             if self.consume(Token::LeftBrace)? {
-                let expr = self.parse_expression(ParsingExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::AssignmentAndOther, ..default() })?;
+                let expr = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::AssignmentAndOther, ..default() })?;
                 self.expect_and_ie_xml_tag(Token::RightBrace)?;
                 attribute_expression = Some(expr);
                 self.consume_and_ie_xml_tag(Token::XmlWhitespace)?;
@@ -1451,7 +1451,7 @@ impl<'input> Parser<'input> {
                 self.consume_and_ie_xml_tag(Token::XmlWhitespace)?;
                 let value: XmlAttributeValue;
                 if self.consume(Token::LeftBrace)? {
-                    let expr = self.parse_expression(ParsingExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::AssignmentAndOther, ..default() })?;
+                    let expr = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::AssignmentAndOther, ..default() })?;
                     self.expect_and_ie_xml_tag(Token::RightBrace)?;
                     value = XmlAttributeValue::Expression(expr);
                 } else {
@@ -1513,7 +1513,7 @@ impl<'input> Parser<'input> {
 
     fn parse_xml_tag_name(&mut self) -> Result<XmlTagName, ParserError> {
         if self.consume(Token::LeftBrace)? {
-            let expr = self.parse_expression(ParsingExpressionContext {
+            let expr = self.parse_expression(ParserExpressionContext {
                 allow_in: true,
                 min_precedence: OperatorPrecedence::AssignmentAndOther,
                 ..default()
@@ -1541,7 +1541,7 @@ impl<'input> Parser<'input> {
         let mut content = vec![];
         while !self.peek(Token::XmlLtSlash) {
             if self.consume(Token::LeftBrace)? {
-                let expr = self.parse_expression(ParsingExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::AssignmentAndOther, ..default() })?;
+                let expr = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::AssignmentAndOther, ..default() })?;
                 self.expect_and_ie_xml_content(Token::RightBrace)?;
                 content.push(Rc::new(XmlElementContent::Expression(expr)));
             } else if let Token::XmlMarkup(markup) = self.token.0.clone() {
@@ -1586,7 +1586,7 @@ impl<'input> Parser<'input> {
         let start = self.token_location();
         self.expect(Token::LeftParen)?;
 
-        let expr = self.parse_expression(ParsingExpressionContext {
+        let expr = self.parse_expression(ParserExpressionContext {
             min_precedence: OperatorPrecedence::List,
             allow_in: true,
             ..default()
@@ -1823,7 +1823,7 @@ impl<'input> Parser<'input> {
 
     fn parse_brackets(&mut self) -> Result<Rc<Expression>, ParserError> {
         self.expect(Token::LeftBracket)?;
-        let expr = self.parse_expression(ParsingExpressionContext {
+        let expr = self.parse_expression(ParserExpressionContext {
             min_precedence: OperatorPrecedence::List,
             allow_in: true,
             ..default()
@@ -1834,7 +1834,7 @@ impl<'input> Parser<'input> {
 
     fn parse_paren_expression(&mut self) -> Result<Rc<Expression>, ParserError> {
         self.expect(Token::LeftParen)?;
-        let expr = self.parse_expression(ParsingExpressionContext {
+        let expr = self.parse_expression(ParserExpressionContext {
             min_precedence: OperatorPrecedence::AssignmentAndOther,
             allow_in: true,
             ..default()
@@ -1845,7 +1845,7 @@ impl<'input> Parser<'input> {
 
     fn parse_paren_list_expression(&mut self) -> Result<Rc<Expression>, ParserError> {
         self.expect(Token::LeftParen)?;
-        let expr = self.parse_expression(ParsingExpressionContext {
+        let expr = self.parse_expression(ParserExpressionContext {
             min_precedence: OperatorPrecedence::List,
             allow_in: true,
             ..default()
@@ -2038,7 +2038,7 @@ impl<'input> Parser<'input> {
     fn parse_variable_binding(&mut self, allow_in: bool) -> Result<VariableBinding, ParserError> {
         let destructuring = self.parse_typed_destructuring()?;
         let initializer = if self.consume(Token::Assign)? {
-            Some(self.parse_expression(ParsingExpressionContext {
+            Some(self.parse_expression(ParserExpressionContext {
                 allow_in,
                 min_precedence: OperatorPrecedence::AssignmentAndOther,
                 ..default()
@@ -2056,11 +2056,11 @@ impl<'input> Parser<'input> {
         Ok(self.consume(Token::Semicolon)? || self.peek(Token::RightBrace) || self.previous_token.1.line_break(&self.token.1))
     }
 
-    fn parse_substatement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
+    fn parse_substatement(&mut self, context: ParserDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
         self.parse_statement(context)
     }
 
-    fn parse_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
+    fn parse_statement(&mut self, context: ParserDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
         // ExpressionStatement or LabeledStatement
         if let Token::Identifier(id) = &self.token.0.clone() {
             let id = (id.clone(), self.token_location());
@@ -2085,7 +2085,7 @@ impl<'input> Parser<'input> {
                     location: self.pop_location(),
                     object: arguments,
                 }));
-                expr = self.parse_subexpressions(expr, ParsingExpressionContext {
+                expr = self.parse_subexpressions(expr, ParserExpressionContext {
                     allow_in: true,
                     min_precedence: OperatorPrecedence::List,
                     ..default()
@@ -2129,7 +2129,7 @@ impl<'input> Parser<'input> {
             let context = if context.is_top_level_or_package() || context.is_type_block() {
                 context.clone()
             } else {
-                context.override_control_context(true, ParsingControlContext {
+                context.override_control_context(true, ParserControlFlowContext {
                     breakable: true,
                     iteration: false,
                 })
@@ -2178,7 +2178,7 @@ impl<'input> Parser<'input> {
         // ExpressionStatement
         } else {
             self.mark_location();
-            let exp = self.parse_expression(ParsingExpressionContext {
+            let exp = self.parse_expression(ParserExpressionContext {
                 allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
             })?;
             let semicolon_inserted = if exp.is_invalidated() {
@@ -2192,7 +2192,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn parse_statement_starting_with_identifier(&mut self, context: ParsingDirectiveContext, id: (String, Location)) -> Result<(Rc<Directive>, bool), ParserError> {
+    fn parse_statement_starting_with_identifier(&mut self, context: ParserDirectiveContext, id: (String, Location)) -> Result<(Rc<Directive>, bool), ParserError> {
         self.push_location(&id.1);
         let id_location = id.1.clone();
 
@@ -2229,7 +2229,7 @@ impl<'input> Parser<'input> {
             }
         }
 
-        exp = self.parse_subexpressions(exp, ParsingExpressionContext {
+        exp = self.parse_subexpressions(exp, ParserExpressionContext {
             allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
         })?;
         let semicolon_inserted = self.parse_semicolon()?;
@@ -2239,7 +2239,7 @@ impl<'input> Parser<'input> {
         })), semicolon_inserted))
     }
 
-    fn parse_qualified_identifier_statement_or_normal_config(&mut self, context: ParsingDirectiveContext, id: (String, Location), asdoc: Option<Rc<AsDoc>>) -> Result<(Rc<Directive>, bool), ParserError> {
+    fn parse_qualified_identifier_statement_or_normal_config(&mut self, context: ParserDirectiveContext, id: (String, Location), asdoc: Option<Rc<AsDoc>>) -> Result<(Rc<Directive>, bool), ParserError> {
         self.push_location(&id.1);
         let id_location = id.1.clone();
         let id = Rc::new(Expression::QualifiedIdentifier(QualifiedIdentifier {
@@ -2252,7 +2252,7 @@ impl<'input> Parser<'input> {
         let ql = self.pop_location();
         let id = self.finish_qualified_identifier(false, ql, id)?;
         let mut exp = Rc::new(Expression::QualifiedIdentifier(id));
-        exp = self.parse_subexpressions(exp, ParsingExpressionContext {
+        exp = self.parse_subexpressions(exp, ParserExpressionContext {
             allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
         })?;
 
@@ -2268,7 +2268,7 @@ impl<'input> Parser<'input> {
         })), semicolon_inserted))
     }
 
-    fn parse_opt_normal_config(&mut self, exp: &Rc<Expression>, asdoc: Option<Rc<AsDoc>>, context: ParsingDirectiveContext) -> Result<Option<(Rc<Directive>, bool)>, ParserError> {
+    fn parse_opt_normal_config(&mut self, exp: &Rc<Expression>, asdoc: Option<Rc<AsDoc>>, context: ParserDirectiveContext) -> Result<Option<(Rc<Directive>, bool)>, ParserError> {
         if self.peek_annotatable_directive_identifier_name() {
             match exp.to_normal_configuration_identifier(self) {
                 Ok(Some((q, constant_name, metadata))) => {
@@ -2310,11 +2310,11 @@ impl<'input> Parser<'input> {
         Ok(None)
     }
 
-    fn parse_block(&mut self, context: ParsingDirectiveContext) -> Result<Block, ParserError> {
+    fn parse_block(&mut self, context: ParserDirectiveContext) -> Result<Block, ParserError> {
         self.parse_block_with_metadata(context, None)
     }
 
-    fn parse_block_with_metadata(&mut self, context: ParsingDirectiveContext, metadata: Option<Vec<Attribute>>) -> Result<Block, ParserError> {
+    fn parse_block_with_metadata(&mut self, context: ParserDirectiveContext, metadata: Option<Vec<Attribute>>) -> Result<Block, ParserError> {
         self.mark_location();
         self.expect(Token::LeftBrace)?;
         let mut directives = vec![];
@@ -2335,15 +2335,15 @@ impl<'input> Parser<'input> {
         })
     }
 
-    fn parse_if_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
-        let context = context.override_control_context(true, ParsingControlContext {
+    fn parse_if_statement(&mut self, context: ParserDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
+        let context = context.override_control_context(true, ParserControlFlowContext {
             breakable: true,
             iteration: false,
         });
         self.mark_location();
         self.next()?;
         self.expect(Token::LeftParen)?;
-        let test = self.parse_expression(ParsingExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
+        let test = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
         self.expect(Token::RightParen)?;
         let semicolon_inserted;
         let (consequent, semicolon_inserted_1) = self.parse_substatement(context.clone())?;
@@ -2365,7 +2365,7 @@ impl<'input> Parser<'input> {
         })), semicolon_inserted))
     }
 
-    fn parse_switch_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
+    fn parse_switch_statement(&mut self, context: ParserDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
         self.mark_location();
         self.next()?;
         if self.peek_context_keyword("type") {
@@ -2373,12 +2373,12 @@ impl<'input> Parser<'input> {
             self.next()?;
             return self.parse_switch_type_statement(context);
         }
-        let context = context.override_control_context(false, ParsingControlContext {
+        let context = context.override_control_context(false, ParserControlFlowContext {
             breakable: true,
             iteration: false,
         });
         self.expect(Token::LeftParen)?;
-        let discriminant = self.parse_expression(ParsingExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
+        let discriminant = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
         self.expect(Token::RightParen)?;
         self.expect(Token::LeftBrace)?;
         let cases = self.parse_case_elements(context)?;
@@ -2389,7 +2389,7 @@ impl<'input> Parser<'input> {
         })), true))
     }
 
-    fn parse_case_elements(&mut self, context: ParsingDirectiveContext) -> Result<Vec<Case>, ParserError> {
+    fn parse_case_elements(&mut self, context: ParserDirectiveContext) -> Result<Vec<Case>, ParserError> {
         let mut cases = vec![];
         let mut semicolon_inserted = false;
         while !self.peek(Token::RightBrace) {
@@ -2405,7 +2405,7 @@ impl<'input> Parser<'input> {
                 if self.peek(Token::Case) {
                     self.mark_location();
                     self.next()?;
-                    let exp = self.parse_expression(ParsingExpressionContext {
+                    let exp = self.parse_expression(ParserExpressionContext {
                         allow_in: true,
                         min_precedence: OperatorPrecedence::List,
                         ..default()
@@ -2440,13 +2440,13 @@ impl<'input> Parser<'input> {
         Ok(cases)
     }
 
-    fn parse_switch_type_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
-        let context = context.override_control_context(true, ParsingControlContext {
+    fn parse_switch_type_statement(&mut self, context: ParserDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
+        let context = context.override_control_context(true, ParserControlFlowContext {
             breakable: true,
             iteration: false,
         });
         self.expect(Token::LeftParen)?;
-        let discriminant = self.parse_expression(ParsingExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
+        let discriminant = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
         self.expect(Token::RightParen)?;
         self.expect(Token::LeftBrace)?;
         let cases = self.parse_type_case_elements(context)?;
@@ -2457,7 +2457,7 @@ impl<'input> Parser<'input> {
         })), true))
     }
 
-    fn parse_type_case_elements(&mut self, context: ParsingDirectiveContext) -> Result<Vec<TypeCase>, ParserError> {
+    fn parse_type_case_elements(&mut self, context: ParserDirectiveContext) -> Result<Vec<TypeCase>, ParserError> {
         let mut cases = vec![];
         while !self.peek(Token::RightBrace) && !self.peek(Token::Eof) {
             if self.peek(Token::Default) {
@@ -2486,8 +2486,8 @@ impl<'input> Parser<'input> {
         Ok(cases)
     }
 
-    fn parse_do_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
-        let context = context.override_control_context(false, ParsingControlContext {
+    fn parse_do_statement(&mut self, context: ParserDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
+        let context = context.override_control_context(false, ParserControlFlowContext {
             breakable: true,
             iteration: true,
         });
@@ -2504,7 +2504,7 @@ impl<'input> Parser<'input> {
 
         // Test
         self.expect(Token::LeftParen)?;
-        let test = self.parse_expression(ParsingExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
+        let test = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
         self.expect(Token::RightParen)?;
 
         let semicolon_inserted = self.parse_semicolon()?;
@@ -2514,8 +2514,8 @@ impl<'input> Parser<'input> {
         })), semicolon_inserted))
     }
 
-    fn parse_while_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
-        let context = context.override_control_context(false, ParsingControlContext {
+    fn parse_while_statement(&mut self, context: ParserDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
+        let context = context.override_control_context(false, ParserControlFlowContext {
             breakable: true,
             iteration: true,
         });
@@ -2524,7 +2524,7 @@ impl<'input> Parser<'input> {
 
         // Test
         self.expect(Token::LeftParen)?;
-        let test = self.parse_expression(ParsingExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
+        let test = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
         self.expect(Token::RightParen)?;
 
         // Body
@@ -2537,8 +2537,8 @@ impl<'input> Parser<'input> {
     }
 
     /// Parses `for`, `for..in` or `for each`.
-    fn parse_for_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
-        let context = context.override_control_context(false, ParsingControlContext {
+    fn parse_for_statement(&mut self, context: ParserDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
+        let context = context.override_control_context(false, ParserControlFlowContext {
             breakable: true,
             iteration: true,
         });
@@ -2565,7 +2565,7 @@ impl<'input> Parser<'input> {
         }
 
         let mut init_exp = if init_variable.is_none() && !self.peek(Token::Semicolon) {
-            self.parse_opt_expression(ParsingExpressionContext {
+            self.parse_opt_expression(ParserExpressionContext {
                 allow_in: false,
                 min_precedence: OperatorPrecedence::Postfix,
                 ..default()
@@ -2579,11 +2579,11 @@ impl<'input> Parser<'input> {
         }
 
         if init_exp.is_none() && init_variable.is_none() && !self.peek(Token::Semicolon) {
-            init_exp = Some(self.parse_expression(ParsingExpressionContext {
+            init_exp = Some(self.parse_expression(ParserExpressionContext {
                 allow_in: false, min_precedence: OperatorPrecedence::List, ..default()
             })?);
         } else if let Some(exp) = init_exp.as_ref() {
-            init_exp = Some(self.parse_subexpressions(exp.clone(), ParsingExpressionContext {
+            init_exp = Some(self.parse_subexpressions(exp.clone(), ParserExpressionContext {
                 allow_in: false, min_precedence: OperatorPrecedence::List, ..default()
             })?);
         }
@@ -2600,7 +2600,7 @@ impl<'input> Parser<'input> {
         let test = if self.peek(Token::Semicolon) {
             None
         } else {
-            Some(self.parse_expression(ParsingExpressionContext {
+            Some(self.parse_expression(ParserExpressionContext {
                 allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
             })?)
         };
@@ -2608,7 +2608,7 @@ impl<'input> Parser<'input> {
         let update = if self.peek(Token::RightParen) {
             None
         } else {
-            Some(self.parse_expression(ParsingExpressionContext {
+            Some(self.parse_expression(ParserExpressionContext {
                 allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
             })?)
         };
@@ -2623,7 +2623,7 @@ impl<'input> Parser<'input> {
         })), semicolon_inserted))
     }
 
-    fn parse_for_each_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
+    fn parse_for_each_statement(&mut self, context: ParserDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
         self.expect(Token::LeftParen)?;
         let left = if self.peek(Token::Var) || self.peek(Token::Const) {
             self.mark_location();
@@ -2639,12 +2639,12 @@ impl<'input> Parser<'input> {
                 bindings: vec![Rc::new(binding)],
             }))
         } else {
-            ForInBinding::Expression(self.parse_expression(ParsingExpressionContext {
+            ForInBinding::Expression(self.parse_expression(ParserExpressionContext {
                 allow_in: false, min_precedence: OperatorPrecedence::Postfix, ..default()
             })?)
         };
         self.expect(Token::In)?;
-        let right = self.parse_expression(ParsingExpressionContext {
+        let right = self.parse_expression(ParserExpressionContext {
             allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
         })?;
         self.expect(Token::RightParen)?;
@@ -2658,7 +2658,7 @@ impl<'input> Parser<'input> {
         })), semicolon_inserted))
     }
 
-    fn parse_for_in_statement_with_left_variable(&mut self, context: ParsingDirectiveContext, left: SimpleVariableDefinition) -> Result<(Rc<Directive>, bool), ParserError> {
+    fn parse_for_in_statement_with_left_variable(&mut self, context: ParserDirectiveContext, left: SimpleVariableDefinition) -> Result<(Rc<Directive>, bool), ParserError> {
         let variable_binding = left.bindings[0].clone();
 
         if let Some(init) = &variable_binding.initializer {
@@ -2669,7 +2669,7 @@ impl<'input> Parser<'input> {
             self.add_syntax_error(&left.kind.1.clone(), DiagnosticKind::MultipleForInBindings, vec![]);
         }
 
-        let right = self.parse_expression(ParsingExpressionContext {
+        let right = self.parse_expression(ParserExpressionContext {
             allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
         })?;
         self.expect(Token::RightParen)?;
@@ -2683,8 +2683,8 @@ impl<'input> Parser<'input> {
         })), semicolon_inserted))
     }
 
-    fn parse_for_in_statement_with_left_exp(&mut self, context: ParsingDirectiveContext, left: Rc<Expression>) -> Result<(Rc<Directive>, bool), ParserError> {
-        let right = self.parse_expression(ParsingExpressionContext {
+    fn parse_for_in_statement_with_left_exp(&mut self, context: ParserDirectiveContext, left: Rc<Expression>) -> Result<(Rc<Directive>, bool), ParserError> {
+        let right = self.parse_expression(ParserExpressionContext {
             allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
         })?;
         self.expect(Token::RightParen)?;
@@ -2719,8 +2719,8 @@ impl<'input> Parser<'input> {
         })
     }
 
-    fn parse_with_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
-        let context = context.override_control_context(true, ParsingControlContext {
+    fn parse_with_statement(&mut self, context: ParserDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
+        let context = context.override_control_context(true, ParserControlFlowContext {
             breakable: true,
             iteration: false,
         });
@@ -2729,7 +2729,7 @@ impl<'input> Parser<'input> {
 
         // Object
         self.expect(Token::LeftParen)?;
-        let object = self.parse_expression(ParsingExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
+        let object = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
         self.expect(Token::RightParen)?;
 
         // Body
@@ -2741,7 +2741,7 @@ impl<'input> Parser<'input> {
         })), semicolon_inserted))
     }
 
-    fn parse_break_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
+    fn parse_break_statement(&mut self, context: ParserDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
         self.mark_location();
         self.next()?;
 
@@ -2765,7 +2765,7 @@ impl<'input> Parser<'input> {
         Ok((node, semicolon_inserted))
     }
 
-    fn parse_continue_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
+    fn parse_continue_statement(&mut self, context: ParserDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
         self.mark_location();
         self.next()?;
 
@@ -2789,12 +2789,12 @@ impl<'input> Parser<'input> {
         Ok((node, semicolon_inserted))
     }
 
-    fn parse_return_statement(&mut self, _context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
+    fn parse_return_statement(&mut self, _context: ParserDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
         self.mark_location();
         self.next()?;
 
         let expression = if self.previous_token.1.line_break(&self.token.1) { None } else {
-            self.parse_opt_expression(ParsingExpressionContext {
+            self.parse_opt_expression(ParserExpressionContext {
                 allow_in: true,
                 min_precedence: OperatorPrecedence::List,
                 ..default()
@@ -2811,13 +2811,13 @@ impl<'input> Parser<'input> {
         Ok((node, semicolon_inserted))
     }
 
-    fn parse_throw_statement(&mut self, _context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
+    fn parse_throw_statement(&mut self, _context: ParserDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
         self.mark_location();
         self.next()?;
 
         let line_break = self.previous_token.1.line_break(&self.token.1);
 
-        let expression = self.parse_expression(ParsingExpressionContext {
+        let expression = self.parse_expression(ParserExpressionContext {
             allow_in: true,
             min_precedence: OperatorPrecedence::List,
             ..default()
@@ -2837,7 +2837,7 @@ impl<'input> Parser<'input> {
         Ok((node, semicolon_inserted))
     }
 
-    fn parse_try_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
+    fn parse_try_statement(&mut self, context: ParserDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
         self.mark_location();
         self.next()?;
         let context = context.clone_control();
@@ -2892,7 +2892,7 @@ impl<'input> Parser<'input> {
         self.expect_context_keyword("namespace")?;
         self.expect(Token::Assign)?;
 
-        let expression = self.parse_expression(ParsingExpressionContext {
+        let expression = self.parse_expression(ParserExpressionContext {
             allow_in: true,
             allow_assignment: false,
             min_precedence: OperatorPrecedence::AssignmentAndOther,
@@ -2915,7 +2915,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn parse_directive(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
+    fn parse_directive(&mut self, context: ParserDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
         let asdoc: Option<Rc<AsDoc>> = if self.peek(Token::LeftBracket) { None } else { self.parse_asdoc()? };
         // ConfigurationDirective or Statement
         if let Token::Identifier(id) = &self.token.0 {
@@ -2952,7 +2952,7 @@ impl<'input> Parser<'input> {
                     // self.parse_attribute_keywords_or_expressions(&mut context)?;
                 } else {
                     let mut first_attr_expr = self.parse_expression_starting_with_identifier(id)?;
-                    first_attr_expr = self.parse_subexpressions(first_attr_expr, ParsingExpressionContext {
+                    first_attr_expr = self.parse_subexpressions(first_attr_expr, ParserExpressionContext {
                         allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
                     })?;
 
@@ -2996,7 +2996,7 @@ impl<'input> Parser<'input> {
             self.parse_import_directive_or_expression_statement(context)
         } else if self.peek(Token::LeftBracket) {
             self.mark_location();
-            let exp = self.parse_expression(ParsingExpressionContext {
+            let exp = self.parse_expression(ParserExpressionContext {
                 allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
             })?;
             if self.peek_annotatable_directive_identifier_name() {
@@ -3022,7 +3022,7 @@ impl<'input> Parser<'input> {
             if self.peek(Token::LeftBrace) {
                 match exp.to_metadata(self) {
                     Ok(Some(metadata)) => {
-                        let context = context.override_control_context(true, ParsingControlContext {
+                        let context = context.override_control_context(true, ParserControlFlowContext {
                             breakable: true,
                             iteration: false,
                         });
@@ -3051,7 +3051,7 @@ impl<'input> Parser<'input> {
                 if matches!(self.token.0, Token::ColonColon) {
                     self.push_location(&rns.location());
                     let rns = Rc::new(Expression::QualifiedIdentifier(self.finish_qualified_identifier(false, rns.location(), rns)?));
-                    let rns = self.parse_subexpressions(rns, ParsingExpressionContext {
+                    let rns = self.parse_subexpressions(rns, ParserExpressionContext {
                         allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
                     })?;
                     let semicolon = self.parse_semicolon()?;
@@ -3078,7 +3078,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn parse_directives(&mut self, context: ParsingDirectiveContext) -> Result<Vec<Rc<Directive>>, ParserError> {
+    fn parse_directives(&mut self, context: ParserDirectiveContext) -> Result<Vec<Rc<Directive>>, ParserError> {
         let mut directives = vec![];
         let mut semicolon = false;
         while !self.peek(Token::Eof) {
@@ -3110,7 +3110,7 @@ impl<'input> Parser<'input> {
                 }));
             } else if self.consume(Token::LeftBracket)? {
                 self.push_location(&result.location());
-                let key = self.parse_expression(ParsingExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
+                let key = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
                 self.expect(Token::RightBracket)?;
                 result = Rc::new(Expression::ComputedMember(ComputedMemberExpression {
                     base: result, asdoc: None, key, location: self.pop_location()
@@ -3236,7 +3236,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn parse_import_directive_or_expression_statement(&mut self, _context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
+    fn parse_import_directive_or_expression_statement(&mut self, _context: ParserDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
         self.mark_location();
         self.next()?;
         if self.consume(Token::Dot)? {
@@ -3245,7 +3245,7 @@ impl<'input> Parser<'input> {
             let mut expression = Rc::new(Expression::ImportMeta(ImportMeta {
                 location: self.pop_location(),
             }));
-            expression = self.parse_subexpressions(expression, ParsingExpressionContext {
+            expression = self.parse_subexpressions(expression, ParserExpressionContext {
                 allow_in: true,
                 min_precedence: OperatorPrecedence::List,
                 ..default()
@@ -3300,7 +3300,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn parse_include_directive(&mut self, context: ParsingDirectiveContext, start: Location) -> Result<(Rc<Directive>, bool), ParserError> {
+    fn parse_include_directive(&mut self, context: ParserDirectiveContext, start: Location) -> Result<(Rc<Directive>, bool), ParserError> {
         self.push_location(&start);
         let source_path_location = self.token_location();
         let Token::StringLiteral(source) = &self.token.0.clone() else {
@@ -3374,7 +3374,7 @@ impl<'input> Parser<'input> {
         self.mark_location();
         self.next()?;
         self.expect_context_keyword("namespace")?;
-        let expression = self.parse_expression(ParsingExpressionContext {
+        let expression = self.parse_expression(ParserExpressionContext {
             min_precedence: OperatorPrecedence::List,
             ..default()
         })?;
@@ -3405,7 +3405,7 @@ impl<'input> Parser<'input> {
         }
 
         // Forbid destructuring bindings in enumerations.
-        if !has_static && matches!(context, ParsingDirectiveContext::EnumBlock) {
+        if !has_static && matches!(context, ParserDirectiveContext::EnumBlock) {
             if kind != VariableDefinitionKind::Const {
                 self.add_syntax_error(&kind_location, DiagnosticKind::EnumMembersMustBeConst, diagnostic_arguments![]);
             }
@@ -3481,9 +3481,9 @@ impl<'input> Parser<'input> {
             FunctionName::Identifier(name)
         };
         let block_context = if constructor {
-            ParsingDirectiveContext::ConstructorBlock { super_statement_found: Rc::new(Cell::new(false)) }
+            ParserDirectiveContext::ConstructorBlock { super_statement_found: Rc::new(Cell::new(false)) }
         } else {
-            ParsingDirectiveContext::Default
+            ParserDirectiveContext::Default
         };
         let common = self.parse_function_common(false, block_context, true)?;
         let semicolon = if common.has_block_body() { true } else { self.parse_semicolon()? };
@@ -3504,7 +3504,7 @@ impl<'input> Parser<'input> {
             self.add_syntax_error(&name.location(), DiagnosticKind::FunctionMayNotBeAsynchronous, diagnostic_arguments![]);
         }
 
-        let interface_method = matches!(context, ParsingDirectiveContext::InterfaceBlock);
+        let interface_method = matches!(context, ParserDirectiveContext::InterfaceBlock);
 
         // Body verification.
         //
@@ -3585,7 +3585,7 @@ impl<'input> Parser<'input> {
         if self.consume(Token::Implements)? {
             implements_clause = Some(self.parse_type_expression_list()?);
         }
-        let block = Rc::new(self.parse_block(ParsingDirectiveContext::ClassBlock {
+        let block = Rc::new(self.parse_block(ParserDirectiveContext::ClassBlock {
             name: name.0.clone(),
         })?);
 
@@ -3640,7 +3640,7 @@ impl<'input> Parser<'input> {
         if self.consume(Token::As)? {
             as_clause = Some(self.parse_type_expression()?);
         }
-        let block = Rc::new(self.parse_block(ParsingDirectiveContext::EnumBlock)?);
+        let block = Rc::new(self.parse_block(ParserDirectiveContext::EnumBlock)?);
 
         for a in &attributes {
             if a.is_metadata() {
@@ -3697,7 +3697,7 @@ impl<'input> Parser<'input> {
         if self.consume(Token::Extends)? {
             extends_clause = Some(self.parse_type_expression_list()?);
         }
-        let block = Rc::new(self.parse_block(ParsingDirectiveContext::InterfaceBlock)?);
+        let block = Rc::new(self.parse_block(ParserDirectiveContext::InterfaceBlock)?);
 
         // Interface block must only contain function definitions
         for directive in block.directives.iter() {
@@ -3793,7 +3793,7 @@ impl<'input> Parser<'input> {
         let left = self.expect_identifier(true)?;
         let mut right: Option<Rc<Expression>> = None;
         if self.consume(Token::Assign)? {
-            right = Some(self.parse_expression(ParsingExpressionContext {
+            right = Some(self.parse_expression(ParserExpressionContext {
                 min_precedence: OperatorPrecedence::AssignmentAndOther,
                 ..default()
             })?);
@@ -3840,7 +3840,7 @@ impl<'input> Parser<'input> {
         Ok(list)
     }
 
-    fn verify_visibility(&self, a: &Attribute, context: &ParsingDirectiveContext) {
+    fn verify_visibility(&self, a: &Attribute, context: &ParserDirectiveContext) {
         let mut unallowed = false;
         match a {
             Attribute::Expression(_) => {},
@@ -3882,7 +3882,7 @@ impl<'input> Parser<'input> {
         }))
     }
 
-    fn parse_configuration_directive(&mut self, context: ParsingDirectiveContext, start_location: Location) -> Result<(Rc<Directive>, bool), ParserError> {
+    fn parse_configuration_directive(&mut self, context: ParserDirectiveContext, start_location: Location) -> Result<(Rc<Directive>, bool), ParserError> {
         self.push_location(&start_location);
         self.expect(Token::LeftBrace)?;
         let subdirective = self.parse_configuration_subdirective(context.clone())?;
@@ -3893,7 +3893,7 @@ impl<'input> Parser<'input> {
         })), true))
     }
 
-    fn parse_configuration_subdirective(&mut self, context: ParsingDirectiveContext) -> Result<Rc<Directive>, ParserError> {
+    fn parse_configuration_subdirective(&mut self, context: ParserDirectiveContext) -> Result<Rc<Directive>, ParserError> {
         if self.peek(Token::If) {
             self.mark_location();
             self.next()?;
@@ -4168,7 +4168,7 @@ impl<'input> Parser<'input> {
                 name.push(self.expect_identifier(true)?);
             }
         }
-        let block = Rc::new(self.parse_block(ParsingDirectiveContext::PackageBlock)?);
+        let block = Rc::new(self.parse_block(ParserDirectiveContext::PackageBlock)?);
         Ok(Rc::new(PackageDefinition {
             location: self.pop_location(),
             asdoc,
@@ -4184,7 +4184,7 @@ impl<'input> Parser<'input> {
         while self.peek(Token::Package) {
             packages.push(self.parse_package_definition()?);
         }
-        let directives = self.parse_directives(ParsingDirectiveContext::TopLevel)?;
+        let directives = self.parse_directives(ParserDirectiveContext::TopLevel)?;
         Ok(Rc::new(Program {
             location: if just_eof {
                 self.pop_location();
@@ -4281,7 +4281,7 @@ impl<'input> Parser<'input> {
         (main_body, tags)
     }
 
-    fn split_asdoc_lines(&mut self, location: &Location, content: &str) -> Vec<ParsingAsDocLine> {
+    fn split_asdoc_lines(&mut self, location: &Location, content: &str) -> Vec<ParserAsDocLine> {
         let mut builder = String::new();
         let mut lines = vec![];
         let mut _line_number = location.first_line_number();
@@ -4290,7 +4290,7 @@ impl<'input> Parser<'input> {
         let mut characters = content.chars();
         while let Some(ch) = characters.next() {
             if CharacterValidator::is_line_terminator(ch) {
-                lines.push(ParsingAsDocLine {
+                lines.push(ParserAsDocLine {
                     content: builder,
                     location: Location::with_offsets(self.compilation_unit(), line_first_offset, index),
                 });
@@ -4308,7 +4308,7 @@ impl<'input> Parser<'input> {
                 index += ch.len_utf8();
             }
         }
-        lines.push(ParsingAsDocLine {
+        lines.push(ParserAsDocLine {
             content: builder,
             location: Location::with_offsets(self.compilation_unit(), line_first_offset, index),
         });
@@ -4886,12 +4886,12 @@ impl<'input> Parser<'input> {
     }
 }
 
-fn parse_include_directive_source(nested_compilation_unit: Rc<CompilationUnit>, context: ParsingDirectiveContext) -> (Vec<Rc<PackageDefinition>>, Vec<Rc<Directive>>) {
+fn parse_include_directive_source(nested_compilation_unit: Rc<CompilationUnit>, context: ParserDirectiveContext) -> (Vec<Rc<PackageDefinition>>, Vec<Rc<Directive>>) {
     let mut parser = Parser::new(&nested_compilation_unit);
     if parser.next().is_ok() {
         let mut packages = vec![];
         let mut failure = false;
-        if matches!(context, ParsingDirectiveContext::TopLevel) {
+        if matches!(context, ParserDirectiveContext::TopLevel) {
             while parser.peek(Token::Package) {
                 if let Ok(package) = parser.parse_package_definition() {
                     packages.push(package);
@@ -4993,18 +4993,18 @@ enum XmlPiError {
     EncodingMustBeUtf8,
 }
 
-struct ParsingAsDocLine {
+struct ParserAsDocLine {
     content: String,
     location: Location,
 }
 
 #[derive(Clone)]
-struct ParsingActivation {
+struct ParserActivation {
     uses_yield: bool,
     uses_await: bool,
 }
 
-impl ParsingActivation {
+impl ParserActivation {
     pub fn new() -> Self {
         Self {
             uses_yield: false,
@@ -5018,7 +5018,7 @@ struct AnnotatableContext {
     start_location: Location,
     asdoc: Option<Rc<AsDoc>>,
     attributes: Vec<Attribute>,
-    context: ParsingDirectiveContext,
+    context: ParserDirectiveContext,
     /// Previous token as a directive context keyword.
     directive_context_keyword: Option<(String, Location)>,
 }
@@ -5061,7 +5061,7 @@ impl ParserFacade {
     pub fn parse_expression(compilation_unit: &Rc<CompilationUnit>) -> Option<Rc<Expression>> {
         let mut parser = Parser::new(compilation_unit);
         if parser.next().is_ok() {
-            let exp = parser.parse_expression(ParsingExpressionContext {
+            let exp = parser.parse_expression(ParserExpressionContext {
                 ..default()
             }).ok();
             if exp.is_some() {
@@ -5088,7 +5088,7 @@ impl ParserFacade {
     }
 
     /// Parses `Directives` until end-of-file.
-    pub fn parse_directives(compilation_unit: &Rc<CompilationUnit>, context: ParsingDirectiveContext) -> Option<Vec<Rc<Directive>>> {
+    pub fn parse_directives(compilation_unit: &Rc<CompilationUnit>, context: ParserDirectiveContext) -> Option<Vec<Rc<Directive>>> {
         let mut parser = Parser::new(compilation_unit);
         if parser.next().is_ok() {
             parser.parse_directives(context).ok()

@@ -1,3 +1,5 @@
+//! Miscellaneous.
+
 mod arena;
 pub use arena::*;
 

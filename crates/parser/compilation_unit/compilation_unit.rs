@@ -28,7 +28,7 @@ impl Default for CompilationUnit {
             invalidated: Cell::new(false),
             error_count: Cell::new(0),
             warning_count: Cell::new(0),
-            compiler_options: CompilerOptions::new(),
+            compiler_options: CompilerOptions::default(),
             comments: RefCell::new(vec![]),
             nested_compilation_units: RefCell::new(vec![]),
             included_from: RefCell::new(None),
