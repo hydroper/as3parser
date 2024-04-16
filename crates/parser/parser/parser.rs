@@ -4132,12 +4132,12 @@ impl<'input> Parser<'input> {
                 break;
             }
         }
-        // For meta-data that are not one of { "Event" },
+        // For meta-data that are not one of certain Flex meta-data,
         // delegate the respective ASDoc to the annotatable directive.
         let mut new_attributes = Vec::<Attribute>::new();
         for attr in &context.attributes {
             if let Attribute::Metadata(metadata) = attr {
-                if metadata.name.0 != "Event" && metadata.asdoc.is_some() {
+                if !is_flex_documentable_meta_data(&metadata.name.0) && metadata.asdoc.is_some() {
                     new_attributes.push(Attribute::Metadata(Rc::new(Metadata {
                         location: metadata.location.clone(),
                         asdoc: None,
@@ -4981,6 +4981,10 @@ fn process_xml_pi(file_path: Option<String>, compiler_options: &Rc<CompilerOptio
     }
     parser.expect_eof()?;
     Ok(errors)
+}
+
+fn is_flex_documentable_meta_data(name: &str) -> bool {
+    ["Event", "SkinState"].contains(&name)
 }
 
 enum XmlPiError {
