@@ -40,6 +40,11 @@ MXML supports a subset of CSS.
 - [ ] Define tree structures
 - [ ] Parse a style sheet
 
+Conform to Apache Royale sources:
+
+- [CSS.g](https://github.com/apache/royale-compiler/blob/develop/compiler/src/main/antlr3/org/apache/royale/compiler/internal/css/CSS.g)
+- [CSSTree.g](https://github.com/apache/royale-compiler/blob/develop/compiler/src/main/antlr3/org/apache/royale/compiler/internal/css/CSSTree.g)
+
 ## License
 
 Apache License 2.0, copyright 2024 Hydroper
