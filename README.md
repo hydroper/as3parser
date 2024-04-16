@@ -23,7 +23,7 @@ ActionScript 3 parser in the Rust language.
 
 [Working with MXML](docs/working-with-mxml.md)
 
-[Standards](docs/standards.md)
+[Standards and Documents](docs/standards.md)
 
 [New Syntax](docs/new-syntax.md)
 
