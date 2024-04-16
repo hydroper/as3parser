@@ -5,6 +5,7 @@ use serde::{Serialize, Deserialize};
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct MxmlDocument {
+    pub location: Location,
     pub version: XmlVersion,
     pub encoding: String,
     pub content: Vec<Rc<MxmlContent>>,
@@ -32,6 +33,8 @@ pub struct MxmlElement {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct MxmlAttribute {
     pub location: Location,
+    /// Indicates whether the attribute is a `xmlns` or `xmlns:` attribute.
+    pub xmlns: bool,
     pub name: MxmlName,
     pub value: (String, Location),
 }
@@ -39,14 +42,50 @@ pub struct MxmlAttribute {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct MxmlName {
     pub location: Location,
-    pub prefix: Option<Rc<String>>,
+    /// The unresolved prefix of the name.
+    pub prefix: Option<String>,
     pub name: String,
+}
+
+impl MxmlName {
+    pub fn resolve_prefix(&self, namespace: &Rc<MxmlNamespace>) -> Result<String, MxmlNameError> {
+        let Some(p) = self.prefix.as_ref() else {
+            return if let Some(v) = namespace.get(MxmlNamespace::DEFAULT_NAMESPACE) {
+                Ok(v)
+            } else {
+                Err(MxmlNameError::PrefixNotDefined(MxmlNamespace::DEFAULT_NAMESPACE.into()))
+            };
+        };
+        if let Some(v) = namespace.get(p) {
+            Ok(v)
+        } else {
+            Err(MxmlNameError::PrefixNotDefined(p.clone()))
+        }
+    }
+
+    pub fn resolve_name(&self, namespace: &Rc<MxmlNamespace>) -> Result<(String, String), MxmlNameError> {
+        let p = self.resolve_prefix(namespace)?;
+        Ok((p, self.name.clone()))
+    }
+
+    pub fn equals_name(&self, other: &Self, namespace: &Rc<MxmlNamespace>) -> Result<bool, MxmlNameError> {
+        if self.name != other.name {
+            return Ok(false);
+        }
+        let p1 = self.resolve_prefix(namespace)?;
+        let p2 = other.resolve_prefix(namespace)?;
+        Ok(&p1 == &p2)
+    }
+}
+
+#[derive(Clone)]
+pub enum MxmlNameError {
+    PrefixNotDefined(String),
 }
 
 #[derive(Clone, Serialize, Deserialize)]
 pub enum MxmlContent {
     Characters((String, Location)),
-    Whitespace((String, Location)),
     /// A CDATA construct, including the first `<![CDATA[` characters
     /// and the last `]]>` characters.
     CData((String, Location)),
@@ -65,7 +104,6 @@ impl MxmlContent {
     pub fn location(&self) -> Location {
         match self {
             Self::Characters((_, l)) => l.clone(),
-            Self::Whitespace((_, l)) => l.clone(),
             Self::CData((_, l)) => l.clone(),
             Self::Comment((_, l)) => l.clone(),
             Self::ProcessingInstruction { location: l, .. } => l.clone(),
@@ -93,10 +131,15 @@ impl MxmlNamespace {
 
     /// Constructs an empty set of namespace mappings.
     pub fn new(parent: Option<&Rc<MxmlNamespace>>) -> Self {
-        Self {
+        let mut ns = Self {
             parent: parent.map(|p| p.clone()),
             mappings: RefCell::new(BTreeMap::new()),
+        };
+        if ns.parent.is_none() {
+            ns.mappings.get_mut().insert(Self::DEFAULT_NAMESPACE.into(), "".into());
+            ns.mappings.get_mut().insert("xmlns".into(), "http://www.w3.org/xml/xmlns".into());
         }
+        ns
     }
 
     pub fn includes(&self, prefix: &str) -> bool {
@@ -115,16 +158,16 @@ impl MxmlNamespace {
         self.parent.as_ref().and_then(|p| p.get(prefix))
     }
 
-    pub fn set(&mut self, prefix: &str, value: &str) {
-        self.mappings.get_mut().insert(prefix.to_owned(), value.to_owned());
+    pub fn set(&self, prefix: &str, value: &str) {
+        self.mappings.borrow_mut().insert(prefix.to_owned(), value.to_owned());
     }
 
-    pub fn delete(&mut self, prefix: &str) -> bool {
-        self.mappings.get_mut().remove(prefix).is_some()
+    pub fn delete(&self, prefix: &str) -> bool {
+        self.mappings.borrow_mut().remove(prefix).is_some()
     }
 
-    pub fn clear(&mut self) {
-        self.mappings.get_mut().clear();
+    pub fn clear(&self) {
+        self.mappings.borrow_mut().clear();
     }
 
     /// Returns the actual set of prefix mappings.

@@ -24,6 +24,10 @@ impl<'input> Tokenizer<'input> {
         &self.compilation_unit
     }
 
+    pub fn characters(&self) -> &CharacterReader<'input> {
+        &self.characters
+    }
+
     /// Scans for an *InputElementDiv* token.
     pub fn scan_ie_div(&mut self) -> Result<(Token, Location), ParsingFailure> {
         loop {
@@ -1191,11 +1195,10 @@ impl<'input> Tokenizer<'input> {
                     }
                     if CharacterValidator::is_line_terminator(ch) {
                         self.consume_line_terminator();
-                    } else if self.characters.reached_end() {
-                        self.add_unexpected_error();
-                        return Err(ParsingFailure);
-                    } else {
+                    } else if self.characters.has_remaining() {
                         self.characters.next();
+                    } else {
+                        break;
                     }
                 }
 

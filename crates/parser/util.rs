@@ -12,6 +12,9 @@ pub use shared_array::*;
 mod shared_map;
 pub use shared_map::*;
 
+mod escaping;
+pub use escaping::*;
+
 pub use std::cell::{Cell, RefCell};
 pub use std::collections::{HashMap, HashSet};
 pub use std::rc::{Rc, Weak};

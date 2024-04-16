@@ -64,6 +64,11 @@ impl CompilationUnit {
         &self.source_text.contents
     }
 
+    /// Compiler options.
+    pub fn compiler_options(&self) -> Rc<CompilerOptions> {
+        self.compiler_options.clone()
+    }
+
     /// Whether the source contains any errors after parsing
     /// and/or verification.
     pub fn invalidated(&self) -> bool {

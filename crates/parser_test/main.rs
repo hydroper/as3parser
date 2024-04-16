@@ -12,6 +12,9 @@ struct Arguments {
 
     #[arg(short, long)]
     file_log: bool,
+
+    #[arg(short, long)]
+    mxml: bool,
 }
 
 fn main() -> io::Result<()> {
@@ -25,17 +28,33 @@ fn main() -> io::Result<()> {
     let source_path_diagnostics = FlexPath::new_native(&source_path).change_extension(".diag").to_string_with_flex_separator();
     let source_content = fs::read_to_string(&source_path)?;
     let compilation_unit = CompilationUnit::new(Some(source_path), source_content, &CompilerOptions::new());
-    if let Some(program) = ParserFacade::parse_program(&compilation_unit) {
-        if arguments.file_log {
-            fs::write(&source_path_ast_json, serde_json::to_string_pretty(&program).unwrap())?;
+    if arguments.mxml {
+        if let Some(document) = ParserFacade::parse_mxml_document(&compilation_unit, true) {
+            if arguments.file_log {
+                fs::write(&source_path_ast_json, serde_json::to_string_pretty(&document).unwrap())?;
+            } else {
+                println!("MXML successfuly parsed.");
+            }
         } else {
-            println!("AS3 program successfuly parsed.");
+            if arguments.file_log {
+                fs::write(&source_path_ast_json, "{}")?;
+            } else {
+                println!("MXML failed to parse.");
+            }
         }
     } else {
-        if arguments.file_log {
-            fs::write(&source_path_ast_json, "{}")?;
+        if let Some(program) = ParserFacade::parse_program(&compilation_unit) {
+            if arguments.file_log {
+                fs::write(&source_path_ast_json, serde_json::to_string_pretty(&program).unwrap())?;
+            } else {
+                println!("AS3 program successfuly parsed.");
+            }
         } else {
-            println!("AS3 program failed to parse.");
+            if arguments.file_log {
+                fs::write(&source_path_ast_json, "{}")?;
+            } else {
+                println!("AS3 program failed to parse.");
+            }
         }
     }
     let mut diagnostics = vec![];

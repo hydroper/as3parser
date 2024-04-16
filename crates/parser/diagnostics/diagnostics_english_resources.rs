@@ -49,6 +49,13 @@ lazy_static! {
         DiagnosticKind::ParentSourceIsNotAFile.id() => "Parent source is not a file".into(),
         DiagnosticKind::CircularIncludeDirective.id() => "Circular include directive".into(),
         DiagnosticKind::MalformedDestructuring.id() => "Malformed destructuring".into(),
+        DiagnosticKind::XmlPrefixNotDefined.id() => "Prefix not defined: '{1}'".into(),
+        DiagnosticKind::RedefiningXmlAttribute.id() => "Redefining attribute: '{1}'".into(),
+        DiagnosticKind::InvalidXmlPi.id() => "Invalid processing instruction".into(),
+        DiagnosticKind::XmlPiUnknownAttribute.id() => "Unknown attribute at processing instruction: '{1}'".into(),
+        DiagnosticKind::XmlPiVersionMustBe10.id() => "XML version must be '1.0'".into(),
+        DiagnosticKind::XmlPiEncodingMustBeUtf8.id() => "XML encoding must be 'utf-8'".into(),
+        DiagnosticKind::XmlMustConsistOfExactly1Element.id() => "Document must consist of exactly one element".into(),
         // DiagnosticKind::K.id() => "".into(),
     };
 }

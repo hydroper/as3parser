@@ -46,6 +46,13 @@ pub enum DiagnosticKind {
     ParentSourceIsNotAFile = 1066,
     CircularIncludeDirective = 1067,
     MalformedDestructuring = 1068,
+    XmlPrefixNotDefined = 1069,
+    RedefiningXmlAttribute = 1070,
+    InvalidXmlPi = 1071,
+    XmlPiUnknownAttribute = 1072,
+    XmlPiVersionMustBe10 = 1073,
+    XmlPiEncodingMustBeUtf8 = 1074,
+    XmlMustConsistOfExactly1Element = 1075,
 }
 
 impl DiagnosticKind {

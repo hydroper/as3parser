@@ -7,17 +7,24 @@ pub struct Parser<'input> {
     token: (Token, Location),
     locations: Vec<Location>,
     activations: Vec<ParsingActivation>,
+    ignore_xml_whitespace: bool,
 }
 
 impl<'input> Parser<'input> {
     /// Constructs a parser.
     pub fn new(compilation_unit: &'input Rc<CompilationUnit>) -> Self {
+        Self::with_xml_options(compilation_unit, false)
+    }
+
+    /// Constructs a parser.
+    pub fn with_xml_options(compilation_unit: &'input Rc<CompilationUnit>, ignore_xml_whitespace: bool) -> Self {
         Self {
             tokenizer: Tokenizer::new(compilation_unit),
             previous_token: (Token::Eof, Location::with_offset(&compilation_unit, 0)),
             token: (Token::Eof, Location::with_offset(&compilation_unit, 0)),
             locations: vec![],
             activations: vec![],
+            ignore_xml_whitespace,
         }
     }
 
@@ -1525,7 +1532,7 @@ impl<'input> Parser<'input> {
             return Ok((name, name_location));
         } else {
             self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectedXmlName, diagnostic_arguments![Token(self.token.0.clone())]);
-            Ok(("".into(), self.tokenizer.cursor_location()))
+            Ok((INVALIDATED_IDENTIFIER.into(), self.tokenizer.cursor_location()))
         }
     }
 
@@ -4601,6 +4608,279 @@ impl<'input> Parser<'input> {
         }
         Some(Rc::new(AsDocReference { base, instance_property, }))
     }
+
+    /// Parses MXMLElement starting from its XMLTagContent.
+    fn parse_mxml_element(&mut self, start: Location, namespace: &Rc<MxmlNamespace>) -> Result<MxmlElement, ParsingFailure> {
+        self.push_location(&start);
+        let namespace = Rc::new(MxmlNamespace::new(Some(namespace)));
+        let name = self.parse_xml_name()?;
+        let mut attributes: Vec<Rc<MxmlAttribute>> = vec![];
+        while self.consume_and_ie_xml_tag(Token::XmlWhitespace)? {
+            if matches!(self.token.0, Token::XmlName(_)) {
+                self.mark_location();
+                let name = self.parse_xml_name()?;
+                self.consume_and_ie_xml_tag(Token::XmlWhitespace)?;
+                self.expect_and_ie_xml_tag(Token::Assign)?;
+                self.consume_and_ie_xml_tag(Token::XmlWhitespace)?;
+                let value = self.parse_xml_attribute_value()?;
+                let attrib = PlainMxmlAttribute {
+                    location: self.pop_location(),
+                    name,
+                    value,
+                };
+                self.process_mxml_attribute(&mut attributes, &attrib, &namespace);
+            } else {
+                break;
+            }
+        }
+
+        let name = self.process_mxml_tag_name(name, &namespace);
+
+        let mut content: Option<Vec<Rc<MxmlContent>>> = None;
+        let mut closing_name: Option<MxmlName> = None;
+
+        let is_empty = self.consume_and_ie_xml_content(Token::XmlSlashGt)?;
+
+        if !is_empty {
+            self.expect_and_ie_xml_content(Token::Gt)?;
+            content = Some(self.parse_mxml_content(false, &namespace)?);
+            self.expect_and_ie_xml_tag(Token::XmlLtSlash)?;
+            let name = self.parse_xml_name()?;
+            closing_name = Some(self.process_mxml_tag_name(name, &namespace));
+            self.consume_and_ie_xml_tag(Token::XmlWhitespace)?;
+            self.expect_and_ie_xml_content(Token::Gt)?;
+        }
+
+        if let Some(content) = content.as_mut() {
+            self.filter_mxml_whitespace_out(content);
+        }
+
+        Ok(MxmlElement {
+            location: self.pop_location(),
+            name,
+            attributes,
+            content,
+            closing_name,
+            namespace,
+        })
+    }
+
+    /// Filters whitespace chunks out of a content list when
+    /// they include at least one child element.
+    fn filter_mxml_whitespace_out(&self, content: &mut Vec<Rc<MxmlContent>>) {
+        if !self.ignore_xml_whitespace {
+            return;
+        }
+        let mut inc_el = false;
+        for node in content.iter() {
+            inc_el = matches!(node.as_ref(), MxmlContent::Element(_));
+            if inc_el {
+                break;
+            }
+        }
+        if inc_el {
+            let mut indices: Vec<usize> = vec![];
+            for i in 0..content.len() {
+                let MxmlContent::Characters((ch, _)) = content[i].as_ref() else {
+                    continue;
+                };
+                if ch.trim().is_empty() {
+                    indices.push(i);
+                }
+            }
+            for i in indices.iter().rev() {
+                content.remove(*i);
+            }
+        }
+    }
+
+    /// * [ ] Make sure an attribute is not redefined.
+    fn process_mxml_attribute(&mut self, output: &mut Vec<Rc<MxmlAttribute>>, attribute: &PlainMxmlAttribute, namespace: &Rc<MxmlNamespace>) {
+        let attribute_value = unescape_xml(&attribute.value.0);
+        // xml="uri"
+        if attribute.name.0 == "xmlns" {
+            namespace.set(MxmlNamespace::DEFAULT_NAMESPACE, &attribute_value);
+            output.push(Rc::new(MxmlAttribute {
+                location: attribute.location.clone(),
+                name: MxmlName {
+                    location: attribute.name.1.clone(),
+                    prefix: None,
+                    name: "xmlns".into(),
+                },
+                value: (attribute_value, attribute.value.1.clone()),
+                xmlns: true,
+            }));
+        // xmlns:prefix="uri"
+        } else if attribute.name.0.starts_with("xmlns:") {
+            namespace.set(&attribute.name.0[6..], &attribute_value);
+            output.push(Rc::new(MxmlAttribute {
+                location: attribute.location.clone(),
+                name: MxmlName {
+                    location: attribute.name.1.clone(),
+                    prefix: Some("xmlns".into()),
+                    name: attribute.name.0[6..].to_owned(),
+                },
+                value: (attribute_value, attribute.value.1.clone()),
+                xmlns: true,
+            }));
+        // attrib="value"
+        } else {
+            let split = attribute.name.0.split(':').collect::<Vec<_>>();
+            let prefix: Option<String> = if split.len() > 1 {
+                Some(split[split.len() - 2].to_owned())
+            } else {
+                None
+            };
+            let name = split.last().unwrap();
+            let attrib = Rc::new(MxmlAttribute {
+                location: attribute.location.clone(),
+                name: MxmlName {
+                    location: attribute.name.1.clone(),
+                    prefix,
+                    name: (*name).to_owned(),
+                },
+                value: (attribute_value, attribute.value.1.clone()),
+                xmlns: false,
+            });
+            match attrib.name.resolve_prefix(namespace) {
+                Ok(_) => {
+                    for prev_attrib in output.iter() {
+                        if prev_attrib.name.equals_name(&attrib.name, namespace).unwrap_or(false) {
+                            self.add_syntax_error(&attrib.name.location, DiagnosticKind::RedefiningXmlAttribute, diagnostic_arguments![String(attrib.name.name.clone())]);
+                        }
+                    }
+                },
+                Err(MxmlNameError::PrefixNotDefined(prefix)) => {
+                    self.add_syntax_error(&attrib.name.location, DiagnosticKind::XmlPrefixNotDefined, diagnostic_arguments![String(prefix)]);
+                },
+            }
+            output.push(attrib);
+        }
+    }
+
+    fn process_mxml_tag_name(&mut self, name: (String, Location), namespace: &Rc<MxmlNamespace>) -> MxmlName {
+        let split = name.0.split(':').collect::<Vec<_>>();
+        let prefix: Option<String> = if split.len() > 1 {
+            Some(split[split.len() - 2].to_owned())
+        } else {
+            None
+        };
+        let name_str = split.last().unwrap();
+        let name = MxmlName {
+            location: name.1.clone(),
+            prefix,
+            name: (*name_str).to_owned(),
+        };
+        match name.resolve_prefix(namespace) {
+            Ok(_) => {},
+            Err(MxmlNameError::PrefixNotDefined(prefix)) => {
+                self.add_syntax_error(&name.location, DiagnosticKind::XmlPrefixNotDefined, diagnostic_arguments![String(prefix)]);
+            },
+        }
+        name
+    }
+
+    /// Parses XMLContent until either the `</` token or end-of-file.
+    fn parse_mxml_content(&mut self, until_eof: bool, namespace: &Rc<MxmlNamespace>) -> Result<Vec<Rc<MxmlContent>>, ParsingFailure> {
+        let mut content = vec![];
+        while if until_eof { self.tokenizer.characters().has_remaining() } else { !self.peek(Token::XmlLtSlash) } {
+            if let Token::XmlMarkup(markup) = self.token.0.clone() {
+                let location = self.token_location();
+                self.next_ie_xml_content()?;
+                // XMLCDATA
+                if markup.starts_with("<![CDATA[") {
+                    content.push(Rc::new(MxmlContent::CData((markup, location))));
+                // XMLComment
+                } else if markup.starts_with("<!--") {
+                    content.push(Rc::new(MxmlContent::Comment((markup, location))));
+                // XMLPI
+                } else {
+                    let mut pi_characters = CharacterReader::from(&markup[2..(markup.len() - 2)]);
+                    let mut name = String::new();
+                    if CharacterValidator::is_xml_name_start(pi_characters.peek_or_zero()) {
+                        name.push(pi_characters.next_or_zero());
+                        while CharacterValidator::is_xml_name_part(pi_characters.peek_or_zero()) {
+                            name.push(pi_characters.next_or_zero());
+                        }
+                    }
+                    let mut data = String::new();
+                    while pi_characters.has_remaining() {
+                        data.push(pi_characters.next_or_zero());
+                    }
+                    match process_xml_pi(self.compilation_unit().file_path(), &self.compilation_unit().compiler_options(), &name, &data) {
+                        Ok(errors) => {
+                            for error in errors {
+                                match error {
+                                    XmlPiError::UnknownAttribute(name) => {
+                                        self.add_syntax_error(&location, DiagnosticKind::XmlPiUnknownAttribute, diagnostic_arguments![String(name.clone())]);
+                                    },
+                                    XmlPiError::VersionMustBe10 => {
+                                        self.add_syntax_error(&location, DiagnosticKind::XmlPiVersionMustBe10, vec![]);
+                                    },
+                                    XmlPiError::EncodingMustBeUtf8 => {
+                                        self.add_syntax_error(&location, DiagnosticKind::XmlPiEncodingMustBeUtf8, vec![]);
+                                    },
+                                }
+                            }
+                        },
+                        Err(_) => {
+                            self.add_syntax_error(&location, DiagnosticKind::InvalidXmlPi, vec![]);
+                            return Err(ParsingFailure);
+                        },
+                    }
+                    content.push(Rc::new(MxmlContent::ProcessingInstruction {
+                        location,
+                        name,
+                        data: if data.is_empty() { None } else { Some(data) },
+                    }));
+                }
+            } else if let Token::XmlText(text) = self.token.0.clone() {
+                let location = self.token_location();
+                self.next_ie_xml_content()?;
+                content.push(Rc::new(MxmlContent::Characters((unescape_xml(&text), location))));
+            } else if self.consume_and_ie_xml_tag(Token::Lt)? {
+                let start = self.token_location();
+                let element = self.parse_mxml_element(start, namespace)?;
+                content.push(Rc::new(MxmlContent::Element(Rc::new(element))));
+            } else if !until_eof {
+                self.expect_and_ie_xml_content(Token::XmlLtSlash)?;
+            }
+        }
+        Ok(content)
+    }
+
+    fn parse_mxml_document(&mut self) -> Result<Rc<MxmlDocument>, ParsingFailure> {
+        self.mark_location();
+        let ns = Rc::new(MxmlNamespace::new(None));
+        let mut content = self.parse_mxml_content(true, &ns)?;
+        self.filter_mxml_whitespace_out(&mut content);
+
+        let mut element_count = 0usize;
+        let mut character_count = 0usize;
+
+        for node in content.iter() {
+            match node.as_ref() {
+                MxmlContent::Characters(_) |
+                MxmlContent::CData(_) => {
+                    character_count += 1;
+                },
+                MxmlContent::Element(_) => {
+                    element_count += 1;
+                },
+                _ => {},
+            }
+        }
+        let location = self.pop_location();
+        if element_count != 1 || character_count != 0 {
+            self.add_syntax_error(&location, DiagnosticKind::XmlMustConsistOfExactly1Element, vec![]);
+        }
+        Ok(Rc::new(MxmlDocument {
+            location,
+            version: XmlVersion::Version10,
+            encoding: "utf-8".into(),
+            content,
+        }))
+    }
 }
 
 fn parse_include_directive_source(nested_compilation_unit: Rc<CompilationUnit>, context: ParsingDirectiveContext) -> (Vec<Rc<PackageDefinition>>, Vec<Rc<Directive>>) {
@@ -4663,6 +4943,49 @@ fn join_asdoc_content(content: &Vec<(String, Location)>) -> (String, Location) {
     (s, location)
 }
 
+fn process_xml_pi(file_path: Option<String>, compiler_options: &Rc<CompilerOptions>, name: &str, data: &str) -> Result<Vec<XmlPiError>, ParsingFailure> {
+    if name != "xml" {
+        return Ok(vec![]);
+    }
+    let cu1 = CompilationUnit::new(file_path, data.to_owned(), compiler_options);
+    let mut parser = Parser::new(&cu1);
+    let mut errors = Vec::<XmlPiError>::new();
+    while parser.consume_and_ie_xml_tag(Token::XmlWhitespace)? {
+        if matches!(parser.token.0, Token::XmlName(_)) {
+            let name = parser.parse_xml_name()?;
+            parser.consume_and_ie_xml_tag(Token::XmlWhitespace)?;
+            parser.expect_and_ie_xml_tag(Token::Assign)?;
+            parser.consume_and_ie_xml_tag(Token::XmlWhitespace)?;
+            let value = parser.parse_xml_attribute_value()?;
+            match name.0.as_ref() {
+                "version" => {
+                    if value.0 != "1.0" {
+                        errors.push(XmlPiError::VersionMustBe10);
+                    }
+                },
+                "encoding" => {
+                    if value.0.to_lowercase() != "utf-8" {
+                        errors.push(XmlPiError::EncodingMustBeUtf8);
+                    }
+                },
+                _ => {
+                    errors.push(XmlPiError::UnknownAttribute(name.0.clone()));
+                },
+            }
+        } else {
+            break;
+        }
+    }
+    parser.expect_eof()?;
+    Ok(errors)
+}
+
+enum XmlPiError {
+    UnknownAttribute(String),
+    VersionMustBe10,
+    EncodingMustBeUtf8,
+}
+
 struct ParsingAsDocLine {
     content: String,
     location: Location,
@@ -4701,6 +5024,12 @@ impl AnnotatableContext {
             false
         }
     }
+}
+
+struct PlainMxmlAttribute {
+    pub location: Location,
+    pub name: (String, Location),
+    pub value: (String, Location),
 }
 
 pub struct ParserFacade;
@@ -4753,6 +5082,18 @@ impl ParserFacade {
         let mut parser = Parser::new(compilation_unit);
         if parser.next().is_ok() {
             parser.parse_directives(context).ok()
+        } else {
+            None
+        }
+    }
+
+    /// Parses `MxmlDocument` until end-of-file.
+    pub fn parse_mxml_document(compilation_unit: &Rc<CompilationUnit>, ignore_xml_whitespace: bool) -> Option<Rc<MxmlDocument>> {
+        let mut parser = Parser::with_xml_options(compilation_unit, ignore_xml_whitespace);
+        if parser.next_ie_xml_content().is_ok() {
+            let document = parser.parse_mxml_document().ok();
+            /* if compilation_unit.invalidated() { None } else { document } */
+            document
         } else {
             None
         }
