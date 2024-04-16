@@ -29,7 +29,7 @@ impl<'input> Tokenizer<'input> {
     }
 
     /// Scans for an *InputElementDiv* token.
-    pub fn scan_ie_div(&mut self) -> Result<(Token, Location), ParsingFailure> {
+    pub fn scan_ie_div(&mut self) -> Result<(Token, Location), ParserError> {
         loop {
             let ch = self.characters.peek_or_zero();
             if CharacterValidator::is_whitespace(ch) {
@@ -430,7 +430,7 @@ impl<'input> Tokenizer<'input> {
 
     /// Scans regular expression after a `/` or `/=` token has been scanned by
     /// `scan_ie_div`.
-    pub fn scan_regexp_literal(&mut self, start: Location, mut body: String) -> Result<(Token, Location), ParsingFailure> {
+    pub fn scan_regexp_literal(&mut self, start: Location, mut body: String) -> Result<(Token, Location), ParserError> {
         loop {
             let ch = self.characters.peek_or_zero();
             if ch == '/' {
@@ -442,7 +442,7 @@ impl<'input> Tokenizer<'input> {
                 let ch = self.characters.peek_or_zero();
                 if self.characters.reached_end() {
                     self.add_unexpected_error();
-                    return Err(ParsingFailure);
+                    return Err(ParserError::Common);
                 } else if CharacterValidator::is_line_terminator(ch) {
                     self.add_unexpected_error();
                     self.consume_line_terminator();
@@ -455,7 +455,7 @@ impl<'input> Tokenizer<'input> {
                 self.consume_line_terminator();
             } else if self.characters.reached_end() {
                 self.add_unexpected_error();
-                return Err(ParsingFailure);
+                return Err(ParserError::Common);
             } else {
                 body.push(ch);
                 self.characters.next();
@@ -515,7 +515,7 @@ impl<'input> Tokenizer<'input> {
         false
     }
 
-    fn consume_comment(&mut self) -> Result<bool, ParsingFailure> {
+    fn consume_comment(&mut self) -> Result<bool, ParserError> {
         let ch = self.characters.peek_or_zero();
         if ch != '/' {
             return Ok(false);
@@ -552,7 +552,7 @@ impl<'input> Tokenizer<'input> {
                     self.characters.skip_in_place();
                 } else {
                     self.add_unexpected_error();
-                    return Err(ParsingFailure);
+                    return Err(ParserError::Common);
                 }
             }
 
@@ -569,7 +569,7 @@ impl<'input> Tokenizer<'input> {
         Ok(false)
     }
 
-    fn scan_identifier(&mut self) -> Result<Option<(Token, Location)>, ParsingFailure> {
+    fn scan_identifier(&mut self) -> Result<Option<(Token, Location)>, ParserError> {
         let start = self.cursor_location();
         let mut escaped = false;
         let Some((ch, escaped_2)) = self.consume_identifier_start()? else {
@@ -593,7 +593,7 @@ impl<'input> Tokenizer<'input> {
     }
 
     /// Returns a tuple in the form (*character*, *escaped*).
-    fn consume_identifier_start(&mut self) -> Result<Option<(char, bool)>, ParsingFailure> {
+    fn consume_identifier_start(&mut self) -> Result<Option<(char, bool)>, ParserError> {
         let ch = self.characters.peek_or_zero();
         if CharacterValidator::is_identifier_start(ch) {
             self.characters.next();
@@ -607,7 +607,7 @@ impl<'input> Tokenizer<'input> {
     }
 
     /// Returns a tuple in the form (*character*, *escaped*).
-    fn consume_identifier_part(&mut self) -> Result<Option<(char, bool)>, ParsingFailure> {
+    fn consume_identifier_part(&mut self) -> Result<Option<(char, bool)>, ParserError> {
         let ch = self.characters.peek_or_zero();
         if CharacterValidator::is_identifier_part(ch) {
             self.characters.next();
@@ -621,7 +621,7 @@ impl<'input> Tokenizer<'input> {
     }
 
     /// Expects UnicodeEscapeSequence starting from `u`.
-    fn expect_unicode_escape_sequence(&mut self) -> Result<char, ParsingFailure> {
+    fn expect_unicode_escape_sequence(&mut self) -> Result<char, ParserError> {
         let start = self.cursor_location();
         if self.characters.peek_or_zero() != 'u' {
             self.add_unexpected_error();
@@ -670,7 +670,7 @@ impl<'input> Tokenizer<'input> {
         Ok(r)
     }
 
-    fn expect_hex_digit(&mut self) -> Result<u32, ParsingFailure> {
+    fn expect_hex_digit(&mut self) -> Result<u32, ParserError> {
         let ch = self.characters.peek_or_zero();
         let mv = CharacterValidator::hex_digit_mv(ch);
         if mv.is_none() {
@@ -681,7 +681,7 @@ impl<'input> Tokenizer<'input> {
         Ok(mv.unwrap())
     }
 
-    fn scan_dot_or_numeric_literal(&mut self) -> Result<Option<(Token, Location)>, ParsingFailure> {
+    fn scan_dot_or_numeric_literal(&mut self) -> Result<Option<(Token, Location)>, ParserError> {
         let start = self.cursor_location();
         let ch = self.characters.peek_or_zero();
         let mut initial_dot = false;
@@ -775,7 +775,7 @@ impl<'input> Tokenizer<'input> {
         Ok(Some((Token::NumericLiteral(string, suffix), location)))
     }
 
-    fn scan_hex_literal(&mut self, start: Location) -> Result<Option<(Token, Location)>, ParsingFailure> {
+    fn scan_hex_literal(&mut self, start: Location) -> Result<Option<(Token, Location)>, ParserError> {
         if !CharacterValidator::is_hex_digit(self.characters.peek_or_zero()) {
             self.add_unexpected_error();
         }
@@ -792,7 +792,7 @@ impl<'input> Tokenizer<'input> {
         Ok(Some((Token::NumericLiteral(s, suffix), location)))
     }
 
-    fn scan_bin_literal(&mut self, start: Location) -> Result<Option<(Token, Location)>, ParsingFailure> {
+    fn scan_bin_literal(&mut self, start: Location) -> Result<Option<(Token, Location)>, ParserError> {
         if !CharacterValidator::is_bin_digit(self.characters.peek_or_zero()) {
             self.add_unexpected_error();
         }
@@ -809,7 +809,7 @@ impl<'input> Tokenizer<'input> {
         Ok(Some((Token::NumericLiteral(s, suffix), location)))
     }
 
-    fn consume_underscore_followed_by_dec_digit(&mut self) -> Result<(), ParsingFailure> {
+    fn consume_underscore_followed_by_dec_digit(&mut self) -> Result<(), ParserError> {
         if self.characters.peek_or_zero() == '_' {
             self.characters.next();
             if !CharacterValidator::is_dec_digit(self.characters.peek_or_zero()) {
@@ -820,7 +820,7 @@ impl<'input> Tokenizer<'input> {
         Ok(())
     }
 
-    fn consume_underscore_followed_by_hex_digit(&mut self) -> Result<(), ParsingFailure> {
+    fn consume_underscore_followed_by_hex_digit(&mut self) -> Result<(), ParserError> {
         if self.characters.peek_or_zero() == '_' {
             self.characters.next();
             if !CharacterValidator::is_hex_digit(self.characters.peek_or_zero()) {
@@ -831,7 +831,7 @@ impl<'input> Tokenizer<'input> {
         Ok(())
     }
 
-    fn consume_underscore_followed_by_bin_digit(&mut self) -> Result<(), ParsingFailure> {
+    fn consume_underscore_followed_by_bin_digit(&mut self) -> Result<(), ParserError> {
         if self.characters.peek_or_zero() == '_' {
             self.characters.next();
             if !CharacterValidator::is_bin_digit(self.characters.peek_or_zero()) {
@@ -848,7 +848,7 @@ impl<'input> Tokenizer<'input> {
         }
     }
 
-    fn scan_string_literal(&mut self, raw: bool) -> Result<Option<(Token, Location)>, ParsingFailure> {
+    fn scan_string_literal(&mut self, raw: bool) -> Result<Option<(Token, Location)>, ParserError> {
         let delim = self.characters.peek_or_zero();
         if !['"', '\''].contains(&delim) {
             return Ok(None);
@@ -880,7 +880,7 @@ impl<'input> Tokenizer<'input> {
                     self.consume_line_terminator();
                 } else if !self.characters.has_remaining() {
                     self.add_unexpected_error();
-                    return Err(ParsingFailure);
+                    return Err(ParserError::Common);
                 } else {
                     value.push(ch);
                     self.characters.next();
@@ -900,7 +900,7 @@ impl<'input> Tokenizer<'input> {
                         self.consume_line_terminator();
                     } else if !self.characters.has_remaining() {
                         self.add_unexpected_error();
-                        return Err(ParsingFailure);
+                        return Err(ParserError::Common);
                     } else {
                         value.push(ch);
                         self.characters.next();
@@ -913,7 +913,7 @@ impl<'input> Tokenizer<'input> {
         Ok(Some((Token::StringLiteral(value), location)))
     }
 
-    fn scan_triple_string_literal(&mut self, delim: char, start: Location, raw: bool) -> Result<Option<(Token, Location)>, ParsingFailure> {
+    fn scan_triple_string_literal(&mut self, delim: char, start: Location, raw: bool) -> Result<Option<(Token, Location)>, ParserError> {
         let mut lines: Vec<String> = vec![];
         let mut builder = String::new();
 
@@ -930,7 +930,7 @@ impl<'input> Tokenizer<'input> {
                     self.consume_line_terminator();
                 } else if !self.characters.has_remaining() {
                     self.add_unexpected_error();
-                    return Err(ParsingFailure);
+                    return Err(ParserError::Common);
                 } else {
                     builder.push(ch);
                     self.characters.next();
@@ -952,7 +952,7 @@ impl<'input> Tokenizer<'input> {
                         self.consume_line_terminator();
                     } else if !self.characters.has_remaining() {
                         self.add_unexpected_error();
-                        return Err(ParsingFailure);
+                        return Err(ParserError::Common);
                     } else {
                         builder.push(ch);
                         self.characters.next();
@@ -985,14 +985,14 @@ impl<'input> Tokenizer<'input> {
         Ok(Some((Token::StringLiteral(value), location)))
     }
 
-    fn consume_escape_sequence(&mut self) -> Result<Option<String>, ParsingFailure> {
+    fn consume_escape_sequence(&mut self) -> Result<Option<String>, ParserError> {
         if self.characters.peek_or_zero() != '\\' {
             return Ok(None);
         }
         self.characters.next();
         if !self.characters.has_remaining() {
             self.add_unexpected_error();
-            return Err(ParsingFailure);
+            return Err(ParserError::Common);
         }
         if self.consume_line_terminator() {
             return Ok(Some("".into()));
@@ -1054,7 +1054,7 @@ impl<'input> Tokenizer<'input> {
     }
 
     /// Scans for an *InputElementXMLTag* token.
-    pub fn scan_ie_xml_tag(&mut self) -> Result<(Token, Location), ParsingFailure> {
+    pub fn scan_ie_xml_tag(&mut self) -> Result<(Token, Location), ParserError> {
         let start = self.cursor_location();
         let ch = self.characters.peek_or_zero();
 
@@ -1108,7 +1108,7 @@ impl<'input> Tokenizer<'input> {
                             return Ok((Token::XmlSlashGt, location));
                         }
                     }
-                    return Err(ParsingFailure);
+                    return Err(ParserError::Common);
                 }
                 self.characters.next();
                 let location = start.combine_with(self.cursor_location());
@@ -1126,7 +1126,7 @@ impl<'input> Tokenizer<'input> {
                 }
                 if self.characters.reached_end() {
                     self.add_unexpected_error();
-                    return Err(ParsingFailure)
+                    return Err(ParserError::Common)
                 }
                 let value = self.compilation_unit.text()[(start.first_offset + 1)..self.cursor_location().first_offset].to_owned();
                 self.characters.next();
@@ -1145,7 +1145,7 @@ impl<'input> Tokenizer<'input> {
             _ => {
                 self.add_unexpected_error();
                 if self.characters.reached_end() {
-                    return Err(ParsingFailure);
+                    return Err(ParserError::Common);
                 }
                 self.characters.next();
                 self.scan_ie_xml_tag()
@@ -1154,7 +1154,7 @@ impl<'input> Tokenizer<'input> {
     }
 
     /// Scans for an *InputElementXMLContent* token.
-    pub fn scan_ie_xml_content(&mut self) -> Result<(Token, Location), ParsingFailure> {
+    pub fn scan_ie_xml_content(&mut self) -> Result<(Token, Location), ParserError> {
         let start = self.cursor_location();
         let ch = self.characters.peek_or_zero();
 
@@ -1210,7 +1210,7 @@ impl<'input> Tokenizer<'input> {
     }
 
     /// Attempts to scan a XMLMarkup token after a `<` character.
-    pub fn scan_xml_markup(&mut self, start: Location) -> Result<Option<(Token, Location)>, ParsingFailure> {
+    pub fn scan_xml_markup(&mut self, start: Location) -> Result<Option<(Token, Location)>, ParserError> {
         // XMLComment
         if self.characters.peek_seq(3) == "!--" {
             self.characters.skip_count_in_place(3);
@@ -1222,7 +1222,7 @@ impl<'input> Tokenizer<'input> {
                     self.consume_line_terminator();
                 } else if self.characters.reached_end() {
                     self.add_unexpected_error();
-                    return Err(ParsingFailure);
+                    return Err(ParserError::Common);
                 } else {
                     self.characters.next();
                 }
@@ -1245,7 +1245,7 @@ impl<'input> Tokenizer<'input> {
                     self.consume_line_terminator();
                 } else if self.characters.reached_end() {
                     self.add_unexpected_error();
-                    return Err(ParsingFailure);
+                    return Err(ParserError::Common);
                 } else {
                     self.characters.next();
                 }
@@ -1268,7 +1268,7 @@ impl<'input> Tokenizer<'input> {
                     self.consume_line_terminator();
                 } else if self.characters.reached_end() {
                     self.add_unexpected_error();
-                    return Err(ParsingFailure);
+                    return Err(ParserError::Common);
                 } else {
                     self.characters.next();
                 }

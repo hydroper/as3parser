@@ -62,19 +62,19 @@ impl<'input> Parser<'input> {
     }
     */
 
-    fn next(&mut self) -> Result<(), ParsingFailure> {
+    fn next(&mut self) -> Result<(), ParserError> {
         self.previous_token = self.token.clone();
         self.token = self.tokenizer.scan_ie_div()?;
         Ok(())
     }
 
-    fn next_ie_xml_tag(&mut self) -> Result<(), ParsingFailure> {
+    fn next_ie_xml_tag(&mut self) -> Result<(), ParserError> {
         self.previous_token = self.token.clone();
         self.token = self.tokenizer.scan_ie_xml_tag()?;
         Ok(())
     }
 
-    fn next_ie_xml_content(&mut self) -> Result<(), ParsingFailure> {
+    fn next_ie_xml_content(&mut self) -> Result<(), ParserError> {
         self.previous_token = self.token.clone();
         self.token = self.tokenizer.scan_ie_xml_content()?;
         Ok(())
@@ -84,7 +84,7 @@ impl<'input> Parser<'input> {
         self.token.0 == token
     }
 
-    fn peek_identifier(&self, reserved_words: bool) -> Result<Option<(String, Location)>, ParsingFailure> {
+    fn peek_identifier(&self, reserved_words: bool) -> Result<Option<(String, Location)>, ParserError> {
         if let Token::Identifier(id) = self.token.0.clone() {
             let location = self.token.1.clone();
             Ok(Some((id, location)))
@@ -103,7 +103,7 @@ impl<'input> Parser<'input> {
         if let Token::Identifier(id) = self.token.0.clone() { id == name && self.token.1.character_count() == name.len() } else { false }
     }
 
-    fn consume(&mut self, token: Token) -> Result<bool, ParsingFailure> {
+    fn consume(&mut self, token: Token) -> Result<bool, ParserError> {
         if self.token.0 == token {
             self.next()?;
             Ok(true)
@@ -112,7 +112,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn consume_and_ie_xml_tag(&mut self, token: Token) -> Result<bool, ParsingFailure> {
+    fn consume_and_ie_xml_tag(&mut self, token: Token) -> Result<bool, ParserError> {
         if self.token.0 == token {
             self.next_ie_xml_tag()?;
             Ok(true)
@@ -121,7 +121,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn consume_and_ie_xml_content(&mut self, token: Token) -> Result<bool, ParsingFailure> {
+    fn consume_and_ie_xml_content(&mut self, token: Token) -> Result<bool, ParserError> {
         if self.token.0 == token {
             self.next_ie_xml_content()?;
             Ok(true)
@@ -130,7 +130,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn consume_identifier(&mut self, reserved_words: bool) -> Result<Option<(String, Location)>, ParsingFailure> {
+    fn consume_identifier(&mut self, reserved_words: bool) -> Result<Option<(String, Location)>, ParserError> {
         if let Token::Identifier(id) = self.token.0.clone() {
             let location = self.token.1.clone();
             self.next()?;
@@ -147,7 +147,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn consume_context_keyword(&mut self, name: &str) -> Result<bool, ParsingFailure> {
+    fn consume_context_keyword(&mut self, name: &str) -> Result<bool, ParserError> {
         if let Token::Identifier(id) = self.token.0.clone() {
             if id == name && self.token.1.character_count() == name.len() {
                 self.next()?;
@@ -160,7 +160,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn expect(&mut self, token: Token) -> Result<(), ParsingFailure> {
+    fn expect(&mut self, token: Token) -> Result<(), ParserError> {
         if self.token.0 != token {
             self.add_syntax_error(&self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![Token(token.clone()), Token(self.token.0.clone())]);
             let expecting_identifier_name = token.is_identifier_name();
@@ -177,7 +177,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn expect_and_ie_xml_tag(&mut self, token: Token) -> Result<(), ParsingFailure> {
+    fn expect_and_ie_xml_tag(&mut self, token: Token) -> Result<(), ParserError> {
         if self.token.0 != token {
             self.add_syntax_error(&self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![Token(token.clone()), Token(self.token.0.clone())]);
             while self.token.0 != Token::Eof {
@@ -193,7 +193,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn expect_and_ie_xml_content(&mut self, token: Token) -> Result<(), ParsingFailure> {
+    fn expect_and_ie_xml_content(&mut self, token: Token) -> Result<(), ParserError> {
         if self.token.0 != token {
             self.add_syntax_error(&self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![Token(token.clone()), Token(self.token.0.clone())]);
             while self.token.0 != Token::Eof {
@@ -209,7 +209,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn expect_identifier(&mut self, reserved_words: bool) -> Result<(String, Location), ParsingFailure> {
+    fn expect_identifier(&mut self, reserved_words: bool) -> Result<(String, Location), ParserError> {
         if let Token::Identifier(id) = self.token.0.clone() {
             let location = self.token.1.clone();
             self.next()?;
@@ -236,7 +236,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn expect_context_keyword(&mut self, name: &str) -> Result<(), ParsingFailure> {
+    fn expect_context_keyword(&mut self, name: &str) -> Result<(), ParserError> {
         if let Token::Identifier(id) = self.token.0.clone() {
             if id == name && self.token.1.character_count() == name.len() {
                 self.next()?;
@@ -257,7 +257,7 @@ impl<'input> Parser<'input> {
     /// Expects a greater-than symbol. If the facing token is not greater-than,
     /// but starts with a greater-than symbol, the first character is shifted off
     /// from the facing token.
-    fn expect_type_parameters_gt(&mut self) -> Result<(), ParsingFailure> {
+    fn expect_type_parameters_gt(&mut self) -> Result<(), ParserError> {
         match self.token.0 {
             Token::Gt => {
                 self.next()?;
@@ -304,7 +304,7 @@ impl<'input> Parser<'input> {
     /// Consumes a greater-than symbol. If the facing token is not greater-than,
     /// but starts with a greater-than symbol, the first character is shifted off
     /// from the facing token.
-    fn consume_type_parameters_gt(&mut self) -> Result<bool, ParsingFailure> {
+    fn consume_type_parameters_gt(&mut self) -> Result<bool, ParserError> {
         match self.token.0 {
             Token::Gt => {
                 self.next()?;
@@ -341,7 +341,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    pub fn expect_eof(&mut self) -> Result<(), ParsingFailure> {
+    pub fn expect_eof(&mut self) -> Result<(), ParserError> {
         self.expect(Token::Eof)
     }
 
@@ -357,7 +357,7 @@ impl<'input> Parser<'input> {
         }))
     }
 
-    pub fn parse_expression(&mut self, context: ParsingExpressionContext) -> Result<Rc<Expression>, ParsingFailure> {
+    pub fn parse_expression(&mut self, context: ParsingExpressionContext) -> Result<Rc<Expression>, ParserError> {
         if let Some(exp) = self.parse_opt_expression(context)? {
             Ok(exp)
         } else {
@@ -366,7 +366,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    pub fn parse_opt_expression(&mut self, context: ParsingExpressionContext) -> Result<Option<Rc<Expression>>, ParsingFailure> {
+    pub fn parse_opt_expression(&mut self, context: ParsingExpressionContext) -> Result<Option<Rc<Expression>>, ParserError> {
         let exp: Option<Rc<Expression>> = self.parse_opt_start_expression(context.clone())?;
 
         // Parse subexpressions
@@ -376,7 +376,7 @@ impl<'input> Parser<'input> {
         Ok(None)
     }
 
-    fn parse_subexpressions(&mut self, mut base: Rc<Expression>, context: ParsingExpressionContext) -> Result<Rc<Expression>, ParsingFailure> {
+    fn parse_subexpressions(&mut self, mut base: Rc<Expression>, context: ParsingExpressionContext) -> Result<Rc<Expression>, ParserError> {
         loop {
             if self.consume(Token::Dot)? {
                 base = self.parse_dot_subexpression(base)?;
@@ -513,7 +513,7 @@ impl<'input> Parser<'input> {
         Ok(base)
     }
 
-    fn parse_binary_operator(&mut self, base: Rc<Expression>, mut operator: Operator, right_precedence: OperatorPrecedence, context: ParsingExpressionContext) -> Result<Rc<Expression>, ParsingFailure> {
+    fn parse_binary_operator(&mut self, base: Rc<Expression>, mut operator: Operator, right_precedence: OperatorPrecedence, context: ParsingExpressionContext) -> Result<Rc<Expression>, ParserError> {
         // The left operand of a null-coalescing operation must not be
         // a logical AND, XOR or OR operation.
         if operator == Operator::NullCoalescing {
@@ -550,7 +550,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn parse_optional_chaining(&mut self, base: Rc<Expression>) -> Result<Rc<Expression>, ParsingFailure> {
+    fn parse_optional_chaining(&mut self, base: Rc<Expression>) -> Result<Rc<Expression>, ParserError> {
         self.push_location(&base.location());
         self.duplicate_location();
         let mut operation = Rc::new(Expression::OptionalChainingPlaceholder(OptionalChainingPlaceholder {
@@ -603,7 +603,7 @@ impl<'input> Parser<'input> {
         })))
     }
 
-    fn parse_optional_chaining_subexpressions(&mut self, mut base: Rc<Expression>) -> Result<Rc<Expression>, ParsingFailure> {
+    fn parse_optional_chaining_subexpressions(&mut self, mut base: Rc<Expression>) -> Result<Rc<Expression>, ParserError> {
         loop {
             if self.consume(Token::Dot)? {
                 base = self.parse_dot_subexpression(base)?;
@@ -648,7 +648,7 @@ impl<'input> Parser<'input> {
         Ok(base)
     }
 
-    fn parse_dot_subexpression(&mut self, base: Rc<Expression>) -> Result<Rc<Expression>, ParsingFailure> {
+    fn parse_dot_subexpression(&mut self, base: Rc<Expression>) -> Result<Rc<Expression>, ParserError> {
         self.push_location(&base.location());
         if self.peek(Token::LeftParen) {
             let paren_location = self.token_location();
@@ -691,7 +691,7 @@ impl<'input> Parser<'input> {
 
     /// Ensures a parameter list consists of zero or more required parameters followed by
     /// zero or more optional parameters optionally followed by a rest parameter.
-    fn validate_parameter_list(&mut self, params: Vec<(ParameterKind, Location)>) -> Result<(), ParsingFailure> {
+    fn validate_parameter_list(&mut self, params: Vec<(ParameterKind, Location)>) -> Result<(), ParserError> {
         let mut least_kind = ParameterKind::Required; 
         let mut has_rest = false;
         for (param_kind, param_loc) in params {
@@ -707,7 +707,7 @@ impl<'input> Parser<'input> {
         Ok(())
     }
 
-    fn parse_opt_start_expression(&mut self, context: ParsingExpressionContext) -> Result<Option<Rc<Expression>>, ParsingFailure> {
+    fn parse_opt_start_expression(&mut self, context: ParsingExpressionContext) -> Result<Option<Rc<Expression>>, ParserError> {
         if let Token::Identifier(id) = self.token.0.clone() {
             let id_location = self.token_location();
             self.next()?;
@@ -875,7 +875,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn parse_expression_starting_with_identifier(&mut self, id: (String, Location)) -> Result<Rc<Expression>, ParsingFailure> {
+    fn parse_expression_starting_with_identifier(&mut self, id: (String, Location)) -> Result<Rc<Expression>, ParserError> {
         let id_location = id.1.clone();
         let id = id.0;
 
@@ -915,7 +915,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn parse_function_expression(&mut self, context: ParsingExpressionContext) -> Result<Rc<Expression>, ParsingFailure> {
+    fn parse_function_expression(&mut self, context: ParsingExpressionContext) -> Result<Rc<Expression>, ParserError> {
         self.mark_location();
         self.next()?;
         let mut name = None;
@@ -931,7 +931,7 @@ impl<'input> Parser<'input> {
         })))
     }
 
-    fn parse_function_common(&mut self, function_expr: bool, block_context: ParsingDirectiveContext, allow_in: bool) -> Result<Rc<FunctionCommon>, ParsingFailure> {
+    fn parse_function_common(&mut self, function_expr: bool, block_context: ParsingDirectiveContext, allow_in: bool) -> Result<Rc<FunctionCommon>, ParserError> {
         self.mark_location();
         self.duplicate_location();
         self.expect(Token::LeftParen)?;
@@ -984,7 +984,7 @@ impl<'input> Parser<'input> {
         }))
     }
 
-    fn parse_parameter(&mut self) -> Result<Rc<Parameter>, ParsingFailure> {
+    fn parse_parameter(&mut self) -> Result<Rc<Parameter>, ParserError> {
         self.mark_location();
         let rest = self.consume(Token::Ellipsis)?;
         let binding: Rc<VariableBinding> = Rc::new(self.parse_variable_binding(true)?);
@@ -1007,7 +1007,7 @@ impl<'input> Parser<'input> {
         }))
     }
 
-    fn parse_object_initializer(&mut self) -> Result<Rc<Expression>, ParsingFailure> {
+    fn parse_object_initializer(&mut self) -> Result<Rc<Expression>, ParserError> {
         self.mark_location();
         self.expect(Token::LeftBrace)?;
         let mut fields: Vec<Rc<InitializerField>> = vec![];
@@ -1025,7 +1025,7 @@ impl<'input> Parser<'input> {
         })))
     }
 
-    fn parse_field(&mut self) -> Result<Rc<InitializerField>, ParsingFailure> {
+    fn parse_field(&mut self) -> Result<Rc<InitializerField>, ParserError> {
         if self.peek(Token::Ellipsis) {
             self.mark_location();
             self.next()?;
@@ -1059,7 +1059,7 @@ impl<'input> Parser<'input> {
         }))
     }
 
-    fn parse_field_name(&mut self) -> Result<(FieldName, Location), ParsingFailure> {
+    fn parse_field_name(&mut self) -> Result<(FieldName, Location), ParserError> {
         if let Token::StringLiteral(value) = &self.token.0.clone() {
             let location = self.token_location();
             self.next()?;
@@ -1093,7 +1093,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn parse_new_expression(&mut self, start: Location) -> Result<Rc<Expression>, ParsingFailure> {
+    fn parse_new_expression(&mut self, start: Location) -> Result<Rc<Expression>, ParserError> {
         self.push_location(&start);
         if self.consume(Token::Lt)? {
             let element_type = self.parse_type_expression()?;
@@ -1137,7 +1137,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn parse_new_expression_start(&mut self) -> Result<Rc<Expression>, ParsingFailure> {
+    fn parse_new_expression_start(&mut self) -> Result<Rc<Expression>, ParserError> {
         if self.peek(Token::New) {
             let start = self.token_location();
             self.next()?;
@@ -1149,7 +1149,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn parse_super_expression_followed_by_property_operator(&mut self) -> Result<Rc<Expression>, ParsingFailure> {
+    fn parse_super_expression_followed_by_property_operator(&mut self) -> Result<Rc<Expression>, ParserError> {
         self.mark_location();
         self.duplicate_location();
         self.next()?;
@@ -1176,7 +1176,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn parse_arguments(&mut self) -> Result<Vec<Rc<Expression>>, ParsingFailure> {
+    fn parse_arguments(&mut self) -> Result<Vec<Rc<Expression>>, ParserError> {
         self.expect(Token::LeftParen)?;
         let mut arguments = vec![];
         if !self.peek(Token::RightParen) {
@@ -1197,7 +1197,7 @@ impl<'input> Parser<'input> {
         Ok(arguments)
     }
 
-    fn parse_new_subexpression(&mut self) -> Result<Rc<Expression>, ParsingFailure> {
+    fn parse_new_subexpression(&mut self) -> Result<Rc<Expression>, ParserError> {
         let mut base = self.parse_new_expression_start()?;
         loop {
             if self.consume(Token::LeftBracket)? {
@@ -1235,7 +1235,7 @@ impl<'input> Parser<'input> {
         Ok(base)
     }
 
-    fn parse_primary_expression(&mut self) -> Result<Rc<Expression>, ParsingFailure> {
+    fn parse_primary_expression(&mut self) -> Result<Rc<Expression>, ParserError> {
         if let Token::Identifier(id) = self.token.0.clone() {
             let id_location = self.token_location();
             self.next()?;
@@ -1353,7 +1353,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn finish_embed_expression(&mut self, start: Location) -> Result<Rc<Expression>, ParsingFailure> {
+    fn finish_embed_expression(&mut self, start: Location) -> Result<Rc<Expression>, ParserError> {
         self.push_location(&start);
         let descriptor = self.parse_object_initializer()?.clone();
         let Expression::ObjectInitializer(descriptor) = descriptor.as_ref() else {
@@ -1365,7 +1365,7 @@ impl<'input> Parser<'input> {
         })));
     }
 
-    fn parse_array_initializer(&mut self) -> Result<Rc<Expression>, ParsingFailure> {
+    fn parse_array_initializer(&mut self) -> Result<Rc<Expression>, ParserError> {
         self.mark_location();
 
         let asdoc = self.parse_asdoc()?;
@@ -1409,7 +1409,7 @@ impl<'input> Parser<'input> {
         })))
     }
 
-    fn parse_xml_element_or_xml_list(&mut self, start: Location) -> Result<Rc<Expression>, ParsingFailure> {
+    fn parse_xml_element_or_xml_list(&mut self, start: Location) -> Result<Rc<Expression>, ParserError> {
         self.next_ie_xml_tag()?;
         if self.consume_and_ie_xml_content(Token::Gt)? {
             self.push_location(&start);
@@ -1431,7 +1431,7 @@ impl<'input> Parser<'input> {
     }
 
     /// Parses XMLElement starting from its XMLTagContent.
-    fn parse_xml_element(&mut self, start: Location, ends_at_ie_div: bool) -> Result<XmlElement, ParsingFailure> {
+    fn parse_xml_element(&mut self, start: Location, ends_at_ie_div: bool) -> Result<XmlElement, ParserError> {
         self.push_location(&start);
         let name = self.parse_xml_tag_name()?;
         let mut attributes: Vec<Rc<XmlAttribute>> = vec![];
@@ -1500,7 +1500,7 @@ impl<'input> Parser<'input> {
         })
     }
     
-    fn parse_xml_attribute_value(&mut self) -> Result<(String, Location), ParsingFailure> {
+    fn parse_xml_attribute_value(&mut self) -> Result<(String, Location), ParserError> {
         if let Token::XmlAttributeValue(value) = self.token.0.clone() {
             let location = self.token_location();
             self.next_ie_xml_tag()?;
@@ -1511,7 +1511,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn parse_xml_tag_name(&mut self) -> Result<XmlTagName, ParsingFailure> {
+    fn parse_xml_tag_name(&mut self) -> Result<XmlTagName, ParserError> {
         if self.consume(Token::LeftBrace)? {
             let expr = self.parse_expression(ParsingExpressionContext {
                 allow_in: true,
@@ -1525,7 +1525,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn parse_xml_name(&mut self) -> Result<(String, Location), ParsingFailure> {
+    fn parse_xml_name(&mut self) -> Result<(String, Location), ParserError> {
         if let Token::XmlName(name) = self.token.0.clone() {
             let name_location = self.token_location();
             self.next_ie_xml_tag()?;
@@ -1537,7 +1537,7 @@ impl<'input> Parser<'input> {
     }
 
     /// Parses XMLContent until a `</` token.
-    fn parse_xml_content(&mut self) -> Result<Vec<Rc<XmlElementContent>>, ParsingFailure> {
+    fn parse_xml_content(&mut self) -> Result<Vec<Rc<XmlElementContent>>, ParserError> {
         let mut content = vec![];
         while !self.peek(Token::XmlLtSlash) {
             if self.consume(Token::LeftBrace)? {
@@ -1563,7 +1563,7 @@ impl<'input> Parser<'input> {
         Ok(content)
     }
 
-    fn finish_paren_list_expr_or_qual_id(&mut self, start: Location, left: Rc<Expression>) -> Result<Rc<Expression>, ParsingFailure> {
+    fn finish_paren_list_expr_or_qual_id(&mut self, start: Location, left: Rc<Expression>) -> Result<Rc<Expression>, ParserError> {
         if self.peek(Token::ColonColon) && !matches!(left.as_ref(), Expression::Sequence(_)) {
             self.push_location(&start);
             let ql = self.pop_location();
@@ -1582,7 +1582,7 @@ impl<'input> Parser<'input> {
     }
 
     /// Parses either a ParenListExpression, (), or a QualifiedIdentifier
-    fn parse_paren_list_expr_or_qual_id(&mut self) -> Result<Rc<Expression>, ParsingFailure> {
+    fn parse_paren_list_expr_or_qual_id(&mut self) -> Result<Rc<Expression>, ParserError> {
         let start = self.token_location();
         self.expect(Token::LeftParen)?;
 
@@ -1596,7 +1596,7 @@ impl<'input> Parser<'input> {
         self.finish_paren_list_expr_or_qual_id(start, expr)
     }
 
-    fn parse_opt_reserved_namespace(&mut self) -> Result<Option<Rc<Expression>>, ParsingFailure> {
+    fn parse_opt_reserved_namespace(&mut self) -> Result<Option<Rc<Expression>>, ParserError> {
         let loc = self.token.1.clone();
         if self.consume(Token::Public)? {
             Ok(Some(Rc::new(Expression::ReservedNamespace(ReservedNamespaceExpression::Public(loc)))))
@@ -1611,7 +1611,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn parse_qualified_identifier(&mut self) -> Result<QualifiedIdentifier, ParsingFailure> {
+    fn parse_qualified_identifier(&mut self) -> Result<QualifiedIdentifier, ParserError> {
         self.mark_location();
 
         let attribute = self.consume(Token::Attribute)?;
@@ -1698,7 +1698,7 @@ impl<'input> Parser<'input> {
         })
     }
 
-    fn parse_non_attribute_qualified_identifier(&mut self) -> Result<QualifiedIdentifier, ParsingFailure> {
+    fn parse_non_attribute_qualified_identifier(&mut self) -> Result<QualifiedIdentifier, ParserError> {
         self.mark_location();
 
         let attribute = false;
@@ -1777,7 +1777,7 @@ impl<'input> Parser<'input> {
     }
 
     /// Expects a colon-colon and finishes a qualified identifier.
-    fn finish_qualified_identifier(&mut self, attribute: bool, start_location: Location, qual: Rc<Expression>) -> Result<QualifiedIdentifier, ParsingFailure> {
+    fn finish_qualified_identifier(&mut self, attribute: bool, start_location: Location, qual: Rc<Expression>) -> Result<QualifiedIdentifier, ParserError> {
         self.push_location(&start_location);
         self.expect(Token::ColonColon)?;
 
@@ -1821,7 +1821,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn parse_brackets(&mut self) -> Result<Rc<Expression>, ParsingFailure> {
+    fn parse_brackets(&mut self) -> Result<Rc<Expression>, ParserError> {
         self.expect(Token::LeftBracket)?;
         let expr = self.parse_expression(ParsingExpressionContext {
             min_precedence: OperatorPrecedence::List,
@@ -1832,7 +1832,7 @@ impl<'input> Parser<'input> {
         expr
     }
 
-    fn parse_paren_expression(&mut self) -> Result<Rc<Expression>, ParsingFailure> {
+    fn parse_paren_expression(&mut self) -> Result<Rc<Expression>, ParserError> {
         self.expect(Token::LeftParen)?;
         let expr = self.parse_expression(ParsingExpressionContext {
             min_precedence: OperatorPrecedence::AssignmentAndOther,
@@ -1843,7 +1843,7 @@ impl<'input> Parser<'input> {
         expr
     }
 
-    fn parse_paren_list_expression(&mut self) -> Result<Rc<Expression>, ParsingFailure> {
+    fn parse_paren_list_expression(&mut self) -> Result<Rc<Expression>, ParserError> {
         self.expect(Token::LeftParen)?;
         let expr = self.parse_expression(ParsingExpressionContext {
             min_precedence: OperatorPrecedence::List,
@@ -1854,7 +1854,7 @@ impl<'input> Parser<'input> {
         expr
     }
 
-    fn parse_typed_destructuring(&mut self) -> Result<TypedDestructuring, ParsingFailure> {
+    fn parse_typed_destructuring(&mut self) -> Result<TypedDestructuring, ParserError> {
         self.mark_location();
         let mut destructuring: Rc<Expression>;
         if self.peek(Token::LeftBrace) {
@@ -1890,7 +1890,7 @@ impl<'input> Parser<'input> {
         })
     }
 
-    pub fn parse_type_expression(&mut self) -> Result<Rc<Expression>, ParsingFailure> {
+    pub fn parse_type_expression(&mut self) -> Result<Rc<Expression>, ParserError> {
         let start = self.token_location();
         let (mut base, wrap_nullable) = self.parse_type_expression_start()?;
 
@@ -1925,7 +1925,7 @@ impl<'input> Parser<'input> {
         Ok(base)
     }
 
-    fn parse_type_expression_start(&mut self) -> Result<(Rc<Expression>, bool), ParsingFailure> {
+    fn parse_type_expression_start(&mut self) -> Result<(Rc<Expression>, bool), ParserError> {
         // Allow a `?` prefix to wrap a type into nullable.
         let wrap_nullable = self.consume(Token::Question)?;
 
@@ -1988,7 +1988,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn parse_function_type_expression(&mut self) -> Result<Rc<Expression>, ParsingFailure> {
+    fn parse_function_type_expression(&mut self) -> Result<Rc<Expression>, ParserError> {
         self.mark_location();
         self.next()?;
 
@@ -2012,7 +2012,7 @@ impl<'input> Parser<'input> {
         })))
     }
 
-    fn parse_function_type_parameter(&mut self) -> Result<Rc<FunctionTypeParameter>, ParsingFailure> {
+    fn parse_function_type_parameter(&mut self) -> Result<Rc<FunctionTypeParameter>, ParserError> {
         self.mark_location();
         let rest = self.consume(Token::Ellipsis)?;
         let type_expression: Option<Rc<Expression>> = if rest && self.peek(Token::RightParen) {
@@ -2035,7 +2035,7 @@ impl<'input> Parser<'input> {
         }))
     }
 
-    fn parse_variable_binding(&mut self, allow_in: bool) -> Result<VariableBinding, ParsingFailure> {
+    fn parse_variable_binding(&mut self, allow_in: bool) -> Result<VariableBinding, ParserError> {
         let destructuring = self.parse_typed_destructuring()?;
         let initializer = if self.consume(Token::Assign)? {
             Some(self.parse_expression(ParsingExpressionContext {
@@ -2052,15 +2052,15 @@ impl<'input> Parser<'input> {
         })
     }
 
-    fn parse_semicolon(&mut self) -> Result<bool, ParsingFailure> {
+    fn parse_semicolon(&mut self) -> Result<bool, ParserError> {
         Ok(self.consume(Token::Semicolon)? || self.peek(Token::RightBrace) || self.previous_token.1.line_break(&self.token.1))
     }
 
-    fn parse_substatement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+    fn parse_substatement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
         self.parse_statement(context)
     }
 
-    fn parse_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+    fn parse_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
         // ExpressionStatement or LabeledStatement
         if let Token::Identifier(id) = &self.token.0.clone() {
             let id = (id.clone(), self.token_location());
@@ -2192,7 +2192,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn parse_statement_starting_with_identifier(&mut self, context: ParsingDirectiveContext, id: (String, Location)) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+    fn parse_statement_starting_with_identifier(&mut self, context: ParsingDirectiveContext, id: (String, Location)) -> Result<(Rc<Directive>, bool), ParserError> {
         self.push_location(&id.1);
         let id_location = id.1.clone();
 
@@ -2239,7 +2239,7 @@ impl<'input> Parser<'input> {
         })), semicolon_inserted))
     }
 
-    fn parse_qualified_identifier_statement_or_normal_config(&mut self, context: ParsingDirectiveContext, id: (String, Location), asdoc: Option<Rc<AsDoc>>) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+    fn parse_qualified_identifier_statement_or_normal_config(&mut self, context: ParsingDirectiveContext, id: (String, Location), asdoc: Option<Rc<AsDoc>>) -> Result<(Rc<Directive>, bool), ParserError> {
         self.push_location(&id.1);
         let id_location = id.1.clone();
         let id = Rc::new(Expression::QualifiedIdentifier(QualifiedIdentifier {
@@ -2268,7 +2268,7 @@ impl<'input> Parser<'input> {
         })), semicolon_inserted))
     }
 
-    fn parse_opt_normal_config(&mut self, exp: &Rc<Expression>, asdoc: Option<Rc<AsDoc>>, context: ParsingDirectiveContext) -> Result<Option<(Rc<Directive>, bool)>, ParsingFailure> {
+    fn parse_opt_normal_config(&mut self, exp: &Rc<Expression>, asdoc: Option<Rc<AsDoc>>, context: ParsingDirectiveContext) -> Result<Option<(Rc<Directive>, bool)>, ParserError> {
         if self.peek_annotatable_directive_identifier_name() {
             match exp.to_normal_configuration_identifier(self) {
                 Ok(Some((q, constant_name, metadata))) => {
@@ -2310,11 +2310,11 @@ impl<'input> Parser<'input> {
         Ok(None)
     }
 
-    fn parse_block(&mut self, context: ParsingDirectiveContext) -> Result<Block, ParsingFailure> {
+    fn parse_block(&mut self, context: ParsingDirectiveContext) -> Result<Block, ParserError> {
         self.parse_block_with_metadata(context, None)
     }
 
-    fn parse_block_with_metadata(&mut self, context: ParsingDirectiveContext, metadata: Option<Vec<Attribute>>) -> Result<Block, ParsingFailure> {
+    fn parse_block_with_metadata(&mut self, context: ParsingDirectiveContext, metadata: Option<Vec<Attribute>>) -> Result<Block, ParserError> {
         self.mark_location();
         self.expect(Token::LeftBrace)?;
         let mut directives = vec![];
@@ -2335,7 +2335,7 @@ impl<'input> Parser<'input> {
         })
     }
 
-    fn parse_if_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+    fn parse_if_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
         let context = context.override_control_context(true, ParsingControlContext {
             breakable: true,
             iteration: false,
@@ -2365,7 +2365,7 @@ impl<'input> Parser<'input> {
         })), semicolon_inserted))
     }
 
-    fn parse_switch_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+    fn parse_switch_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
         self.mark_location();
         self.next()?;
         if self.peek_context_keyword("type") {
@@ -2389,7 +2389,7 @@ impl<'input> Parser<'input> {
         })), true))
     }
 
-    fn parse_case_elements(&mut self, context: ParsingDirectiveContext) -> Result<Vec<Case>, ParsingFailure> {
+    fn parse_case_elements(&mut self, context: ParsingDirectiveContext) -> Result<Vec<Case>, ParserError> {
         let mut cases = vec![];
         let mut semicolon_inserted = false;
         while !self.peek(Token::RightBrace) {
@@ -2440,7 +2440,7 @@ impl<'input> Parser<'input> {
         Ok(cases)
     }
 
-    fn parse_switch_type_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+    fn parse_switch_type_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
         let context = context.override_control_context(true, ParsingControlContext {
             breakable: true,
             iteration: false,
@@ -2457,7 +2457,7 @@ impl<'input> Parser<'input> {
         })), true))
     }
 
-    fn parse_type_case_elements(&mut self, context: ParsingDirectiveContext) -> Result<Vec<TypeCase>, ParsingFailure> {
+    fn parse_type_case_elements(&mut self, context: ParsingDirectiveContext) -> Result<Vec<TypeCase>, ParserError> {
         let mut cases = vec![];
         while !self.peek(Token::RightBrace) && !self.peek(Token::Eof) {
             if self.peek(Token::Default) {
@@ -2486,7 +2486,7 @@ impl<'input> Parser<'input> {
         Ok(cases)
     }
 
-    fn parse_do_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+    fn parse_do_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
         let context = context.override_control_context(false, ParsingControlContext {
             breakable: true,
             iteration: true,
@@ -2514,7 +2514,7 @@ impl<'input> Parser<'input> {
         })), semicolon_inserted))
     }
 
-    fn parse_while_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+    fn parse_while_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
         let context = context.override_control_context(false, ParsingControlContext {
             breakable: true,
             iteration: true,
@@ -2537,7 +2537,7 @@ impl<'input> Parser<'input> {
     }
 
     /// Parses `for`, `for..in` or `for each`.
-    fn parse_for_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+    fn parse_for_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
         let context = context.override_control_context(false, ParsingControlContext {
             breakable: true,
             iteration: true,
@@ -2623,7 +2623,7 @@ impl<'input> Parser<'input> {
         })), semicolon_inserted))
     }
 
-    fn parse_for_each_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+    fn parse_for_each_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
         self.expect(Token::LeftParen)?;
         let left = if self.peek(Token::Var) || self.peek(Token::Const) {
             self.mark_location();
@@ -2658,7 +2658,7 @@ impl<'input> Parser<'input> {
         })), semicolon_inserted))
     }
 
-    fn parse_for_in_statement_with_left_variable(&mut self, context: ParsingDirectiveContext, left: SimpleVariableDefinition) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+    fn parse_for_in_statement_with_left_variable(&mut self, context: ParsingDirectiveContext, left: SimpleVariableDefinition) -> Result<(Rc<Directive>, bool), ParserError> {
         let variable_binding = left.bindings[0].clone();
 
         if let Some(init) = &variable_binding.initializer {
@@ -2683,7 +2683,7 @@ impl<'input> Parser<'input> {
         })), semicolon_inserted))
     }
 
-    fn parse_for_in_statement_with_left_exp(&mut self, context: ParsingDirectiveContext, left: Rc<Expression>) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+    fn parse_for_in_statement_with_left_exp(&mut self, context: ParsingDirectiveContext, left: Rc<Expression>) -> Result<(Rc<Directive>, bool), ParserError> {
         let right = self.parse_expression(ParsingExpressionContext {
             allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
         })?;
@@ -2698,7 +2698,7 @@ impl<'input> Parser<'input> {
         })), semicolon_inserted))
     }
 
-    fn parse_simple_variable_definition(&mut self, allow_in: bool) -> Result<SimpleVariableDefinition, ParsingFailure> {
+    fn parse_simple_variable_definition(&mut self, allow_in: bool) -> Result<SimpleVariableDefinition, ParserError> {
         self.mark_location();
         let kind: VariableDefinitionKind;
         let kind_location = self.token_location();
@@ -2719,7 +2719,7 @@ impl<'input> Parser<'input> {
         })
     }
 
-    fn parse_with_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+    fn parse_with_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
         let context = context.override_control_context(true, ParsingControlContext {
             breakable: true,
             iteration: false,
@@ -2741,7 +2741,7 @@ impl<'input> Parser<'input> {
         })), semicolon_inserted))
     }
 
-    fn parse_break_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+    fn parse_break_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
         self.mark_location();
         self.next()?;
 
@@ -2765,7 +2765,7 @@ impl<'input> Parser<'input> {
         Ok((node, semicolon_inserted))
     }
 
-    fn parse_continue_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+    fn parse_continue_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
         self.mark_location();
         self.next()?;
 
@@ -2789,7 +2789,7 @@ impl<'input> Parser<'input> {
         Ok((node, semicolon_inserted))
     }
 
-    fn parse_return_statement(&mut self, _context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+    fn parse_return_statement(&mut self, _context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
         self.mark_location();
         self.next()?;
 
@@ -2811,7 +2811,7 @@ impl<'input> Parser<'input> {
         Ok((node, semicolon_inserted))
     }
 
-    fn parse_throw_statement(&mut self, _context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+    fn parse_throw_statement(&mut self, _context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
         self.mark_location();
         self.next()?;
 
@@ -2837,7 +2837,7 @@ impl<'input> Parser<'input> {
         Ok((node, semicolon_inserted))
     }
 
-    fn parse_try_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+    fn parse_try_statement(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
         self.mark_location();
         self.next()?;
         let context = context.clone_control();
@@ -2882,7 +2882,7 @@ impl<'input> Parser<'input> {
         Ok((node, true))
     }
 
-    fn parse_default_xml_namespace_statement(&mut self) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+    fn parse_default_xml_namespace_statement(&mut self) -> Result<(Rc<Directive>, bool), ParserError> {
         self.mark_location();
         self.next()?;
 
@@ -2915,7 +2915,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn parse_directive(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+    fn parse_directive(&mut self, context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
         let asdoc: Option<Rc<AsDoc>> = if self.peek(Token::LeftBracket) { None } else { self.parse_asdoc()? };
         // ConfigurationDirective or Statement
         if let Token::Identifier(id) = &self.token.0 {
@@ -3078,7 +3078,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn parse_directives(&mut self, context: ParsingDirectiveContext) -> Result<Vec<Rc<Directive>>, ParsingFailure> {
+    fn parse_directives(&mut self, context: ParsingDirectiveContext) -> Result<Vec<Rc<Directive>>, ParserError> {
         let mut directives = vec![];
         let mut semicolon = false;
         while !self.peek(Token::Eof) {
@@ -3092,7 +3092,7 @@ impl<'input> Parser<'input> {
         Ok(directives)
     }
 
-    fn parse_expression_attribute(&mut self, id: &(String, Location)) -> Result<Rc<Expression>, ParsingFailure> {
+    fn parse_expression_attribute(&mut self, id: &(String, Location)) -> Result<Rc<Expression>, ParserError> {
         let mut result = Rc::new(Expression::QualifiedIdentifier(QualifiedIdentifier {
             location: id.1.clone(),
             attribute: false,
@@ -3122,7 +3122,7 @@ impl<'input> Parser<'input> {
         Ok(result)
     }
 
-    fn parse_annotatable_directive(&mut self, context: AnnotatableContext) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+    fn parse_annotatable_directive(&mut self, context: AnnotatableContext) -> Result<(Rc<Directive>, bool), ParserError> {
         if self.peek(Token::Var) || self.peek(Token::Const) {
             self.parse_variable_definition(context)
         } else if self.consume(Token::Function)? {
@@ -3236,7 +3236,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn parse_import_directive_or_expression_statement(&mut self, _context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+    fn parse_import_directive_or_expression_statement(&mut self, _context: ParsingDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
         self.mark_location();
         self.next()?;
         if self.consume(Token::Dot)? {
@@ -3300,7 +3300,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn parse_include_directive(&mut self, context: ParsingDirectiveContext, start: Location) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+    fn parse_include_directive(&mut self, context: ParsingDirectiveContext, start: Location) -> Result<(Rc<Directive>, bool), ParserError> {
         self.push_location(&start);
         let source_path_location = self.token_location();
         let Token::StringLiteral(source) = &self.token.0.clone() else {
@@ -3370,7 +3370,7 @@ impl<'input> Parser<'input> {
         Ok((node, semicolon))
     }
 
-    fn parse_use_namespace_directive(&mut self) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+    fn parse_use_namespace_directive(&mut self) -> Result<(Rc<Directive>, bool), ParserError> {
         self.mark_location();
         self.next()?;
         self.expect_context_keyword("namespace")?;
@@ -3388,7 +3388,7 @@ impl<'input> Parser<'input> {
         Ok((node, semicolon))
     }
 
-    fn parse_variable_definition(&mut self, context: AnnotatableContext) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+    fn parse_variable_definition(&mut self, context: AnnotatableContext) -> Result<(Rc<Directive>, bool), ParserError> {
         let AnnotatableContext { start_location, asdoc, attributes, context, .. } = context;
         let has_static = Attribute::find_static(&attributes).is_some();
         self.push_location(&start_location);
@@ -3455,7 +3455,7 @@ impl<'input> Parser<'input> {
         Ok((node, semicolon))
     }
 
-    fn parse_function_definition(&mut self, context: AnnotatableContext) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+    fn parse_function_definition(&mut self, context: AnnotatableContext) -> Result<(Rc<Directive>, bool), ParserError> {
         let AnnotatableContext { start_location, asdoc, attributes, context, .. } = context;
         let has_native = Attribute::find_native(&attributes).is_some();
         let has_abstract = Attribute::find_abstract(&attributes).is_some();
@@ -3572,7 +3572,7 @@ impl<'input> Parser<'input> {
         Ok((node, semicolon))
     }
 
-    fn parse_class_definition(&mut self, context: AnnotatableContext) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+    fn parse_class_definition(&mut self, context: AnnotatableContext) -> Result<(Rc<Directive>, bool), ParserError> {
         let AnnotatableContext { start_location, asdoc, attributes, context, .. } = context;
         self.push_location(&start_location);
         let name = self.expect_identifier(true)?;
@@ -3632,7 +3632,7 @@ impl<'input> Parser<'input> {
         Ok((node, true))
     }
 
-    fn parse_enum_definition(&mut self, context: AnnotatableContext) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+    fn parse_enum_definition(&mut self, context: AnnotatableContext) -> Result<(Rc<Directive>, bool), ParserError> {
         let AnnotatableContext { start_location, asdoc, mut attributes, context, .. } = context;
         self.push_location(&start_location);
         let name = self.expect_identifier(true)?;
@@ -3688,7 +3688,7 @@ impl<'input> Parser<'input> {
         Ok((node, true))
     }
 
-    fn parse_interface_definition(&mut self, context: AnnotatableContext) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+    fn parse_interface_definition(&mut self, context: AnnotatableContext) -> Result<(Rc<Directive>, bool), ParserError> {
         let AnnotatableContext { start_location, asdoc, attributes, context, .. } = context;
         self.push_location(&start_location);
         let name = self.expect_identifier(true)?;
@@ -3743,7 +3743,7 @@ impl<'input> Parser<'input> {
         Ok((node, true))
     }
 
-    fn parse_type_definition(&mut self, context: AnnotatableContext) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+    fn parse_type_definition(&mut self, context: AnnotatableContext) -> Result<(Rc<Directive>, bool), ParserError> {
         let AnnotatableContext { start_location, asdoc, attributes, context, .. } = context;
         self.push_location(&start_location);
         let left = self.expect_identifier(true)?;
@@ -3787,7 +3787,7 @@ impl<'input> Parser<'input> {
         Ok((node, semicolon))
     }
 
-    fn parse_namespace_definition(&mut self, context: AnnotatableContext) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+    fn parse_namespace_definition(&mut self, context: AnnotatableContext) -> Result<(Rc<Directive>, bool), ParserError> {
         let AnnotatableContext { start_location, asdoc, attributes, context, .. } = context;
         self.push_location(&start_location);
         let left = self.expect_identifier(true)?;
@@ -3832,7 +3832,7 @@ impl<'input> Parser<'input> {
         Ok((node, semicolon))
     }
 
-    fn parse_type_expression_list(&mut self) -> Result<Vec<Rc<Expression>>, ParsingFailure> {
+    fn parse_type_expression_list(&mut self) -> Result<Vec<Rc<Expression>>, ParserError> {
         let mut list = vec![self.parse_type_expression()?];
         while self.consume(Token::Comma)? {
             list.push(self.parse_type_expression()?);
@@ -3860,7 +3860,7 @@ impl<'input> Parser<'input> {
         }
     }
     
-    fn parse_type_parameters_opt(&mut self) -> Result<Option<Vec<Rc<TypeParameter>>>, ParsingFailure> {
+    fn parse_type_parameters_opt(&mut self) -> Result<Option<Vec<Rc<TypeParameter>>>, ParserError> {
         if !self.consume(Token::Dot)? {
             return Ok(None);
         }
@@ -3873,7 +3873,7 @@ impl<'input> Parser<'input> {
         Ok(Some(list))
     }
     
-    fn parse_type_parameter(&mut self) -> Result<Rc<TypeParameter>, ParsingFailure> {
+    fn parse_type_parameter(&mut self) -> Result<Rc<TypeParameter>, ParserError> {
         self.mark_location();
         let name = self.expect_identifier(false)?;
         Ok(Rc::new(TypeParameter {
@@ -3882,7 +3882,7 @@ impl<'input> Parser<'input> {
         }))
     }
 
-    fn parse_configuration_directive(&mut self, context: ParsingDirectiveContext, start_location: Location) -> Result<(Rc<Directive>, bool), ParsingFailure> {
+    fn parse_configuration_directive(&mut self, context: ParsingDirectiveContext, start_location: Location) -> Result<(Rc<Directive>, bool), ParserError> {
         self.push_location(&start_location);
         self.expect(Token::LeftBrace)?;
         let subdirective = self.parse_configuration_subdirective(context.clone())?;
@@ -3893,7 +3893,7 @@ impl<'input> Parser<'input> {
         })), true))
     }
 
-    fn parse_configuration_subdirective(&mut self, context: ParsingDirectiveContext) -> Result<Rc<Directive>, ParsingFailure> {
+    fn parse_configuration_subdirective(&mut self, context: ParsingDirectiveContext) -> Result<Rc<Directive>, ParserError> {
         if self.peek(Token::If) {
             self.mark_location();
             self.next()?;
@@ -3916,7 +3916,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn parse_configuration_expression(&mut self) -> Result<Rc<Expression>, ParsingFailure> {
+    fn parse_configuration_expression(&mut self) -> Result<Rc<Expression>, ParserError> {
         let mut base = self.parse_configuration_primary_expression()?;
         if self.consume(Token::LogicalAnd)? {
             self.push_location(&base.location());
@@ -3940,7 +3940,7 @@ impl<'input> Parser<'input> {
         Ok(base)
     }
 
-    fn parse_configuration_primary_expression(&mut self) -> Result<Rc<Expression>, ParsingFailure> {
+    fn parse_configuration_primary_expression(&mut self) -> Result<Rc<Expression>, ParserError> {
         if let Token::Identifier(id) = &self.token.0.clone() {
             self.mark_location();
             self.next()?;
@@ -4047,7 +4047,7 @@ impl<'input> Parser<'input> {
         self.previous_token.0.to_attribute(&self.previous_token.1)
     }
 
-    fn _keyword_or_expression_attribute_from_previous_token(&mut self) -> Result<Option<Attribute>, ParsingFailure> {
+    fn _keyword_or_expression_attribute_from_previous_token(&mut self) -> Result<Option<Attribute>, ParserError> {
         if let Some(a) = self.keyword_attribute_from_previous_token() {
             return Ok(Some(a));
         }
@@ -4057,7 +4057,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn parse_keyword_or_expression_attribute(&mut self) -> Result<Option<Attribute>, ParsingFailure> {
+    fn parse_keyword_or_expression_attribute(&mut self) -> Result<Option<Attribute>, ParserError> {
         if let Some(a) = self.token.0.to_attribute(&self.token.1) {
             self.next()?;
             return Ok(Some(a));
@@ -4094,9 +4094,9 @@ impl<'input> Parser<'input> {
         || Token::is_context_keyword(&self.previous_token, "namespace")
     }
 
-    fn parse_attribute_keywords_or_expressions(&mut self, context: &mut AnnotatableContext) -> Result<(), ParsingFailure> {
+    fn parse_attribute_keywords_or_expressions(&mut self, context: &mut AnnotatableContext) -> Result<(), ParserError> {
         if context.directive_context_keyword.is_some() {
-            return Err(ParsingFailure);
+            return Err(ParserError::Common);
         }
         loop {
             if let Some(a) = self.parse_keyword_or_expression_attribute()? {
@@ -4157,7 +4157,7 @@ impl<'input> Parser<'input> {
         Ok(())
     }
 
-    pub fn parse_package_definition(&mut self) -> Result<Rc<PackageDefinition>, ParsingFailure> {
+    pub fn parse_package_definition(&mut self) -> Result<Rc<PackageDefinition>, ParserError> {
         self.mark_location();
         let asdoc = self.parse_asdoc()?;
         self.expect(Token::Package)?;
@@ -4177,7 +4177,7 @@ impl<'input> Parser<'input> {
         }))
     }
 
-    pub fn parse_program(&mut self) -> Result<Rc<Program>, ParsingFailure> {
+    pub fn parse_program(&mut self) -> Result<Rc<Program>, ParserError> {
         self.mark_location();
         let just_eof = self.peek(Token::Eof);
         let mut packages = vec![];
@@ -4197,7 +4197,7 @@ impl<'input> Parser<'input> {
         }))
     }
 
-    pub fn parse_asdoc(&mut self) -> Result<Option<Rc<AsDoc>>, ParsingFailure> {
+    pub fn parse_asdoc(&mut self) -> Result<Option<Rc<AsDoc>>, ParserError> {
         let comments = self.compilation_unit().comments.borrow();
         let last_comment = comments.last().map(|last_comment| last_comment.clone());
         drop(comments);
@@ -4610,7 +4610,7 @@ impl<'input> Parser<'input> {
     }
 
     /// Parses MXMLElement starting from its XMLTagContent.
-    fn parse_mxml_element(&mut self, start: Location, namespace: &Rc<MxmlNamespace>) -> Result<MxmlElement, ParsingFailure> {
+    fn parse_mxml_element(&mut self, start: Location, namespace: &Rc<MxmlNamespace>) -> Result<MxmlElement, ParserError> {
         self.push_location(&start);
         let namespace = Rc::new(MxmlNamespace::new(Some(namespace)));
         let name = self.parse_xml_name()?;
@@ -4781,7 +4781,7 @@ impl<'input> Parser<'input> {
     }
 
     /// Parses XMLContent until either the `</` token or end-of-file.
-    fn parse_mxml_content(&mut self, until_eof: bool, namespace: &Rc<MxmlNamespace>) -> Result<Vec<Rc<MxmlContent>>, ParsingFailure> {
+    fn parse_mxml_content(&mut self, until_eof: bool, namespace: &Rc<MxmlNamespace>) -> Result<Vec<Rc<MxmlContent>>, ParserError> {
         let mut content = vec![];
         while if until_eof { self.tokenizer.characters().has_remaining() } else { !self.peek(Token::XmlLtSlash) } {
             if let Token::XmlMarkup(markup) = self.token.0.clone() {
@@ -4823,12 +4823,12 @@ impl<'input> Parser<'input> {
                                 }
                             }
                             if !errors.is_empty() {
-                                return Err(ParsingFailure);
+                                return Err(ParserError::Common);
                             }
                         },
                         Err(_) => {
                             self.add_syntax_error(&location, DiagnosticKind::InvalidXmlPi, vec![]);
-                            return Err(ParsingFailure);
+                            return Err(ParserError::Common);
                         },
                     }
                     content.push(Rc::new(MxmlContent::ProcessingInstruction {
@@ -4852,7 +4852,7 @@ impl<'input> Parser<'input> {
         Ok(content)
     }
 
-    fn parse_mxml_document(&mut self) -> Result<Rc<MxmlDocument>, ParsingFailure> {
+    fn parse_mxml_document(&mut self) -> Result<Rc<MxmlDocument>, ParserError> {
         self.mark_location();
         let ns = Rc::new(MxmlNamespace::new(None));
         let mut content = self.parse_mxml_content(true, &ns)?;
@@ -4946,7 +4946,7 @@ fn join_asdoc_content(content: &Vec<(String, Location)>) -> (String, Location) {
     (s, location)
 }
 
-fn process_xml_pi(file_path: Option<String>, compiler_options: &Rc<CompilerOptions>, name: &str, data: &str) -> Result<Vec<XmlPiError>, ParsingFailure> {
+fn process_xml_pi(file_path: Option<String>, compiler_options: &Rc<CompilerOptions>, name: &str, data: &str) -> Result<Vec<XmlPiError>, ParserError> {
     if name != "xml" {
         return Ok(vec![]);
     }

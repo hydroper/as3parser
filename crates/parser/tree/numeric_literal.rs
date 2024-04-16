@@ -23,59 +23,59 @@ pub enum NumberSuffix {
 impl NumericLiteral {
     /// Parses a double-precision floating point either in
     /// decimal, binary (`0b`) or hexadecimal (`0x`) notation.
-    pub fn parse_double(&self, negative: bool) -> Result<f64, ParsingFailure> {
+    pub fn parse_double(&self, negative: bool) -> Result<f64, ParserError> {
         let s = self.value.replace('_', "");
         if s.starts_with('0') {
             if s[1..].starts_with('x') || s[1..].starts_with('X') {
                 let n = u64::from_str_radix(&(if negative { "-" } else { "" }.to_owned() + &s[2..]), 16);
-                return n.map_err(|_| ParsingFailure)
-                    .and_then(|n| f64::value_from(n).map_err(|_| ParsingFailure));
+                return n.map_err(|_| ParserError::Common)
+                    .and_then(|n| f64::value_from(n).map_err(|_| ParserError::Common));
             } else if s[1..].starts_with('b') || s[1..].starts_with('B') {
                 let n = u64::from_str_radix(&(if negative { "-" } else { "" }.to_owned() + &s[2..]), 2);
-                return n.map_err(|_| ParsingFailure)
-                    .and_then(|n| f64::value_from(n).map_err(|_| ParsingFailure));
+                return n.map_err(|_| ParserError::Common)
+                    .and_then(|n| f64::value_from(n).map_err(|_| ParserError::Common));
             }
         }
-        f64::from_str(&(if negative { "-" } else { "" }.to_owned() + &s)).map_err(|_| ParsingFailure)
+        f64::from_str(&(if negative { "-" } else { "" }.to_owned() + &s)).map_err(|_| ParserError::Common)
     }
 
     /// Parses a single-precision floating point either in
     /// decimal, binary (`0b`) or hexadecimal (`0x`) notation.
-    pub fn parse_single(&self, negative: bool) -> Result<f32, ParsingFailure> {
+    pub fn parse_single(&self, negative: bool) -> Result<f32, ParserError> {
         let s = self.value.replace('_', "");
         if s.starts_with('0') {
             if s[1..].starts_with('x') || s[1..].starts_with('X') {
                 let n = u64::from_str_radix(&(if negative { "-" } else { "" }.to_owned() + &s[2..]), 16);
-                return n.map_err(|_| ParsingFailure)
-                    .and_then(|n| f32::value_from(n).map_err(|_| ParsingFailure));
+                return n.map_err(|_| ParserError::Common)
+                    .and_then(|n| f32::value_from(n).map_err(|_| ParserError::Common));
             } else if s[1..].starts_with('b') || s[1..].starts_with('B') {
                 let n = u64::from_str_radix(&(if negative { "-" } else { "" }.to_owned() + &s[2..]), 2);
-                return n.map_err(|_| ParsingFailure)
-                    .and_then(|n| f32::value_from(n).map_err(|_| ParsingFailure));
+                return n.map_err(|_| ParserError::Common)
+                    .and_then(|n| f32::value_from(n).map_err(|_| ParserError::Common));
             }
         }
-        f32::from_str(&(if negative { "-" } else { "" }.to_owned() + &s)).map_err(|_| ParsingFailure)
+        f32::from_str(&(if negative { "-" } else { "" }.to_owned() + &s)).map_err(|_| ParserError::Common)
     }
 
     /// Parses a signed long either in
     /// decimal, binary (`0b`) or hexadecimal (`0x`) notation.
-    pub fn parse_long(&self, negative: bool) -> Result<i64, ParsingFailure> {
+    pub fn parse_long(&self, negative: bool) -> Result<i64, ParserError> {
         let s = self.value.replace('_', "");
         if s.starts_with('0') {
             if s[1..].starts_with('x') || s[1..].starts_with('X') {
                 let n = i64::from_str_radix(&(if negative { "-" } else { "" }.to_owned() + &s[2..]), 16);
-                return n.map_err(|_| ParsingFailure);
+                return n.map_err(|_| ParserError::Common);
             } else if s[1..].starts_with('b') || s[1..].starts_with('B') {
                 let n = i64::from_str_radix(&(if negative { "-" } else { "" }.to_owned() + &s[2..]), 2);
-                return n.map_err(|_| ParsingFailure);
+                return n.map_err(|_| ParserError::Common);
             }
         }
-        i64::from_str(&s).map_err(|_| ParsingFailure)
+        i64::from_str(&s).map_err(|_| ParserError::Common)
     }
 
     /// Parses a big integer either in
     /// decimal, binary (`0b`) or hexadecimal (`0x`) notation.
-    pub fn parse_big_int(&self, negative: bool) -> Result<BigInt, ParsingFailure> {
+    pub fn parse_big_int(&self, negative: bool) -> Result<BigInt, ParserError> {
         let s = self.value.replace('_', "");
         if s.starts_with('0') {
             if s[1..].starts_with('x') || s[1..].starts_with('X') {
@@ -84,17 +84,17 @@ impl NumericLiteral {
                     digits.push(CharacterValidator::hex_digit_mv(ch).unwrap().to_u8().unwrap());
                 }
                 let n = BigInt::from_radix_be(if negative { num_bigint::Sign::Minus } else { num_bigint::Sign::Plus }, &digits, 16);
-                return n.map_or(Err(ParsingFailure), |n| Ok(n));
+                return n.map_or(Err(ParserError::Common), |n| Ok(n));
             } else if s[1..].starts_with('b') || s[1..].starts_with('B') {
                 let mut digits: Vec<u8> = vec![];
                 for ch in s[2..].chars() {
                     digits.push(CharacterValidator::bin_digit_mv(ch).unwrap().to_u8().unwrap());
                 }
                 let n = BigInt::from_radix_be(if negative { num_bigint::Sign::Minus } else { num_bigint::Sign::Plus }, &digits, 2);
-                return n.map_or(Err(ParsingFailure), |n| Ok(n));
+                return n.map_or(Err(ParserError::Common), |n| Ok(n));
             }
         }
-        BigInt::from_str(&s).map_err(|_| ParsingFailure)
+        BigInt::from_str(&s).map_err(|_| ParserError::Common)
     }
 }
 
