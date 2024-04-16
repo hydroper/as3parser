@@ -5039,6 +5039,9 @@ struct PlainMxmlAttribute {
     pub value: (String, Location),
 }
 
+#[path = "css_parser.rs"]
+mod css_parser;
+
 pub struct ParserFacade;
 
 impl ParserFacade {
