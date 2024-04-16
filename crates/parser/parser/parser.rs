@@ -4809,7 +4809,7 @@ impl<'input> Parser<'input> {
                     }
                     match process_xml_pi(self.compilation_unit().file_path(), &self.compilation_unit().compiler_options(), &name, &data) {
                         Ok(errors) => {
-                            for error in errors {
+                            for error in errors.iter() {
                                 match error {
                                     XmlPiError::UnknownAttribute(name) => {
                                         self.add_syntax_error(&location, DiagnosticKind::XmlPiUnknownAttribute, diagnostic_arguments![String(name.clone())]);
@@ -4821,6 +4821,9 @@ impl<'input> Parser<'input> {
                                         self.add_syntax_error(&location, DiagnosticKind::XmlPiEncodingMustBeUtf8, vec![]);
                                     },
                                 }
+                            }
+                            if !errors.is_empty() {
+                                return Err(ParsingFailure);
                             }
                         },
                         Err(_) => {
