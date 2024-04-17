@@ -151,4 +151,9 @@ impl Location {
     pub fn line_break(&self, other: &Self) -> bool {
         self.last_line_number() != other.first_line_number()
     }
+
+    /// Returns the source text comprising the source location.
+    pub fn text(&self) -> String {
+        self.compilation_unit.text()[self.first_offset..self.last_offset].to_owned()
+    }
 }
