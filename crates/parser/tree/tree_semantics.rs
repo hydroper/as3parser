@@ -33,7 +33,7 @@ pub trait TreeSemanticsAccessor<T, S: Clone> {
 }
 
 macro impl_semantics_with_loc_call {
-    ($tree_semantics_id:ident, $($nodetype:ident),*$(,)?) => {
+    (struct $tree_semantics_id:ident, $($nodetype:ident),*$(,)?) => {
         $(
             impl<S: Clone> TreeSemanticsAccessor<$nodetype, S> for $tree_semantics_id<S> {
                 fn get(&self, node: &Rc<$nodetype>) -> Option<S> {
@@ -88,7 +88,7 @@ macro impl_semantics_with_loc_call {
 }
 
 macro impl_semantics_with_loc_field {
-    ($tree_semantics_id:ident, $($nodetype:ident),*$(,)?) => {
+    (struct $tree_semantics_id:ident, $($nodetype:ident),*$(,)?) => {
         $(
             impl<S: Clone> TreeSemanticsAccessor<$nodetype, S> for $tree_semantics_id<S> {
                 fn get(&self, node: &Rc<$nodetype>) -> Option<S> {
@@ -143,7 +143,7 @@ macro impl_semantics_with_loc_field {
 }
 
 macro impl_semantics_1 {
-    ($tree_semantics_1_id:ident, $new_id:ident, $($nodetype:ident),*$(,)?) => {
+    (struct $tree_semantics_1_id:ident, fn $new_id:ident, $($nodetype:ident),*$(,)?) => {
         struct $tree_semantics_1_id<S> {
             $(
                 #[allow(non_snake_case)]
@@ -179,14 +179,14 @@ macro impl_semantics_1 {
 }
 
 impl_semantics_with_loc_call!(
-    TreeSemantics,
+    struct TreeSemantics,
     Expression,
     Directive,
     MxmlContent,
 );
 
 impl_semantics_with_loc_field!(
-    TreeSemantics,
+    struct TreeSemantics,
     FunctionCommon,
     Block,
     Program,
@@ -197,8 +197,8 @@ impl_semantics_with_loc_field!(
 );
 
 impl_semantics_1!(
-    TreeSemantics1,
-    new,
+    struct TreeSemantics1,
+    fn new,
     Expression,
     Directive,
     FunctionCommon,
