@@ -53,7 +53,7 @@ Tree structure:
 
 * [x] `CssNode` enumeration
   * [x] `CssArrayPropertyValue` variant
-  * [ ] `CssColorPropertyValue` variant
+  * [x] `CssColorPropertyValue` variant
   * [ ] `CssCombinator` variant
   * [ ] `CssDocument` variant
   * [ ] `CssFontFace` variant

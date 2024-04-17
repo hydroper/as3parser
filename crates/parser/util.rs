@@ -17,6 +17,9 @@ pub use shared_map::*;
 mod escaping;
 pub use escaping::*;
 
+mod css;
+pub use css::*;
+
 pub use std::cell::{Cell, RefCell};
 pub use std::collections::{HashMap, HashSet};
 pub use std::rc::{Rc, Weak};

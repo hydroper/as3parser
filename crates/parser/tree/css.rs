@@ -79,12 +79,14 @@ pub enum CssModelTreeType {
 #[derive(Clone, Serialize, Deserialize)]
 pub enum CssNode {
     ArrayPropertyValue(CssArrayPropertyValue),
+    ColorPropertyValue(CssColorPropertyValue),
 }
 
 impl CssNode {
     pub fn children(&self) -> Vec<Rc<CssNode>> {
         match self {
             Self::ArrayPropertyValue(v) => v.elements.clone(),
+            Self::ColorPropertyValue(_) => vec![],
         }
     }
 
@@ -92,13 +94,15 @@ impl CssNode {
     pub fn location(&self) -> Location {
         match self {
             Self::ArrayPropertyValue(v) => v.location.clone(),
+            Self::ColorPropertyValue(v) => v.location.clone(),
         }
     }
 
     /// Node's type.
     pub fn operator(&self) -> CssModelTreeType {
         match self {
-            Self::ArrayPropertyValue(_) => CssModelTreeType::PropertyValue,
+            Self::ArrayPropertyValue(_) |
+            Self::ColorPropertyValue(_) => CssModelTreeType::PropertyValue,
         }
     }
 
@@ -117,6 +121,7 @@ impl ToString for CssNode {
     fn to_string(&self) -> String {
         match self {
             Self::ArrayPropertyValue(v) => v.elements.iter().map(|v| v.to_string()).collect::<Vec<_>>().join(", "),
+            Self::ColorPropertyValue(v) => v.text(),
         }
     }
 }
@@ -133,6 +138,39 @@ pub struct CssArrayPropertyValue {
     pub location: Location,
     /// List of `CssPropertyValue`s.
     pub elements: Vec<Rc<CssNode>>,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct CssColorPropertyValue {
+    pub location: Location,
+    pub color_int: u32,
+}
+
+impl CssColorPropertyValue {
+    pub fn from_hex(location: Location, token_text: &str) -> Self {
+        assert!(token_text.starts_with("#"), "Invalid color: {token_text}");
+        let mut token_text = token_text.to_owned();
+        if token_text.len() == 4 {
+            let mut six = String::new();
+            let chars: Vec<_> = token_text.chars().collect();
+            six.push('#');
+            six.push(chars[1]);
+            six.push(chars[1]);
+            six.push(chars[2]);
+            six.push(chars[2]);
+            six.push(chars[3]);
+            six.push(chars[3]);
+            token_text = six;
+        }
+        Self {
+            location,
+            color_int: u32::from_str_radix(&token_text, 16).unwrap(),
+        }
+    }
+
+    pub fn text(&self) -> String {
+        self.location.text()
+    }
 }
 
 /// A "combinator" represents a CSS selector that combines with a selector. It
