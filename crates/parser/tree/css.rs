@@ -71,6 +71,70 @@ pub enum CssFontFaceSourceType {
     Local,
 }
 
+#[derive(Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum CssModelTreeType {
+    PropertyValue,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub enum CssNode {
+    ArrayPropertyValue(CssArrayPropertyValue),
+}
+
+impl CssNode {
+    pub fn children(&self) -> Vec<Rc<CssNode>> {
+        match self {
+            Self::ArrayPropertyValue(v) => v.elements.clone(),
+        }
+    }
+
+    /// Source location information.
+    pub fn location(&self) -> Location {
+        match self {
+            Self::ArrayPropertyValue(v) => v.location.clone(),
+        }
+    }
+
+    /// Node's type.
+    pub fn operator(&self) -> CssModelTreeType {
+        match self {
+            Self::ArrayPropertyValue(_) => CssModelTreeType::PropertyValue,
+        }
+    }
+
+    /// Node's child count.
+    pub fn arity(&self) -> usize {
+        self.children().len()
+    }
+
+    /// Node's nth child given an index.
+    pub fn nth_child(&self, index: usize) -> Option<Rc<CssNode>> {
+        self.children().get(index).map(|r| r.clone())
+    }
+}
+
+impl ToString for CssNode {
+    fn to_string(&self) -> String {
+        match self {
+            Self::ArrayPropertyValue(v) => v.elements.iter().map(|v| v.to_string()).collect::<Vec<_>>().join(", "),
+        }
+    }
+}
+
+/// Array type property values are comma-separated values in CSS properties.
+///
+/// For example:
+///
+/// ```css
+/// fillColors: #FFFFFF, #CCCCCC, #FFFFFF, #EEEEEE;
+/// ```
+#[derive(Clone, Serialize, Deserialize)]
+pub struct CssArrayPropertyValue {
+    pub location: Location,
+    /// List of `CssPropertyValue`s.
+    pub elements: Vec<Rc<CssNode>>,
+}
+
 /// A "combinator" represents a CSS selector that combines with a selector. It
 /// has a type value and an associated selector. If selector "A" is written on
 /// the left of selector "B", then "A" is the combinator of "B".
@@ -84,12 +148,12 @@ pub enum CssFontFaceSourceType {
 /// `s|Button.rounded`.
 #[derive(Clone, Serialize, Deserialize)]
 pub struct CssCombinator {
-    /// The selector associated with the combinator. For example:
+    /// The selector (`CssSelector`) associated with the combinator. For example:
     /// ```css
     /// s|VBox s|Label
     /// ```
     /// Then, `s|Label` is a combinator whose selector is `s|VBox`.
-    pub selector: Rc<CssSelector>,
+    pub selector: Rc<CssNode>,
     /// The combinator type.
     pub combinator_type: CssCombinatorType,
 }

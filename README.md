@@ -46,14 +46,13 @@ Conform to Apache Royale sources:
 
 - [CSS.g](https://github.com/apache/royale-compiler/blob/develop/compiler/src/main/antlr3/org/apache/royale/compiler/internal/css/CSS.g)
 - [CSSTree.g](https://github.com/apache/royale-compiler/blob/develop/compiler/src/main/antlr3/org/apache/royale/compiler/internal/css/CSSTree.g)
-- [org.apache.royale.compiler.internal.css](https://github.com/apache/royale-compiler/tree/fc03f3b4fa9bc93e2492dc3dc7db045656b8fa24/compiler/src/main/java/org/apache/royale/compiler/internal/css)
+- [org.apache.royale.compiler.css](https://github.com/apache/royale-compiler/tree/fc03f3b4fa9bc93e2492dc3dc7db045656b8fa24/compiler/src/main/java/org/apache/royale/compiler/css)
+- (Implementation) [org.apache.royale.compiler.internal.css](https://github.com/apache/royale-compiler/tree/fc03f3b4fa9bc93e2492dc3dc7db045656b8fa24/compiler/src/main/java/org/apache/royale/compiler/internal/css)
 
 Tree structure:
 
-* [ ] `CssNode` enumeration
-  * [ ] Includes children and source location
-  * [ ] `kind(): CssModelTreeKind`
-  * [ ] `CssArrayPropertyValue` variant
+* [x] `CssNode` enumeration
+  * [x] `CssArrayPropertyValue` variant
   * [ ] `CssColorPropertyValue` variant
   * [ ] `CssCombinator` variant
   * [ ] `CssDocument` variant
@@ -61,16 +60,22 @@ Tree structure:
   * [ ] `CssFunctionCallPropertyValue` variant
   * [ ] `CssKeyFrames` variant
   * [ ] `CssKeywordPropertyValue` variant
+  * [ ] `CssMediaQuery` variant
+    * [ ] Alternative to Royale's `CSSTypedNode` with media query condition children.
   * [ ] `CssMediaQueryCondition` variant
   * [ ] `CssMultiValuePropertyValue` variant
   * [ ] `CssNamespaceDefinition` variant
   * [ ] `CssNumberPropertyValue` variant
   * [ ] `CssProperty` variant
+  * [ ] `CssPropertyList` variant
+    * [ ] Alternative to Royale's `CSSTypedNode` with property children.
   * [ ] `CssRgbColorPropertyValue` variant
   * [ ] `CssRgbaColorPropertyValue` variant
   * [ ] `CssRule` variant
   * [ ] `CssSelector` variant
   * [ ] `CssSelectorCondition` variant
+  * [ ] `CssSelectorGroup` variant
+    * [ ] Alternative to Royale's `CSSTypedNode` with selector children.
   * [ ] `CssStringPropertyValue` variant
   * [ ] `CssText` variant
   * [ ] `CssUrlAndFormatPropertyValue` variant
