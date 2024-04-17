@@ -13,7 +13,7 @@ pub struct TreeSemantics<S> {
     large_units: RefCell<HashMap<ByAddress<Rc<CompilationUnit>>, TreeSemantics1<S>>>,
 }
 
-impl<S> TreeSemantics<S> {
+impl<S: Clone> TreeSemantics<S> {
     pub fn new() -> Self {
         Self {
             common: TreeSemantics1::new(),
@@ -33,9 +33,9 @@ pub trait TreeSemanticsAccessor<T, S: Clone> {
 }
 
 macro impl_semantics_with_loc_call {
-    ($($nodetype:ident),*$(,)?) => {
+    ($tree_semantics_id:ident, $($nodetype:ident),*$(,)?) => {
         $(
-            impl<S: Clone> TreeSemanticsAccessor<$nodetype, S> for TreeSemantics<S> {
+            impl<S: Clone> TreeSemanticsAccessor<$nodetype, S> for $tree_semantics_id<S> {
                 fn get(&self, node: &Rc<$nodetype>) -> Option<S> {
                     let cu = node.location().compilation_unit();
                     if cu.text().len() < LARGE_BYTES {
@@ -51,8 +51,8 @@ macro impl_semantics_with_loc_call {
                     if cu.text().len() < LARGE_BYTES {
                         self.common.set(node, symbol);
                     } else {
-                        let large_units = self.large_units.borrow();
-                        let m1 = large_units.get_mut(&ByAddress(cu));
+                        let mut large_units = self.large_units.borrow_mut();
+                        let m1 = large_units.get_mut(&ByAddress(cu.clone()));
                         if let Some(m1) = m1 {
                             m1.set(node, symbol);
                         } else {
@@ -67,7 +67,7 @@ macro impl_semantics_with_loc_call {
                     if cu.text().len() < LARGE_BYTES {
                         self.common.delete(node)
                     } else {
-                        let large_units = self.large_units.borrow();
+                        let mut large_units = self.large_units.borrow_mut();
                         let m1 = large_units.get_mut(&ByAddress(cu));
                         m1.map(|m1| m1.delete(node)).unwrap_or(false)
                     }
@@ -88,9 +88,9 @@ macro impl_semantics_with_loc_call {
 }
 
 macro impl_semantics_with_loc_field {
-    ($($nodetype:ident),*$(,)?) => {
+    ($tree_semantics_id:ident, $($nodetype:ident),*$(,)?) => {
         $(
-            impl<S: Clone> TreeSemanticsAccessor<$nodetype, S> for TreeSemantics<S> {
+            impl<S: Clone> TreeSemanticsAccessor<$nodetype, S> for $tree_semantics_id<S> {
                 fn get(&self, node: &Rc<$nodetype>) -> Option<S> {
                     let cu = node.location.compilation_unit();
                     if cu.text().len() < LARGE_BYTES {
@@ -106,8 +106,8 @@ macro impl_semantics_with_loc_field {
                     if cu.text().len() < LARGE_BYTES {
                         self.common.set(node, symbol);
                     } else {
-                        let large_units = self.large_units.borrow();
-                        let m1 = large_units.get_mut(&ByAddress(cu));
+                        let mut large_units = self.large_units.borrow_mut();
+                        let m1 = large_units.get_mut(&ByAddress(cu.clone()));
                         if let Some(m1) = m1 {
                             m1.set(node, symbol);
                         } else {
@@ -122,7 +122,7 @@ macro impl_semantics_with_loc_field {
                     if cu.text().len() < LARGE_BYTES {
                         self.common.delete(node)
                     } else {
-                        let large_units = self.large_units.borrow();
+                        let mut large_units = self.large_units.borrow_mut();
                         let m1 = large_units.get_mut(&ByAddress(cu));
                         m1.map(|m1| m1.delete(node)).unwrap_or(false)
                     }
@@ -143,16 +143,16 @@ macro impl_semantics_with_loc_field {
 }
 
 macro impl_semantics_1 {
-    ($($nodetype:ident),*$(,)?) => {
-        struct TreeSemantics1<S> {
+    ($tree_semantics_1_id:ident, $new_id:ident, $($nodetype:ident),*$(,)?) => {
+        struct $tree_semantics_1_id<S> {
             $(
                 #[allow(non_snake_case)]
                 $nodetype: RefCell<HashMap<NodeAsKey<Rc<$nodetype>>, Option<S>>>,
             )*
         }
 
-        impl<S: Clone> TreeSemantics1<S> {
-            pub fn new() -> Self {
+        impl<S: Clone> $tree_semantics_1_id<S> {
+            pub fn $new_id() -> Self {
                 Self {
                     $($nodetype: RefCell::new(HashMap::new()),)*
                 }
@@ -160,7 +160,7 @@ macro impl_semantics_1 {
         }
 
         $(
-            impl<S: Clone> TreeSemanticsAccessor<$nodetype, S> for TreeSemantics1<S> {
+            impl<S: Clone> TreeSemanticsAccessor<$nodetype, S> for $tree_semantics_1_id<S> {
                 fn get(&self, node: &Rc<$nodetype>) -> Option<S> {
                     self.$nodetype.borrow().get(&NodeAsKey(node.clone())).map(|v| v.clone().unwrap())
                 }
@@ -179,12 +179,14 @@ macro impl_semantics_1 {
 }
 
 impl_semantics_with_loc_call!(
+    TreeSemantics,
     Expression,
     Directive,
     MxmlContent,
 );
 
 impl_semantics_with_loc_field!(
+    TreeSemantics,
     FunctionCommon,
     Block,
     Program,
@@ -195,6 +197,8 @@ impl_semantics_with_loc_field!(
 );
 
 impl_semantics_1!(
+    TreeSemantics1,
+    new,
     Expression,
     Directive,
     FunctionCommon,
