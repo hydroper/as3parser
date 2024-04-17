@@ -144,11 +144,9 @@ macro impl_semantics_with_loc_field {
 
 macro impl_semantics_1 {
     (struct $tree_semantics_1_id:ident, fn $new_id:ident, $($nodetype:ident),*$(,)?) => {
+        #[allow(non_snake_case)]
         struct $tree_semantics_1_id<S> {
-            $(
-                #[allow(non_snake_case)]
-                $nodetype: RefCell<HashMap<NodeAsKey<Rc<$nodetype>>, Option<S>>>,
-            )*
+            $($nodetype: RefCell<HashMap<NodeAsKey<Rc<$nodetype>>, Option<S>>>,)*
         }
 
         impl<S: Clone> $tree_semantics_1_id<S> {
