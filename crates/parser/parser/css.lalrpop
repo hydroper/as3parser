@@ -1,11 +1,13 @@
 use std::str::FromStr;
+use std::rc::Rc;
 use lalrpop_util::ErrorRecovery;
+use crate::compilation_unit::CompilationUnit;
+use crate::compilation_unit::Location;
 
-grammar<'err>(errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, &'static str>>);
+grammar<'err, 'cu>(errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, &'static str>>, compilation_unit: &'cu Rc<CompilationUnit>);
 
 pub Term: i32 = {
-    <n:Num> => n,
-    "(" <t:Term> ")" => t,
+    <n:Number> => n,
 };
 
-Num: i32 = <s:r"[0-9]+"> => i32::from_str(s).unwrap();
+Number: i32 = <s:r"[0-9]+"> => i32::from_str(s).unwrap();
