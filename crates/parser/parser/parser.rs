@@ -1466,7 +1466,7 @@ impl<'input> Parser<'input> {
             }
         }
 
-        let mut content: Option<Vec<Rc<XmlElementContent>>> = None;
+        let mut content: Option<Vec<Rc<XmlContent>>> = None;
         let mut closing_name: Option<XmlTagName> = None;
 
         let is_empty;
@@ -1537,25 +1537,31 @@ impl<'input> Parser<'input> {
     }
 
     /// Parses XMLContent until a `</` token.
-    fn parse_xml_content(&mut self) -> Result<Vec<Rc<XmlElementContent>>, ParserError> {
+    fn parse_xml_content(&mut self) -> Result<Vec<Rc<XmlContent>>, ParserError> {
         let mut content = vec![];
         while !self.peek(Token::XmlLtSlash) {
             if self.consume(Token::LeftBrace)? {
                 let expr = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::AssignmentAndOther, ..default() })?;
                 self.expect_and_ie_xml_content(Token::RightBrace)?;
-                content.push(Rc::new(XmlElementContent::Expression(expr)));
+                content.push(Rc::new(XmlContent::Expression(expr)));
             } else if let Token::XmlMarkup(markup) = self.token.0.clone() {
                 let location = self.token_location();
                 self.next_ie_xml_content()?;
-                content.push(Rc::new(XmlElementContent::XmlMarkup((markup, location))));
+                content.push(Rc::new(XmlContent::Markup((markup, location))));
             } else if let Token::XmlText(text) = self.token.0.clone() {
+                if self.tokenizer.characters().reached_end() {
+                    self.expect_and_ie_xml_content(Token::XmlLtSlash)?;
+                    break;
+                }
                 let location = self.token_location();
                 self.next_ie_xml_content()?;
-                content.push(Rc::new(XmlElementContent::XmlText((text, location))));
+                content.push(Rc::new(XmlContent::Characters((text, location))));
             } else if self.consume_and_ie_xml_tag(Token::Lt)? {
                 let start = self.token_location();
                 let element = self.parse_xml_element(start, false)?;
-                content.push(Rc::new(XmlElementContent::XmlElement(Rc::new(element))));
+                content.push(Rc::new(XmlContent::Element(Rc::new(element))));
+            } else if self.peek(Token::Eof) {
+                break;
             } else {
                 self.expect_and_ie_xml_content(Token::XmlLtSlash)?;
             }

@@ -28,7 +28,7 @@ if let Some(document) = ParserFacade::parse_mxml_document(&source, ignore_whites
 }
 ```
 
-The nodes used for ECMAScript for XML (E4X) and MXML are distinct. For example, MXML uses `MxmlElement` instead of `XmlElement`, and `MxmlContent` instead of `XmlElementContent`.
+The nodes used for ECMAScript for XML (E4X) and MXML are distinct. For example, MXML uses `MxmlElement` instead of `XmlElement`, and `MxmlContent` instead of `XmlContent`.
 
 ## Qualified names
 

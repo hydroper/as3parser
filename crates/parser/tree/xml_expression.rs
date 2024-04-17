@@ -16,7 +16,7 @@ pub struct XmlMarkupExpression {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct XmlListExpression {
     pub location: Location,
-    pub content: Vec<Rc<XmlElementContent>>,
+    pub content: Vec<Rc<XmlContent>>,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -25,7 +25,7 @@ pub struct XmlElement {
     pub name: XmlTagName,
     pub attributes: Vec<Rc<XmlAttribute>>,
     pub attribute_expression: Option<Rc<Expression>>,
-    pub content: Option<Vec<Rc<XmlElementContent>>>,
+    pub content: Option<Vec<Rc<XmlContent>>>,
     pub closing_name: Option<XmlTagName>,
 }
 
@@ -49,9 +49,9 @@ pub enum XmlAttributeValue {
 }
 
 #[derive(Clone, Serialize, Deserialize)]
-pub enum XmlElementContent {
-    XmlText((String, Location)),
-    XmlMarkup((String, Location)),
-    XmlElement(Rc<XmlElement>),
+pub enum XmlContent {
+    Characters((String, Location)),
+    Markup((String, Location)),
+    Element(Rc<XmlElement>),
     Expression(Rc<Expression>),
 }

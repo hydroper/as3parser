@@ -77,13 +77,13 @@
                       "attribute_expression": null,
                       "content": [
                         {
-                          "XmlText": [
+                          "Characters": [
                             "\r\n    ",
                             "6:4-7:5"
                           ]
                         },
                         {
-                          "XmlElement": {
+                          "Element": {
                             "location": "7:6-7:9",
                             "name": {
                               "Name": [
@@ -98,13 +98,13 @@
                           }
                         },
                         {
-                          "XmlText": [
+                          "Characters": [
                             "\r\n    ",
                             "7:9-8:5"
                           ]
                         },
                         {
-                          "XmlElement": {
+                          "Element": {
                             "location": "8:6-8:13",
                             "name": {
                               "Name": [
@@ -131,13 +131,13 @@
                           }
                         },
                         {
-                          "XmlText": [
+                          "Characters": [
                             "\r\n    ",
                             "8:13-9:5"
                           ]
                         },
                         {
-                          "XmlElement": {
+                          "Element": {
                             "location": "9:6-9:15",
                             "name": {
                               "Name": [
@@ -166,13 +166,13 @@
                           }
                         },
                         {
-                          "XmlText": [
+                          "Characters": [
                             "\r\n    ",
                             "9:15-10:5"
                           ]
                         },
                         {
-                          "XmlElement": {
+                          "Element": {
                             "location": "10:6-10:15",
                             "name": {
                               "Name": [
@@ -210,13 +210,13 @@
                           }
                         },
                         {
-                          "XmlText": [
+                          "Characters": [
                             "\r\n    Lorem ipsum\r\n    ",
                             "10:15-12:5"
                           ]
                         },
                         {
-                          "XmlElement": {
+                          "Element": {
                             "location": "12:6-12:23",
                             "name": {
                               "Name": [
@@ -228,7 +228,7 @@
                             "attribute_expression": null,
                             "content": [
                               {
-                                "XmlText": [
+                                "Characters": [
                                   "Lorem ipsum",
                                   "12:8-12:19"
                                 ]
@@ -243,7 +243,7 @@
                           }
                         },
                         {
-                          "XmlText": [
+                          "Characters": [
                             "\r\n    ",
                             "12:23-13:5"
                           ]
@@ -264,7 +264,7 @@
                           }
                         },
                         {
-                          "XmlText": [
+                          "Characters": [
                             "\r\n",
                             "13:8-14:1"
                           ]

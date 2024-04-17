@@ -2,7 +2,6 @@ use crate::ns::*;
 
 pub struct Tokenizer<'input> {
     compilation_unit: Rc<CompilationUnit>,
-    line_number: usize,
     characters: CharacterReader<'input>,
 }
 
@@ -15,7 +14,6 @@ impl<'input> Tokenizer<'input> {
         compilation_unit.already_tokenized.set(true);
         Self {
             compilation_unit,
-            line_number: 1,
             characters: CharacterReader::from(text),
         }
     }
@@ -471,11 +469,6 @@ impl<'input> Tokenizer<'input> {
         Ok((Token::RegExpLiteral { body, flags }, location))
     }
 
-    /// Indicates the current line number, counted from 1 (one).
-    pub fn line_number(&self) -> usize {
-        self.line_number
-    }
-
     fn character_ahead_location(&self) -> Location {
         if self.characters.reached_end() {
             return self.cursor_location();
@@ -504,12 +497,12 @@ impl<'input> Tokenizer<'input> {
         let ch = self.characters.peek_or_zero();
         if ch == '\x0D' && self.characters.peek_at_or_zero(1) == '\x0A' {
             self.characters.skip_count_in_place(2);
-            self.line_number += 1;
+            // self.line_number += 1;
             return true;
         }
         if CharacterValidator::is_line_terminator(ch) {
             self.characters.next();
-            self.line_number += 1;
+            // self.line_number += 1;
             return true;
         }
         false
@@ -1188,6 +1181,9 @@ impl<'input> Tokenizer<'input> {
 
             // XmlName
             _ => {
+                if self.characters.reached_end() {
+                    return Ok((Token::Eof, self.cursor_location()));
+                }
                 loop {
                     let ch = self.characters.peek_or_zero();
                     if ['<', '{'].contains(&ch) {

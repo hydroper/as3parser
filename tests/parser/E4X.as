@@ -16,3 +16,5 @@ default xml namespace = myxmlns;
     ..d;
 
 <></>;
+
+<a>
