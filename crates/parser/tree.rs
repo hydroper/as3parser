@@ -151,8 +151,8 @@ mod program;
 pub use program::*;
 
 // MXML document
-mod mxml_document;
-pub use mxml_document::*;
+mod mxml;
+pub use mxml::*;
 
 // CSS
 // mod css;

@@ -26,8 +26,8 @@ let parser_options = ParserOptions {
     ..default()
 };
 
-if let Some(document) = ParserFacade(parser_options).parse_mxml_document(&source) {
-    // document: Rc<MxmlDocument>
+if let Some(document) = ParserFacade(parser_options).parse_mxml(&source) {
+    // document: Rc<Mxml>
 }
 ```
 

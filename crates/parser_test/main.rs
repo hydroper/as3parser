@@ -28,7 +28,7 @@ fn main() -> io::Result<()> {
     let source_content = fs::read_to_string(&source_path)?;
     let compilation_unit = CompilationUnit::new(Some(source_path), source_content, &CompilerOptions::default());
     if arguments.mxml {
-        if let Some(document) = ParserFacade(&compilation_unit, default()).parse_mxml_document() {
+        if let Some(document) = ParserFacade(&compilation_unit, default()).parse_mxml() {
             if arguments.file_log {
                 fs::write(&source_path_ast_json, serde_json::to_string_pretty(&document).unwrap())?;
             } else {

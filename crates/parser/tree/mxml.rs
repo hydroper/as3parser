@@ -4,7 +4,7 @@ use crate::ns::*;
 use serde::{Serialize, Deserialize};
 
 #[derive(Clone, Serialize, Deserialize)]
-pub struct MxmlDocument {
+pub struct Mxml {
     pub location: Location,
     pub version: XmlVersion,
     pub encoding: String,

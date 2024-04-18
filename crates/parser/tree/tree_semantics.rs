@@ -189,7 +189,7 @@ impl_semantics_with_loc_field!(
     Block,
     Program,
     SimpleVariableDefinition,
-    MxmlDocument,
+    Mxml,
     MxmlElement,
     MxmlAttribute,
 );
@@ -203,7 +203,7 @@ impl_semantics_1!(
     Block,
     Program,
     SimpleVariableDefinition,
-    MxmlDocument,
+    Mxml,
     MxmlContent,
     MxmlElement,
     MxmlAttribute,

@@ -4892,7 +4892,7 @@ impl<'input> Parser<'input> {
         Ok(content)
     }
 
-    fn parse_mxml_document(&mut self) -> Result<Rc<MxmlDocument>, ParserError> {
+    fn parse_mxml(&mut self) -> Result<Rc<Mxml>, ParserError> {
         self.mark_location();
         let ns = Rc::new(MxmlNamespace::new(None));
         let mut content = self.parse_mxml_content(true, &ns)?;
@@ -4917,7 +4917,7 @@ impl<'input> Parser<'input> {
         if element_count != 1 || character_count != 0 {
             self.add_syntax_error(&location, DiagnosticKind::XmlMustConsistOfExactly1Element, vec![]);
         }
-        Ok(Rc::new(MxmlDocument {
+        Ok(Rc::new(Mxml {
             location,
             version: XmlVersion::Version10,
             encoding: "utf-8".into(),
@@ -5178,11 +5178,11 @@ impl<'input> ParserFacade<'input> {
         }
     }
 
-    /// Parses `MxmlDocument` until end-of-file.
-    pub fn parse_mxml_document(&self) -> Option<Rc<MxmlDocument>> {
+    /// Parses `Mxml` until end-of-file.
+    pub fn parse_mxml(&self) -> Option<Rc<Mxml>> {
         let mut parser = self.create_parser();
         if parser.next_ie_xml_content().is_ok() {
-            let document = parser.parse_mxml_document().ok();
+            let document = parser.parse_mxml().ok();
             /* if compilation_unit.invalidated() { None } else { document } */
             document
         } else {
