@@ -28,10 +28,17 @@
                       }
                     }
                   },
-                  "instance_property": [
-                    "x",
-                    "3:13-3:14"
-                  ]
+                  "instance_property": {
+                    "location": "3:13-3:14",
+                    "attribute": false,
+                    "qualifier": null,
+                    "id": {
+                      "Id": [
+                        "x",
+                        "3:13-3:14"
+                      ]
+                    }
+                  }
                 }
               },
               "3:4-3:14"
@@ -57,10 +64,17 @@
                         }
                       }
                     },
-                    "instance_property": [
-                      "x",
-                      "5:12-5:13"
-                    ]
+                    "instance_property": {
+                      "location": "5:12-5:13",
+                      "attribute": false,
+                      "qualifier": null,
+                      "id": {
+                        "Id": [
+                          "x",
+                          "5:12-5:13"
+                        ]
+                      }
+                    }
                   },
                   "display_text": "X description"
                 }

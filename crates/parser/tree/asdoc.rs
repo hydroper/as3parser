@@ -52,5 +52,5 @@ pub struct AsDocReference {
     /// Base expression.
     pub base: Option<Rc<Expression>>,
     /// Instance property fragment following the hash character.
-    pub instance_property: Option<(String, Location)>,
+    pub instance_property: Option<Rc<QualifiedIdentifier>>,
 }

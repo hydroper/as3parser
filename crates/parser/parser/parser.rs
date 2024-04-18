@@ -4603,7 +4603,7 @@ impl<'input> Parser<'input> {
         }
         let mut base: Option<Rc<Expression>> = None;
         let base_text: String = split[0].to_owned();
-        let instance_property: Option<(String, Location)> = split.get(1).and_then(|&f| if f.is_empty() { None } else {
+        let instance_property_text: Option<(String, Location)> = split.get(1).and_then(|&f| if f.is_empty() { None } else {
             Some((f.to_owned(), Location::with_offsets(self.compilation_unit(), reference_loc.first_offset() + base_text.len() + 1, reference_loc.last_offset())))
         });
 
@@ -4614,6 +4614,20 @@ impl<'input> Parser<'input> {
             };
             if let Some(exp) = ParserFacade(parser_options).parse_expression(self.compilation_unit()) {
                 base = Some(exp);
+            } else {
+                self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.to_owned())]);
+                return None;
+            }
+        }
+
+        let mut instance_property: Option<Rc<QualifiedIdentifier>> = None;
+        if let Some(text) = instance_property_text {
+            let parser_options = ParserOptions {
+                byte_range: Some((text.1.first_offset(), text.1.last_offset())),
+                ..default()
+            };
+            if let Some(exp) = ParserFacade(parser_options).parse_qualified_identifier(self.compilation_unit()) {
+                instance_property = Some(Rc::new(exp));
             } else {
                 self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.to_owned())]);
                 return None;
@@ -5109,6 +5123,20 @@ impl ParserFacade {
             let exp = parser.parse_expression(ParserExpressionContext {
                 ..default()
             }).ok();
+            if exp.is_some() {
+                let _ = parser.expect_eof();
+            }
+            exp
+        } else {
+            None
+        }
+    }
+
+    /// Parses a qualified identifier and expects end-of-file.
+    pub fn parse_qualified_identifier(&self, compilation_unit: &Rc<CompilationUnit>) -> Option<QualifiedIdentifier> {
+        let mut parser = self.create_parser(compilation_unit);
+        if parser.next().is_ok() {
+            let exp = parser.parse_qualified_identifier().ok();
             if exp.is_some() {
                 let _ = parser.expect_eof();
             }
