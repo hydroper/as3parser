@@ -4735,7 +4735,6 @@ impl<'input> Parser<'input> {
         }
     }
 
-    /// * [ ] Make sure an attribute is not redefined.
     fn process_mxml_attribute(&mut self, output: &mut Vec<Rc<MxmlAttribute>>, attribute: &PlainMxmlAttribute, namespace: &Rc<MxmlNamespace>) {
         let attribute_value = unescape_xml(&attribute.value.0);
         // xml="uri"
