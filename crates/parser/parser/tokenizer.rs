@@ -10,12 +10,9 @@ impl<'input> Tokenizer<'input> {
     pub fn new(compilation_unit: &'input Rc<CompilationUnit>, options: &ParserOptions) -> Self {
         let text: &'input str = compilation_unit.text();
         let compilation_unit = compilation_unit.clone();
-        let mut characters: CharacterReader<'input>;
+        let characters: CharacterReader<'input>;
         if let Some(range) = options.byte_range {
-            characters = CharacterReader::from(&text[0..range.1]);
-            while characters.has_remaining() && characters.index() < range.0 {
-                characters.next();
-            }
+            characters = CharacterReader::from_offset(&text[0..range.1], range.0);
         } else {
             characters = CharacterReader::from(text);
         }

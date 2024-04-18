@@ -5,10 +5,16 @@ use std::str::CharIndices;
 #[derive(Clone)]
 pub struct CharacterReader<'a> {
     length: usize,
+    start_offset: usize,
     char_indices: CharIndices<'a>,
 }
 
 impl<'a> CharacterReader<'a> {
+    /// Constructs a `CharacterReader` from a string starting at the given offset.
+    pub fn from_offset(value: &'a str, offset: usize) -> Self {
+        CharacterReader { length: value.len(), start_offset: offset, char_indices: value[offset..].char_indices() }
+    }
+
     /// Indicates if there are remaining code points to read.
     pub fn has_remaining(&self) -> bool {
         self.clone().char_indices.next().is_some()
@@ -34,9 +40,9 @@ impl<'a> CharacterReader<'a> {
         }
     }
 
-    /// Returns the current index in the string.
+    /// Returns the current byte offset in the string.
     pub fn index(&self) -> usize {
-        self.clone().char_indices.next().map_or(self.length, |(i, _)| i)
+        self.clone().char_indices.next().map_or(self.length, |(i, _)| self.start_offset + i)
     }
 
     /// Returns the next code point. If there are no code points
@@ -94,14 +100,14 @@ impl<'a> CharacterReader<'a> {
 impl<'a> From<&'a str> for CharacterReader<'a> {
     /// Constructs a `CharacterReader` from a string.
     fn from(value: &'a str) -> Self {
-        CharacterReader { length: value.len(), char_indices: value.char_indices() }
+        CharacterReader { length: value.len(), start_offset: 0, char_indices: value.char_indices() }
     }
 }
 
 impl<'a> From<&'a String> for CharacterReader<'a> {
     /// Constructs a `CharacterReader` from a string.
     fn from(value: &'a String) -> Self {
-        CharacterReader { length: value.len(), char_indices: value.char_indices() }
+        CharacterReader { length: value.len(), start_offset: 0, char_indices: value.char_indices() }
     }
 }
 
