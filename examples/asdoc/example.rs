@@ -12,7 +12,7 @@ fn main() {
     let compilation_unit = CompilationUnit::new(Some(source_path), source_content, &CompilerOptions::default());
 
     // Parse program
-    if let Some(program) = ParserFacade(default()).parse_program(&compilation_unit) {
+    if let Some(program) = ParserFacade(&compilation_unit, default()).parse_program() {
         visit_program(&program);
     }
 

@@ -18,9 +18,11 @@ Parse programs or expressions through the `ParserFacade` structure of the `as3_p
 ```rust
 use as3_parser::ns::*;
 
-let source = CompilationUnit::new(None, "x ** y".into(), &CompilerOptions::default());
+let compilation_unit = CompilationUnit::new(None, "x ** y".into(), &CompilerOptions::default());
+
 let parser_options = ParserOptions::default();
-if let Some(program) = ParserFacade(parser_options).parse_program(&source) {
+
+if let Some(program) = ParserFacade(&compilation_unit, parser_options).parse_program() {
     // program: Rc<Program>
 }
 ```

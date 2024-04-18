@@ -4416,7 +4416,7 @@ impl<'input> Parser<'input> {
                         byte_range: Some((reference_loc.first_offset(), reference_loc.last_offset())),
                         ..default()
                     };
-                    if let Some(exp) = ParserFacade(parser_options).parse_expression(self.compilation_unit()) {
+                    if let Some(exp) = ParserFacade(self.compilation_unit(), parser_options).parse_expression() {
                         tags.push((AsDocTag::EventType(exp), location));
                     } else {
                         self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.clone())]);
@@ -4567,7 +4567,7 @@ impl<'input> Parser<'input> {
                             byte_range: Some((reference_loc.first_offset(), reference_loc.last_offset())),
                             ..default()
                         };
-                        if let Some(exp) = ParserFacade(parser_options).parse_type_expression(self.compilation_unit()) {
+                        if let Some(exp) = ParserFacade(self.compilation_unit(), parser_options).parse_type_expression() {
                             tags.push((AsDocTag::Throws { class_reference: exp, description }, location));
                         } else {
                             self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.clone())]);
@@ -4621,7 +4621,7 @@ impl<'input> Parser<'input> {
                 byte_range: Some((reference_loc.first_offset(), reference_loc.first_offset() + base_text.len())),
                 ..default()
             };
-            if let Some(exp) = ParserFacade(parser_options).parse_expression(self.compilation_unit()) {
+            if let Some(exp) = ParserFacade(self.compilation_unit(), parser_options).parse_expression() {
                 base = Some(exp);
             } else {
                 self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.to_owned())]);
@@ -4635,7 +4635,7 @@ impl<'input> Parser<'input> {
                 byte_range: Some((text.1.first_offset(), text.1.last_offset())),
                 ..default()
             };
-            if let Some(exp) = ParserFacade(parser_options).parse_qualified_identifier(self.compilation_unit()) {
+            if let Some(exp) = ParserFacade(self.compilation_unit(), parser_options).parse_qualified_identifier() {
                 instance_property = Some(Rc::new(exp));
             } else {
                 self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.to_owned())]);
@@ -5087,7 +5087,7 @@ struct PlainMxmlAttribute {
 mod css_parser;
 
 /// A simplified interface for executing the parser.
-pub struct ParserFacade(pub ParserOptions);
+pub struct ParserFacade<'input>(pub &'input Rc<CompilationUnit>, pub ParserOptions);
 
 pub struct ParserOptions {
     /// For MXML, indicates whether to ignore XML whitespace chunks when at
@@ -5107,14 +5107,14 @@ impl Default for ParserOptions {
     }
 }
 
-impl ParserFacade {
-    fn create_parser<'input>(&self, compilation_unit: &'input Rc<CompilationUnit>) -> Parser<'input> {
-        Parser::new(compilation_unit, &self.0)
+impl<'input> ParserFacade<'input> {
+    fn create_parser(&self) -> Parser<'input> {
+        Parser::new(self.0, &self.1)
     }
 
     /// Parses `Program` until end-of-file.
-    pub fn parse_program(&self, compilation_unit: &Rc<CompilationUnit>) -> Option<Rc<Program>> {
-        let mut parser = self.create_parser(compilation_unit);
+    pub fn parse_program(&self) -> Option<Rc<Program>> {
+        let mut parser = self.create_parser();
         if parser.next().is_ok() {
             let program = parser.parse_program().ok();
             /* if compilation_unit.invalidated() { None } else { program } */
@@ -5125,8 +5125,8 @@ impl ParserFacade {
     }
 
     /// Parses `ListExpression^allowIn` and expects end-of-file.
-    pub fn parse_expression(&self, compilation_unit: &Rc<CompilationUnit>) -> Option<Rc<Expression>> {
-        let mut parser = self.create_parser(compilation_unit);
+    pub fn parse_expression(&self) -> Option<Rc<Expression>> {
+        let mut parser = self.create_parser();
         if parser.next().is_ok() {
             let exp = parser.parse_expression(ParserExpressionContext {
                 ..default()
@@ -5141,8 +5141,8 @@ impl ParserFacade {
     }
 
     /// Parses a qualified identifier and expects end-of-file.
-    pub fn parse_qualified_identifier(&self, compilation_unit: &Rc<CompilationUnit>) -> Option<QualifiedIdentifier> {
-        let mut parser = self.create_parser(compilation_unit);
+    pub fn parse_qualified_identifier(&self) -> Option<QualifiedIdentifier> {
+        let mut parser = self.create_parser();
         if parser.next().is_ok() {
             let exp = parser.parse_qualified_identifier().ok();
             if exp.is_some() {
@@ -5155,8 +5155,8 @@ impl ParserFacade {
     }
 
     /// Parses `TypeExpression` and expects end-of-file.
-    pub fn parse_type_expression(&self, compilation_unit: &Rc<CompilationUnit>) -> Option<Rc<Expression>> {
-        let mut parser = self.create_parser(compilation_unit);
+    pub fn parse_type_expression(&self) -> Option<Rc<Expression>> {
+        let mut parser = self.create_parser();
         if parser.next().is_ok() {
             let exp = parser.parse_type_expression().ok();
             if exp.is_some() {
@@ -5169,8 +5169,8 @@ impl ParserFacade {
     }
 
     /// Parses `Directives` until end-of-file.
-    pub fn parse_directives(&self, compilation_unit: &Rc<CompilationUnit>, context: ParserDirectiveContext) -> Option<Vec<Rc<Directive>>> {
-        let mut parser = self.create_parser(compilation_unit);
+    pub fn parse_directives(&self, context: ParserDirectiveContext) -> Option<Vec<Rc<Directive>>> {
+        let mut parser = self.create_parser();
         if parser.next().is_ok() {
             parser.parse_directives(context).ok()
         } else {
@@ -5179,8 +5179,8 @@ impl ParserFacade {
     }
 
     /// Parses `MxmlDocument` until end-of-file.
-    pub fn parse_mxml_document(&self, compilation_unit: &Rc<CompilationUnit>) -> Option<Rc<MxmlDocument>> {
-        let mut parser = self.create_parser(compilation_unit);
+    pub fn parse_mxml_document(&self) -> Option<Rc<MxmlDocument>> {
+        let mut parser = self.create_parser();
         if parser.next_ie_xml_content().is_ok() {
             let document = parser.parse_mxml_document().ok();
             /* if compilation_unit.invalidated() { None } else { document } */
