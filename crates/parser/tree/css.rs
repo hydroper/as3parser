@@ -108,6 +108,7 @@ pub enum CssNode {
     Document(CssDocument),
     FontFace(CssFontFace),
     FontFaceList(CssFontFaceList),
+    FunctionCallPropertyValue(CssFunctionCallPropertyValue),
     MediaQuery(CssMediaQuery),
     NamespaceList(CssNamespaceList),
     PropertyList(CssPropertyList),
@@ -125,6 +126,7 @@ impl CssNode {
             Self::Document(v) => v.children.clone(),
             Self::FontFace(_) => vec![],
             Self::FontFaceList(v) => v.children.clone(),
+            Self::FunctionCallPropertyValue(_) => vec![],
             Self::MediaQuery(v) => v.children.clone(),
             Self::NamespaceList(v) => v.children.clone(),
             Self::PropertyList(v) => v.children.clone(),
@@ -143,6 +145,7 @@ impl CssNode {
             Self::Document(v) => v.location.clone(),
             Self::FontFace(v) => v.location.clone(),
             Self::FontFaceList(v) => v.location.clone(),
+            Self::FunctionCallPropertyValue(v) => v.location.clone(),
             Self::MediaQuery(v) => v.location.clone(),
             Self::NamespaceList(v) => v.location.clone(),
             Self::PropertyList(v) => v.location.clone(),
@@ -156,7 +159,8 @@ impl CssNode {
         match self {
             Self::Invalidated(_) => CssModelTreeType::Invalidated,
             Self::ArrayPropertyValue(_) |
-            Self::ColorPropertyValue(_) => CssModelTreeType::PropertyValue,
+            Self::ColorPropertyValue(_) |
+            Self::FunctionCallPropertyValue(_) => CssModelTreeType::PropertyValue,
             Self::Combinator(_) => CssModelTreeType::Combinator,
             Self::Document(_) => CssModelTreeType::Document,
             Self::FontFace(_) => CssModelTreeType::FontFace,
@@ -180,22 +184,22 @@ impl CssNode {
     }
 
     pub fn as_property(&self) -> Option<&CssProperty> {
-        let CssNode::Property(property) = self else { None };
+        let CssNode::Property(property) = self else { return None; };
         Some(property)
     }
 
     pub fn as_array_property_value(&self) -> Option<&CssArrayPropertyValue> {
-        let CssNode::ArrayPropertyValue(v) = self else { None };
+        let CssNode::ArrayPropertyValue(v) = self else { return None; };
         Some(v)
     }
 
     pub fn as_function_call_property_value(&self) -> Option<&CssFunctionCallPropertyValue> {
-        let CssNode::FunctionCallPropertyValue(v) = self else { None };
+        let CssNode::FunctionCallPropertyValue(v) = self else { return None; };
         Some(v)
     }
 
     pub fn as_namespace_definition(&self) -> Option<&CssNamespaceDefinition> {
-        let CssNode::NamespaceDefinition(d) = self else { None };
+        let CssNode::NamespaceDefinition(d) = self else { return None; };
         Some(d)
     }
 }
@@ -226,6 +230,14 @@ impl ToString for CssNode {
                 s.push_str("}\n");
                 s
             },
+            Self::FunctionCallPropertyValue(v) => {
+                if let Some(f) = &v.url_format {
+                    format!("{}({}) {}", v.name, v.raw_arguments, f)
+                } else {
+                    format!("{}({})", v.name, v.raw_arguments)
+                }
+            },
+            _ => "[object CSSNode]".into(),
         }
     }
 }
@@ -492,7 +504,7 @@ impl CssFontFace {
 
     pub fn source_value(&self) -> Result<String, ParserError> {
         let _ = self.source_type()?;
-        CssFunctionCallPropertyValue::get_single_argument_from_raw(&self.source.as_function_call_property_value().unwrap().raw_arguments)
+        Ok(CssFunctionCallPropertyValue::get_single_argument_from_raw(&self.source.as_function_call_property_value().unwrap().raw_arguments))
     }
 }
 
@@ -552,8 +564,8 @@ pub struct CssFunctionCallPropertyValue {
     pub name: String,
     /// Raw arguments text excluding the parentheses.
     pub raw_arguments: String,
-    /// If the function call is in the `url("") format("")`,
-    /// indicates the format string in `format("")`.
+    /// If the function call is in the `url("") format("")` form,
+    /// indicates the `format` function call characters.
     pub url_format: Option<String>,
 
     _nothing: PhantomData<()>,
@@ -581,6 +593,15 @@ impl CssFunctionCallPropertyValue {
             raw_arguments: raw_arguments[1..raw_arguments.len() - 1].to_owned(),
             url_format: url_format.map(|f| f.to_owned()),
             _nothing: PhantomData::default(),
+        }
+    }
+
+    pub fn get_single_argument_from_raw(raw_arguments: &str) -> String {
+        if (raw_arguments.starts_with('"') && raw_arguments.ends_with('"'))
+        || (raw_arguments.starts_with('\'') && raw_arguments.ends_with('\'')) {
+            raw_arguments[1..raw_arguments.len() - 1].to_owned()
+        } else{
+            raw_arguments.to_owned()
         }
     }
 }
