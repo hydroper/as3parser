@@ -60,7 +60,7 @@ Tree structure:
   * [x] `CssFontFaceList` variant
     * [x] Alternative to Royale's `CSSTypedNode` with font face children.
   * [ ] `CssFunctionCallPropertyValue` variant
-    * [ ] `url_format: Option<String>` field (used in place of Royale `CSSURLAndFormatPropertyValue`)
+    * [x] `url_format: Option<String>` field (used in place of Royale `CSSURLAndFormatPropertyValue`)
   * [ ] `CssKeyFrames` variant
   * [ ] `CssKeywordPropertyValue` variant
   * [x] `CssMediaQuery` variant

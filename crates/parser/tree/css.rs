@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{marker::PhantomData, str::FromStr};
 
 use crate::ns::*;
 use serde::{Serialize, Deserialize};
@@ -492,11 +492,7 @@ impl CssFontFace {
 
     pub fn source_value(&self) -> Result<String, ParserError> {
         let _ = self.source_type()?;
-        if let Some(v) = CssFunctionCallPropertyValue::get_single_argument_from_raw(&self.source.as_function_call_property_value().unwrap().raw_arguments) {
-            Ok(v)
-        } else {
-            Err(ParserError::Common)
-        }
+        CssFunctionCallPropertyValue::get_single_argument_from_raw(&self.source.as_function_call_property_value().unwrap().raw_arguments)
     }
 }
 
@@ -540,4 +536,51 @@ pub struct CssSelectorGroup {
     pub location: Location,
     /// List of `CssNode::Selector`.
     pub children: Vec<Rc<CssNode>>,
+}
+
+/// CSS function call property value.
+///
+/// For example:
+///
+/// ```css
+/// Embed("bg.png")
+/// ```
+#[derive(Clone, Serialize, Deserialize)]
+pub struct CssFunctionCallPropertyValue {
+    pub location: Location,
+    /// Name of the function.
+    pub name: String,
+    /// Raw arguments text excluding the parentheses.
+    pub raw_arguments: String,
+    /// If the function call is in the `url("") format("")`,
+    /// indicates the format string in `format("")`.
+    pub url_format: Option<String>,
+
+    _nothing: PhantomData<()>,
+}
+
+impl CssFunctionCallPropertyValue {
+    /// Function name for `ClassReference("")`.
+    pub const CLASS_REFERENCE: &'static str = "ClassReference";
+    /// Function name for `PropertyReference("")`.
+    pub const PROPERTY_REFERENCE: &'static str = "PropertyReference";
+    /// Function name for `Embed("")`.
+    pub const EMBED: &'static str = "Embed";
+    /// Function name for `url("")`.
+    pub const URL: &'static str = "url";
+
+    /// Constructs the node.
+    ///
+    /// # Parameters
+    /// 
+    /// - `raw_arguments`: raw arguments text including parentheses and any quotes.
+    pub fn new(location: Location, name: String, raw_arguments: &str, url_format: Option<&str>) -> Self {
+        Self {
+            location,
+            name,
+            raw_arguments: raw_arguments[1..raw_arguments.len() - 1].to_owned(),
+            url_format: url_format.map(|f| f.to_owned()),
+            _nothing: PhantomData::default(),
+        }
+    }
 }
