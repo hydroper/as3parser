@@ -7,7 +7,6 @@ use hydroper_source_text::SourceText;
 pub struct CompilationUnit {
     pub(crate) file_path: Option<String>,
     pub(crate) source_text: SourceText,
-    pub(crate) already_tokenized: Cell<bool>,
     diagnostics: RefCell<Vec<Diagnostic>>,
     pub(crate) error_count: Cell<u32>,
     pub(crate) warning_count: Cell<u32>,
@@ -23,7 +22,6 @@ impl Default for CompilationUnit {
         Self {
             file_path: None,
             source_text: SourceText::new("".into()),
-            already_tokenized: Cell::new(false),
             diagnostics: RefCell::new(vec![]),
             invalidated: Cell::new(false),
             error_count: Cell::new(0),
@@ -42,7 +40,6 @@ impl CompilationUnit {
         Rc::new(Self {
             file_path,
             source_text: SourceText::new(text),
-            already_tokenized: Cell::new(false),
             diagnostics: RefCell::new(vec![]),
             invalidated: Cell::new(false),
             error_count: Cell::new(0),

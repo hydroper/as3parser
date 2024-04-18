@@ -10,7 +10,7 @@ Install `as3_parser` in your Cargo project with `cargo add as3_parser`, or add t
 
 ```toml
 [dependencies]
-as3_parser = "0.4"
+as3_parser = "0.5"
 ```
 
 Parse programs or expressions through the `ParserFacade` structure of the `as3_parser` crate:
@@ -19,7 +19,8 @@ Parse programs or expressions through the `ParserFacade` structure of the `as3_p
 use as3_parser::ns::*;
 
 let source = CompilationUnit::new(None, "x ** y".into(), &CompilerOptions::default());
-if let Some(program) = ParserFacade::parse_program(&source) {
+let parser_options = ParserOptions::default();
+if let Some(program) = ParserFacade(parser_options).parse_program(&source) {
     // program: Rc<Program>
 }
 ```

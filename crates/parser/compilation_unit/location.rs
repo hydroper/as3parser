@@ -3,6 +3,7 @@ use std::fmt::Debug;
 use serde::{Serialize, Deserialize, Serializer};
 use std::rc::Rc;
 use crate::compilation_unit::*;
+use crate::util::{CharacterReader, count_first_whitespace_characters};
 
 /// Represents a source location. This location includes
 /// spanning lines and columns and the reference compilation unit.
@@ -155,5 +156,21 @@ impl Location {
     /// Returns the source text comprising the source location.
     pub fn text(&self) -> String {
         self.compilation_unit.text()[self.first_offset..self.last_offset].to_owned()
+    }
+
+    /// Shifts one character off this location until end-of-file.
+    pub fn shift_until_eof(&self, count: usize) -> Location {
+        let mut ch = CharacterReader::from(&self.compilation_unit.text()[self.first_offset..]);
+        for _ in 0..count {
+            if ch.next().is_none() {
+                break;
+            }
+        }
+        Self::with_offsets(&self.compilation_unit, self.first_offset + ch.index(), self.last_offset)
+    }
+
+    /// Shifts the count of whitespace characters in a text off this location.
+    pub fn shift_whitespace(&self, text: &str) -> Location {
+        self.shift_until_eof(count_first_whitespace_characters(text))
     }
 }

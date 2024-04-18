@@ -7,14 +7,21 @@ pub struct Tokenizer<'input> {
 
 impl<'input> Tokenizer<'input> {
     /// Constructs a tokenizer.
-    pub fn new(compilation_unit: &'input Rc<CompilationUnit>) -> Self {
+    pub fn new(compilation_unit: &'input Rc<CompilationUnit>, options: &ParserOptions) -> Self {
         let text: &'input str = compilation_unit.text();
         let compilation_unit = compilation_unit.clone();
-        assert!(!compilation_unit.already_tokenized.get(), "A CompilationUnit must be tokenized at most once.");
-        compilation_unit.already_tokenized.set(true);
+        let mut characters: CharacterReader<'input>;
+        if let Some(range) = options.byte_range {
+            characters = CharacterReader::from(&text[0..range.1]);
+            while characters.has_remaining() && characters.index() < range.0 {
+                characters.next();
+            }
+        } else {
+            characters = CharacterReader::from(text);
+        }
         Self {
             compilation_unit,
-            characters: CharacterReader::from(text),
+            characters,
         }
     }
 
@@ -1288,7 +1295,7 @@ mod tests {
     fn tokenize_n_per_n() {
         let _n = "n".to_owned();
         let source = CompilationUnit::new(None, "n * n".into(), &CompilerOptions::default());
-        let mut tokenizer = Tokenizer::new(&source);
+        let mut tokenizer = Tokenizer::new(&source, &default());
         let Ok((Token::Identifier(name), _)) = tokenizer.scan_ie_div() else { panic!() };
         assert_eq!(name, "n");
         assert!(matches!(tokenizer.scan_ie_div(), Ok((Token::Times, _))));
@@ -1303,7 +1310,7 @@ mod tests {
             // Single-line comment
             /* Multi-line comment */
         ".into(), &CompilerOptions::default());
-        let mut tokenizer = Tokenizer::new(&source);
+        let mut tokenizer = Tokenizer::new(&source, &default());
         assert!(matches!(tokenizer.scan_ie_div(), Ok((Token::Eof, _))));
         assert_eq!(source.comments()[0].content(), " Single-line comment");
         assert_eq!(source.comments()[1].content(), " Multi-line comment ");
@@ -1321,7 +1328,7 @@ mod tests {
             "a\b"
             @"a\b"
         "###.into(), &CompilerOptions::default());
-        let mut tokenizer = Tokenizer::new(&source);
+        let mut tokenizer = Tokenizer::new(&source, &default());
 
         let Ok((Token::StringLiteral(s), _)) = tokenizer.scan_ie_div() else { panic!() };
         assert_eq!(s, "Some AAA content");
@@ -1363,7 +1370,7 @@ mod tests {
             0b0000_0000
             0f
         "###.into(), &CompilerOptions::default());
-        let mut tokenizer = Tokenizer::new(&source);
+        let mut tokenizer = Tokenizer::new(&source, &default());
         for n in numbers {
             let Ok((Token::NumericLiteral(n2, suffix), location)) = tokenizer.scan_ie_div() else { panic!() };
             assert_eq!(n, NumericLiteral { value: n2, location, suffix }.parse_double(false).unwrap());
@@ -1377,7 +1384,7 @@ mod tests {
             /(?:)/gi
         "###.into(), &CompilerOptions::default());
 
-        let mut tokenizer = Tokenizer::new(&source);
+        let mut tokenizer = Tokenizer::new(&source, &default());
 
         let Ok((Token::Div, start)) = tokenizer.scan_ie_div() else { panic!() };
         let Ok((Token::RegExpLiteral { body, flags }, _)) = tokenizer.scan_regexp_literal(start, "".into()) else { panic!() };

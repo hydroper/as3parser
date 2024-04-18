@@ -19,11 +19,14 @@ let text = r#"
 "#;
 let source = CompilationUnit::new(None, text.into(), &CompilerOptions::default());
 
-// Ignore whitespace chunks in a node list when at least one
-// element appears.
-let ignore_whitespace = true;
+let parser_options = ParserOptions {
+    // Ignore whitespace chunks in a node list when at least one
+    // element appears.
+    ignore_xml_whitespace: true,
+    ..default()
+};
 
-if let Some(document) = ParserFacade::parse_mxml_document(&source, ignore_whitespace) {
+if let Some(document) = ParserFacade(parser_options).parse_mxml_document(&source) {
     // document: Rc<MxmlDocument>
 }
 ```

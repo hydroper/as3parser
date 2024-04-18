@@ -12,19 +12,14 @@ pub struct Parser<'input> {
 
 impl<'input> Parser<'input> {
     /// Constructs a parser.
-    pub fn new(compilation_unit: &'input Rc<CompilationUnit>) -> Self {
-        Self::with_xml_options(compilation_unit, false)
-    }
-
-    /// Constructs a parser.
-    pub fn with_xml_options(compilation_unit: &'input Rc<CompilationUnit>, ignore_xml_whitespace: bool) -> Self {
+    pub fn new(compilation_unit: &'input Rc<CompilationUnit>, options: &ParserOptions) -> Self {
         Self {
-            tokenizer: Tokenizer::new(compilation_unit),
+            tokenizer: Tokenizer::new(compilation_unit, options),
             previous_token: (Token::Eof, Location::with_offset(&compilation_unit, 0)),
             token: (Token::Eof, Location::with_offset(&compilation_unit, 0)),
             locations: vec![],
             activations: vec![],
-            ignore_xml_whitespace,
+            ignore_xml_whitespace: options.ignore_xml_whitespace,
         }
     }
 
@@ -4352,9 +4347,10 @@ impl<'input> Parser<'input> {
 
                 // @copy reference
                 "copy" => {
-                    let (content, location) = join_asdoc_content(building_content);
-                    let location = tag_location.combine_with(location);
-                    if let Some(reference) = self.parse_asdoc_reference(&content, &tag_location, &tag_name) {
+                    let (content, c_location) = join_asdoc_content(building_content);
+                    let location = tag_location.combine_with(c_location.clone());
+                    let reference_loc = c_location.shift_whitespace(&self.compilation_unit().text()[c_location.first_offset()..c_location.last_offset()]);
+                    if let Some(reference) = self.parse_asdoc_reference(&content, &reference_loc, &tag_location, &tag_name) {
                         tags.push((AsDocTag::Copy(reference), location));
                     }
                 },
@@ -4404,10 +4400,14 @@ impl<'input> Parser<'input> {
 
                 // @eventType typeOrConstant
                 "eventType" => {
-                    let (type_or_constant, location) = join_asdoc_content(building_content);
+                    let (_, location) = join_asdoc_content(building_content);
                     let location = tag_location.combine_with(location);
-                    let compilation_unit_2 = CompilationUnit::new(None, type_or_constant, &self.tokenizer.compilation_unit().compiler_options);
-                    if let Some(exp) = ParserFacade::parse_expression(&compilation_unit_2) {
+                    let reference_loc = location.clone();
+                    let parser_options = ParserOptions {
+                        byte_range: Some((reference_loc.first_offset(), reference_loc.last_offset())),
+                        ..default()
+                    };
+                    if let Some(exp) = ParserFacade(parser_options).parse_expression(self.compilation_unit()) {
                         tags.push((AsDocTag::EventType(exp), location));
                     } else {
                         self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.clone())]);
@@ -4520,26 +4520,28 @@ impl<'input> Parser<'input> {
 
                 // @see reference [displayText]
                 "see" => {
-                    let (content, location) = join_asdoc_content(building_content);
-                    let location = tag_location.combine_with(location);
+                    let (content, c_location) = join_asdoc_content(building_content);
+                    let location = tag_location.combine_with(c_location.clone());
                     let reference: String;
                     let display_text: Option<String>;
+                    let mut reference_loc = c_location.shift_whitespace(&self.compilation_unit().text()[c_location.first_offset()..c_location.last_offset()]);
                     if let Some((_, reference_1, display_text_1)) = regex_captures!(r"(?x) ([^\s]+) (.*)", &content) {
                         reference = reference_1.to_owned();
+                        reference_loc = Location::with_offsets(self.compilation_unit(), reference_loc.first_offset(), reference_loc.first_offset() + reference.len());
                         display_text = Some(display_text_1.trim().to_owned());
                     } else {
                         reference = content;
                         display_text = None;
                     }
-                    if let Some(reference) = self.parse_asdoc_reference(&reference, &tag_location, &tag_name) {
+                    if let Some(reference) = self.parse_asdoc_reference(&reference, &reference_loc, &tag_location, &tag_name) {
                         tags.push((AsDocTag::See { reference, display_text }, location));
                     }
                 },
 
                 // @throws className description
                 "throws" => {
-                    let (class_name_and_description, location) = join_asdoc_content(building_content);
-                    let location = tag_location.combine_with(location);
+                    let (class_name_and_description, c_location) = join_asdoc_content(building_content);
+                    let location = tag_location.combine_with(c_location.clone());
 
                     let class_name_and_description = regex_captures!(r"^([^\s]+)(\s.*)?", &class_name_and_description);
 
@@ -4550,8 +4552,13 @@ impl<'input> Parser<'input> {
                         } else {
                             Some(description)
                         };
-                        let compilation_unit_2 = CompilationUnit::new(None, class_name.into(), &self.tokenizer.compilation_unit().compiler_options);
-                        if let Some(exp) = ParserFacade::parse_type_expression(&compilation_unit_2) {
+                        let mut reference_loc = c_location.shift_whitespace(&self.compilation_unit().text()[c_location.first_offset()..c_location.last_offset()]);
+                        reference_loc = Location::with_offsets(self.compilation_unit(), reference_loc.first_offset(), reference_loc.first_offset() + class_name.len());
+                        let parser_options = ParserOptions {
+                            byte_range: Some((reference_loc.first_offset(), reference_loc.last_offset())),
+                            ..default()
+                        };
+                        if let Some(exp) = ParserFacade(parser_options).parse_type_expression(self.compilation_unit()) {
                             tags.push((AsDocTag::Throws { class_reference: exp, description }, location));
                         } else {
                             self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.clone())]);
@@ -4588,19 +4595,24 @@ impl<'input> Parser<'input> {
         building_content.clear();
     }
 
-    fn parse_asdoc_reference(&self, reference: &str, tag_location: &Location, tag_name: &str) -> Option<Rc<AsDocReference>> {
+    fn parse_asdoc_reference(&self, reference: &str, reference_loc: &Location, tag_location: &Location, tag_name: &str) -> Option<Rc<AsDocReference>> {
         let split: Vec<&str> = reference.split("#").collect();
         if split.len() > 2 {
             self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.to_owned())]);
             return None;
         }
         let mut base: Option<Rc<Expression>> = None;
-        let instance_property: Option<String> = split.get(1).and_then(|&f| if f.is_empty() { None } else { Some(f.to_owned()) });
         let base_text: String = split[0].to_owned();
+        let instance_property: Option<(String, Location)> = split.get(1).and_then(|&f| if f.is_empty() { None } else {
+            Some((f.to_owned(), Location::with_offsets(self.compilation_unit(), reference_loc.first_offset() + base_text.len() + 1, reference_loc.last_offset())))
+        });
 
         if !base_text.is_empty() {
-            let compilation_unit_2 = CompilationUnit::new(None, base_text, &self.tokenizer.compilation_unit().compiler_options);
-            if let Some(exp) = ParserFacade::parse_expression(&compilation_unit_2) {
+            let parser_options = ParserOptions {
+                byte_range: Some((reference_loc.first_offset(), reference_loc.first_offset() + base_text.len())),
+                ..default()
+            };
+            if let Some(exp) = ParserFacade(parser_options).parse_expression(self.compilation_unit()) {
                 base = Some(exp);
             } else {
                 self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagnostic_arguments![String(tag_name.to_owned())]);
@@ -4893,7 +4905,9 @@ impl<'input> Parser<'input> {
 }
 
 fn parse_include_directive_source(nested_compilation_unit: Rc<CompilationUnit>, context: ParserDirectiveContext) -> (Vec<Rc<PackageDefinition>>, Vec<Rc<Directive>>) {
-    let mut parser = Parser::new(&nested_compilation_unit);
+    let mut parser = Parser::new(&nested_compilation_unit, &ParserOptions {
+        ..default()
+    });
     if parser.next().is_ok() {
         let mut packages = vec![];
         let mut failure = false;
@@ -4957,7 +4971,9 @@ fn process_xml_pi(file_path: Option<String>, compiler_options: &Rc<CompilerOptio
         return Ok(vec![]);
     }
     let cu1 = CompilationUnit::new(file_path, data.to_owned(), compiler_options);
-    let mut parser = Parser::new(&cu1);
+    let mut parser = Parser::new(&cu1, &ParserOptions {
+        ..default()
+    });
     let mut errors = Vec::<XmlPiError>::new();
     while parser.consume_and_ie_xml_tag(Token::XmlWhitespace)? {
         if matches!(parser.token.0, Token::XmlName(_)) {
@@ -5048,12 +5064,35 @@ struct PlainMxmlAttribute {
 #[path = "css_parser.rs"]
 mod css_parser;
 
-pub struct ParserFacade;
+/// A simplified interface for executing the parser.
+pub struct ParserFacade(pub ParserOptions);
+
+pub struct ParserOptions {
+    /// For MXML, indicates whether to ignore XML whitespace chunks when at
+    /// least one element appears. Default: true.
+    pub ignore_xml_whitespace: bool,
+    /// Indicates the range of characters that shall be parsed,
+    /// the first and last byte indices respectively.
+    pub byte_range: Option<(usize, usize)>,
+}
+
+impl Default for ParserOptions {
+    fn default() -> Self {
+        Self {
+            ignore_xml_whitespace: true,
+            byte_range: None,
+        }
+    }
+}
 
 impl ParserFacade {
+    fn create_parser<'input>(&self, compilation_unit: &'input Rc<CompilationUnit>) -> Parser<'input> {
+        Parser::new(compilation_unit, &self.0)
+    }
+
     /// Parses `Program` until end-of-file.
-    pub fn parse_program(compilation_unit: &Rc<CompilationUnit>) -> Option<Rc<Program>> {
-        let mut parser = Parser::new(compilation_unit);
+    pub fn parse_program(&self, compilation_unit: &Rc<CompilationUnit>) -> Option<Rc<Program>> {
+        let mut parser = self.create_parser(compilation_unit);
         if parser.next().is_ok() {
             let program = parser.parse_program().ok();
             /* if compilation_unit.invalidated() { None } else { program } */
@@ -5064,8 +5103,8 @@ impl ParserFacade {
     }
 
     /// Parses `ListExpression^allowIn` and expects end-of-file.
-    pub fn parse_expression(compilation_unit: &Rc<CompilationUnit>) -> Option<Rc<Expression>> {
-        let mut parser = Parser::new(compilation_unit);
+    pub fn parse_expression(&self, compilation_unit: &Rc<CompilationUnit>) -> Option<Rc<Expression>> {
+        let mut parser = self.create_parser(compilation_unit);
         if parser.next().is_ok() {
             let exp = parser.parse_expression(ParserExpressionContext {
                 ..default()
@@ -5080,8 +5119,8 @@ impl ParserFacade {
     }
 
     /// Parses `TypeExpression` and expects end-of-file.
-    pub fn parse_type_expression(compilation_unit: &Rc<CompilationUnit>) -> Option<Rc<Expression>> {
-        let mut parser = Parser::new(compilation_unit);
+    pub fn parse_type_expression(&self, compilation_unit: &Rc<CompilationUnit>) -> Option<Rc<Expression>> {
+        let mut parser = self.create_parser(compilation_unit);
         if parser.next().is_ok() {
             let exp = parser.parse_type_expression().ok();
             if exp.is_some() {
@@ -5094,8 +5133,8 @@ impl ParserFacade {
     }
 
     /// Parses `Directives` until end-of-file.
-    pub fn parse_directives(compilation_unit: &Rc<CompilationUnit>, context: ParserDirectiveContext) -> Option<Vec<Rc<Directive>>> {
-        let mut parser = Parser::new(compilation_unit);
+    pub fn parse_directives(&self, compilation_unit: &Rc<CompilationUnit>, context: ParserDirectiveContext) -> Option<Vec<Rc<Directive>>> {
+        let mut parser = self.create_parser(compilation_unit);
         if parser.next().is_ok() {
             parser.parse_directives(context).ok()
         } else {
@@ -5104,8 +5143,8 @@ impl ParserFacade {
     }
 
     /// Parses `MxmlDocument` until end-of-file.
-    pub fn parse_mxml_document(compilation_unit: &Rc<CompilationUnit>, ignore_xml_whitespace: bool) -> Option<Rc<MxmlDocument>> {
-        let mut parser = Parser::with_xml_options(compilation_unit, ignore_xml_whitespace);
+    pub fn parse_mxml_document(&self, compilation_unit: &Rc<CompilationUnit>) -> Option<Rc<MxmlDocument>> {
+        let mut parser = self.create_parser(compilation_unit);
         if parser.next_ie_xml_content().is_ok() {
             let document = parser.parse_mxml_document().ok();
             /* if compilation_unit.invalidated() { None } else { document } */

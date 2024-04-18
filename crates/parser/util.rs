@@ -27,3 +27,7 @@ pub use std::rc::{Rc, Weak};
 pub fn default<T: Default>() -> T {
     T::default()
 }
+
+pub fn count_first_whitespace_characters(input: &str) -> usize {
+    input.chars().count() - input.trim_start().chars().count()
+}

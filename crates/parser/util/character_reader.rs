@@ -89,18 +89,6 @@ impl<'a> CharacterReader<'a> {
         }
         r
     }
-
-    /// Constructs a `CharacterReader` from a string at a given `index` position.
-    /// If `index` is beyond the limit, the reader reaches the end of the string.
-    pub fn from_index(string: &'a str, index: usize) -> CharacterReader<'a> {
-        let mut indices = string.char_indices();
-        for _ in 0..index {
-            if indices.next().is_none() {
-                break;
-            }
-        }
-        CharacterReader { length: string.len() - index, char_indices: indices }
-    }
 }
 
 impl<'a> From<&'a str> for CharacterReader<'a> {
