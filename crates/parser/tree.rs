@@ -5,8 +5,6 @@ mod expression;
 pub use expression::*;
 mod qualified_identifier;
 pub use qualified_identifier::*;
-mod embed_expression;
-pub use embed_expression::*;
 mod paren_expression;
 pub use paren_expression::*;
 mod null_literal;

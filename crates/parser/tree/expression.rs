@@ -5,7 +5,6 @@ use serde::{Serialize, Deserialize};
 #[derive(Clone, Serialize, Deserialize)]
 pub enum Expression {
     QualifiedIdentifier(QualifiedIdentifier),
-    Embed(EmbedExpression),
     Paren(ParenExpression),
     NullLiteral(NullLiteral),
     BooleanLiteral(BooleanLiteral),
@@ -51,7 +50,6 @@ impl Expression {
     pub fn location(&self) -> Location {
         match self {
             Self::QualifiedIdentifier(e) => e.location.clone(),
-            Self::Embed(e) => e.location.clone(),
             Self::Paren(e) => e.location.clone(),
             Self::NullLiteral(e) => e.location.clone(),
             Self::BooleanLiteral(e) => e.location.clone(),

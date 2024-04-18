@@ -874,10 +874,12 @@ impl<'input> Parser<'input> {
         let id_location = id.1.clone();
         let id = id.0;
 
+        /*
         // EmbedExpression
         if self.peek(Token::LeftBrace) && id == "embed" && self.previous_token.1.character_count() == "embed".len() {
             return Ok(self.finish_embed_expression(id_location)?);
         }
+        */
 
         let id = Rc::new(Expression::QualifiedIdentifier(QualifiedIdentifier {
             location: id_location.clone(),
@@ -1235,10 +1237,12 @@ impl<'input> Parser<'input> {
             let id_location = self.token_location();
             self.next()?;
 
+            /*
             // EmbedExpression
             if self.peek(Token::LeftBrace) && id == "embed" && self.previous_token.1.character_count() == "embed".len() {
                 return Ok(self.finish_embed_expression(id_location)?);
             }
+            */
 
             let id = Rc::new(Expression::QualifiedIdentifier(QualifiedIdentifier {
                 location: id_location.clone(),
@@ -1348,6 +1352,7 @@ impl<'input> Parser<'input> {
         }
     }
 
+    /*
     fn finish_embed_expression(&mut self, start: Location) -> Result<Rc<Expression>, ParserError> {
         self.push_location(&start);
         let descriptor = self.parse_object_initializer()?.clone();
@@ -1359,6 +1364,7 @@ impl<'input> Parser<'input> {
             description: descriptor.clone(),
         })));
     }
+    */
 
     fn parse_array_initializer(&mut self) -> Result<Rc<Expression>, ParserError> {
         self.mark_location();
@@ -2210,10 +2216,13 @@ impl<'input> Parser<'input> {
 
         let mut exp: Rc<Expression>;
 
+        /*
         // EmbedExpression
         if self.peek(Token::LeftBrace) && id.0 == "embed" && self.previous_token.1.character_count() == "embed".len() {
             exp = self.finish_embed_expression(id_location)?;
         } else {
+        */
+        {
             let id = Rc::new(Expression::QualifiedIdentifier(QualifiedIdentifier {
                 location: id_location.clone(),
                 attribute: false,
