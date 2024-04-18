@@ -91,6 +91,12 @@ pub enum CssModelTreeType {
     Combinator,
     Document,
     FontFace,
+    FontFaceList,
+    MediaQuery,
+    NamespaceList,
+    PropertyList,
+    RuleList,
+    SelectorGroup,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -101,6 +107,12 @@ pub enum CssNode {
     Combinator(CssCombinator),
     Document(CssDocument),
     FontFace(CssFontFace),
+    FontFaceList(CssFontFaceList),
+    MediaQuery(CssMediaQuery),
+    NamespaceList(CssNamespaceList),
+    PropertyList(CssPropertyList),
+    RuleList(CssRuleList),
+    SelectorGroup(CssSelectorGroup),
 }
 
 impl CssNode {
@@ -110,14 +122,14 @@ impl CssNode {
             Self::ArrayPropertyValue(v) => v.elements.clone(),
             Self::ColorPropertyValue(_) => vec![],
             Self::Combinator(_) => vec![],
-            Self::Document(v) => {
-                let mut list = vec![];
-                list.extend(v.at_namespaces.iter().map(|v| v.clone()));
-                list.extend(v.font_faces.iter().map(|v| v.clone()));
-                list.extend(v.rules.iter().map(|v| v.clone()));
-                list
-            },
-            Self::FontFace(v) => vec![],
+            Self::Document(v) => v.children.clone(),
+            Self::FontFace(_) => vec![],
+            Self::FontFaceList(v) => v.children.clone(),
+            Self::MediaQuery(v) => v.children.clone(),
+            Self::NamespaceList(v) => v.children.clone(),
+            Self::PropertyList(v) => v.children.clone(),
+            Self::RuleList(v) => v.children.clone(),
+            Self::SelectorGroup(v) => v.children.clone(),
         }
     }
 
@@ -130,6 +142,12 @@ impl CssNode {
             Self::Combinator(v) => v.location.clone(),
             Self::Document(v) => v.location.clone(),
             Self::FontFace(v) => v.location.clone(),
+            Self::FontFaceList(v) => v.location.clone(),
+            Self::MediaQuery(v) => v.location.clone(),
+            Self::NamespaceList(v) => v.location.clone(),
+            Self::PropertyList(v) => v.location.clone(),
+            Self::RuleList(v) => v.location.clone(),
+            Self::SelectorGroup(v) => v.location.clone(),
         }
     }
 
@@ -142,6 +160,12 @@ impl CssNode {
             Self::Combinator(_) => CssModelTreeType::Combinator,
             Self::Document(_) => CssModelTreeType::Document,
             Self::FontFace(_) => CssModelTreeType::FontFace,
+            Self::FontFaceList(_) => CssModelTreeType::FontFaceList,
+            Self::MediaQuery(_) => CssModelTreeType::MediaQuery,
+            Self::NamespaceList(_) => CssModelTreeType::NamespaceList,
+            Self::PropertyList(_) => CssModelTreeType::PropertyList,
+            Self::RuleList(_) => CssModelTreeType::RuleList,
+            Self::SelectorGroup(_) => CssModelTreeType::SelectorGroup,
         }
     }
 
@@ -287,6 +311,7 @@ pub struct CssCombinator {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct CssDocument {
     pub location: Location,
+    pub children: Vec<Rc<CssNode>>,
     /// List of `CssNode::Rule` nodes, CSS rules in their declaration order.
     pub rules: Vec<Rc<CssNode>>,
     /// List of `CssNode::NamespaceDefinition` nodes, namespace prefix declarations.
@@ -308,8 +333,36 @@ impl CssDocument {
             let key = if let Some(p) = &ns1.prefix { p.clone() } else { Self::DEFAULT_NAMESPACE_SHORT_NAME.to_owned() };
             namespaces_lookup.insert(key, ns.clone());
         }
+        let mut children: Vec<Rc<CssNode>> = vec![];
+        let cursor_loc = Location::with_offset(&location.compilation_unit(), location.first_offset());
+        let ns_children = at_namespaces.iter().map(|v| v.clone()).collect::<Vec<_>>();
+        let fon_children = font_faces.iter().map(|v| v.clone()).collect::<Vec<_>>();
+        let rules_children = rules.iter().map(|v| v.clone()).collect::<Vec<_>>();
+
+        children.push(Rc::new(CssNode::NamespaceList(CssNamespaceList {
+            location: if ns_children.is_empty() { cursor_loc.clone() } else {
+                Location::with_offsets(&ns_children[0].location().compilation_unit(), ns_children[0].location().first_offset(), ns_children.last().unwrap().location().last_offset())
+            },
+            children: ns_children,
+        })));
+
+        children.push(Rc::new(CssNode::FontFaceList(CssFontFaceList {
+            location: if fon_children.is_empty() { cursor_loc.clone() } else {
+                Location::with_offsets(&fon_children[0].location().compilation_unit(), fon_children[0].location().first_offset(), fon_children.last().unwrap().location().last_offset())
+            },
+            children: fon_children,
+        })));
+
+        children.push(Rc::new(CssNode::RuleList(CssRuleList {
+            location: if rules_children.is_empty() { cursor_loc.clone() } else {
+                Location::with_offsets(&rules_children[0].location().compilation_unit(), rules_children[0].location().first_offset(), rules_children.last().unwrap().location().last_offset())
+            },
+            children: rules_children,
+        })));
+
         Self {
             location,
+            children,
             at_namespaces,
             font_faces,
             rules,
@@ -445,4 +498,46 @@ impl CssFontFace {
             Err(ParserError::Common)
         }
     }
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct CssFontFaceList {
+    pub location: Location,
+    /// List of `CssNode::FontFace`.
+    pub children: Vec<Rc<CssNode>>,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct CssMediaQuery {
+    pub location: Location,
+    /// List of `CssNode::MediaQueryCondition`.
+    pub children: Vec<Rc<CssNode>>,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct CssNamespaceList {
+    pub location: Location,
+    /// List of `CssNode::NamespaceDefinition`.
+    pub children: Vec<Rc<CssNode>>,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct CssPropertyList {
+    pub location: Location,
+    /// List of `CssNode::Property`.
+    pub children: Vec<Rc<CssNode>>,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct CssRuleList {
+    pub location: Location,
+    /// List of `CssNode::Rule`.
+    pub children: Vec<Rc<CssNode>>,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct CssSelectorGroup {
+    pub location: Location,
+    /// List of `CssNode::Selector`.
+    pub children: Vec<Rc<CssNode>>,
 }
