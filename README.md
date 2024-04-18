@@ -54,9 +54,11 @@ Tree structure:
 * [x] `CssNode` enumeration
   * [x] `CssArrayPropertyValue` variant
   * [x] `CssColorPropertyValue` variant
-  * [ ] `CssCombinator` variant
-  * [ ] `CssDocument` variant
-  * [ ] `CssFontFace` variant
+  * [x] `CssCombinator` variant
+  * [x] `CssDocument` variant
+  * [x] `CssFontFace` variant
+  * [ ] `CssFontFaceList` variant
+    * [ ] Alternative to Royale's `CSSTypedNode` with font face children.
   * [ ] `CssFunctionCallPropertyValue` variant
   * [ ] `CssKeyFrames` variant
   * [ ] `CssKeywordPropertyValue` variant
@@ -65,6 +67,8 @@ Tree structure:
   * [ ] `CssMediaQueryCondition` variant
   * [ ] `CssMultiValuePropertyValue` variant
   * [ ] `CssNamespaceDefinition` variant
+  * [ ] `CssNamespaceList` variant
+    * [ ] Alternative to Royale's `CSSTypedNode` with namespace definition children.
   * [ ] `CssNumberPropertyValue` variant
   * [ ] `CssProperty` variant
   * [ ] `CssPropertyList` variant
@@ -72,6 +76,8 @@ Tree structure:
   * [ ] `CssRgbColorPropertyValue` variant
   * [ ] `CssRgbaColorPropertyValue` variant
   * [ ] `CssRule` variant
+  * [ ] `CssRuleList` variant
+    * [ ] Alternative to Royale's `CSSTypedNode` with rule children.
   * [ ] `CssSelector` variant
   * [ ] `CssSelectorCondition` variant
   * [ ] `CssSelectorGroup` variant
