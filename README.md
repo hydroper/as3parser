@@ -31,6 +31,10 @@ ActionScript 3 parser in the Rust language.
 
 [Processing Deviations](docs/processing-deviations.md)
 
+## Wiki
+
+The [wiki](https://github.com/hydroper/as3parser/wiki) of this repository contains other introductory articles.
+
 ## Verifier
 
 ActionScript execution consists of parsing, verification, and evaluation. Verification can be performed ahead of time, as is already done by the existing initial compilers of the language (ASC 2 and Apache Flex's MXML compiler), reporting errors and warnings, deriving a control flow graph for every activation, and attaching symbols to syntactic nodes. This project might be integrated with a verifier in the future.
