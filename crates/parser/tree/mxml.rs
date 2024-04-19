@@ -36,6 +36,7 @@ pub struct MxmlAttribute {
     /// Indicates whether the attribute is a `xmlns` or `xmlns:` attribute.
     pub xmlns: bool,
     pub name: MxmlName,
+    /// Attribute value. The location data includes the quotes.
     pub value: (String, Location),
 }
 

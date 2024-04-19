@@ -3951,20 +3951,25 @@ impl<'input> Parser<'input> {
     }
 
     fn parse_configuration_primary_expression(&mut self) -> Result<Rc<Expression>, ParserError> {
-        if let Token::Identifier(id) = &self.token.0.clone() {
+        if let Token::Identifier(_) = &self.token.0.clone() {
             self.mark_location();
-            self.next()?;
-            let mut id = id.clone();
+            let mut id = self.expect_identifier(false)?;
+            let mut qual: Option<Rc<Expression>> = None;
             if self.consume(Token::ColonColon)? {
-                let (id_1, _) = self.expect_identifier(true)?;
-                id = id + &"::".to_owned() + &id_1;
+                qual = Some(Rc::new(Expression::QualifiedIdentifier(QualifiedIdentifier {
+                    location: id.1.clone(),
+                    attribute: false,
+                    qualifier: None,
+                    id: QualifiedIdentifierIdentifier::Id(id.clone()),
+                })));
+                id = self.expect_identifier(true)?;
             }
             let id_location = self.pop_location();
             let id = Rc::new(Expression::QualifiedIdentifier(QualifiedIdentifier {
                 location: id_location.clone(),
                 attribute: false,
-                qualifier: None,
-                id: QualifiedIdentifierIdentifier::Id((id, id_location)),
+                qualifier: qual,
+                id: QualifiedIdentifierIdentifier::Id(id.clone()),
             }));
             let equality: Option<Operator> = if self.consume(Token::Assign)? {
                 Some(Operator::Equals)

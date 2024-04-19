@@ -144,18 +144,7 @@ switch type (o) {
 
 ## Configuration Directive
 
-`configuration { ... }` means conditional compilation with `if`, `else if` and `else` branches. A limited set of expressions are valid and translate to a different syntactic construct:
-
-* `q::x` translates to an identifier whose name is literally `"q::x"` without a qualifier.
-* `x` asks whether a constant `x` is present.
-* `k="v"` translates to `k == "v"`.
-* `k=v` translates to `k == "v"`.
-* `k!="v"` goes as is.
-* `k!=v` translates to `k != "v"`.
-* `x && y`
-* `x || y`
-* `(x)`
-* `!x`
+`configuration { ... }` means conditional compilation with `if`, `else if` and `else` branches. A limited set of conditional expressions are valid and translate to a different syntactic construct:
 
 ```
 configuration {
@@ -165,6 +154,26 @@ configuration {
         trace("k!=3")
     }
 }
+```
+
+Conditional expressions:
+
+```actionscript3
+// Check whether constant is "true"
+q::x
+x
+// Check whether constant is "v"
+k="v"
+k=v // QualifiedIdentifier == StringLiteral
+// Check whether constant is not "v"
+k!="v"
+k!=v // QualifiedIdentifier != StringLiteral
+
+x && y
+x || y
+
+(x)
+!x
 ```
 
 ## Parameterized Types
