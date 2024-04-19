@@ -158,7 +158,7 @@ impl Location {
         self.compilation_unit.text()[self.first_offset..self.last_offset].to_owned()
     }
 
-    /// Shifts one character off this location until end-of-file.
+    /// Shifts a count of characters off this location until end-of-file.
     pub fn shift_until_eof(&self, count: usize) -> Location {
         let mut ch = CharacterReader::from(&self.compilation_unit.text()[self.first_offset..]);
         for _ in 0..count {
