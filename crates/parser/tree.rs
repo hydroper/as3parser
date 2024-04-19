@@ -155,8 +155,8 @@ mod mxml;
 pub use mxml::*;
 
 // CSS
-// mod css;
-// pub use css::*;
+mod css;
+pub use css::*;
 
 mod tree_semantics;
 pub use tree_semantics::*;

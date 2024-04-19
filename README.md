@@ -19,7 +19,7 @@ ActionScript 3 parser in the Rust language.
 
 [Working with diagnostics](docs/diagnostics.md)
 
-[Working with interpolated ActionScript](docs/interpolation.md)
+[Working with locations](docs/locations.md)
 
 [Working with MXML](docs/working-with-mxml.md)
 
