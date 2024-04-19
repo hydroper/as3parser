@@ -7,7 +7,7 @@ use hydroper_source_text::SourceText;
 pub struct CompilationUnit {
     pub(crate) file_path: Option<String>,
     pub(crate) source_text: SourceText,
-    diagnostics: RefCell<Vec<Diagnostic>>,
+    pub(crate) diagnostics: RefCell<Vec<Diagnostic>>,
     pub(crate) error_count: Cell<u32>,
     pub(crate) warning_count: Cell<u32>,
     pub(crate) invalidated: Cell<bool>,
@@ -110,6 +110,30 @@ impl CompilationUnit {
         for unit in self.nested_compilation_units.borrow().iter() {
             unit.sort_diagnostics();
         }
+    }
+
+    /// Determines whether to skip contributing an error when it
+    /// occurs at the same offset of the last error.
+    pub fn prevent_equal_offset_error(&self, location: &Location) -> bool {
+        let diag_list = self.diagnostics.borrow();
+        let mut i = (diag_list.len() - 1) as isize;
+        let mut j = 0;
+        while i >= 0 {
+            let diag = &diag_list[i as usize];
+            if diag.is_warning() {
+                i -= 1;
+                continue;
+            }
+            if diag.location.first_offset == location.first_offset {
+                return true;
+            }
+            i -= 1;
+            if j >= 14 {
+                break;
+            }
+            j += 1;
+        }
+        false
     }
 
     /// If this compilation unit is subsequent of an include directive in another

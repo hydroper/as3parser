@@ -48,6 +48,9 @@ impl<'input> Parser<'input> {
     }
 
     fn add_syntax_error(&self, location: &Location, kind: DiagnosticKind, arguments: Vec<DiagnosticArgument>) {
+        if self.compilation_unit().prevent_equal_offset_error(location) {
+            return;
+        }
         self.compilation_unit().add_diagnostic(Diagnostic::new_syntax_error(location, kind, arguments));
     }
 

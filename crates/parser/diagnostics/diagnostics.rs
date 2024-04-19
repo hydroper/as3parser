@@ -84,6 +84,14 @@ impl Diagnostic {
         self.is_warning
     }
 
+    pub fn is_error(&self) -> bool {
+        !self.is_warning
+    }
+
+    pub fn is_syntax_error(&self) -> bool {
+        !self.is_verify_error && !self.is_warning
+    }
+
     pub fn is_verify_error(&self) -> bool {
         self.is_verify_error
     }
