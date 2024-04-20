@@ -9,7 +9,7 @@ pub enum ParserError {
 
 /// Returns the identifier name that is specially reserved
 /// for invalidated identifiers that could not be parsed.
-pub const INVALIDATED_IDENTIFIER: &'static str = "\x00\x00\x00\x00\x00\x00\x00";
+pub const INVALIDATED_IDENTIFIER: &'static str = "\x00";
 
 #[derive(Clone)]
 pub(crate) enum MetadataRefineError {
