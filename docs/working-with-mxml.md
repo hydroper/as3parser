@@ -17,7 +17,7 @@ let text = r#"
     creationComplete="initialize()">
 </s:Application>
 "#;
-let source = CompilationUnit::new(None, text.into(), &CompilerOptions::default());
+let compilation_unit = CompilationUnit::new(None, text.into(), &CompilerOptions::default());
 
 let parser_options = ParserOptions {
     // Ignore whitespace chunks in a node list when at least one
@@ -26,7 +26,7 @@ let parser_options = ParserOptions {
     ..default()
 };
 
-if let Some(document) = ParserFacade(parser_options).parse_mxml(&source) {
+if let Some(document) = ParserFacade(&compilation_unit, parser_options).parse_mxml() {
     // document: Rc<Mxml>
 }
 ```
