@@ -4686,7 +4686,7 @@ impl<'input> Parser<'input> {
         }
 
         for attrib in &plain_attributes {
-            self.process_mxml_xattribute(&mut attributes, &attrib, &namespace);
+            self.process_mxml_attribute(&mut attributes, &attrib, &namespace);
         }
 
         let name = self.process_mxml_tag_name(name, &namespace);
@@ -4768,6 +4768,9 @@ impl<'input> Parser<'input> {
         } else if attribute.name.0.starts_with("xmlns:") {
             let attribute_value = unescape_xml(&attribute.value.0);
             namespace.set(&attribute.name.0[6..], &attribute_value);
+            if attribute.name.0[6..].find(':').is_some() {
+                self.add_syntax_error(&attribute.name.1, DiagnosticKind::XmlNameAtMostOneColon, vec![]);
+            }
             output.push(Rc::new(MxmlAttribute {
                 location: attribute.location.clone(),
                 name: MxmlName {
@@ -4786,6 +4789,9 @@ impl<'input> Parser<'input> {
         if !(attribute.name.0 == "xmlns" || attribute.name.0.starts_with("xmlns:")) {
             let attribute_value = unescape_xml(&attribute.value.0);
             let split = attribute.name.0.split(':').collect::<Vec<_>>();
+            if split.len() > 2 {
+                self.add_syntax_error(&attribute.name.1, DiagnosticKind::XmlNameAtMostOneColon, vec![]);
+            }
             let prefix: Option<String> = if split.len() > 1 {
                 Some(split[split.len() - 2].to_owned())
             } else {
@@ -4820,6 +4826,9 @@ impl<'input> Parser<'input> {
 
     fn process_mxml_tag_name(&mut self, name: (String, Location), namespace: &Rc<MxmlNamespace>) -> MxmlName {
         let split = name.0.split(':').collect::<Vec<_>>();
+        if split.len() > 2 {
+            self.add_syntax_error(&name.1, DiagnosticKind::XmlNameAtMostOneColon, vec![]);
+        }
         let prefix: Option<String> = if split.len() > 1 {
             Some(split[split.len() - 2].to_owned())
         } else {

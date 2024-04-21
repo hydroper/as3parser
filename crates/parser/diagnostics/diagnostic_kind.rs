@@ -53,6 +53,7 @@ pub enum DiagnosticKind {
     XmlPiVersionMustBe10 = 1073,
     XmlPiEncodingMustBeUtf8 = 1074,
     XmlMustConsistOfExactly1Element = 1075,
+    XmlNameAtMostOneColon = 1076,
 }
 
 impl DiagnosticKind {

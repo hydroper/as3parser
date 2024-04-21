@@ -56,6 +56,7 @@ lazy_static! {
         DiagnosticKind::XmlPiVersionMustBe10.id() => "XML version must be '1.0'".into(),
         DiagnosticKind::XmlPiEncodingMustBeUtf8.id() => "XML encoding must be 'utf-8'".into(),
         DiagnosticKind::XmlMustConsistOfExactly1Element.id() => "Document must consist of exactly one element".into(),
+        DiagnosticKind::XmlNameAtMostOneColon.id() => "XML name may have at most one colon".into(),
         // DiagnosticKind::K.id() => "".into(),
     };
 }
