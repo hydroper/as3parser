@@ -4664,6 +4664,7 @@ impl<'input> Parser<'input> {
         let namespace = Rc::new(MxmlNamespace::new(Some(namespace)));
         let name = self.parse_xml_name()?;
         let mut attributes: Vec<Rc<MxmlAttribute>> = vec![];
+        let mut plain_attributes: Vec<PlainMxmlAttribute> = vec![];
         while self.consume_and_ie_xml_tag(Token::XmlWhitespace)? {
             if matches!(self.token.0, Token::XmlName(_)) {
                 self.mark_location();
@@ -4677,10 +4678,15 @@ impl<'input> Parser<'input> {
                     name,
                     value,
                 };
-                self.process_mxml_attribute(&mut attributes, &attrib, &namespace);
+                self.process_mxml_xmlns_attribute(&mut attributes, &attrib, &namespace);
+                plain_attributes.push(attrib);
             } else {
                 break;
             }
+        }
+
+        for attrib in &plain_attributes {
+            self.process_mxml_xattribute(&mut attributes, &attrib, &namespace);
         }
 
         let name = self.process_mxml_tag_name(name, &namespace);
@@ -4743,10 +4749,10 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn process_mxml_attribute(&mut self, output: &mut Vec<Rc<MxmlAttribute>>, attribute: &PlainMxmlAttribute, namespace: &Rc<MxmlNamespace>) {
-        let attribute_value = unescape_xml(&attribute.value.0);
+    fn process_mxml_xmlns_attribute(&mut self, output: &mut Vec<Rc<MxmlAttribute>>, attribute: &PlainMxmlAttribute, namespace: &Rc<MxmlNamespace>) {
         // xml="uri"
         if attribute.name.0 == "xmlns" {
+            let attribute_value = unescape_xml(&attribute.value.0);
             namespace.set(MxmlNamespace::DEFAULT_NAMESPACE, &attribute_value);
             output.push(Rc::new(MxmlAttribute {
                 location: attribute.location.clone(),
@@ -4760,6 +4766,7 @@ impl<'input> Parser<'input> {
             }));
         // xmlns:prefix="uri"
         } else if attribute.name.0.starts_with("xmlns:") {
+            let attribute_value = unescape_xml(&attribute.value.0);
             namespace.set(&attribute.name.0[6..], &attribute_value);
             output.push(Rc::new(MxmlAttribute {
                 location: attribute.location.clone(),
@@ -4771,8 +4778,13 @@ impl<'input> Parser<'input> {
                 value: (attribute_value, attribute.value.1.clone()),
                 xmlns: true,
             }));
+        }
+    }
+
+    fn process_mxml_attribute(&mut self, output: &mut Vec<Rc<MxmlAttribute>>, attribute: &PlainMxmlAttribute, namespace: &Rc<MxmlNamespace>) {
         // attrib="value"
-        } else {
+        if !(attribute.name.0 == "xmlns" || attribute.name.0.starts_with("xmlns:")) {
+            let attribute_value = unescape_xml(&attribute.value.0);
             let split = attribute.name.0.split(':').collect::<Vec<_>>();
             let prefix: Option<String> = if split.len() > 1 {
                 Some(split[split.len() - 2].to_owned())
