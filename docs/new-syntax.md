@@ -83,10 +83,6 @@ enum E1 {
 
     function f1(): void {}
 }
-[Set]
-enum E2 {
-    const M1, M2
-}
 ```
 
 ## Array Initializer
