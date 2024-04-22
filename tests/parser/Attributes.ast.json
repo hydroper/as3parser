@@ -178,7 +178,7 @@
       "ClassDefinition": {
         "location": "12:1-17:12",
         "asdoc": {
-          "location": "9:4-11:2",
+          "location": "9:1-11:4",
           "main_body": [
             "Foo",
             "10:4-10:7"
@@ -201,35 +201,35 @@
             "Metadata": {
               "location": "16:2-16:40",
               "asdoc": {
-                "location": "13:4-15:2",
+                "location": "13:1-15:4",
                 "main_body": null,
                 "tags": [
                   [
                     {
                       "EventType": {
                         "Member": {
-                          "location": "1:1-1:13",
+                          "location": "14:15-14:27",
                           "base": {
                             "QualifiedIdentifier": {
-                              "location": "1:1-1:9",
+                              "location": "14:15-14:23",
                               "attribute": false,
                               "qualifier": null,
                               "id": {
                                 "Id": [
                                   "FooEvent",
-                                  "1:1-1:9"
+                                  "14:15-14:23"
                                 ]
                               }
                             }
                           },
                           "identifier": {
-                            "location": "1:10-1:13",
+                            "location": "14:24-14:27",
                             "attribute": false,
                             "qualifier": null,
                             "id": {
                               "Id": [
                                 "FOO",
-                                "1:10-1:13"
+                                "14:24-14:27"
                               ]
                             }
                           }

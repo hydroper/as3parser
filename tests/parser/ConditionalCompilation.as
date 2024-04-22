@@ -1,4 +1,4 @@
-package com.nintendo.metroid {
+package foo.bar {
     /**
      * Comment 1 (overriden by the "Communication facility" comment).
      */
@@ -10,7 +10,7 @@ package com.nintendo.metroid {
     /**
      * Dispatched when a message is received.
      */
-    [Event(name = "received", type = "com.nintendo.metroid.MessageEvent")]
+    [Event(name = "received", type = "foo.bar.MessageEvent")]
     public class CommunicationCenter extends EventDispatcher {
         CONFIG::DEBUG {
             protected var x: T1, y: T2, z: T3;

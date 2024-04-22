@@ -6,7 +6,7 @@
       "VariableDefinition": {
         "location": "7:1-7:6",
         "asdoc": {
-          "location": "1:4-6:2",
+          "location": "1:1-6:4",
           "main_body": [
             "Main body.",
             "2:4-2:14"
@@ -116,7 +116,7 @@
       "VariableDefinition": {
         "location": "12:1-18:6",
         "asdoc": {
-          "location": "13:4-16:2",
+          "location": "13:1-16:4",
           "main_body": [
             "N2. Lorem\nipsum.",
             "14:4-15:10"
@@ -179,7 +179,7 @@
       "FunctionDefinition": {
         "location": "23:1-24:2",
         "asdoc": {
-          "location": "20:4-22:2",
+          "location": "20:1-22:4",
           "main_body": null,
           "tags": [
             [
