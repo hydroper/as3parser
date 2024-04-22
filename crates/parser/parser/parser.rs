@@ -4224,9 +4224,9 @@ impl<'input> Parser<'input> {
                 self.compilation_unit().comments_mut().pop();
                 let location = comment.location();
                 let comment_prefix_length: usize = 3;
-                let location = Location::with_offsets(self.compilation_unit(), location.first_offset + comment_prefix_length, location.last_offset - 2);
+                let location1 = Location::with_offsets(self.compilation_unit(), location.first_offset + comment_prefix_length, location.last_offset - 2);
                 let content = &comment.content.borrow()[1..];
-                let (main_body, tags) = self.parse_asdoc_content(&location, content);
+                let (main_body, tags) = self.parse_asdoc_content(&location1, content);
                 Some(Rc::new(AsDoc {
                     location,
                     main_body,
