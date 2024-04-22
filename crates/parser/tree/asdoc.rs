@@ -17,10 +17,6 @@ pub enum AsDocTag {
     Deprecated {
         message: Option<String>,
     },
-    Event {
-        name: String,
-        description: String,
-    },
     EventType(Rc<Expression>),
     Example(String),
     InheritDoc,

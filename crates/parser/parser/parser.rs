@@ -4449,17 +4449,6 @@ impl<'input> Parser<'input> {
                     tags.push((AsDocTag::Deprecated { message }, location));
                 },
 
-                // @event eventName description
-                "event" => {
-                    let (content, location) = join_asdoc_content(building_content);
-                    let location = tag_location.combine_with(location);
-                    if let Some((_, name, description)) = regex_captures!(r"(?x) ([^\s]+) (.*)", &content) {
-                        tags.push((AsDocTag::Event { name: name.into(), description: description.trim_start().into() }, location));
-                    } else {
-                        tags.push((AsDocTag::Event { name: content, description: "".into() }, location));
-                    }
-                },
-
                 // @eventType typeOrConstant
                 "eventType" => {
                     let (_, c_location) = join_asdoc_content(building_content);
