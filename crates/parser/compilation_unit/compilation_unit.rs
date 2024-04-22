@@ -116,6 +116,9 @@ impl CompilationUnit {
     /// occurs at the same offset of the last error.
     pub fn prevent_equal_offset_error(&self, location: &Location) -> bool {
         let diag_list = self.diagnostics.borrow();
+        if diag_list.is_empty() {
+            return false;
+        }
         let mut i = (diag_list.len() - 1) as isize;
         let mut j = 0;
         while i >= 0 {
