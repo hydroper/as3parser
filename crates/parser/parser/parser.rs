@@ -8,6 +8,7 @@ pub struct Parser<'input> {
     locations: Vec<Location>,
     activations: Vec<ParserActivation>,
     ignore_xml_whitespace: bool,
+    expected_token_error: bool,
 }
 
 impl<'input> Parser<'input> {
@@ -20,6 +21,7 @@ impl<'input> Parser<'input> {
             locations: vec![],
             activations: vec![],
             ignore_xml_whitespace: options.ignore_xml_whitespace,
+            expected_token_error: false,
         }
     }
 
@@ -160,6 +162,7 @@ impl<'input> Parser<'input> {
 
     fn expect(&mut self, token: Token) -> Result<(), ParserError> {
         if self.token.0 != token {
+            self.expected_token_error = true;
             self.add_syntax_error(&self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![Token(token.clone()), Token(self.token.0.clone())]);
             let expecting_identifier_name = token.is_identifier_name();
             while self.token.0 != Token::Eof && (if expecting_identifier_name { self.token.0.is_identifier_name() } else { true }) {
@@ -170,6 +173,7 @@ impl<'input> Parser<'input> {
             }
             Ok(())
         } else {
+            self.expected_token_error = false;
             self.next()?;
             Ok(())
         }
@@ -177,6 +181,7 @@ impl<'input> Parser<'input> {
 
     fn expect_and_ie_xml_tag(&mut self, token: Token) -> Result<(), ParserError> {
         if self.token.0 != token {
+            self.expected_token_error = true;
             self.add_syntax_error(&self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![Token(token.clone()), Token(self.token.0.clone())]);
             while self.token.0 != Token::Eof {
                 self.next_ie_xml_tag()?;
@@ -186,6 +191,20 @@ impl<'input> Parser<'input> {
             }
             Ok(())
         } else {
+            self.expected_token_error = false;
+            self.next_ie_xml_tag()?;
+            Ok(())
+        }
+    }
+
+    /// Expects a token; but if it fails, does not skip any token.
+    fn non_greedy_expect_and_ie_xml_tag(&mut self, token: Token) -> Result<(), ParserError> {
+        if self.token.0 != token {
+            self.expected_token_error = true;
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![Token(token.clone()), Token(self.token.0.clone())]);
+            Ok(())
+        } else {
+            self.expected_token_error = false;
             self.next_ie_xml_tag()?;
             Ok(())
         }
@@ -193,6 +212,7 @@ impl<'input> Parser<'input> {
 
     fn expect_and_ie_xml_content(&mut self, token: Token) -> Result<(), ParserError> {
         if self.token.0 != token {
+            self.expected_token_error = true;
             self.add_syntax_error(&self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![Token(token.clone()), Token(self.token.0.clone())]);
             while self.token.0 != Token::Eof {
                 self.next_ie_xml_content()?;
@@ -202,6 +222,7 @@ impl<'input> Parser<'input> {
             }
             Ok(())
         } else {
+            self.expected_token_error = false;
             self.next_ie_xml_content()?;
             Ok(())
         }
@@ -209,17 +230,20 @@ impl<'input> Parser<'input> {
 
     fn expect_identifier(&mut self, reserved_words: bool) -> Result<(String, Location), ParserError> {
         if let Token::Identifier(id) = self.token.0.clone() {
+            self.expected_token_error = false;
             let location = self.token.1.clone();
             self.next()?;
             Ok((id, location))
         } else {
             if reserved_words {
                 if let Some(id) = self.token.0.reserved_word_name() {
+                    self.expected_token_error = false;
                     let location = self.token.1.clone();
                     self.next()?;
                     return Ok((id, location));
                 }
             }
+            self.expected_token_error = true;
             self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectedIdentifier, diagnostic_arguments![Token(self.token.0.clone())]);
             /*
             while self.token.0 != Token::Eof && self.token.0.is_identifier_name() {
@@ -237,10 +261,12 @@ impl<'input> Parser<'input> {
     fn expect_context_keyword(&mut self, name: &str) -> Result<(), ParserError> {
         if let Token::Identifier(id) = self.token.0.clone() {
             if id == name && self.token.1.character_count() == name.len() {
+                self.expected_token_error = false;
                 self.next()?;
                 return Ok(());
             }
         }
+        self.expected_token_error = true;
         self.add_syntax_error(&self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![String(name.into()), Token(self.token.0.clone())]);
         while self.token.0 != Token::Eof && self.token.0.is_identifier_name() {
             if self.consume_context_keyword(name)? {
@@ -256,6 +282,7 @@ impl<'input> Parser<'input> {
     /// but starts with a greater-than symbol, the first character is shifted off
     /// from the facing token.
     fn expect_type_parameters_gt(&mut self) -> Result<(), ParserError> {
+        self.expected_token_error = false;
         match self.token.0 {
             Token::Gt => {
                 self.next()?;
@@ -287,6 +314,7 @@ impl<'input> Parser<'input> {
                 Ok(())
             },
             _ => {
+                self.expected_token_error = true;
                 self.add_syntax_error(&self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![Token(Token::Gt), Token(self.token.0.clone())]);
                 while self.token.0 != Token::Eof {
                     self.next()?;
@@ -1451,15 +1479,17 @@ impl<'input> Parser<'input> {
                 self.mark_location();
                 let name = self.parse_xml_name()?;
                 self.consume_and_ie_xml_tag(Token::XmlWhitespace)?;
-                self.expect_and_ie_xml_tag(Token::Assign)?;
-                self.consume_and_ie_xml_tag(Token::XmlWhitespace)?;
-                let value: XmlAttributeValue;
-                if self.consume(Token::LeftBrace)? {
-                    let expr = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::AssignmentAndOther, ..default() })?;
-                    self.expect_and_ie_xml_tag(Token::RightBrace)?;
-                    value = XmlAttributeValue::Expression(expr);
-                } else {
-                    value = XmlAttributeValue::Value(self.parse_xml_attribute_value()?);
+                self.non_greedy_expect_and_ie_xml_tag(Token::Assign)?;
+                let mut value = XmlAttributeValue::Value(("".into(), self.token.1.clone()));
+                if !self.expected_token_error {
+                    self.consume_and_ie_xml_tag(Token::XmlWhitespace)?;
+                    if self.consume(Token::LeftBrace)? {
+                        let expr = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::AssignmentAndOther, ..default() })?;
+                        self.expect_and_ie_xml_tag(Token::RightBrace)?;
+                        value = XmlAttributeValue::Expression(expr);
+                    } else {
+                        value = XmlAttributeValue::Value(self.parse_xml_attribute_value()?);
+                    }
                 }
                 attributes.push(Rc::new(XmlAttribute {
                     location: self.pop_location(),
@@ -2331,16 +2361,18 @@ impl<'input> Parser<'input> {
         self.mark_location();
         self.expect(Token::LeftBrace)?;
         let mut directives = vec![];
-        let mut semicolon_inserted = false;
-        while !self.peek(Token::RightBrace) && !self.peek(Token::Eof) {
-            if !directives.is_empty() && !semicolon_inserted {
-                self.expect(Token::Semicolon)?;
+        if !self.expected_token_error {
+            let mut semicolon_inserted = false;
+            while !self.peek(Token::RightBrace) && !self.peek(Token::Eof) {
+                if !directives.is_empty() && !semicolon_inserted {
+                    self.expect(Token::Semicolon)?;
+                }
+                let (directive, semicolon_inserted_1) = self.parse_directive(context.clone())?;
+                directives.push(directive);
+                semicolon_inserted = semicolon_inserted_1;
             }
-            let (directive, semicolon_inserted_1) = self.parse_directive(context.clone())?;
-            directives.push(directive);
-            semicolon_inserted = semicolon_inserted_1;
+            self.expect(Token::RightBrace)?;
         }
-        self.expect(Token::RightBrace)?;
         Ok(Block { 
             location: self.pop_location(),
             metadata,
@@ -4670,9 +4702,12 @@ impl<'input> Parser<'input> {
                 self.mark_location();
                 let name = self.parse_xml_name()?;
                 self.consume_and_ie_xml_tag(Token::XmlWhitespace)?;
-                self.expect_and_ie_xml_tag(Token::Assign)?;
-                self.consume_and_ie_xml_tag(Token::XmlWhitespace)?;
-                let value = self.parse_xml_attribute_value()?;
+                self.non_greedy_expect_and_ie_xml_tag(Token::Assign)?;
+                let mut value = ("".into(), self.token.1.clone());
+                if !self.expected_token_error {
+                    self.consume_and_ie_xml_tag(Token::XmlWhitespace)?;
+                    value = self.parse_xml_attribute_value()?;
+                }
                 let attrib = PlainMxmlAttribute {
                     location: self.pop_location(),
                     name,
