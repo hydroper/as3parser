@@ -4462,9 +4462,9 @@ impl<'input> Parser<'input> {
 
                 // @eventType typeOrConstant
                 "eventType" => {
-                    let (_, location) = join_asdoc_content(building_content);
-                    let location = tag_location.combine_with(location);
-                    let reference_loc = location.clone();
+                    let (_, c_location) = join_asdoc_content(building_content);
+                    let location = tag_location.combine_with(c_location.clone());
+                    let reference_loc = c_location.shift_whitespace(&self.compilation_unit().text()[c_location.first_offset()..c_location.last_offset()]);
                     let parser_options = ParserOptions {
                         byte_range: Some((reference_loc.first_offset(), reference_loc.last_offset())),
                         ..default()
