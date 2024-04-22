@@ -179,6 +179,19 @@ impl<'input> Parser<'input> {
         }
     }
 
+    /// Expects a token; but if it fails, does not skip any token.
+    fn non_greedy_expect(&mut self, token: Token) -> Result<(), ParserError> {
+        if self.token.0 != token {
+            self.expected_token_error = true;
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![Token(token.clone()), Token(self.token.0.clone())]);
+            Ok(())
+        } else {
+            self.expected_token_error = false;
+            self.next()?;
+            Ok(())
+        }
+    }
+
     fn expect_and_ie_xml_tag(&mut self, token: Token) -> Result<(), ParserError> {
         if self.token.0 != token {
             self.expected_token_error = true;
@@ -2359,7 +2372,7 @@ impl<'input> Parser<'input> {
 
     fn parse_block_with_metadata(&mut self, context: ParserDirectiveContext, metadata: Option<Vec<Attribute>>) -> Result<Block, ParserError> {
         self.mark_location();
-        self.expect(Token::LeftBrace)?;
+        self.non_greedy_expect(Token::LeftBrace)?;
         let mut directives = vec![];
         if !self.expected_token_error {
             let mut semicolon_inserted = false;
