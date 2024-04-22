@@ -5,6 +5,7 @@ use as3_parser::ns::*;
 #[derive(Serialize, Deserialize)]
 struct ParserResult {
     program: Option<Rc<Program>>,
+    mxml: Option<Rc<Mxml>>,
     diagnostics: Vec<ParserDiagnosticResult>,
 }
 
@@ -19,9 +20,19 @@ struct ParserDiagnosticResult {
 }
 
 #[wasm_bindgen]
-pub fn parse(input: &str) -> String {
+pub fn parse(input: &str, source_type: &str) -> String {
     let compilation_unit = CompilationUnit::new(None, input.to_owned(), &CompilerOptions::default());
-    let program = ParserFacade(&compilation_unit, default()).parse_program();
+
+    let mut program: Option<Rc<Program>> = None;
+    let mut mxml: Option<Rc<Mxml>> = None;
+
+    let source_type = source_type.to_lowercase();
+
+    if source_type == "mxml" {
+        mxml = ParserFacade(&compilation_unit, default()).parse_mxml();
+    } else {
+        program = ParserFacade(&compilation_unit, default()).parse_program();
+    }
     let mut diagnostics = vec![];
     compilation_unit.sort_diagnostics();
     for diagnostic in compilation_unit.nested_diagnostics() {
@@ -36,6 +47,7 @@ pub fn parse(input: &str) -> String {
     }
     serde_json::to_string_pretty(&ParserResult {
         program,
+        mxml,
         diagnostics,
     }).unwrap()
 }

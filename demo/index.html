@@ -11,6 +11,13 @@
         <div id="parserControls" style="display: none">
             <h1>ActionScript 3 Parser Demo</h1>
             <div id="editor" class="ace-custom-theme"></div>
+            <div>
+                <label for="sourceFormOption">Source form:</label>
+                <select id="sourceFormOption">
+                    <option value="as">ActionScript</option>
+                    <option value="mxml">MXML</option>
+                </select>
+            </div>
             <div id="messageLog"></div>
             <div id="ast" class="ace-custom-theme"></div>
             <button id="parseButton" class="button">Parse</button>
@@ -27,6 +34,7 @@
             constructor() {
                 this.editor = null;
                 this.messageLog = document.querySelector("main #messageLog");
+                this.sourceFormOption = document.querySelector("main #sourceFormOption");
                 this.ast = null;
                 this.timeout = null;
 
@@ -67,11 +75,16 @@
                     }, 500);
                 });
 
+                this.sourceFormOption.addEventListener("change", _e => {
+                    this.parse();
+                });
+
                 this.parse();
             }
 
             parse() {
-                const result = JSON.parse(parse(this.editor.getValue()));
+                let sourceForm = this.sourceFormOption.value;
+                const result = JSON.parse(parse(this.editor.getValue(), sourceForm));
                 const diagnostics1 = [];
                 this.editor.getSession().clearAnnotations();
                 for (const diagnostic of result.diagnostics) {
@@ -86,7 +99,8 @@
                     diagnostics1.push("<div class=\"problem\"><div class=\"" + (diagnostic.warning ? "warning" : "error") + "-icon\"></div>" + diagnostic.line1 + ":" + diagnostic.column1 + ": " + diagnostic.message.replace(/\&/g, "&amp;").replace(/\</g, "&lt;") + "</div>");
                 }
                 this.messageLog.innerHTML = diagnostics1.join("");
-                this.ast.setValue(result.program == null ? '"Failed to parse"' : JSON.stringify(result.program, null, 2));
+                const treeKey = sourceForm == "as" ? "program" : "mxml";
+                this.ast.setValue(result[treeKey] == null ? '"Failed to parse"' : JSON.stringify(result[treeKey], null, 2));
                 this.ast.clearSelection();
             }
         }
