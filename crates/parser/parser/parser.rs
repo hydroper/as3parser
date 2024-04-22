@@ -4916,6 +4916,9 @@ impl<'input> Parser<'input> {
                 content.push(Rc::new(MxmlContent::Element(Rc::new(element))));
             } else if !until_eof {
                 self.expect_and_ie_xml_content(Token::XmlLtSlash)?;
+                if !self.tokenizer.characters().has_remaining() {
+                    break;
+                }
             }
         }
         Ok(content)
