@@ -2,15 +2,16 @@
 /* eslint-disable */
 /**
 * @param {string} input
+* @param {string} source_type
 * @returns {string}
 */
-export function parse(input: string): string;
+export function parse(input: string, source_type: string): string;
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
-  readonly parse: (a: number, b: number, c: number) => void;
+  readonly parse: (a: number, b: number, c: number, d: number, e: number) => void;
   readonly __wbindgen_add_to_stack_pointer: (a: number) => number;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
