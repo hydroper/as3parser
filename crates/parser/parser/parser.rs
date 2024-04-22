@@ -291,53 +291,43 @@ impl<'input> Parser<'input> {
         Ok(())
     }
 
+    fn non_greedy_expect_context_keyword(&mut self, name: &str) -> Result<(), ParserError> {
+        if let Token::Identifier(id) = self.token.0.clone() {
+            if id == name && self.token.1.character_count() == name.len() {
+                self.expected_token_error = false;
+                self.next()?;
+                return Ok(());
+            }
+        }
+        self.expected_token_error = true;
+        self.add_syntax_error(&self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![String(name.into()), Token(self.token.0.clone())]);
+        Ok(())
+    }
+
     /// Expects a greater-than symbol. If the facing token is not greater-than,
     /// but starts with a greater-than symbol, the first character is shifted off
     /// from the facing token.
-    fn expect_type_parameters_gt(&mut self) -> Result<(), ParserError> {
+    fn _expect_type_parameters_gt(&mut self) -> Result<(), ParserError> {
         self.expected_token_error = false;
-        match self.token.0 {
-            Token::Gt => {
+        if !self.consume_type_parameters_gt()? {
+            self.expected_token_error = true;
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![Token(Token::Gt), Token(self.token.0.clone())]);
+            while self.token.0 != Token::Eof {
                 self.next()?;
-                Ok(())
-            },
-            Token::Ge => {
-                self.token.0 = Token::Assign;
-                self.token.1.first_offset += 1;
-                Ok(())
-            },
-            Token::RightShift => {
-                self.token.0 = Token::Gt;
-                self.token.1.first_offset += 1;
-                Ok(())
-            },
-            Token::RightShiftAssign => {
-                self.token.0 = Token::Ge;
-                self.token.1.first_offset += 1;
-                Ok(())
-            },
-            Token::UnsignedRightShift => {
-                self.token.0 = Token::RightShift;
-                self.token.1.first_offset += 1;
-                Ok(())
-            },
-            Token::UnsignedRightShiftAssign => {
-                self.token.0 = Token::RightShiftAssign;
-                self.token.1.first_offset += 1;
-                Ok(())
-            },
-            _ => {
-                self.expected_token_error = true;
-                self.add_syntax_error(&self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![Token(Token::Gt), Token(self.token.0.clone())]);
-                while self.token.0 != Token::Eof {
-                    self.next()?;
-                    if self.consume_type_parameters_gt()? {
-                        return Ok(());
-                    }
+                if self.consume_type_parameters_gt()? {
+                    return Ok(());
                 }
-                Ok(())
-            },
+            }
         }
+        Ok(())
+    }
+    fn non_greedy_expect_type_parameters_gt(&mut self) -> Result<(), ParserError> {
+        self.expected_token_error = false;
+        if !self.consume_type_parameters_gt()? {
+            self.expected_token_error = true;
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![Token(Token::Gt), Token(self.token.0.clone())]);
+        }
+        Ok(())
     }
 
     /// Consumes a greater-than symbol. If the facing token is not greater-than,
@@ -714,7 +704,7 @@ impl<'input> Parser<'input> {
             while self.consume(Token::Comma)? {
                 arguments.push(self.parse_type_expression()?);
             }
-            self.expect_type_parameters_gt()?;
+            self.non_greedy_expect_type_parameters_gt()?;
             Ok(Rc::new(Expression::WithTypeArguments(ExpressionWithTypeArguments {
                 location: self.pop_location(),
                 base, arguments
@@ -1138,7 +1128,7 @@ impl<'input> Parser<'input> {
         self.push_location(&start);
         if self.consume(Token::Lt)? {
             let element_type = self.parse_type_expression()?;
-            self.expect_type_parameters_gt()?;
+            self.non_greedy_expect_type_parameters_gt()?;
             self.expect(Token::LeftBracket)?;
             let mut elements: Vec<Element> = vec![];
 
@@ -1257,7 +1247,7 @@ impl<'input> Parser<'input> {
                     while self.consume(Token::Comma)? {
                         arguments.push(self.parse_type_expression()?);
                     }
-                    self.expect_type_parameters_gt()?;
+                    self.non_greedy_expect_type_parameters_gt()?;
                     base = Rc::new(Expression::WithTypeArguments(ExpressionWithTypeArguments {
                         location: self.pop_location(),
                         base, arguments
@@ -2234,14 +2224,14 @@ impl<'input> Parser<'input> {
             let exp = self.parse_expression(ParserExpressionContext {
                 allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
             })?;
-            let semicolon_inserted = if exp.is_invalidated() {
+            let semicolon = if exp.is_invalidated() {
                 self.next()?;
                 true
             } else { self.parse_semicolon()? };
             Ok((Rc::new(Directive::ExpressionStatement(ExpressionStatement {
                 location: self.pop_location(),
                 expression: exp,
-            })), semicolon_inserted))
+            })), semicolon))
         }
     }
 
@@ -2251,13 +2241,13 @@ impl<'input> Parser<'input> {
 
         // LabeledStatement
         if self.consume(Token::Colon)? {
-            let (substatement, semicolon_inserted) = self.parse_substatement(context.put_label(id.0.clone()))?;
+            let (substatement, semicolon) = self.parse_substatement(context.put_label(id.0.clone()))?;
             let labeled = Rc::new(Directive::LabeledStatement(LabeledStatement {
                 location: self.pop_location(),
                 label: id.clone(),
                 substatement,
             }));
-            return Ok((labeled, semicolon_inserted));
+            return Ok((labeled, semicolon));
         }
 
         let mut exp: Rc<Expression>;
@@ -2288,11 +2278,11 @@ impl<'input> Parser<'input> {
         exp = self.parse_subexpressions(exp, ParserExpressionContext {
             allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
         })?;
-        let semicolon_inserted = self.parse_semicolon()?;
+        let semicolon = self.parse_semicolon()?;
         Ok((Rc::new(Directive::ExpressionStatement(ExpressionStatement {
             location: self.pop_location(),
             expression: exp,
-        })), semicolon_inserted))
+        })), semicolon))
     }
 
     fn parse_qualified_identifier_statement_or_normal_config(&mut self, context: ParserDirectiveContext, id: (String, Location), asdoc: Option<Rc<AsDoc>>) -> Result<(Rc<Directive>, bool), ParserError> {
@@ -2317,11 +2307,11 @@ impl<'input> Parser<'input> {
             return Ok(result);
         }
 
-        let semicolon_inserted = self.parse_semicolon()?;
+        let semicolon = self.parse_semicolon()?;
         Ok((Rc::new(Directive::ExpressionStatement(ExpressionStatement {
             location: self.pop_location(),
             expression: exp,
-        })), semicolon_inserted))
+        })), semicolon))
     }
 
     fn parse_opt_normal_config(&mut self, exp: &Rc<Expression>, asdoc: Option<Rc<AsDoc>>, context: ParserDirectiveContext) -> Result<Option<(Rc<Directive>, bool)>, ParserError> {
@@ -2375,14 +2365,14 @@ impl<'input> Parser<'input> {
         self.non_greedy_expect(Token::LeftBrace)?;
         let mut directives = vec![];
         if !self.expected_token_error {
-            let mut semicolon_inserted = false;
+            let mut semicolon = false;
             while !self.peek(Token::RightBrace) && !self.peek(Token::Eof) {
-                if !directives.is_empty() && !semicolon_inserted {
+                if !directives.is_empty() && !semicolon {
                     self.expect(Token::Semicolon)?;
                 }
-                let (directive, semicolon_inserted_1) = self.parse_directive(context.clone())?;
+                let (directive, semicolon_1) = self.parse_directive(context.clone())?;
                 directives.push(directive);
-                semicolon_inserted = semicolon_inserted_1;
+                semicolon = semicolon_1;
             }
             self.expect(Token::RightBrace)?;
         }
@@ -2403,24 +2393,24 @@ impl<'input> Parser<'input> {
         self.expect(Token::LeftParen)?;
         let test = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
         self.expect(Token::RightParen)?;
-        let semicolon_inserted;
-        let (consequent, semicolon_inserted_1) = self.parse_substatement(context.clone())?;
+        let semicolon;
+        let (consequent, semicolon_1) = self.parse_substatement(context.clone())?;
         let mut alternative = None;
         if self.peek(Token::Else) {
-            if !semicolon_inserted_1 {
+            if !semicolon_1 {
                 self.expect(Token::Semicolon)?;
             }
             self.next()?;
-            let (alternative_2, semicolon_inserted_2) = self.parse_substatement(context.clone())?;
+            let (alternative_2, semicolon_2) = self.parse_substatement(context.clone())?;
             alternative = Some(alternative_2);
-            semicolon_inserted = semicolon_inserted_2;
+            semicolon = semicolon_2;
         } else {
-            semicolon_inserted = semicolon_inserted_1;
+            semicolon = semicolon_1;
         }
         Ok((Rc::new(Directive::IfStatement(IfStatement {
             location: self.pop_location(),
             test, consequent, alternative,
-        })), semicolon_inserted))
+        })), semicolon))
     }
 
     fn parse_switch_statement(&mut self, context: ParserDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
@@ -2435,12 +2425,20 @@ impl<'input> Parser<'input> {
             breakable: true,
             iteration: false,
         });
-        self.expect(Token::LeftParen)?;
-        let discriminant = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
-        self.expect(Token::RightParen)?;
-        self.expect(Token::LeftBrace)?;
-        let cases = self.parse_case_elements(context)?;
-        self.expect(Token::RightBrace)?;
+        let mut discriminant = self.create_invalidated_expression(&self.tokenizer.cursor_location());
+        let mut cases: Vec<Case> = vec![];
+        self.non_greedy_expect(Token::LeftParen)?;
+        if !self.expected_token_error {
+            discriminant = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
+            self.non_greedy_expect(Token::RightParen)?;
+            if !self.expected_token_error {
+                self.non_greedy_expect(Token::LeftBrace)?;
+                if !self.expected_token_error {
+                    cases = self.parse_case_elements(context)?;
+                    self.non_greedy_expect(Token::RightBrace)?;
+                }
+            }
+        }
         Ok((Rc::new(Directive::SwitchStatement(SwitchStatement {
             location: self.pop_location(),
             discriminant, cases,
@@ -2449,9 +2447,9 @@ impl<'input> Parser<'input> {
 
     fn parse_case_elements(&mut self, context: ParserDirectiveContext) -> Result<Vec<Case>, ParserError> {
         let mut cases = vec![];
-        let mut semicolon_inserted = false;
+        let mut semicolon = false;
         while !self.peek(Token::RightBrace) {
-            if !cases.is_empty() && !semicolon_inserted {
+            if !cases.is_empty() && !semicolon {
                 self.expect(Token::Semicolon)?;
             }
             if !(self.peek(Token::Case) || self.peek(Token::Default)) {
@@ -2480,14 +2478,14 @@ impl<'input> Parser<'input> {
                 }
             }
             let mut directives = vec![];
-            semicolon_inserted = false;
+            semicolon = false;
             while !(self.peek(Token::RightBrace) || self.peek(Token::Case) || self.peek(Token::Default)) {
-                if !directives.is_empty() && !semicolon_inserted {
+                if !directives.is_empty() && !semicolon {
                     self.expect(Token::Semicolon)?;
                 }
-                let (directive, semicolon_inserted_1) = self.parse_directive(context.clone())?;
+                let (directive, semicolon_1) = self.parse_directive(context.clone())?;
                 directives.push(directive);
-                semicolon_inserted = semicolon_inserted_1;
+                semicolon = semicolon_1;
             }
             cases.push(Case {
                 location: self.pop_location(),
@@ -2503,12 +2501,20 @@ impl<'input> Parser<'input> {
             breakable: true,
             iteration: false,
         });
-        self.expect(Token::LeftParen)?;
-        let discriminant = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
-        self.expect(Token::RightParen)?;
-        self.expect(Token::LeftBrace)?;
-        let cases = self.parse_type_case_elements(context)?;
-        self.expect(Token::RightBrace)?;
+        let mut discriminant = self.create_invalidated_expression(&self.tokenizer.cursor_location());
+        let mut cases: Vec<TypeCase> = vec![];
+        self.non_greedy_expect(Token::LeftParen)?;
+        if !self.expected_token_error {
+            discriminant = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
+            self.non_greedy_expect(Token::RightParen)?;
+            if !self.expected_token_error {
+                self.non_greedy_expect(Token::LeftBrace)?;
+                if !self.expected_token_error {
+                    cases = self.parse_type_case_elements(context)?;
+                    self.non_greedy_expect(Token::RightBrace)?;
+                }
+            }
+        }
         Ok((Rc::new(Directive::SwitchTypeStatement(SwitchTypeStatement {
             location: self.pop_location(),
             discriminant, cases,
@@ -2529,16 +2535,22 @@ impl<'input> Parser<'input> {
                 });
             } else {
                 self.mark_location();
-                self.expect(Token::Case)?;
-                self.expect(Token::LeftParen)?;
-                let parameter = Some(self.parse_typed_destructuring()?);
-                self.expect(Token::RightParen)?;
-                let block = Rc::new(self.parse_block(context.clone())?);
-                cases.push(TypeCase {
-                    location: self.pop_location(),
-                    parameter,
-                    block,
-                });
+                self.non_greedy_expect(Token::Case)?;
+                if !self.expected_token_error {
+                    self.non_greedy_expect(Token::LeftParen)?;
+                    if !self.expected_token_error {
+                        let parameter = Some(self.parse_typed_destructuring()?);
+                        self.non_greedy_expect(Token::RightParen)?;
+                        if !self.expected_token_error {
+                            let block = Rc::new(self.parse_block(context.clone())?);
+                            cases.push(TypeCase {
+                                location: self.pop_location(),
+                                parameter,
+                                block,
+                            });
+                        }
+                    }
+                }
             }
         }
         Ok(cases)
@@ -2553,8 +2565,8 @@ impl<'input> Parser<'input> {
         self.next()?;
 
         // Body
-        let (body, semicolon_inserted_1) = self.parse_substatement(context)?;
-        if !semicolon_inserted_1 {
+        let (body, semicolon_1) = self.parse_substatement(context)?;
+        if !semicolon_1 {
             self.expect(Token::Semicolon)?;
         }
 
@@ -2565,11 +2577,11 @@ impl<'input> Parser<'input> {
         let test = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
         self.expect(Token::RightParen)?;
 
-        let semicolon_inserted = self.parse_semicolon()?;
+        let semicolon = self.parse_semicolon()?;
         Ok((Rc::new(Directive::DoStatement(DoStatement {
             location: self.pop_location(),
             body, test,
-        })), semicolon_inserted))
+        })), semicolon))
     }
 
     fn parse_while_statement(&mut self, context: ParserDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
@@ -2586,12 +2598,12 @@ impl<'input> Parser<'input> {
         self.expect(Token::RightParen)?;
 
         // Body
-        let (body, semicolon_inserted) = self.parse_substatement(context)?;
+        let (body, semicolon) = self.parse_substatement(context)?;
 
         Ok((Rc::new(Directive::WhileStatement(WhileStatement {
             location: self.pop_location(),
             test, body,
-        })), semicolon_inserted))
+        })), semicolon))
     }
 
     /// Parses `for`, `for..in` or `for each`.
@@ -2673,12 +2685,12 @@ impl<'input> Parser<'input> {
         self.expect(Token::RightParen)?;
 
         // Body
-        let (body, semicolon_inserted) = self.parse_substatement(context)?;
+        let (body, semicolon) = self.parse_substatement(context)?;
 
         Ok((Rc::new(Directive::ForStatement(ForStatement {
             location: self.pop_location(),
             init, test, update, body,
-        })), semicolon_inserted))
+        })), semicolon))
     }
 
     fn parse_for_each_statement(&mut self, context: ParserDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
@@ -2708,12 +2720,12 @@ impl<'input> Parser<'input> {
         self.expect(Token::RightParen)?;
 
         // Body
-        let (body, semicolon_inserted) = self.parse_substatement(context)?;
+        let (body, semicolon) = self.parse_substatement(context)?;
 
         Ok((Rc::new(Directive::ForInStatement(ForInStatement {
             location: self.pop_location(),
             each: true, left, right, body,
-        })), semicolon_inserted))
+        })), semicolon))
     }
 
     fn parse_for_in_statement_with_left_variable(&mut self, context: ParserDirectiveContext, left: SimpleVariableDefinition) -> Result<(Rc<Directive>, bool), ParserError> {
@@ -2733,12 +2745,12 @@ impl<'input> Parser<'input> {
         self.expect(Token::RightParen)?;
 
         // Body
-        let (body, semicolon_inserted) = self.parse_substatement(context)?;
+        let (body, semicolon) = self.parse_substatement(context)?;
 
         Ok((Rc::new(Directive::ForInStatement(ForInStatement {
             location: self.pop_location(),
             each: false, left: ForInBinding::VariableDefinition(Rc::new(left)), right, body,
-        })), semicolon_inserted))
+        })), semicolon))
     }
 
     fn parse_for_in_statement_with_left_exp(&mut self, context: ParserDirectiveContext, left: Rc<Expression>) -> Result<(Rc<Directive>, bool), ParserError> {
@@ -2748,12 +2760,12 @@ impl<'input> Parser<'input> {
         self.expect(Token::RightParen)?;
 
         // Body
-        let (body, semicolon_inserted) = self.parse_substatement(context)?;
+        let (body, semicolon) = self.parse_substatement(context)?;
 
         Ok((Rc::new(Directive::ForInStatement(ForInStatement {
             location: self.pop_location(),
             each: false, left: ForInBinding::Expression(left), right, body,
-        })), semicolon_inserted))
+        })), semicolon))
     }
 
     fn parse_simple_variable_definition(&mut self, allow_in: bool) -> Result<SimpleVariableDefinition, ParserError> {
@@ -2791,12 +2803,12 @@ impl<'input> Parser<'input> {
         self.expect(Token::RightParen)?;
 
         // Body
-        let (body, semicolon_inserted) = self.parse_substatement(context)?;
+        let (body, semicolon) = self.parse_substatement(context)?;
 
         Ok((Rc::new(Directive::WithStatement(WithStatement {
             location: self.pop_location(),
             object, body,
-        })), semicolon_inserted))
+        })), semicolon))
     }
 
     fn parse_break_statement(&mut self, context: ParserDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
@@ -2807,7 +2819,7 @@ impl<'input> Parser<'input> {
         let label_location = label.clone().map(|label| label.1.clone());
         let label = label.map(|label| label.0.clone());
 
-        let semicolon_inserted = self.parse_semicolon()?;
+        let semicolon = self.parse_semicolon()?;
 
         let node = Rc::new(Directive::BreakStatement(BreakStatement {
             location: self.pop_location(),
@@ -2820,7 +2832,7 @@ impl<'input> Parser<'input> {
             self.add_syntax_error(&node.location(), DiagnosticKind::IllegalBreak, vec![]);
         }
 
-        Ok((node, semicolon_inserted))
+        Ok((node, semicolon))
     }
 
     fn parse_continue_statement(&mut self, context: ParserDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
@@ -2831,7 +2843,7 @@ impl<'input> Parser<'input> {
         let label_location = label.clone().map(|label| label.1.clone());
         let label = label.map(|label| label.0.clone());
 
-        let semicolon_inserted = self.parse_semicolon()?;
+        let semicolon = self.parse_semicolon()?;
 
         let node = Rc::new(Directive::ContinueStatement(ContinueStatement {
             location: self.pop_location(),
@@ -2844,7 +2856,7 @@ impl<'input> Parser<'input> {
             self.add_syntax_error(&node.location(), DiagnosticKind::IllegalContinue, vec![]);
         }
 
-        Ok((node, semicolon_inserted))
+        Ok((node, semicolon))
     }
 
     fn parse_return_statement(&mut self, _context: ParserDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
@@ -2859,14 +2871,14 @@ impl<'input> Parser<'input> {
             })?
         };
 
-        let semicolon_inserted = self.parse_semicolon()?;
+        let semicolon = self.parse_semicolon()?;
 
         let node = Rc::new(Directive::ReturnStatement(ReturnStatement {
             location: self.pop_location(),
             expression,
         }));
 
-        Ok((node, semicolon_inserted))
+        Ok((node, semicolon))
     }
 
     fn parse_throw_statement(&mut self, _context: ParserDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
@@ -2885,14 +2897,14 @@ impl<'input> Parser<'input> {
             self.add_syntax_error(&expression.location(), DiagnosticKind::ExpressionMustNotFollowLineBreak, vec![]);
         }
 
-        let semicolon_inserted = self.parse_semicolon()?;
+        let semicolon = self.parse_semicolon()?;
 
         let node = Rc::new(Directive::ThrowStatement(ThrowStatement {
             location: self.pop_location(),
             expression,
         }));
 
-        Ok((node, semicolon_inserted))
+        Ok((node, semicolon))
     }
 
     fn parse_try_statement(&mut self, context: ParserDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
@@ -2902,19 +2914,25 @@ impl<'input> Parser<'input> {
         let block = Rc::new(self.parse_block(context.clone())?);
         let mut catch_clauses: Vec<CatchClause> = vec![];
         let mut finally_clause: Option<FinallyClause> = None;
+        let mut found_catch = false;
         loop {
             if self.peek(Token::Catch) {
+                found_catch = true;
                 self.mark_location();
                 self.next()?;
-                self.expect(Token::LeftParen)?;
-                let parameter = self.parse_typed_destructuring()?;
-                self.expect(Token::RightParen)?;
-                let block = Rc::new(self.parse_block(context.clone())?);
-                catch_clauses.push(CatchClause {
-                    location: self.pop_location(),
-                    parameter,
-                    block,
-                });
+                self.non_greedy_expect(Token::LeftParen)?;
+                if !self.expected_token_error {
+                    let parameter = self.parse_typed_destructuring()?;
+                    self.non_greedy_expect(Token::RightParen)?;
+                    if !self.expected_token_error {
+                        let block = Rc::new(self.parse_block(context.clone())?);
+                        catch_clauses.push(CatchClause {
+                            location: self.pop_location(),
+                            parameter,
+                            block,
+                        });
+                    }
+                }
             } else if self.peek(Token::Finally) {
                 self.mark_location();
                 self.next()?;
@@ -2928,8 +2946,8 @@ impl<'input> Parser<'input> {
                 break;
             }
         }
-        if catch_clauses.is_empty() && finally_clause.is_none() {
-            self.expect(Token::Catch)?;
+        if !found_catch && finally_clause.is_none() {
+            self.non_greedy_expect(Token::Catch)?;
         }
 
         let node = Rc::new(Directive::TryStatement(TryStatement {
@@ -2944,27 +2962,36 @@ impl<'input> Parser<'input> {
         self.mark_location();
         self.next()?;
 
+        let mut expression = self.create_invalidated_expression(&self.tokenizer.cursor_location());
         self.forbid_line_break_before_token();
-        self.expect_context_keyword("xml")?;
-        self.forbid_line_break_before_token();
-        self.expect_context_keyword("namespace")?;
-        self.expect(Token::Assign)?;
+        self.non_greedy_expect_context_keyword("xml")?;
+        if !self.expected_token_error {
+            expression = self.create_invalidated_expression(&self.tokenizer.cursor_location());
+            self.forbid_line_break_before_token();
+            self.non_greedy_expect_context_keyword("namespace")?;
+            if !self.expected_token_error {
+                expression = self.create_invalidated_expression(&self.tokenizer.cursor_location());
+                self.non_greedy_expect(Token::Assign)?;
 
-        let expression = self.parse_expression(ParserExpressionContext {
-            allow_in: true,
-            allow_assignment: false,
-            min_precedence: OperatorPrecedence::AssignmentAndOther,
-            ..default()
-        })?;
+                if !self.expected_token_error {
+                    expression = self.parse_expression(ParserExpressionContext {
+                        allow_in: true,
+                        allow_assignment: false,
+                        min_precedence: OperatorPrecedence::AssignmentAndOther,
+                        ..default()
+                    })?;
+                }
+            }
+        }
 
-        let semicolon_inserted = self.parse_semicolon()?;
+        let semicolon = self.parse_semicolon()?;
 
         let node = Rc::new(Directive::DefaultXmlNamespaceStatement(DefaultXmlNamespaceStatement {
             location: self.pop_location(),
             right: expression,
         }));
 
-        Ok((node, semicolon_inserted))
+        Ok((node, semicolon))
     }
 
     fn forbid_line_break_before_token(&mut self) {
@@ -3026,11 +3053,11 @@ impl<'input> Parser<'input> {
                             return Ok(result);
                         }
 
-                        let semicolon_inserted = self.parse_semicolon()?;
+                        let semicolon = self.parse_semicolon()?;
                         return Ok((Rc::new(Directive::ExpressionStatement(ExpressionStatement {
                             location: self.pop_location(),
                             expression: first_attr_expr,
-                        })), semicolon_inserted));
+                        })), semicolon));
                     }
 
                     let first_attr = self.keyword_or_expression_attribute_from_expression(&first_attr_expr);
@@ -3927,7 +3954,7 @@ impl<'input> Parser<'input> {
         while self.consume(Token::Comma)? {
             list.push(self.parse_type_parameter()?);
         }
-        self.expect_type_parameters_gt()?;
+        self.non_greedy_expect_type_parameters_gt()?;
         Ok(Some(list))
     }
     
