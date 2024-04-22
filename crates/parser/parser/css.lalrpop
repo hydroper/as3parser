@@ -2,7 +2,7 @@ use std::str::FromStr;
 use std::rc::Rc;
 use lalrpop_util::ErrorRecovery;
 use crate::compilation_unit::CompilationUnit;
-use crate::compilation_unit::Location;
+// use crate::compilation_unit::Location;
 
 grammar<'err, 'cu>(errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, &'static str>>, compilation_unit: &'cu Rc<CompilationUnit>);
 
