@@ -1140,10 +1140,10 @@ impl<'input> Tokenizer<'input> {
             },
 
             _ => {
-                self.add_unexpected_error();
                 if self.characters.reached_end() {
-                    return Err(ParserError::Common);
+                    return Ok((Token::Eof, self.cursor_location()));
                 }
+                self.add_unexpected_error();
                 self.characters.next();
                 self.scan_ie_xml_tag()
             },

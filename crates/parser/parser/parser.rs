@@ -5007,7 +5007,7 @@ impl<'input> Parser<'input> {
                     while pi_characters.has_remaining() {
                         data.push(pi_characters.next_or_zero());
                     }
-                    match process_xml_pi(self.compilation_unit().file_path(), &self.compilation_unit().compiler_options(), &name, &data) {
+                    match process_xml_pi(self.compilation_unit(), (location.first_offset() + 2 + name.len(), location.last_offset() - 2), &name) {
                         Ok(errors) => {
                             for error in errors.iter() {
                                 match error {
@@ -5027,8 +5027,8 @@ impl<'input> Parser<'input> {
                             }
                         },
                         Err(_) => {
-                            self.add_syntax_error(&location, DiagnosticKind::InvalidXmlPi, vec![]);
-                            return Err(ParserError::Common);
+                            // self.add_syntax_error(&location, DiagnosticKind::InvalidXmlPi, vec![]);
+                            // return Err(ParserError::Common);
                         },
                     }
                     content.push(Rc::new(MxmlContent::ProcessingInstruction {
@@ -5151,15 +5151,16 @@ fn join_asdoc_content(content: &Vec<(String, Location)>) -> (String, Location) {
     (s, location)
 }
 
-fn process_xml_pi(file_path: Option<String>, compiler_options: &Rc<CompilerOptions>, name: &str, data: &str) -> Result<Vec<XmlPiError>, ParserError> {
+fn process_xml_pi(cu: &Rc<CompilationUnit>, byte_range: (usize, usize), name: &str) -> Result<Vec<XmlPiError>, ParserError> {
     if name != "xml" {
         return Ok(vec![]);
     }
-    let cu1 = CompilationUnit::new(file_path, data.to_owned(), compiler_options);
-    let mut parser = Parser::new(&cu1, &ParserOptions {
+    let mut parser = Parser::new(&cu, &ParserOptions {
+        byte_range: Some(byte_range),
         ..default()
     });
     let mut errors = Vec::<XmlPiError>::new();
+    parser.next_ie_xml_tag()?;
     while parser.consume_and_ie_xml_tag(Token::XmlWhitespace)? {
         if matches!(parser.token.0, Token::XmlName(_)) {
             let name = parser.parse_xml_name()?;
