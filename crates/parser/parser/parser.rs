@@ -147,7 +147,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn consume_context_keyword(&mut self, name: &str) -> Result<bool, ParserError> {
+    fn _consume_context_keyword(&mut self, name: &str) -> Result<bool, ParserError> {
         if let Token::Identifier(id) = self.token.0.clone() {
             if id == name && self.token.1.character_count() == name.len() {
                 self.next()?;
@@ -241,6 +241,18 @@ impl<'input> Parser<'input> {
         }
     }
 
+    fn non_greedy_expect_and_ie_xml_content(&mut self, token: Token) -> Result<(), ParserError> {
+        if self.token.0 != token {
+            self.expected_token_error = true;
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![Token(token.clone()), Token(self.token.0.clone())]);
+            Ok(())
+        } else {
+            self.expected_token_error = false;
+            self.next_ie_xml_content()?;
+            Ok(())
+        }
+    }
+
     fn expect_identifier(&mut self, reserved_words: bool) -> Result<(String, Location), ParserError> {
         if let Token::Identifier(id) = self.token.0.clone() {
             self.expected_token_error = false;
@@ -271,7 +283,7 @@ impl<'input> Parser<'input> {
         }
     }
 
-    fn expect_context_keyword(&mut self, name: &str) -> Result<(), ParserError> {
+    fn _expect_context_keyword(&mut self, name: &str) -> Result<(), ParserError> {
         if let Token::Identifier(id) = self.token.0.clone() {
             if id == name && self.token.1.character_count() == name.len() {
                 self.expected_token_error = false;
@@ -280,9 +292,9 @@ impl<'input> Parser<'input> {
             }
         }
         self.expected_token_error = true;
-        self.add_syntax_error(&self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![String(name.into()), Token(self.token.0.clone())]);
+        self.add_syntax_error(&self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![String(format!("'{name}'")), Token(self.token.0.clone())]);
         while self.token.0 != Token::Eof && self.token.0.is_identifier_name() {
-            if self.consume_context_keyword(name)? {
+            if self._consume_context_keyword(name)? {
                 return Ok(());
             } else {
                 self.next()?;
@@ -300,7 +312,7 @@ impl<'input> Parser<'input> {
             }
         }
         self.expected_token_error = true;
-        self.add_syntax_error(&self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![String(name.into()), Token(self.token.0.clone())]);
+        self.add_syntax_error(&self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![String(format!("'{name}'")), Token(self.token.0.clone())]);
         Ok(())
     }
 
@@ -416,7 +428,7 @@ impl<'input> Parser<'input> {
                 self.next()?;
                 self.push_location(&base.location());
                 let key = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
-                self.expect(Token::RightBracket)?;
+                self.non_greedy_expect(Token::RightBracket)?;
                 base = Rc::new(Expression::ComputedMember(ComputedMemberExpression {
                     base, asdoc, key, location: self.pop_location()
                 }));
@@ -463,7 +475,7 @@ impl<'input> Parser<'input> {
             } else if self.token.0 == Token::Not && context.allow_in && context.min_precedence.includes(&OperatorPrecedence::Relational) && !self.previous_token.1.line_break(&self.token.1) {
                 self.push_location(&base.location());
                 self.next()?;
-                self.expect(Token::In)?;
+                self.non_greedy_expect(Token::In)?;
                 base = self.parse_binary_operator(base, Operator::NotIn, OperatorPrecedence::Relational.add(1).unwrap(), context.clone())?;
             // ConditionalExpression
             } else if self.peek(Token::Question) && context.min_precedence.includes(&OperatorPrecedence::AssignmentAndOther) {
@@ -473,11 +485,14 @@ impl<'input> Parser<'input> {
                     min_precedence: OperatorPrecedence::AssignmentAndOther,
                     ..context.clone()
                 })?;
-                self.expect(Token::Colon)?;
-                let alternative = self.parse_expression(ParserExpressionContext {
-                    min_precedence: OperatorPrecedence::AssignmentAndOther,
-                    ..context.clone()
-                })?;
+                let mut alternative = self.create_invalidated_expression(&self.tokenizer.cursor_location());
+                self.non_greedy_expect(Token::Colon)?;
+                if !self.expected_token_error {
+                    alternative = self.parse_expression(ParserExpressionContext {
+                        min_precedence: OperatorPrecedence::AssignmentAndOther,
+                        ..context.clone()
+                    })?;
+                }
                 base = Rc::new(Expression::Conditional(ConditionalExpression {
                     location: self.pop_location(),
                     test: base, consequent, alternative,
@@ -610,7 +625,7 @@ impl<'input> Parser<'input> {
             let asdoc = self.parse_asdoc()?;
             self.next()?;
             let key = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
-            self.expect(Token::RightBracket)?;
+            self.non_greedy_expect(Token::RightBracket)?;
             operation = Rc::new(Expression::ComputedMember(ComputedMemberExpression {
                 location: self.pop_location(),
                 base: operation, asdoc, key,
@@ -642,7 +657,7 @@ impl<'input> Parser<'input> {
                 self.next()?;
                 self.push_location(&base.location());
                 let key = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
-                self.expect(Token::RightBracket)?;
+                self.non_greedy_expect(Token::RightBracket)?;
                 base = Rc::new(Expression::ComputedMember(ComputedMemberExpression {
                     base, asdoc: None, key, location: self.pop_location()
                 }));
@@ -887,8 +902,8 @@ impl<'input> Parser<'input> {
         } else if self.peek(Token::Import) && context.min_precedence.includes(&OperatorPrecedence::Postfix) {
             self.mark_location();
             self.next()?;
-            self.expect(Token::Dot)?;
-            self.expect_context_keyword("meta")?;
+            self.non_greedy_expect(Token::Dot)?;
+            self.non_greedy_expect_context_keyword("meta")?;
             Ok(Some(Rc::new(Expression::ImportMeta(ImportMeta {
                 location: self.pop_location(),
             }))))
@@ -965,18 +980,22 @@ impl<'input> Parser<'input> {
     fn parse_function_common(&mut self, function_expr: bool, block_context: ParserDirectiveContext, allow_in: bool) -> Result<Rc<FunctionCommon>, ParserError> {
         self.mark_location();
         self.duplicate_location();
-        self.expect(Token::LeftParen)?;
         let mut params: Vec<Rc<Parameter>> = vec![];
-        if !self.peek(Token::RightParen) {
-            params.push(self.parse_parameter()?);
-            while self.consume(Token::Comma)? {
+        let mut return_annotation = Some(self.create_invalidated_expression(&self.tokenizer.cursor_location()));
+        self.non_greedy_expect(Token::LeftParen)?;
+        if !self.expected_token_error {
+            if !self.peek(Token::RightParen) {
                 params.push(self.parse_parameter()?);
+                while self.consume(Token::Comma)? {
+                    params.push(self.parse_parameter()?);
+                }
             }
+            self.non_greedy_expect(Token::RightParen)?;
+            if !self.expected_token_error {
+                return_annotation = if self.consume(Token::Colon)? { Some(self.parse_type_expression()?) } else { None };
+            }
+            self.validate_parameter_list(params.iter().map(|p| (p.kind, p.location.clone())).collect::<Vec<_>>())?;
         }
-        self.expect(Token::RightParen)?;
-        self.validate_parameter_list(params.iter().map(|p| (p.kind, p.location.clone())).collect::<Vec<_>>())?;
-
-        let return_annotation = if self.consume(Token::Colon)? { Some(self.parse_type_expression()?) } else { None };
 
         let signature_location = self.pop_location();
 
@@ -996,7 +1015,7 @@ impl<'input> Parser<'input> {
 
         // Body is required by function expressions
         if body.is_none() && function_expr {
-            self.expect(Token::LeftBrace)?;
+            self.non_greedy_expect(Token::LeftBrace)?;
         }
 
         // Exit activation
@@ -1040,7 +1059,7 @@ impl<'input> Parser<'input> {
 
     fn parse_object_initializer(&mut self) -> Result<Rc<Expression>, ParserError> {
         self.mark_location();
-        self.expect(Token::LeftBrace)?;
+        self.non_greedy_expect(Token::LeftBrace)?;
         let mut fields: Vec<Rc<InitializerField>> = vec![];
         while !self.peek(Token::RightBrace) {
             fields.push(self.parse_field()?);
@@ -1048,7 +1067,7 @@ impl<'input> Parser<'input> {
                 break;
             }
         }
-        self.expect(Token::RightBrace)?;
+        self.non_greedy_expect(Token::RightBrace)?;
 
         Ok(Rc::new(Expression::ObjectInitializer(ObjectInitializer {
             location: self.pop_location(),
@@ -1080,7 +1099,7 @@ impl<'input> Parser<'input> {
                 ..default()
             })?);
         } else if !matches!(name.0, FieldName::Identifier(_)) {
-            self.expect(Token::Colon)?;
+            self.non_greedy_expect(Token::Colon)?;
         }
 
         Ok(Rc::new(InitializerField::Field {
@@ -1114,7 +1133,7 @@ impl<'input> Parser<'input> {
                 min_precedence: OperatorPrecedence::List,
                 ..default()
             })?;
-            self.expect(Token::RightBracket)?;
+            self.non_greedy_expect(Token::RightBracket)?;
             let location = self.pop_location();
             Ok((FieldName::Brackets(key_expr), location))
         } else {
@@ -1129,30 +1148,31 @@ impl<'input> Parser<'input> {
         if self.consume(Token::Lt)? {
             let element_type = self.parse_type_expression()?;
             self.non_greedy_expect_type_parameters_gt()?;
-            self.expect(Token::LeftBracket)?;
             let mut elements: Vec<Element> = vec![];
-
-            while !self.peek(Token::RightBracket) {
-                if self.peek(Token::Ellipsis) {
-                    self.mark_location();
-                    self.next()?;
-                    elements.push(Element::Rest((self.parse_expression(ParserExpressionContext {
-                        allow_in: true,
-                        min_precedence: OperatorPrecedence::AssignmentAndOther,
-                        ..default()
-                    })?, self.pop_location())));
-                } else {
-                    elements.push(Element::Expression(self.parse_expression(ParserExpressionContext {
-                        allow_in: true,
-                        min_precedence: OperatorPrecedence::AssignmentAndOther,
-                        ..default()
-                    })?));
+            self.non_greedy_expect(Token::LeftBracket)?;
+            if !self.expected_token_error {
+                while !self.peek(Token::RightBracket) {
+                    if self.peek(Token::Ellipsis) {
+                        self.mark_location();
+                        self.next()?;
+                        elements.push(Element::Rest((self.parse_expression(ParserExpressionContext {
+                            allow_in: true,
+                            min_precedence: OperatorPrecedence::AssignmentAndOther,
+                            ..default()
+                        })?, self.pop_location())));
+                    } else {
+                        elements.push(Element::Expression(self.parse_expression(ParserExpressionContext {
+                            allow_in: true,
+                            min_precedence: OperatorPrecedence::AssignmentAndOther,
+                            ..default()
+                        })?));
+                    }
+                    if !self.consume(Token::Comma)? {
+                        break;
+                    }
                 }
-                if !self.consume(Token::Comma)? {
-                    break;
-                }
+                self.non_greedy_expect(Token::RightBracket)?;
             }
-            self.expect(Token::RightBracket)?;
             Ok(Rc::new(Expression::VectorLiteral(VectorLiteral {
                 location: self.pop_location(),
                 element_type,
@@ -1192,13 +1212,13 @@ impl<'input> Parser<'input> {
 
         if self.consume(Token::LeftBracket)? {
             let key = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
-            self.expect(Token::RightBracket)?;
+            self.non_greedy_expect(Token::RightBracket)?;
             Ok(Rc::new(Expression::ComputedMember(ComputedMemberExpression {
                 location: self.pop_location(),
                 base: super_expr, asdoc: None, key,
             })))
         } else {
-            self.expect(Token::Dot)?;
+            self.non_greedy_expect(Token::Dot)?;
             let identifier = self.parse_qualified_identifier()?;
             Ok(Rc::new(Expression::Member(MemberExpression {
                 location: self.pop_location(),
@@ -1208,7 +1228,7 @@ impl<'input> Parser<'input> {
     }
 
     fn parse_arguments(&mut self) -> Result<Vec<Rc<Expression>>, ParserError> {
-        self.expect(Token::LeftParen)?;
+        self.non_greedy_expect(Token::LeftParen)?;
         let mut arguments = vec![];
         if !self.peek(Token::RightParen) {
             arguments.push(self.parse_expression(ParserExpressionContext {
@@ -1224,7 +1244,7 @@ impl<'input> Parser<'input> {
                 })?);
             }
         }
-        self.expect(Token::RightParen)?;
+        self.non_greedy_expect(Token::RightParen)?;
         Ok(arguments)
     }
 
@@ -1234,7 +1254,7 @@ impl<'input> Parser<'input> {
             if self.consume(Token::LeftBracket)? {
                 self.push_location(&base.location());
                 let key = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
-                self.expect(Token::RightBracket)?;
+                self.non_greedy_expect(Token::RightBracket)?;
                 base = Rc::new(Expression::ComputedMember(ComputedMemberExpression {
                     location: self.pop_location(),
                     base, asdoc: None, key,
@@ -1405,7 +1425,7 @@ impl<'input> Parser<'input> {
 
         let asdoc = self.parse_asdoc()?;
 
-        self.expect(Token::LeftBracket)?;
+        self.non_greedy_expect(Token::LeftBracket)?;
 
         let mut elements: Vec<Element> = vec![];
 
@@ -1436,7 +1456,7 @@ impl<'input> Parser<'input> {
                 break;
             }
         }
-        self.expect(Token::RightBracket)?;
+        self.non_greedy_expect(Token::RightBracket)?;
         Ok(Rc::new(Expression::ArrayLiteral(ArrayLiteral {
             location: self.pop_location(),
             asdoc,
@@ -1449,8 +1469,8 @@ impl<'input> Parser<'input> {
         if self.consume_and_ie_xml_content(Token::Gt)? {
             self.push_location(&start);
             let content = self.parse_xml_content()?;
-            self.expect_and_ie_xml_tag(Token::XmlLtSlash)?;
-            self.expect(Token::Gt)?;
+            self.non_greedy_expect_and_ie_xml_tag(Token::XmlLtSlash)?;
+            self.non_greedy_expect(Token::Gt)?;
             return Ok(Rc::new(Expression::XmlList(XmlListExpression {
                 location: self.pop_location(),
                 content,
@@ -1517,13 +1537,13 @@ impl<'input> Parser<'input> {
         if !is_empty {
             self.expect_and_ie_xml_content(Token::Gt)?;
             content = Some(self.parse_xml_content()?);
-            self.expect_and_ie_xml_tag(Token::XmlLtSlash)?;
+            self.non_greedy_expect_and_ie_xml_tag(Token::XmlLtSlash)?;
             closing_name = Some(self.parse_xml_tag_name()?);
             self.consume_and_ie_xml_tag(Token::XmlWhitespace)?;
             if ends_at_ie_div {
-                self.expect(Token::Gt)?;
+                self.non_greedy_expect(Token::Gt)?;
             } else {
-                self.expect_and_ie_xml_content(Token::Gt)?;
+                self.non_greedy_expect_and_ie_xml_content(Token::Gt)?;
             }
         }
 
@@ -1627,7 +1647,7 @@ impl<'input> Parser<'input> {
     /// Parses either a ParenListExpression, (), or a QualifiedIdentifier
     fn parse_paren_list_expr_or_qual_id(&mut self) -> Result<Rc<Expression>, ParserError> {
         let start = self.token_location();
-        self.expect(Token::LeftParen)?;
+        self.non_greedy_expect(Token::LeftParen)?;
 
         let expr = self.parse_expression(ParserExpressionContext {
             min_precedence: OperatorPrecedence::List,
@@ -1635,7 +1655,7 @@ impl<'input> Parser<'input> {
             ..default()
         })?;
 
-        self.expect(Token::RightParen)?;
+        self.non_greedy_expect(Token::RightParen)?;
         self.finish_paren_list_expr_or_qual_id(start, expr)
     }
 
@@ -1822,7 +1842,7 @@ impl<'input> Parser<'input> {
     /// Expects a colon-colon and finishes a qualified identifier.
     fn finish_qualified_identifier(&mut self, attribute: bool, start_location: Location, qual: Rc<Expression>) -> Result<QualifiedIdentifier, ParserError> {
         self.push_location(&start_location);
-        self.expect(Token::ColonColon)?;
+        self.non_greedy_expect(Token::ColonColon)?;
 
         // `::` may be followed by one of { IdentifierName, `*`, Brackets }
 
@@ -1865,35 +1885,35 @@ impl<'input> Parser<'input> {
     }
 
     fn parse_brackets(&mut self) -> Result<Rc<Expression>, ParserError> {
-        self.expect(Token::LeftBracket)?;
+        self.non_greedy_expect(Token::LeftBracket)?;
         let expr = self.parse_expression(ParserExpressionContext {
             min_precedence: OperatorPrecedence::List,
             allow_in: true,
             ..default()
         });
-        self.expect(Token::RightBracket)?;
+        self.non_greedy_expect(Token::RightBracket)?;
         expr
     }
 
     fn parse_paren_expression(&mut self) -> Result<Rc<Expression>, ParserError> {
-        self.expect(Token::LeftParen)?;
+        self.non_greedy_expect(Token::LeftParen)?;
         let expr = self.parse_expression(ParserExpressionContext {
             min_precedence: OperatorPrecedence::AssignmentAndOther,
             allow_in: true,
             ..default()
         });
-        self.expect(Token::RightParen)?;
+        self.non_greedy_expect(Token::RightParen)?;
         expr
     }
 
     fn parse_paren_list_expression(&mut self) -> Result<Rc<Expression>, ParserError> {
-        self.expect(Token::LeftParen)?;
+        self.non_greedy_expect(Token::LeftParen)?;
         let expr = self.parse_expression(ParserExpressionContext {
             min_precedence: OperatorPrecedence::List,
             allow_in: true,
             ..default()
         });
-        self.expect(Token::RightParen)?;
+        self.non_greedy_expect(Token::RightParen)?;
         expr
     }
 
@@ -2004,7 +2024,7 @@ impl<'input> Parser<'input> {
                     expression: elements[0].clone(),
                 })), wrap_nullable))
             } else {
-                self.expect(Token::Comma)?;
+                self.non_greedy_expect(Token::Comma)?;
                 elements.push(self.parse_type_expression()?);
                 while self.consume(Token::Comma)? {
                     if self.peek(Token::RightBracket) {
@@ -2012,7 +2032,7 @@ impl<'input> Parser<'input> {
                     }
                     elements.push(self.parse_type_expression()?);
                 }
-                self.expect(Token::RightBracket)?;
+                self.non_greedy_expect(Token::RightBracket)?;
                 Ok((Rc::new(Expression::TupleType(TupleTypeExpression {
                     location: self.pop_location(),
                     expressions: elements,
@@ -2035,19 +2055,24 @@ impl<'input> Parser<'input> {
         self.mark_location();
         self.next()?;
 
-        self.expect(Token::LeftParen)?;
         let mut parameters = vec![];
-        if !self.peek(Token::RightParen) {
-            parameters.push(self.parse_function_type_parameter()?);
-            while self.consume(Token::Comma)? {
+        self.non_greedy_expect(Token::LeftParen)?;
+        if !self.expected_token_error {
+            if !self.peek(Token::RightParen) {
                 parameters.push(self.parse_function_type_parameter()?);
+                while self.consume(Token::Comma)? {
+                    parameters.push(self.parse_function_type_parameter()?);
+                }
             }
+            self.non_greedy_expect(Token::RightParen)?;
+            self.validate_parameter_list(parameters.iter().map(|p| (p.kind, p.location.clone())).collect::<Vec<_>>())?;
         }
-        self.expect(Token::RightParen)?;
-        self.validate_parameter_list(parameters.iter().map(|p| (p.kind, p.location.clone())).collect::<Vec<_>>())?;
 
-        self.expect(Token::Colon)?;
-        let result_type = self.parse_type_expression()?;
+        let mut result_type = self.create_invalidated_expression(&self.tokenizer.cursor_location());
+        self.non_greedy_expect(Token::Colon)?;
+        if !self.expected_token_error {
+            result_type = self.parse_type_expression()?;
+        }
         Ok(Rc::new(Expression::FunctionType(FunctionTypeExpression {
             location: self.pop_location(),
             parameters,
@@ -2120,7 +2145,7 @@ impl<'input> Parser<'input> {
             }
             if !semicolon && (self.peek(Token::Dot) || self.peek(Token::LeftBracket)) {
                 if !(self.peek(Token::Dot) || self.peek(Token::LeftBracket)) {
-                    self.expect(Token::Dot)?;
+                    self.non_greedy_expect(Token::Dot)?;
                 }
                 self.duplicate_location();
                 // ExpressionStatement (`super`...)
@@ -2357,10 +2382,6 @@ impl<'input> Parser<'input> {
     }
 
     fn parse_block(&mut self, context: ParserDirectiveContext) -> Result<Block, ParserError> {
-        self.parse_block_with_metadata(context, None)
-    }
-
-    fn parse_block_with_metadata(&mut self, context: ParserDirectiveContext, metadata: Option<Vec<Attribute>>) -> Result<Block, ParserError> {
         self.mark_location();
         self.non_greedy_expect(Token::LeftBrace)?;
         let mut directives = vec![];
@@ -2368,17 +2389,16 @@ impl<'input> Parser<'input> {
             let mut semicolon = false;
             while !self.peek(Token::RightBrace) && !self.peek(Token::Eof) {
                 if !directives.is_empty() && !semicolon {
-                    self.expect(Token::Semicolon)?;
+                    self.non_greedy_expect(Token::Semicolon)?;
                 }
                 let (directive, semicolon_1) = self.parse_directive(context.clone())?;
                 directives.push(directive);
                 semicolon = semicolon_1;
             }
-            self.expect(Token::RightBrace)?;
+            self.non_greedy_expect(Token::RightBrace)?;
         }
         Ok(Block { 
             location: self.pop_location(),
-            metadata,
             directives,
         })
     }
@@ -2390,22 +2410,34 @@ impl<'input> Parser<'input> {
         });
         self.mark_location();
         self.next()?;
-        self.expect(Token::LeftParen)?;
-        let test = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
-        self.expect(Token::RightParen)?;
+        let mut test = self.create_invalidated_expression(&self.tokenizer.cursor_location());
+        let mut consequent: Rc<Directive> = self.create_invalidated_directive(&self.tokenizer.cursor_location());
+        let mut alternative: Option<Rc<Directive>> = None;
         let semicolon;
-        let (consequent, semicolon_1) = self.parse_substatement(context.clone())?;
-        let mut alternative = None;
-        if self.peek(Token::Else) {
-            if !semicolon_1 {
-                self.expect(Token::Semicolon)?;
-            }
-            self.next()?;
-            let (alternative_2, semicolon_2) = self.parse_substatement(context.clone())?;
-            alternative = Some(alternative_2);
-            semicolon = semicolon_2;
+        self.non_greedy_expect(Token::LeftParen)?;
+        if self.expected_token_error {
+            semicolon = self.parse_semicolon()?;
         } else {
-            semicolon = semicolon_1;
+            test = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
+            consequent = self.create_invalidated_directive(&self.tokenizer.cursor_location());
+            self.non_greedy_expect(Token::RightParen)?;
+            if self.expected_token_error {
+                semicolon = self.parse_semicolon()?;
+            } else {
+                let (consequent_1, semicolon_1) = self.parse_substatement(context.clone())?;
+                consequent = consequent_1;
+                if self.peek(Token::Else) {
+                    if !semicolon_1 {
+                        self.non_greedy_expect(Token::Semicolon)?;
+                    }
+                    self.next()?;
+                    let (alternative_2, semicolon_2) = self.parse_substatement(context.clone())?;
+                    alternative = Some(alternative_2);
+                    semicolon = semicolon_2;
+                } else {
+                    semicolon = semicolon_1;
+                }
+            }
         }
         Ok((Rc::new(Directive::IfStatement(IfStatement {
             location: self.pop_location(),
@@ -2450,7 +2482,7 @@ impl<'input> Parser<'input> {
         let mut semicolon = false;
         while !self.peek(Token::RightBrace) {
             if !cases.is_empty() && !semicolon {
-                self.expect(Token::Semicolon)?;
+                self.non_greedy_expect(Token::Semicolon)?;
             }
             if !(self.peek(Token::Case) || self.peek(Token::Default)) {
                 break;
@@ -2466,12 +2498,12 @@ impl<'input> Parser<'input> {
                         min_precedence: OperatorPrecedence::List,
                         ..default()
                     })?;
-                    self.expect(Token::Colon)?;
+                    self.non_greedy_expect(Token::Colon)?;
                     labels.push(CaseLabel::Case((exp, self.pop_location())));
                 } else if self.peek(Token::Default) {
                     self.mark_location();
                     self.next()?;
-                    self.expect(Token::Colon)?;
+                    self.non_greedy_expect(Token::Colon)?;
                     labels.push(CaseLabel::Default(self.pop_location()));
                 } else {
                     break;
@@ -2481,7 +2513,7 @@ impl<'input> Parser<'input> {
             semicolon = false;
             while !(self.peek(Token::RightBrace) || self.peek(Token::Case) || self.peek(Token::Default)) {
                 if !directives.is_empty() && !semicolon {
-                    self.expect(Token::Semicolon)?;
+                    self.non_greedy_expect(Token::Semicolon)?;
                 }
                 let (directive, semicolon_1) = self.parse_directive(context.clone())?;
                 directives.push(directive);
@@ -2567,15 +2599,19 @@ impl<'input> Parser<'input> {
         // Body
         let (body, semicolon_1) = self.parse_substatement(context)?;
         if !semicolon_1 {
-            self.expect(Token::Semicolon)?;
+            self.non_greedy_expect(Token::Semicolon)?;
         }
 
-        self.expect(Token::While)?;
-
-        // Test
-        self.expect(Token::LeftParen)?;
-        let test = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
-        self.expect(Token::RightParen)?;
+        let mut test = self.create_invalidated_expression(&self.tokenizer.cursor_location());
+        self.non_greedy_expect(Token::While)?;
+        if !self.expected_token_error {
+            test = self.create_invalidated_expression(&self.tokenizer.cursor_location());
+            self.non_greedy_expect(Token::LeftParen)?;
+            if !self.expected_token_error {
+                test = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
+                self.non_greedy_expect(Token::RightParen)?;
+            }
+        }
 
         let semicolon = self.parse_semicolon()?;
         Ok((Rc::new(Directive::DoStatement(DoStatement {
@@ -2593,12 +2629,24 @@ impl<'input> Parser<'input> {
         self.next()?;
 
         // Test
-        self.expect(Token::LeftParen)?;
-        let test = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
-        self.expect(Token::RightParen)?;
-
-        // Body
-        let (body, semicolon) = self.parse_substatement(context)?;
+        let mut test = self.create_invalidated_expression(&self.tokenizer.cursor_location());
+        let mut body = self.create_invalidated_directive(&self.tokenizer.cursor_location());
+        let semicolon: bool;
+        self.non_greedy_expect(Token::LeftParen)?;
+        if !self.expected_token_error {
+            test = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
+            body = self.create_invalidated_directive(&self.tokenizer.cursor_location());
+            self.non_greedy_expect(Token::RightParen)?;
+            if !self.expected_token_error {
+                let (body_1, semicolon_1) = self.parse_substatement(context)?;
+                body = body_1;
+                semicolon = semicolon_1;
+            } else {
+                semicolon = self.parse_semicolon()?;
+            }
+        } else {
+            semicolon = self.parse_semicolon()?;
+        }
 
         Ok((Rc::new(Directive::WhileStatement(WhileStatement {
             location: self.pop_location(),
@@ -2622,7 +2670,15 @@ impl<'input> Parser<'input> {
             return self.parse_for_each_statement(context);
         }
 
-        self.expect(Token::LeftParen)?;
+        self.non_greedy_expect(Token::LeftParen)?;
+        if self.expected_token_error {
+            let body = self.create_invalidated_directive(&self.tokenizer.cursor_location());
+            let semicolon = self.parse_semicolon()?;
+            return Ok((Rc::new(Directive::ForStatement(ForStatement {
+                location: self.pop_location(),
+                init: None, test: None, update: None, body,
+            })), semicolon));
+        }
 
         let init_variable = if self.peek(Token::Var) || self.peek(Token::Const) {
             Some(self.parse_simple_variable_definition(false)?)
@@ -2666,7 +2722,7 @@ impl<'input> Parser<'input> {
             None
         };
 
-        self.expect(Token::Semicolon)?;
+        self.non_greedy_expect(Token::Semicolon)?;
         let test = if self.peek(Token::Semicolon) {
             None
         } else {
@@ -2674,7 +2730,7 @@ impl<'input> Parser<'input> {
                 allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
             })?)
         };
-        self.expect(Token::Semicolon)?;
+        self.non_greedy_expect(Token::Semicolon)?;
         let update = if self.peek(Token::RightParen) {
             None
         } else {
@@ -2682,7 +2738,7 @@ impl<'input> Parser<'input> {
                 allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
             })?)
         };
-        self.expect(Token::RightParen)?;
+        self.non_greedy_expect(Token::RightParen)?;
 
         // Body
         let (body, semicolon) = self.parse_substatement(context)?;
@@ -2694,7 +2750,18 @@ impl<'input> Parser<'input> {
     }
 
     fn parse_for_each_statement(&mut self, context: ParserDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
-        self.expect(Token::LeftParen)?;
+        self.non_greedy_expect(Token::LeftParen)?;
+        if self.expected_token_error {
+            let left = ForInBinding::Expression(self.create_invalidated_expression(&self.tokenizer.cursor_location()));
+            let right = self.create_invalidated_expression(&self.tokenizer.cursor_location());
+            let body = self.create_invalidated_directive(&self.tokenizer.cursor_location());
+            let semicolon = self.parse_semicolon()?;
+            return Ok((Rc::new(Directive::ForInStatement(ForInStatement {
+                location: self.pop_location(),
+                each: true, left, right, body,
+            })), semicolon));
+        }
+
         let left = if self.peek(Token::Var) || self.peek(Token::Const) {
             self.mark_location();
             let kind = (if self.peek(Token::Var) { VariableDefinitionKind::Var } else { VariableDefinitionKind::Const }, self.token_location());
@@ -2713,11 +2780,14 @@ impl<'input> Parser<'input> {
                 allow_in: false, min_precedence: OperatorPrecedence::Postfix, ..default()
             })?)
         };
-        self.expect(Token::In)?;
-        let right = self.parse_expression(ParserExpressionContext {
-            allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
-        })?;
-        self.expect(Token::RightParen)?;
+        let mut right = self.create_invalidated_expression(&self.tokenizer.cursor_location());
+        self.non_greedy_expect(Token::In)?;
+        if !self.expected_token_error {
+            right = self.parse_expression(ParserExpressionContext {
+                allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
+            })?;
+        }
+        self.non_greedy_expect(Token::RightParen)?;
 
         // Body
         let (body, semicolon) = self.parse_substatement(context)?;
@@ -2742,7 +2812,7 @@ impl<'input> Parser<'input> {
         let right = self.parse_expression(ParserExpressionContext {
             allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
         })?;
-        self.expect(Token::RightParen)?;
+        self.non_greedy_expect(Token::RightParen)?;
 
         // Body
         let (body, semicolon) = self.parse_substatement(context)?;
@@ -2757,7 +2827,7 @@ impl<'input> Parser<'input> {
         let right = self.parse_expression(ParserExpressionContext {
             allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
         })?;
-        self.expect(Token::RightParen)?;
+        self.non_greedy_expect(Token::RightParen)?;
 
         // Body
         let (body, semicolon) = self.parse_substatement(context)?;
@@ -2775,7 +2845,7 @@ impl<'input> Parser<'input> {
         if self.consume(Token::Const)? {
             kind = VariableDefinitionKind::Const;
         } else {
-            self.expect(Token::Var)?;
+            self.non_greedy_expect(Token::Var)?;
             kind = VariableDefinitionKind::Var;
         }
         let mut bindings = vec![Rc::new(self.parse_variable_binding(allow_in)?)];
@@ -2797,10 +2867,12 @@ impl<'input> Parser<'input> {
         self.mark_location();
         self.next()?;
 
-        // Object
-        self.expect(Token::LeftParen)?;
-        let object = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
-        self.expect(Token::RightParen)?;
+        let mut object = self.create_invalidated_expression(&self.tokenizer.cursor_location());
+        self.non_greedy_expect(Token::LeftParen)?;
+        if !self.expected_token_error {
+            object = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
+        }
+        self.non_greedy_expect(Token::RightParen)?;
 
         // Body
         let (body, semicolon) = self.parse_substatement(context)?;
@@ -3103,23 +3175,6 @@ impl<'input> Parser<'input> {
                     },
                 }
             }
-            // Block statement with meta-data
-            if self.peek(Token::LeftBrace) {
-                match exp.to_metadata(self) {
-                    Ok(Some(metadata)) => {
-                        let context = context.override_control_context(true, ParserControlFlowContext {
-                            breakable: true,
-                            iteration: false,
-                        });
-                        let block = self.parse_block_with_metadata(context, Some(metadata))?;
-                        return Ok((Rc::new(Directive::Block(block)), true));
-                    },
-                    Ok(None) => {},
-                    Err(MetadataRefineError1(MetadataRefineError::Syntax, loc)) => {
-                        self.add_syntax_error(&loc, DiagnosticKind::UnrecognizedMetadataSyntax, diagnostic_arguments![]);
-                    },
-                }
-            }
             let semicolon = self.parse_semicolon()?;
             Ok((Rc::new(Directive::ExpressionStatement(ExpressionStatement {
                 location: self.pop_location(),
@@ -3168,7 +3223,7 @@ impl<'input> Parser<'input> {
         let mut semicolon = false;
         while !self.peek(Token::Eof) {
             if !directives.is_empty() && !semicolon {
-                self.expect(Token::Semicolon)?;
+                self.non_greedy_expect(Token::Semicolon)?;
             }
             let (directive, semicolon_1) = self.parse_directive(context.clone())?;
             directives.push(directive);
@@ -3196,7 +3251,7 @@ impl<'input> Parser<'input> {
             } else if self.consume(Token::LeftBracket)? {
                 self.push_location(&result.location());
                 let key = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
-                self.expect(Token::RightBracket)?;
+                self.non_greedy_expect(Token::RightBracket)?;
                 result = Rc::new(Expression::ComputedMember(ComputedMemberExpression {
                     base: result, asdoc: None, key, location: self.pop_location()
                 }));
@@ -3326,7 +3381,7 @@ impl<'input> Parser<'input> {
         self.next()?;
         if self.consume(Token::Dot)? {
             self.duplicate_location();
-            self.expect_context_keyword("meta")?;
+            self.non_greedy_expect_context_keyword("meta")?;
             let mut expression = Rc::new(Expression::ImportMeta(ImportMeta {
                 location: self.pop_location(),
             }));
@@ -3353,7 +3408,7 @@ impl<'input> Parser<'input> {
             }
     
             if !self.peek(Token::Dot) {
-                self.expect(Token::Dot)?;
+                self.non_greedy_expect(Token::Dot)?;
             }
     
             while self.consume(Token::Dot)? {
@@ -3458,11 +3513,14 @@ impl<'input> Parser<'input> {
     fn parse_use_namespace_directive(&mut self) -> Result<(Rc<Directive>, bool), ParserError> {
         self.mark_location();
         self.next()?;
-        self.expect_context_keyword("namespace")?;
-        let expression = self.parse_expression(ParserExpressionContext {
-            min_precedence: OperatorPrecedence::List,
-            ..default()
-        })?;
+        let mut expression = self.create_invalidated_expression(&self.tokenizer.cursor_location());
+        self.non_greedy_expect_context_keyword("namespace")?;
+        if !self.expected_token_error {
+            expression = self.parse_expression(ParserExpressionContext {
+                min_precedence: OperatorPrecedence::List,
+                ..default()
+            })?;
+        }
         let semicolon = self.parse_semicolon()?;
 
         let node = Rc::new(Directive::UseNamespaceDirective(UseNamespaceDirective {
@@ -3481,7 +3539,7 @@ impl<'input> Parser<'input> {
         let kind = if self.consume(Token::Const)? {
             VariableDefinitionKind::Const
         } else {
-            self.expect(Token::Var)?;
+            self.non_greedy_expect(Token::Var)?;
             VariableDefinitionKind::Var
         };
         let mut bindings = vec![Rc::new(self.parse_variable_binding(true)?)];
@@ -3832,8 +3890,11 @@ impl<'input> Parser<'input> {
         let AnnotatableContext { start_location, asdoc, attributes, context, .. } = context;
         self.push_location(&start_location);
         let left = self.expect_identifier(true)?;
-        self.expect(Token::Assign)?;
-        let right: Rc<Expression> = self.parse_type_expression()?;
+        let mut right = self.create_invalidated_expression(&self.tokenizer.cursor_location());
+        self.non_greedy_expect(Token::Assign)?;
+        if !self.expected_token_error {
+            right = self.parse_type_expression()?;
+        }
 
         for a in &attributes {
             if a.is_metadata() {
@@ -3949,12 +4010,15 @@ impl<'input> Parser<'input> {
         if !self.consume(Token::Dot)? {
             return Ok(None);
         }
-        self.expect(Token::Lt)?;
-        let mut list = vec![self.parse_type_parameter()?];
-        while self.consume(Token::Comma)? {
+        let mut list: Vec<Rc<TypeParameter>> = vec![];
+        self.non_greedy_expect(Token::Lt)?;
+        if !self.expected_token_error {
             list.push(self.parse_type_parameter()?);
+            while self.consume(Token::Comma)? {
+                list.push(self.parse_type_parameter()?);
+            }
+            self.non_greedy_expect_type_parameters_gt()?;
         }
-        self.non_greedy_expect_type_parameters_gt()?;
         Ok(Some(list))
     }
     
@@ -3969,9 +4033,9 @@ impl<'input> Parser<'input> {
 
     fn parse_configuration_directive(&mut self, context: ParserDirectiveContext, start_location: Location) -> Result<(Rc<Directive>, bool), ParserError> {
         self.push_location(&start_location);
-        self.expect(Token::LeftBrace)?;
+        self.non_greedy_expect(Token::LeftBrace)?;
         let subdirective = self.parse_configuration_subdirective(context.clone())?;
-        self.expect(Token::RightBrace)?;
+        self.non_greedy_expect(Token::RightBrace)?;
         Ok((Rc::new(Directive::ConfigurationDirective(ConfigurationDirective {
             location: self.pop_location(),
             directive: subdirective,
@@ -3982,9 +4046,12 @@ impl<'input> Parser<'input> {
         if self.peek(Token::If) {
             self.mark_location();
             self.next()?;
-            self.expect(Token::LeftParen)?;
-            let test = self.parse_configuration_expression()?;
-            self.expect(Token::RightParen)?;
+            let mut test = self.create_invalidated_expression(&self.tokenizer.cursor_location());
+            self.non_greedy_expect(Token::LeftParen)?;
+            if !self.expected_token_error {
+                test = self.parse_configuration_expression()?;
+            }
+            self.non_greedy_expect(Token::RightParen)?;
             let consequent = Rc::new(Directive::Block(self.parse_block(context.clone())?));
             let mut alternative: Option<Rc<Directive>> = None;
             if self.consume(Token::Else)? {
@@ -4093,7 +4160,7 @@ impl<'input> Parser<'input> {
             self.mark_location();
             self.next()?;
             let expression = self.parse_configuration_expression()?;
-            self.expect(Token::RightParen)?;
+            self.non_greedy_expect(Token::RightParen)?;
             Ok(Rc::new(Expression::Paren(ParenExpression {
                 location: self.pop_location(),
                 expression,
@@ -4250,7 +4317,7 @@ impl<'input> Parser<'input> {
     pub fn parse_package_definition(&mut self) -> Result<Rc<PackageDefinition>, ParserError> {
         self.mark_location();
         let asdoc = self.parse_asdoc()?;
-        self.expect(Token::Package)?;
+        self.non_greedy_expect(Token::Package)?;
         let mut name = vec![];
         if let Some(name1) = self.consume_identifier(false)? {
             name.push(name1.clone());
@@ -4763,11 +4830,11 @@ impl<'input> Parser<'input> {
         if !is_empty {
             self.expect_and_ie_xml_content(Token::Gt)?;
             content = Some(self.parse_mxml_content(false, &namespace)?);
-            self.expect_and_ie_xml_tag(Token::XmlLtSlash)?;
+            self.non_greedy_expect_and_ie_xml_tag(Token::XmlLtSlash)?;
             let name = self.parse_xml_name()?;
             closing_name = Some(self.process_mxml_tag_name(name, &namespace));
             self.consume_and_ie_xml_tag(Token::XmlWhitespace)?;
-            self.expect_and_ie_xml_content(Token::Gt)?;
+            self.non_greedy_expect_and_ie_xml_content(Token::Gt)?;
         }
 
         if let Some(content) = content.as_mut() {
