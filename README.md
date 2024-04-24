@@ -25,7 +25,7 @@ ActionScript 3 parser in the Rust language.
 
 [Attaching Meaning](docs/attaching-meaning.md)
 
-[Standards and Documents](docs/standards.md)
+[Reference Documents](docs/references.md)
 
 [New Syntax](docs/new-syntax.md)
 
