@@ -279,7 +279,7 @@ impl<'input> Parser<'input> {
                 }
             }
             */
-            Ok((INVALIDATED_IDENTIFIER.to_owned(), self.token.1.clone()))
+            Ok((INVALIDATED_IDENTIFIER.to_owned(), self.tokenizer.cursor_location()))
         }
     }
 
