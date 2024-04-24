@@ -229,7 +229,10 @@ type T1 = [E1, E2]
 ```
 import x = ns.y;
 
-// Open public of ns and set "ns1" to NamespaceSet(ns public, ns internal)
+// Open ns.* and set "ns1" to ns.*'s public namespace or
+// NamespaceSet(public, internal)
+// if enclosing package is equal
+// ti the aliased package
 import ns1 = ns.*;
 ns1::y
 ```
