@@ -66,6 +66,7 @@ lazy_static! {
         DiagnosticKind::InputEndedBeforeReachingClosingSlashForRegExp.id() => "Input ended before reaching the closing '/' for a regular expression.".into(),
         DiagnosticKind::InputEndedBeforeReachingClosingQuoteForAttributeValue.id() => "Input ended before reaching the closing quotation mark for an attribute value.".into(),
         DiagnosticKind::ExpectingEitherSemicolonOrNewLineHere.id() => "Expecting either a semicolon or a new line here.".into(),
+        DiagnosticKind::CssStringContainsInvalidHexEscapes.id() => "String contains invalid hexadecimal escapes.".into(),
         // DiagnosticKind::K.id() => ".".into(),
     };
 }

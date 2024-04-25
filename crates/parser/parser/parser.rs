@@ -5303,7 +5303,7 @@ struct PlainMxmlAttribute {
 }
 
 #[path = "css_parser.rs"]
-mod css_parser;
+pub(crate) mod css_parser;
 
 /// A simplified interface for executing the parser.
 pub struct ParserFacade<'input>(pub &'input Rc<CompilationUnit>, pub ParserOptions);

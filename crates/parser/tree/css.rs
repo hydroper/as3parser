@@ -204,6 +204,7 @@ impl CssColorPropertyValue {
 pub struct CssNumberPropertyValue {
     pub location: Location,
     pub value: f64,
+    pub unit: Option<String>,
 }
 
 #[derive(Clone, Serialize, Deserialize)]

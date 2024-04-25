@@ -1,13 +1,44 @@
 use std::str::FromStr;
 use std::rc::Rc;
 use lalrpop_util::ErrorRecovery;
+use crate::parser::css_parser::parse_string_content;
 use crate::compilation_unit::CompilationUnit;
-// use crate::compilation_unit::Location;
+use crate::compilation_unit::Location;
+use crate::tree;
 
 grammar<'err, 'cu>(errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, &'static str>>, compilation_unit: &'cu Rc<CompilationUnit>);
 
-pub Term: i32 = {
-    <n:Number> => n,
+match {
+    r"[ \t\r\n]*" => {},
+    r"/\*[^*]*\*+(?:[^/*][^*]*\*+)*/" => {},
+}
+
+pub Number: (f64, Location) = <i: @L> <s:r"[+\-]?([0-9]+(\.[0-9]+)?)|(\.[0-9]+)"> <j: @R> => {
+    (f64::from_str(s).unwrap_or(f64::NAN), Location::with_offsets(compilation_unit, i, j))
 };
 
-Number: i32 = <s:r"[0-9]+"> => i32::from_str(s).unwrap();
+NumberWithPercent: (f64, Location) = <i: @L> <v: Number> r"\%" <j: @R> => {
+    (v.0 / 100.0, Location::with_offsets(compilation_unit, i, j))
+};
+
+NumberWithUnit: tree::CssNumberPropertyValue = <i: @L> <v: Number> <unit:r"(?xi) ((_((_)?_)?)?) [a-z] [a-z0-9\-_]*"> <j: @R> =>
+    tree::CssNumberPropertyValue {
+        location: Location::with_offsets(compilation_unit, i, j),
+        value: v.0,
+        unit: Some(unit.to_owned()),
+    };
+
+String: (String, Location) = {
+    <i: @L> <s:r#"(?xi) "([^"\\]|\\[a-f0-9]{1,6})*""#> <r: @R> => {
+        let loc = Location::with_offsets(compilation_unit, i, j);
+        (parse_string_content(s, loc), loc)
+    },
+    <i: @L> <s:r"(?xi) '([^'\\]|\\[a-f0-9]{1,6})*'"> <r: @R> => {
+        let loc = Location::with_offsets(compilation_unit, i, j);
+        (parse_string_content(s, loc), Location::with_offsets(compilation_unit, i, j))
+    },
+};
+
+Id: (String, Location) = <i: @L> <s:r"(?xi) ((_((_)?_)?)?) [a-z] [a-z0-9\-_]*"> <j: @R> => {
+    (s.to_owned(), Location::with_offsets(compilation_unit, i, j))
+};
