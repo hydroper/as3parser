@@ -1,6 +1,7 @@
-use std::marker::PhantomData;
+use std::{marker::PhantomData, str::FromStr};
 
 use crate::ns::*;
+use num_traits::ToPrimitive;
 use serde::{Serialize, Deserialize};
 
 /// CSS3 selector combinators. Only *descendant* is supported at the
@@ -54,6 +55,11 @@ pub enum CssPropertyValueNode {
     ArrayPropertyValue(CssArrayPropertyValue),
     ColorPropertyValue(CssColorPropertyValue),
     FunctionCallPropertyValue(CssFunctionCallPropertyValue),
+    KeywordPropertyValue(CssKeywordPropertyValue),
+    NumberPropertyValue(CssNumberPropertyValue),
+    RgbColorPropertyValue(CssRgbColorPropertyValue),
+    StringPropertyValue(CssStringPropertyValue),
+    TextPropertyValue(CssTextPropertyValue),
 }
 
 impl CssPropertyValueNode {
@@ -63,6 +69,11 @@ impl CssPropertyValueNode {
             Self::ArrayPropertyValue(v) => v.location.clone(),
             Self::ColorPropertyValue(v) => v.location.clone(),
             Self::FunctionCallPropertyValue(v) => v.location.clone(),
+            Self::KeywordPropertyValue(v) => v.location.clone(),
+            Self::NumberPropertyValue(v) => v.location.clone(),
+            Self::RgbColorPropertyValue(v) => v.location.clone(),
+            Self::StringPropertyValue(v) => v.location.clone(),
+            Self::TextPropertyValue(v) => v.location.clone(),
         }
     }
 
@@ -187,30 +198,63 @@ impl CssColorPropertyValue {
     }
 }
 
-/// A CSS selector containing a combinator.
 #[derive(Clone, Serialize, Deserialize)]
-pub struct CssCombinatorSelector {
+pub struct CssNumberPropertyValue {
     pub location: Location,
-    pub left: Rc<CssDirective>,
-    pub right: Rc<CssDirective>,
-    pub combinator_type: CssCombinatorType,
+    pub value: f64,
 }
 
-/// The root object of a CSS DOM. The CSS3 DOM objects serve not only IDE
-/// features in code model, but also CSS compilation.
 #[derive(Clone, Serialize, Deserialize)]
-pub struct CssDocument {
+pub struct CssRgbColorPropertyValue {
     pub location: Location,
-    /// List of rules, `@namespace` definitions, and `@font-face` definitions.
-    pub children: Vec<Rc<CssDirective>>,
+    pub color_int: u32,
 }
 
-/// CSS DOM for an `@font-face` statement.
+impl CssRgbColorPropertyValue {
+    pub fn from_raw_arguments(location: &Location, raw_arguments: &[String]) -> Result<Self, ParserError> {
+        Ok(CssRgbColorPropertyValue {
+            location: location.clone(),
+            color_int: (Self::parse_component(&raw_arguments[0])? << 16)
+                    |  (Self::parse_component(&raw_arguments[1])? << 8)
+                    |   Self::parse_component(&raw_arguments[2])?,
+        })
+    }
+
+    fn parse_component(input: &str) -> Result<u32, ParserError> {
+        let i = input.find('%');
+        let v: u32;
+        if let Some(i) = i {
+            let percent = f64::from_str(&input[..i]).map_err(|_| ParserError::Common)?.clamp(0.0, 100.0);
+            v = (255.0 * (percent / 100.0)).round().to_u32().ok_or(ParserError::Common)?;
+        } else if input.contains('.') {
+            let ratio = f64::from_str(input).map_err(|_| ParserError::Common)?.clamp(0.0, 1.0);
+            v = (255.0 * ratio).round().to_u32().ok_or(ParserError::Common)?;
+        } else {
+            v = u32::from_str(input).map_err(|_| ParserError::Common)?;
+        }
+        Ok(v.clamp(0, 255))
+    }
+}
+
+/// A CSS keyword is a text taken as a keyword.
 #[derive(Clone, Serialize, Deserialize)]
-pub struct CssFontFace {
+pub struct CssKeywordPropertyValue {
     pub location: Location,
-    // List of `CssDirective::Property` variants.
-    pub properties: Vec<Rc<CssDirective>>,
+    pub name: String,
+}
+
+/// A CSS text is a string value written without quotes.
+#[derive(Clone, Serialize, Deserialize)]
+pub struct CssStringPropertyValue {
+    pub location: Location,
+    pub value: String,
+}
+
+/// A CSS text is a string value written without quotes.
+#[derive(Clone, Serialize, Deserialize)]
+pub struct CssTextPropertyValue {
+    pub location: Location,
+    pub value: String,
 }
 
 /// CSS function call property value.
@@ -243,6 +287,32 @@ impl CssFunctionCallPropertyValue {
     /// Function name for `url("")`.
     pub const URL: &'static str = "url";
 
+}
+
+/// A CSS selector containing a combinator.
+#[derive(Clone, Serialize, Deserialize)]
+pub struct CssCombinatorSelector {
+    pub location: Location,
+    pub left: Rc<CssDirective>,
+    pub right: Rc<CssDirective>,
+    pub combinator_type: CssCombinatorType,
+}
+
+/// The root object of a CSS DOM. The CSS3 DOM objects serve not only IDE
+/// features in code model, but also CSS compilation.
+#[derive(Clone, Serialize, Deserialize)]
+pub struct CssDocument {
+    pub location: Location,
+    /// List of rules, `@namespace` definitions, and `@font-face` definitions.
+    pub children: Vec<Rc<CssDirective>>,
+}
+
+/// CSS DOM for an `@font-face` statement.
+#[derive(Clone, Serialize, Deserialize)]
+pub struct CssFontFace {
+    pub location: Location,
+    // List of `CssDirective::Property` variants.
+    pub properties: Vec<Rc<CssDirective>>,
 }
 
 #[derive(Clone, Serialize, Deserialize)]

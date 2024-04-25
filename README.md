@@ -43,7 +43,7 @@ ActionScript execution consists of parsing, verification, and evaluation. Verifi
 
 MXML supports a subset of CSS.
 
-- [ ] Define tree structures
+- [x] Define tree structures
 - [ ] Parse a style sheet
 
 Conform a bit to the Apache Royale sources:
@@ -62,16 +62,17 @@ Tree structure:
 * [x] `CssDocument`
 * [x] `CssFontFace`
 * [x] `CssFunctionCallPropertyValue`
+* [x] `CssKeywordPropertyValue`
 * [x] `CssMediaQuery`
 * [x] `CssMediaQueryCondition`
 * [x] `CssNamespaceDefinition`
-* [ ] `CssNumberPropertyValue`
+* [x] `CssNumberPropertyValue`
 * [x] `CssProperty`
-* [ ] `CssRgbColorPropertyValue`
+* [x] `CssRgbColorPropertyValue`
 * [x] `CssRule`
 * [x] `CssSelectorCondition`
-* [ ] `CssStringPropertyValue`
-* [ ] `CssTextPropertyValue`
+* [x] `CssStringPropertyValue`
+* [x] `CssTextPropertyValue`
 
 ## License
 
