@@ -181,6 +181,11 @@ impl_semantics_with_loc_call!(
     Expression,
     Directive,
     MxmlContent,
+    CssDirective,
+    CssMediaQueryCondition,
+    CssSelectorCondition,
+    CssPropertyValueNode,
+    CssSelector,
 );
 
 impl_semantics_with_loc_field!(
@@ -192,6 +197,8 @@ impl_semantics_with_loc_field!(
     Mxml,
     MxmlElement,
     MxmlAttribute,
+    CssProperty,
+    CssRule,
 );
 
 impl_semantics_1!(
@@ -207,4 +214,11 @@ impl_semantics_1!(
     MxmlContent,
     MxmlElement,
     MxmlAttribute,
+    CssDirective,
+    CssRule,
+    CssMediaQueryCondition,
+    CssSelectorCondition,
+    CssPropertyValueNode,
+    CssSelector,
+    CssProperty,
 );
