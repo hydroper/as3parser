@@ -1,12 +1,10 @@
-use lalrpop_util::lalrpop_mod;
+use num_traits::ToPrimitive;
 use crate::compilation_unit::*;
 use crate::diagnostics::*;
 use crate::parser::CharacterValidator;
 use crate::util::CharacterReader;
 
-lalrpop_mod!(pub css, "/parser/css.rs");
-
-pub(crate) fn parse_string_content(input: &str, location: &Location) -> String {
+fn _parse_string_content(input: &str, location: &Location) -> String {
     let mut input = CharacterReader::from(&input[1..(input.len() - 1)]);
     let mut result = String::new();
     while let Some(ch1) = input.next() {
@@ -31,4 +29,18 @@ pub(crate) fn parse_string_content(input: &str, location: &Location) -> String {
         }
     }
     result
+}
+
+fn _rgb_bytes_to_integer(r: f64, g: f64, b: f64) -> u32 {
+    (_calc_rgb_byte(r) << 16) | (_calc_rgb_byte(g) << 8) | _calc_rgb_byte(b)
+}
+
+fn _calc_rgb_byte(value: f64) -> u32 {
+    // Integer
+    if value.round() == value {
+        value.round().to_u32().unwrap_or(0).clamp(0, 255)
+    // Float
+    } else {
+        (value * 255.0).round().to_u32().unwrap_or(0).clamp(0, 255)
+    }
 }

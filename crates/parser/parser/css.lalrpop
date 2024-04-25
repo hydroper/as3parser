@@ -2,6 +2,7 @@ use std::str::FromStr;
 use std::rc::Rc;
 use lalrpop_util::ErrorRecovery;
 use crate::parser::css_parser::parse_string_content;
+use crate::parser::css_parser::rgb_bytes_to_integer;
 use crate::compilation_unit::CompilationUnit;
 use crate::compilation_unit::Location;
 use crate::tree;
@@ -15,7 +16,46 @@ match {
     _
 }
 
-pub Number: (f64, Location) = <i: @L> <s:r"[+\-]?([0-9]+(\.[0-9]+)?)|(\.[0-9]+)"> <j: @R> => {
+pub Nothing: () = "" => {};
+
+Rgb: tree::CssRgbColorPropertyValue = {
+    <i: @L> "rgb(" <r: RgbComponent> "," <g: RgbComponent> "," <b: RgbComponent> ")" <j: @L> => {
+        tree::CssRgbColorPropertyValue {
+            location: Location::with_offsets(compilation_unit, i, j),
+            color_int: rgb_bytes_to_integer(r, g, b),
+        }
+    },
+    <i: @L> "rgb(" <r: RgbComponent> <g: RgbComponent> <b: RgbComponent> <j: @L> => {
+        tree::CssRgbColorPropertyValue {
+            location: Location::with_offsets(compilation_unit, i, j),
+            color_int: rgb_bytes_to_integer(r, g, b),
+        }
+    },
+};
+
+RgbComponent: (f64, Location) = {
+    <v: Number> => v,
+    <v: NumberWithPercent> => v,
+};
+
+/// Matches parenthesized arguments of a function call property value.
+/// Returns a string without the outermost parentheses
+/// and a location spanning from the outermost parentheses.
+Arguments: (String, Location) = <i: @L> "(" <s: ArgumentsContent> ")" <j: @R> => {};
+
+ArgumentsContent: String = {
+    <s: r#"[^()]*"#> => s,
+    "(" <s: ArgumentsContent> ")" => format!("({s})"),
+};
+
+Semicolons: () = r";+";
+
+/// Matches either an ID selector or color value.
+HashWord: (String, Location) = <i: @L> <s: r"#[A-Za-z0-9\-_]+"> <j: @R> => {
+    (s[1..].to_owned(), Location::with_offsets(compilation_unit, i, j))
+};
+
+Number: (f64, Location) = <i: @L> <s: r"[+\-]?([0-9]+(\.[0-9]+)?)|(\.[0-9]+)"> <j: @R> => {
     (f64::from_str(s).unwrap_or(f64::NAN), Location::with_offsets(compilation_unit, i, j))
 };
 
@@ -23,7 +63,7 @@ NumberWithPercent: (f64, Location) = <i: @L> <v: Number> r"\%" <j: @R> => {
     (v.0 / 100.0, Location::with_offsets(compilation_unit, i, j))
 };
 
-NumberWithUnit: tree::CssNumberPropertyValue = <i: @L> <v: Number> <unit:r"(?xi) ((_((_)?_)?)?) [a-z] [a-z0-9\-_]*"> <j: @R> =>
+NumberWithUnit: tree::CssNumberPropertyValue = <i: @L> <v: Number> <unit: r"(?xi) ((_((_)?_)?)?) [a-z] [a-z0-9\-_]*"> <j: @R> =>
     tree::CssNumberPropertyValue {
         location: Location::with_offsets(compilation_unit, i, j),
         value: v.0,
@@ -31,16 +71,16 @@ NumberWithUnit: tree::CssNumberPropertyValue = <i: @L> <v: Number> <unit:r"(?xi)
     };
 
 String: (String, Location) = {
-    <i: @L> <s:r#"(?xi) "([^"\\]|\\[a-f0-9]{1,6})*""#> <j: @R> => {
+    <i: @L> <s: r#"(?xi) "([^"\\]|\\[a-f0-9]{1,6})*""#> <j: @R> => {
         let loc = Location::with_offsets(compilation_unit, i, j);
         (parse_string_content(s, &loc), loc)
     },
-    <i: @L> <s:r"(?xi) '([^'\\]|\\[a-f0-9]{1,6})*'"> <j: @R> => {
+    <i: @L> <s: r"(?xi) '([^'\\]|\\[a-f0-9]{1,6})*'"> <j: @R> => {
         let loc = Location::with_offsets(compilation_unit, i, j);
         (parse_string_content(s, &loc), loc)
     },
 };
 
-Id: (String, Location) = <i: @L> <s:r"(?xi) ((_((_)?_)?)?) [a-z] [a-z0-9\-_]*"> <j: @R> => {
+Id: (String, Location) = <i: @L> <s: r"(?xi) ((_((_)?_)?)?) [a-z] [a-z0-9\-_]*"> <j: @R> => {
     (s.to_owned(), Location::with_offsets(compilation_unit, i, j))
 };
