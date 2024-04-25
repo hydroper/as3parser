@@ -262,6 +262,8 @@ Function bodies may consist of an expression, in which case, either:
 const f = function(): Number (10)
 ```
 
+Recommendation: for function definitions consisting of an expression body, it is recommended to use a semicolon to prevent ambiguity with meta-data treated as brackets operators.
+
 ## Numeric Literal
 
 * Binary literal
