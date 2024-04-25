@@ -382,6 +382,15 @@ impl<'input> Parser<'input> {
         }
     }
 
+    fn offending_token_is_inline_or_higher_indented(&self) -> bool {
+        if !self.previous_token.1.line_break(&self.token.1) {
+            return true;
+        }
+        let i1 = self.compilation_unit().get_line_indent(self.previous_token.1.first_line_number());
+        let i2 = self.compilation_unit().get_line_indent(self.token.1.first_line_number());
+        i2 > i1
+    }
+
     pub fn expect_eof(&mut self) -> Result<(), ParserError> {
         self.expect(Token::Eof)
     }
@@ -1005,6 +1014,8 @@ impl<'input> Parser<'input> {
         // Body
         let body = if self.peek(Token::LeftBrace) {
             Some(FunctionBody::Block(Rc::new(self.parse_block(block_context)?)))
+        } else if !(self.offending_token_is_inline_or_higher_indented() || self.peek(Token::LeftParen)) {
+            None
         } else {
             self.parse_opt_expression(ParserExpressionContext {
                 allow_in,

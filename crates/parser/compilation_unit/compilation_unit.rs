@@ -212,8 +212,7 @@ impl CompilationUnit {
 
     pub fn get_line_indent(&self, line: usize) -> usize {
         let line_offset = self.get_line_offset(line).unwrap();
-        let indent = CharacterValidator::indent_count(&self.source_text.contents[line_offset..]);
-        indent - line_offset
+        CharacterValidator::indent_count(&self.source_text.contents[line_offset..])
     }
 }
 

@@ -252,7 +252,11 @@ n ** p
 
 ## Function Body
 
-* Function bodies may consist of an expression. 
+Function bodies may consist of an expression, in which case, either:
+
+* The offending token of the expression is inline.
+* The offending token of the expression is in a line whose indentation is higher than that of the previous token.
+* The offending token of the expression is `(`.
 
 ```
 const f = function(): Number (10)
