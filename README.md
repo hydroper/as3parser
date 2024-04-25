@@ -53,27 +53,6 @@ Conform a bit to the Apache Royale sources:
 - [org.apache.royale.compiler.css](https://github.com/apache/royale-compiler/tree/fc03f3b4fa9bc93e2492dc3dc7db045656b8fa24/compiler/src/main/java/org/apache/royale/compiler/css)
 - (Implementation) [org.apache.royale.compiler.internal.css](https://github.com/apache/royale-compiler/tree/fc03f3b4fa9bc93e2492dc3dc7db045656b8fa24/compiler/src/main/java/org/apache/royale/compiler/internal/css)
 
-Tree structure:
-
-* [x] `CssArrayPropertyValue`
-* [x] `CssBaseSelector`
-* [x] `CssColorPropertyValue`
-* [x] `CssCombinatorSelector`
-* [x] `CssDocument`
-* [x] `CssFontFace`
-* [x] `CssFunctionCallPropertyValue`
-* [x] `CssKeywordPropertyValue`
-* [x] `CssMediaQuery`
-* [x] `CssMediaQueryCondition`
-* [x] `CssNamespaceDefinition`
-* [x] `CssNumberPropertyValue`
-* [x] `CssProperty`
-* [x] `CssRgbColorPropertyValue`
-* [x] `CssRule`
-* [x] `CssSelectorCondition`
-* [x] `CssStringPropertyValue`
-* [x] `CssTextPropertyValue`
-
 ## License
 
 Apache License 2.0, copyright 2024 Hydroper
