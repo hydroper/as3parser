@@ -3282,23 +3282,64 @@ impl<'input> Parser<'input> {
         Ok(result)
     }
 
+    fn report_modifier_errors(&self, context: &AnnotatableContext) {
+        let mut i = 0usize;
+        while i < context.attributes.len() {
+            let a = &context.attributes[i];
+            if Attribute::has(&context.attributes[..i], &a) {
+                self.add_syntax_error(&a.location(), DiagnosticKind::DuplicateAttribute, diagnostic_arguments![]);
+            }
+            if Attribute::is_duplicate_access_modifier(&context.attributes[..i], &a) {
+                self.add_syntax_error(&a.location(), DiagnosticKind::DuplicateAccessModifier, diagnostic_arguments![]);
+            }
+            i += 1;
+        }
+    }
+
     fn parse_annotatable_directive(&mut self, context: AnnotatableContext) -> Result<(Rc<Directive>, bool), ParserError> {
         if self.peek(Token::Var) || self.peek(Token::Const) {
+            self.report_modifier_errors(&context);
             self.parse_variable_definition(context)
         } else if self.consume(Token::Function)? {
+            self.report_modifier_errors(&context);
             self.parse_function_definition(context)
         } else if self.consume(Token::Class)? {
+            self.report_modifier_errors(&context);
             self.parse_class_definition(context)
         } else if context.has_directive_context_keyword("enum") {
+            self.report_modifier_errors(&context);
             self.parse_enum_definition(context)
         } else if context.has_directive_context_keyword("namespace") {
+            self.report_modifier_errors(&context);
             self.parse_namespace_definition(context)
         } else if self.consume(Token::Interface)? {
+            self.report_modifier_errors(&context);
             self.parse_interface_definition(context)
         } else if context.has_directive_context_keyword("type") {
+            self.report_modifier_errors(&context);
             self.parse_type_definition(context)
         } else {
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingDirectiveKeyword, diagnostic_arguments![Token(self.token.0.clone())]);
+            // In case there is a series of inline modifiers,
+            // report semicolon error between each.
+            let mut i = 0usize;
+            let mut error = false;
+            while i < context.attributes.len() {
+                if !context.attributes[i].is_metadata() {
+                    let loc1 = context.attributes[i].location();
+                    if i + 1 < context.attributes.len() {
+                        let loc2 = context.attributes[i + 1].location();
+                        if !loc1.line_break(&loc2) {
+                            self.add_syntax_error(&loc2, DiagnosticKind::ExpectingEitherSemicolonOrNewLineHere, vec![]);
+                            error = true;
+                        }
+                    }
+                }
+                i += 1;
+            }
+
+            if !error {
+                self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingDirectiveKeyword, diagnostic_arguments![Token(self.token.0.clone())]);
+            }
             self.push_location(&context.start_location);
             let loc = self.pop_location();
             Ok((self.create_invalidated_directive(&loc), true))
@@ -4289,12 +4330,6 @@ impl<'input> Parser<'input> {
                 let last_attribute_is_identifier = context.attributes.last().map_or(false, |a| !a.is_metadata());
                 if last_attribute_is_identifier {
                     self.forbid_line_break_before_token();
-                }
-                if Attribute::has(&context.attributes, &a) {
-                    self.add_syntax_error(&a.location(), DiagnosticKind::DuplicateAttribute, diagnostic_arguments![]);
-                }
-                if Attribute::is_duplicate_access_modifier(&context.attributes, &a) {
-                    self.add_syntax_error(&a.location(), DiagnosticKind::DuplicateAccessModifier, diagnostic_arguments![]);
                 }
                 context.attributes.push(a);
                 // self.next()?;

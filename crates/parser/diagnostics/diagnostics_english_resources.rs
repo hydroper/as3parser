@@ -29,7 +29,7 @@ lazy_static! {
         DiagnosticKind::ExpectingStringLiteral.id() => "Expecting string literal before {1}.".into(),
         DiagnosticKind::DuplicateAttribute.id() => "Duplicate attribute.".into(),
         DiagnosticKind::DuplicateAccessModifier.id() => "Duplicate access modifier.".into(),
-        DiagnosticKind::ExpectingDirectiveKeyword.id() => "Expecting directive keyword.".into(),
+        DiagnosticKind::ExpectingDirectiveKeyword.id() => "Expecting either 'var', 'const', 'function', 'class' or 'interface.".into(),
         DiagnosticKind::UnallowedAttribute.id() => "Unallowed attribute.".into(),
         DiagnosticKind::UseDirectiveMustContainPublic.id() => "Use directive must contain the 'public' attribute.".into(),
         DiagnosticKind::MalformedEnumMember.id() => "Malformed enumeration member.".into(),

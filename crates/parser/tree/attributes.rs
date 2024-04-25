@@ -65,7 +65,7 @@ impl Attribute {
         }
     }
 
-    pub fn has_access_modifier(list: &Vec<Attribute>) -> bool {
+    pub fn has_access_modifier(list: &[Attribute]) -> bool {
         for a in list {
             match a {
                 Self::Expression(_) |
@@ -90,7 +90,7 @@ impl Attribute {
         }
     }
 
-    pub fn find_metadata(list: &Vec<Attribute>) -> Vec<Rc<Metadata>> {
+    pub fn find_metadata(list: &[Attribute]) -> Vec<Rc<Metadata>> {
         let mut r = vec![];
         for a in list {
             match &a {
@@ -102,19 +102,19 @@ impl Attribute {
         }
         r
     }
-    pub fn find_expression(list: &Vec<Attribute>) -> Option<Rc<Expression>> { for a in list { match &a { Self::Expression(e) => return Some(e.clone()), _ => {} } }; None }
-    pub fn find_public(list: &Vec<Attribute>) -> Option<Location> { for a in list { match &a { Self::Public(l) => return Some(l.clone()), _ => {} } }; None }
-    pub fn find_private(list: &Vec<Attribute>) -> Option<Location> { for a in list { match &a { Self::Private(l) => return Some(l.clone()), _ => {} } }; None }
-    pub fn find_protected(list: &Vec<Attribute>) -> Option<Location> { for a in list { match &a { Self::Protected(l) => return Some(l.clone()), _ => {} } }; None }
-    pub fn find_internal(list: &Vec<Attribute>) -> Option<Location> { for a in list { match &a { Self::Internal(l) => return Some(l.clone()), _ => {} } }; None }
-    pub fn find_final(list: &Vec<Attribute>) -> Option<Location> { for a in list { match &a { Self::Final(l) => return Some(l.clone()), _ => {} } }; None }
-    pub fn find_native(list: &Vec<Attribute>) -> Option<Location> { for a in list { match &a { Self::Native(l) => return Some(l.clone()), _ => {} } }; None }
-    pub fn find_static(list: &Vec<Attribute>) -> Option<Location> { for a in list { match &a { Self::Static(l) => return Some(l.clone()), _ => {} } }; None }
-    pub fn find_abstract(list: &Vec<Attribute>) -> Option<Location> { for a in list { match &a { Self::Abstract(l) => return Some(l.clone()), _ => {} } }; None }
-    pub fn find_override(list: &Vec<Attribute>) -> Option<Location> { for a in list { match &a { Self::Override(l) => return Some(l.clone()), _ => {} } }; None }
-    pub fn find_dynamic(list: &Vec<Attribute>) -> Option<Location> { for a in list { match &a { Self::Dynamic(l) => return Some(l.clone()), _ => {} } }; None }
+    pub fn find_expression(list: &[Attribute]) -> Option<Rc<Expression>> { for a in list { match &a { Self::Expression(e) => return Some(e.clone()), _ => {} } }; None }
+    pub fn find_public(list: &[Attribute]) -> Option<Location> { for a in list { match &a { Self::Public(l) => return Some(l.clone()), _ => {} } }; None }
+    pub fn find_private(list: &[Attribute]) -> Option<Location> { for a in list { match &a { Self::Private(l) => return Some(l.clone()), _ => {} } }; None }
+    pub fn find_protected(list: &[Attribute]) -> Option<Location> { for a in list { match &a { Self::Protected(l) => return Some(l.clone()), _ => {} } }; None }
+    pub fn find_internal(list: &[Attribute]) -> Option<Location> { for a in list { match &a { Self::Internal(l) => return Some(l.clone()), _ => {} } }; None }
+    pub fn find_final(list: &[Attribute]) -> Option<Location> { for a in list { match &a { Self::Final(l) => return Some(l.clone()), _ => {} } }; None }
+    pub fn find_native(list: &[Attribute]) -> Option<Location> { for a in list { match &a { Self::Native(l) => return Some(l.clone()), _ => {} } }; None }
+    pub fn find_static(list: &[Attribute]) -> Option<Location> { for a in list { match &a { Self::Static(l) => return Some(l.clone()), _ => {} } }; None }
+    pub fn find_abstract(list: &[Attribute]) -> Option<Location> { for a in list { match &a { Self::Abstract(l) => return Some(l.clone()), _ => {} } }; None }
+    pub fn find_override(list: &[Attribute]) -> Option<Location> { for a in list { match &a { Self::Override(l) => return Some(l.clone()), _ => {} } }; None }
+    pub fn find_dynamic(list: &[Attribute]) -> Option<Location> { for a in list { match &a { Self::Dynamic(l) => return Some(l.clone()), _ => {} } }; None }
 
-    pub fn has(list: &Vec<Attribute>, attribute: &Attribute) -> bool {
+    pub fn has(list: &[Attribute], attribute: &Attribute) -> bool {
         match attribute {
             Self::Public(_) => Self::find_public(list).is_some(),
             Self::Private(_) => Self::find_private(list).is_some(),
@@ -130,7 +130,7 @@ impl Attribute {
         }
     }
 
-    pub fn is_duplicate_access_modifier(list: &Vec<Attribute>, attribute: &Attribute) -> bool {
+    pub fn is_duplicate_access_modifier(list: &[Attribute], attribute: &Attribute) -> bool {
         match attribute {
             Self::Expression(_) |
             Self::Public(_) |
