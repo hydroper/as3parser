@@ -405,13 +405,13 @@ impl<'input> Parser<'input> {
     }
 
     fn create_invalidated_expression(&self, location: &Location) -> Rc<Expression> {
-        Rc::new(Expression::Invalidated(InvalidatedExpression {
+        Rc::new(Expression::Invalidated(InvalidatedNode {
             location: location.clone(),
         }))
     }
 
     fn create_invalidated_directive(&self, location: &Location) -> Rc<Directive> {
-        Rc::new(Directive::InvalidatedDirective(InvalidatedDirective {
+        Rc::new(Directive::Invalidated(InvalidatedNode {
             location: location.clone(),
         }))
     }

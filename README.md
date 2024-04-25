@@ -46,7 +46,7 @@ MXML supports a subset of CSS.
 - [ ] Define tree structures
 - [ ] Parse a style sheet
 
-Conform to Apache Royale sources:
+Conform a bit to the Apache Royale sources:
 
 - [CSS.g](https://github.com/apache/royale-compiler/blob/develop/compiler/src/main/antlr3/org/apache/royale/compiler/internal/css/CSS.g)
 - [CSSTree.g](https://github.com/apache/royale-compiler/blob/develop/compiler/src/main/antlr3/org/apache/royale/compiler/internal/css/CSSTree.g)
@@ -55,39 +55,23 @@ Conform to Apache Royale sources:
 
 Tree structure:
 
-* [x] `CssNode` enumeration
-  * [x] `CssArrayPropertyValue` variant
-  * [x] `CssColorPropertyValue` variant
-  * [x] `CssCombinator` variant
-  * [x] `CssDocument` variant
-  * [x] `CssFontFace` variant
-  * [x] `CssFontFaceList` variant
-    * [x] Alternative to Royale's `CSSTypedNode` with font face children.
-  * [x] `CssFunctionCallPropertyValue` variant
-    * [x] `url_format: Option<String>` field (used in place of Royale `CSSURLAndFormatPropertyValue`)
-  * [ ] `CssKeywordPropertyValue` variant
-  * [x] `CssMediaQuery` variant
-    * [x] Alternative to Royale's `CSSTypedNode` with media query condition children.
-  * [ ] `CssMediaQueryCondition` variant
-  * [ ] `CssMultiValuePropertyValue` variant
-  * [ ] `CssNamespaceDefinition` variant
-  * [x] `CssNamespaceList` variant
-    * [x] Alternative to Royale's `CSSTypedNode` with namespace definition children.
-  * [ ] `CssNumberPropertyValue` variant
-  * [ ] `CssProperty` variant
-  * [x] `CssPropertyList` variant
-    * [x] Alternative to Royale's `CSSTypedNode` with property children.
-  * [ ] `CssRgbColorPropertyValue` variant
-  * [ ] `CssRule` variant
-  * [x] `CssRuleList` variant
-    * [x] Alternative to Royale's `CSSTypedNode` with rule children.
-  * [ ] `CssSelector` variant
-  * [ ] `CssSelectorCondition` variant
-  * [x] `CssSelectorGroup` variant
-    * [x] Alternative to Royale's `CSSTypedNode` with selector children.
-  * [ ] `CssStringPropertyValue` variant
-  * [ ] `CssText` variant
-* [ ] `CssModelTreeKind` enumeration
+* [x] `CssArrayPropertyValue`
+* [x] `CssBaseSelector`
+* [x] `CssColorPropertyValue`
+* [x] `CssCombinatorSelector`
+* [x] `CssDocument`
+* [x] `CssFontFace`
+* [x] `CssFunctionCallPropertyValue`
+* [x] `CssMediaQuery`
+* [x] `CssMediaQueryCondition`
+* [x] `CssNamespaceDefinition`
+* [ ] `CssNumberPropertyValue`
+* [x] `CssProperty`
+* [ ] `CssRgbColorPropertyValue`
+* [x] `CssRule`
+* [x] `CssSelectorCondition`
+* [ ] `CssStringPropertyValue`
+* [ ] `CssTextPropertyValue`
 
 ## License
 

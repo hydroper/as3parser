@@ -42,7 +42,7 @@ pub enum Expression {
     ArrayType(ArrayTypeExpression),
     TupleType(TupleTypeExpression),
     FunctionType(FunctionTypeExpression),
-    Invalidated(InvalidatedExpression),
+    Invalidated(InvalidatedNode),
     ReservedNamespace(ReservedNamespaceExpression),
 }
 

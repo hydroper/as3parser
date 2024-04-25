@@ -1,5 +1,8 @@
 //! Defines the syntactic nodes produced by the parser.
 
+mod invalidated_node;
+pub use invalidated_node::*;
+
 // Expressions
 mod expression;
 pub use expression::*;
@@ -61,8 +64,6 @@ mod sequence_expression;
 pub use sequence_expression::*;
 mod type_expression;
 pub use type_expression::*;
-mod invalidated_expression;
-pub use invalidated_expression::*;
 mod reserved_namespace_expression;
 pub use reserved_namespace_expression::*;
 
@@ -109,8 +110,6 @@ pub use default_xml_namespace_statement::*;
 // Directives
 mod directive;
 pub use directive::*;
-mod invalidated_directive;
-pub use invalidated_directive::*;
 mod configuration_directive;
 pub use configuration_directive::*;
 mod import_directive;
@@ -155,8 +154,8 @@ mod mxml;
 pub use mxml::*;
 
 // CSS
-// mod css;
-// pub use css::*;
+mod css;
+pub use css::*;
 
 mod tree_semantics;
 pub use tree_semantics::*;

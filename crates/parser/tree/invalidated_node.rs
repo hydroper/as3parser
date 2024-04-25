@@ -1,8 +1,8 @@
 use crate::ns::*;
 use serde::{Serialize, Deserialize};
 
-/// Represents an expression that failed to parse.
+/// Represents a construct that failed to parse.
 #[derive(Clone, Serialize, Deserialize)]
-pub struct InvalidatedExpression {
+pub struct InvalidatedNode {
     pub location: Location,
 }
