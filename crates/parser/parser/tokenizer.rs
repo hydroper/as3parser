@@ -443,7 +443,7 @@ impl<'input> Tokenizer<'input> {
                 body.push('\\');
                 let ch = self.characters.peek_or_zero();
                 if self.characters.reached_end() {
-                    self.add_unexpected_error();
+                    self.add_unexpected_eof_error(DiagnosticKind::InputEndedBeforeReachingClosingSlashForRegExp);
                     return Err(ParserError::Common);
                 } else if CharacterValidator::is_line_terminator(ch) {
                     self.add_unexpected_error();
@@ -456,7 +456,7 @@ impl<'input> Tokenizer<'input> {
                 body.push('\n');
                 self.consume_line_terminator();
             } else if self.characters.reached_end() {
-                self.add_unexpected_error();
+                self.add_unexpected_eof_error(DiagnosticKind::InputEndedBeforeReachingClosingSlashForRegExp);
                 return Err(ParserError::Common);
             } else {
                 body.push(ch);
@@ -490,10 +490,14 @@ impl<'input> Tokenizer<'input> {
 
     fn add_unexpected_error(&self) {
         if self.characters.has_remaining() {
-            self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&self.character_ahead_location(), DiagnosticKind::UnexpectedOrInvalidToken, vec![]))
+            self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&self.character_ahead_location(), DiagnosticKind::UnexpectedCharacter, diagnostic_arguments![String(self.characters.peek_or_zero().to_string())]))
         } else {
             self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&self.cursor_location(), DiagnosticKind::UnexpectedEnd, vec![]))
         }
+    }
+
+    fn add_unexpected_eof_error(&self, kind: DiagnosticKind) {
+        self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&self.cursor_location(), kind, vec![]));
     }
 
     // LineTerminator
@@ -548,7 +552,7 @@ impl<'input> Tokenizer<'input> {
                 } else if self.characters.has_remaining() {
                     self.characters.skip_in_place();
                 } else {
-                    self.add_unexpected_error();
+                    self.add_unexpected_eof_error(DiagnosticKind::InputEndedBeforeReachingClosingSeqForMultiLineComment);
                     return Err(ParserError::Common);
                 }
             }
@@ -633,7 +637,7 @@ impl<'input> Tokenizer<'input> {
                 | (self.expect_hex_digit()? << 4)
                 | self.expect_hex_digit()?);
             let Some(r) = r else {
-                self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&start.combine_with(self.cursor_location()), DiagnosticKind::UnexpectedOrInvalidToken, vec![]));
+                self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&start.combine_with(self.cursor_location()), DiagnosticKind::InvalidEscapeValue, vec![]));
                 return Ok('\x5F');
             };
             return Ok(r);
@@ -656,12 +660,12 @@ impl<'input> Tokenizer<'input> {
         let location = start.combine_with(self.cursor_location());
         let r = u32::from_str_radix(&self.compilation_unit.text()[(start.first_offset + 2)..(location.last_offset - 1)], 16);
         let Ok(r) = r else {
-            self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&location, DiagnosticKind::UnexpectedOrInvalidToken, vec![]));
+            self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&location, DiagnosticKind::InvalidEscapeValue, vec![]));
             return Ok('\x5F');
         };
         let r = char::from_u32(r);
         let Some(r) = r else {
-            self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&location, DiagnosticKind::UnexpectedOrInvalidToken, vec![]));
+            self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&location, DiagnosticKind::InvalidEscapeValue, vec![]));
             return Ok('\x5F');
         };
         Ok(r)
@@ -873,10 +877,10 @@ impl<'input> Tokenizer<'input> {
                     self.characters.next();
                     break;
                 } else if CharacterValidator::is_line_terminator(ch) {
-                    self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&self.character_ahead_location(), DiagnosticKind::UnallowedLineBreak, vec![]));
+                    self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&self.character_ahead_location(), DiagnosticKind::StringLiteralMustBeTerminatedBeforeLineBreak, vec![]));
                     self.consume_line_terminator();
                 } else if !self.characters.has_remaining() {
-                    self.add_unexpected_error();
+                    self.add_unexpected_eof_error(DiagnosticKind::InputEndedBeforeReachingClosingQuoteForString);
                     return Err(ParserError::Common);
                 } else {
                     value.push(ch);
@@ -893,10 +897,10 @@ impl<'input> Tokenizer<'input> {
                         self.characters.next();
                         break;
                     } else if CharacterValidator::is_line_terminator(ch) {
-                        self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&self.character_ahead_location(), DiagnosticKind::UnallowedLineBreak, vec![]));
+                        self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&self.character_ahead_location(), DiagnosticKind::StringLiteralMustBeTerminatedBeforeLineBreak, vec![]));
                         self.consume_line_terminator();
                     } else if !self.characters.has_remaining() {
-                        self.add_unexpected_error();
+                        self.add_unexpected_eof_error(DiagnosticKind::InputEndedBeforeReachingClosingQuoteForString);
                         return Err(ParserError::Common);
                     } else {
                         value.push(ch);
@@ -926,7 +930,7 @@ impl<'input> Tokenizer<'input> {
                     builder.clear();
                     self.consume_line_terminator();
                 } else if !self.characters.has_remaining() {
-                    self.add_unexpected_error();
+                    self.add_unexpected_eof_error(DiagnosticKind::InputEndedBeforeReachingClosingQuoteForString);
                     return Err(ParserError::Common);
                 } else {
                     builder.push(ch);
@@ -948,7 +952,7 @@ impl<'input> Tokenizer<'input> {
                         builder.clear();
                         self.consume_line_terminator();
                     } else if !self.characters.has_remaining() {
-                        self.add_unexpected_error();
+                        self.add_unexpected_eof_error(DiagnosticKind::InputEndedBeforeReachingClosingQuoteForString);
                         return Err(ParserError::Common);
                     } else {
                         builder.push(ch);
@@ -1122,7 +1126,7 @@ impl<'input> Tokenizer<'input> {
                     }
                 }
                 if self.characters.reached_end() {
-                    self.add_unexpected_error();
+                    self.add_unexpected_eof_error(DiagnosticKind::InputEndedBeforeReachingClosingQuoteForAttributeValue);
                     return Err(ParserError::Common)
                 }
                 let value = self.compilation_unit.text()[(start.first_offset + 1)..self.cursor_location().first_offset].to_owned();
@@ -1221,7 +1225,7 @@ impl<'input> Tokenizer<'input> {
                 } else if CharacterValidator::is_line_terminator(self.characters.peek_or_zero()) {
                     self.consume_line_terminator();
                 } else if self.characters.reached_end() {
-                    self.add_unexpected_error();
+                    self.add_unexpected_eof_error(DiagnosticKind::InputEndedBeforeReachingClosingSeqForXmlComment);
                     return Err(ParserError::Common);
                 } else {
                     self.characters.next();
@@ -1244,7 +1248,7 @@ impl<'input> Tokenizer<'input> {
                 } else if CharacterValidator::is_line_terminator(self.characters.peek_or_zero()) {
                     self.consume_line_terminator();
                 } else if self.characters.reached_end() {
-                    self.add_unexpected_error();
+                    self.add_unexpected_eof_error(DiagnosticKind::InputEndedBeforeReachingClosingSeqForCData);
                     return Err(ParserError::Common);
                 } else {
                     self.characters.next();
@@ -1267,7 +1271,7 @@ impl<'input> Tokenizer<'input> {
                 } else if CharacterValidator::is_line_terminator(self.characters.peek_or_zero()) {
                     self.consume_line_terminator();
                 } else if self.characters.reached_end() {
-                    self.add_unexpected_error();
+                    self.add_unexpected_eof_error(DiagnosticKind::InputEndedBeforeReachingClosingSeqForPi);
                     return Err(ParserError::Common);
                 } else {
                     self.characters.next();

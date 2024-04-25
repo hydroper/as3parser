@@ -163,7 +163,7 @@ impl<'input> Parser<'input> {
     fn expect(&mut self, token: Token) -> Result<(), ParserError> {
         if self.token.0 != token {
             self.expected_token_error = true;
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![Token(token.clone()), Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagnostic_arguments![Token(token.clone()), Token(self.token.0.clone())]);
             let expecting_identifier_name = token.is_identifier_name();
             while self.token.0 != Token::Eof && (if expecting_identifier_name { self.token.0.is_identifier_name() } else { true }) {
                 self.next()?;
@@ -183,7 +183,7 @@ impl<'input> Parser<'input> {
     fn non_greedy_expect(&mut self, token: Token) -> Result<(), ParserError> {
         if self.token.0 != token {
             self.expected_token_error = true;
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![Token(token.clone()), Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagnostic_arguments![Token(token.clone()), Token(self.token.0.clone())]);
             Ok(())
         } else {
             self.expected_token_error = false;
@@ -192,10 +192,19 @@ impl<'input> Parser<'input> {
         }
     }
 
+    fn non_greedy_expect_virtual_semicolon(&mut self) -> Result<(), ParserError> {
+        self.expected_token_error = false;
+        if !self.parse_semicolon()? {
+            self.expected_token_error = true;
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingEitherSemicolonOrNewLineHere, vec![]);
+        }
+        Ok(())
+    }
+
     fn expect_and_ie_xml_tag(&mut self, token: Token) -> Result<(), ParserError> {
         if self.token.0 != token {
             self.expected_token_error = true;
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![Token(token.clone()), Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagnostic_arguments![Token(token.clone()), Token(self.token.0.clone())]);
             while self.token.0 != Token::Eof {
                 self.next_ie_xml_tag()?;
                 if self.token.0 == token {
@@ -214,7 +223,7 @@ impl<'input> Parser<'input> {
     fn non_greedy_expect_and_ie_xml_tag(&mut self, token: Token) -> Result<(), ParserError> {
         if self.token.0 != token {
             self.expected_token_error = true;
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![Token(token.clone()), Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagnostic_arguments![Token(token.clone()), Token(self.token.0.clone())]);
             Ok(())
         } else {
             self.expected_token_error = false;
@@ -226,7 +235,7 @@ impl<'input> Parser<'input> {
     fn expect_and_ie_xml_content(&mut self, token: Token) -> Result<(), ParserError> {
         if self.token.0 != token {
             self.expected_token_error = true;
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![Token(token.clone()), Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagnostic_arguments![Token(token.clone()), Token(self.token.0.clone())]);
             while self.token.0 != Token::Eof {
                 self.next_ie_xml_content()?;
                 if self.token.0 == token {
@@ -244,7 +253,7 @@ impl<'input> Parser<'input> {
     fn non_greedy_expect_and_ie_xml_content(&mut self, token: Token) -> Result<(), ParserError> {
         if self.token.0 != token {
             self.expected_token_error = true;
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![Token(token.clone()), Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagnostic_arguments![Token(token.clone()), Token(self.token.0.clone())]);
             Ok(())
         } else {
             self.expected_token_error = false;
@@ -269,7 +278,7 @@ impl<'input> Parser<'input> {
                 }
             }
             self.expected_token_error = true;
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectedIdentifier, diagnostic_arguments![Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingIdentifier, diagnostic_arguments![Token(self.token.0.clone())]);
             /*
             while self.token.0 != Token::Eof && self.token.0.is_identifier_name() {
                 if let Some(id) = self.consume_identifier(reserved_words)? {
@@ -292,7 +301,7 @@ impl<'input> Parser<'input> {
             }
         }
         self.expected_token_error = true;
-        self.add_syntax_error(&self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![String(format!("'{name}'")), Token(self.token.0.clone())]);
+        self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagnostic_arguments![String(format!("'{name}'")), Token(self.token.0.clone())]);
         while self.token.0 != Token::Eof && self.token.0.is_identifier_name() {
             if self._consume_context_keyword(name)? {
                 return Ok(());
@@ -312,7 +321,7 @@ impl<'input> Parser<'input> {
             }
         }
         self.expected_token_error = true;
-        self.add_syntax_error(&self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![String(format!("'{name}'")), Token(self.token.0.clone())]);
+        self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagnostic_arguments![String(format!("'{name}'")), Token(self.token.0.clone())]);
         Ok(())
     }
 
@@ -323,7 +332,7 @@ impl<'input> Parser<'input> {
         self.expected_token_error = false;
         if !self.consume_type_parameters_gt()? {
             self.expected_token_error = true;
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![Token(Token::Gt), Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagnostic_arguments![Token(Token::Gt), Token(self.token.0.clone())]);
             while self.token.0 != Token::Eof {
                 self.next()?;
                 if self.consume_type_parameters_gt()? {
@@ -337,7 +346,7 @@ impl<'input> Parser<'input> {
         self.expected_token_error = false;
         if !self.consume_type_parameters_gt()? {
             self.expected_token_error = true;
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expected, diagnostic_arguments![Token(Token::Gt), Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagnostic_arguments![Token(Token::Gt), Token(self.token.0.clone())]);
         }
         Ok(())
     }
@@ -411,7 +420,7 @@ impl<'input> Parser<'input> {
         if let Some(exp) = self.parse_opt_expression(context)? {
             Ok(exp)
         } else {
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectedExpression, diagnostic_arguments![Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingExpression, diagnostic_arguments![Token(self.token.0.clone())]);
             Ok(self.create_invalidated_expression(&self.tokenizer.cursor_location()))
         }
     }
@@ -1412,7 +1421,7 @@ impl<'input> Parser<'input> {
             let id = self.parse_qualified_identifier()?;
             Ok(Rc::new(Expression::QualifiedIdentifier(id)))
         } else {
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectedExpression, diagnostic_arguments![Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingExpression, diagnostic_arguments![Token(self.token.0.clone())]);
             Ok(self.create_invalidated_expression(&self.tokenizer.cursor_location()))
         }
     }
@@ -1574,7 +1583,7 @@ impl<'input> Parser<'input> {
             self.next_ie_xml_tag()?;
             return Ok((value, location));
         } else {
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectedXmlAttributeValue, diagnostic_arguments![Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingXmlAttributeValue, diagnostic_arguments![Token(self.token.0.clone())]);
             Ok(("".into(), self.tokenizer.cursor_location()))
         }
     }
@@ -1599,7 +1608,7 @@ impl<'input> Parser<'input> {
             self.next_ie_xml_tag()?;
             return Ok((name, name_location));
         } else {
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectedXmlName, diagnostic_arguments![Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingXmlName, diagnostic_arguments![Token(self.token.0.clone())]);
             Ok((INVALIDATED_IDENTIFIER.into(), self.tokenizer.cursor_location()))
         }
     }
@@ -1763,7 +1772,7 @@ impl<'input> Parser<'input> {
             return self.finish_qualified_identifier(attribute, ql, qual);
         }
 
-        self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectedIdentifier, diagnostic_arguments![Token(self.token.0.clone())]);
+        self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingIdentifier, diagnostic_arguments![Token(self.token.0.clone())]);
         Ok(QualifiedIdentifier {
             location: self.pop_location(),
             attribute: false,
@@ -1841,7 +1850,7 @@ impl<'input> Parser<'input> {
             return self.finish_qualified_identifier(attribute, ql, qual);
         }
 
-        self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectedIdentifier, diagnostic_arguments![Token(self.token.0.clone())]);
+        self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingIdentifier, diagnostic_arguments![Token(self.token.0.clone())]);
         Ok(QualifiedIdentifier {
             location: self.pop_location(),
             attribute: false,
@@ -1885,7 +1894,7 @@ impl<'input> Parser<'input> {
                 id: QualifiedIdentifierIdentifier::Brackets(brackets),
             })
         } else {
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectedIdentifier, diagnostic_arguments![Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingIdentifier, diagnostic_arguments![Token(self.token.0.clone())]);
             Ok(QualifiedIdentifier {
                 location: self.pop_location(),
                 attribute,
@@ -2400,7 +2409,7 @@ impl<'input> Parser<'input> {
             let mut semicolon = false;
             while !self.peek(Token::RightBrace) && !self.peek(Token::Eof) {
                 if !directives.is_empty() && !semicolon {
-                    self.non_greedy_expect(Token::Semicolon)?;
+                    self.non_greedy_expect_virtual_semicolon()?;
                 }
                 let (directive, semicolon_1) = self.parse_directive(context.clone())?;
                 directives.push(directive);
@@ -2439,7 +2448,7 @@ impl<'input> Parser<'input> {
                 consequent = consequent_1;
                 if self.peek(Token::Else) {
                     if !semicolon_1 {
-                        self.non_greedy_expect(Token::Semicolon)?;
+                        self.non_greedy_expect_virtual_semicolon()?;
                     }
                     self.next()?;
                     let (alternative_2, semicolon_2) = self.parse_substatement(context.clone())?;
@@ -2493,7 +2502,7 @@ impl<'input> Parser<'input> {
         let mut semicolon = false;
         while !self.peek(Token::RightBrace) {
             if !cases.is_empty() && !semicolon {
-                self.non_greedy_expect(Token::Semicolon)?;
+                self.non_greedy_expect_virtual_semicolon()?;
             }
             if !(self.peek(Token::Case) || self.peek(Token::Default)) {
                 break;
@@ -2524,7 +2533,7 @@ impl<'input> Parser<'input> {
             semicolon = false;
             while !(self.peek(Token::RightBrace) || self.peek(Token::Case) || self.peek(Token::Default)) {
                 if !directives.is_empty() && !semicolon {
-                    self.non_greedy_expect(Token::Semicolon)?;
+                    self.non_greedy_expect_virtual_semicolon()?;
                 }
                 let (directive, semicolon_1) = self.parse_directive(context.clone())?;
                 directives.push(directive);
@@ -2610,7 +2619,7 @@ impl<'input> Parser<'input> {
         // Body
         let (body, semicolon_1) = self.parse_substatement(context)?;
         if !semicolon_1 {
-            self.non_greedy_expect(Token::Semicolon)?;
+            self.non_greedy_expect_virtual_semicolon()?;
         }
 
         let mut test = self.create_invalidated_expression(&self.tokenizer.cursor_location());
@@ -3234,7 +3243,7 @@ impl<'input> Parser<'input> {
         let mut semicolon = false;
         while !self.peek(Token::Eof) {
             if !directives.is_empty() && !semicolon {
-                self.non_greedy_expect(Token::Semicolon)?;
+                self.non_greedy_expect_virtual_semicolon()?;
             }
             let (directive, semicolon_1) = self.parse_directive(context.clone())?;
             directives.push(directive);
@@ -3289,7 +3298,7 @@ impl<'input> Parser<'input> {
         } else if context.has_directive_context_keyword("type") {
             self.parse_type_definition(context)
         } else {
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectedDirectiveKeyword, diagnostic_arguments![Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingDirectiveKeyword, diagnostic_arguments![Token(self.token.0.clone())]);
             self.push_location(&context.start_location);
             let loc = self.pop_location();
             Ok((self.create_invalidated_directive(&loc), true))
@@ -4142,7 +4151,7 @@ impl<'input> Parser<'input> {
                         value = s.clone();
                         self.next()?;
                     } else {
-                        self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectedStringLiteral, diagnostic_arguments![Token(self.token.0.clone())]);
+                        self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingStringLiteral, diagnostic_arguments![Token(self.token.0.clone())]);
                         while self.token.0 != Token::Eof {
                             self.next()?;
                             if let Token::StringLiteral(s) = self.token.0.clone() {
@@ -4186,7 +4195,7 @@ impl<'input> Parser<'input> {
                 expression,
             })))
         } else {
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectedExpression, diagnostic_arguments![Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingExpression, diagnostic_arguments![Token(self.token.0.clone())]);
             Ok(self.create_invalidated_expression(&self.tokenizer.cursor_location()))
         }
     }
