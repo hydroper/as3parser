@@ -131,6 +131,7 @@ pub struct CssBaseSelector {
 /// Supported condition types for [`CssSelectorCondition`].
 #[derive(Clone, Serialize, Deserialize)]
 pub enum CssSelectorCondition {
+    Invalidated(InvalidatedNode),
     /// For example: `s|Label.className`
     Class((String, Location)),
     /// For example: `s|Label#idValue`
@@ -155,6 +156,7 @@ pub enum CssSelectorCondition {
 impl CssSelectorCondition {
     pub fn location(&self) -> Location {
         match self {
+            Self::Invalidated(v) => v.location.clone(),
             Self::Class((_, l)) => l.clone(),
             Self::Id((_, l)) => l.clone(),
             Self::Pseudo((_, l)) => l.clone(),
@@ -370,6 +372,7 @@ pub struct CssMediaQuery {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub enum CssMediaQueryCondition {
+    Invalidated(InvalidatedNode),
     Base((Rc<CssMediaQueryCondition>, Location)),
     And((Rc<CssMediaQueryCondition>, Location)),
     Not((Rc<CssMediaQueryCondition>, Location)),
@@ -379,6 +382,7 @@ pub enum CssMediaQueryCondition {
 impl CssMediaQueryCondition {
     pub fn location(&self) -> Location {
         match self {
+            Self::Invalidated(v) => v.location.clone(),
             Self::Base((_, l)) => l.clone(),
             Self::And((_, l)) => l.clone(),
             Self::Not((_, l)) => l.clone(),
