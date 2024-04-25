@@ -6,7 +6,7 @@ lazy_static! {
     pub static ref DATA: HashMap<i32, String> = hashmap! {
         // DiagnosticKind::K.id() => ".".into(),
         DiagnosticKind::InvalidEscapeValue.id() => "Invalid escape value.".into(),
-        DiagnosticKind::UnexpectedEnd.id() => "Unexpected end of program.".into(),
+        DiagnosticKind::UnexpectedEnd.id() => "Unexpected end-of-file.".into(),
         DiagnosticKind::UnallowedNumericSuffix.id() => "Unallowed numeric suffix.".into(),
         DiagnosticKind::StringLiteralMustBeTerminatedBeforeLineBreak.id() => "A string literal must be terminated before the line break.".into(),
         DiagnosticKind::Expecting.id() => "Expecting {1} before {2}.".into(),

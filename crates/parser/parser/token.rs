@@ -167,7 +167,7 @@ impl ToString for Token {
     /// * `"XML attribute value"`
     fn to_string(&self) -> String {
         (match self {
-            Token::Eof => "end of program",
+            Token::Eof => "end-of-file",
             Token::Identifier(_) => "identifier",
             Token::StringLiteral(_) => "string",
             Token::NumericLiteral(_, _) => "number",
