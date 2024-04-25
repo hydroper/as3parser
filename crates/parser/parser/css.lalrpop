@@ -11,6 +11,8 @@ grammar<'err, 'cu>(errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, &'s
 match {
     r"[ \t\r\n]*" => {},
     r"/\*[^*]*\*+(?:[^/*][^*]*\*+)*/" => {},
+} else {
+    _
 }
 
 pub Number: (f64, Location) = <i: @L> <s:r"[+\-]?([0-9]+(\.[0-9]+)?)|(\.[0-9]+)"> <j: @R> => {
@@ -29,13 +31,13 @@ NumberWithUnit: tree::CssNumberPropertyValue = <i: @L> <v: Number> <unit:r"(?xi)
     };
 
 String: (String, Location) = {
-    <i: @L> <s:r#"(?xi) "([^"\\]|\\[a-f0-9]{1,6})*""#> <r: @R> => {
+    <i: @L> <s:r#"(?xi) "([^"\\]|\\[a-f0-9]{1,6})*""#> <j: @R> => {
         let loc = Location::with_offsets(compilation_unit, i, j);
-        (parse_string_content(s, loc), loc)
+        (parse_string_content(s, &loc), loc)
     },
-    <i: @L> <s:r"(?xi) '([^'\\]|\\[a-f0-9]{1,6})*'"> <r: @R> => {
+    <i: @L> <s:r"(?xi) '([^'\\]|\\[a-f0-9]{1,6})*'"> <j: @R> => {
         let loc = Location::with_offsets(compilation_unit, i, j);
-        (parse_string_content(s, loc), Location::with_offsets(compilation_unit, i, j))
+        (parse_string_content(s, &loc), loc)
     },
 };
 

@@ -63,7 +63,7 @@ pub enum DiagnosticKind {
     InputEndedBeforeReachingClosingSlashForRegExp = 1083,
     InputEndedBeforeReachingClosingQuoteForAttributeValue = 1084,
     ExpectingEitherSemicolonOrNewLineHere = 1085,
-    CssStringContainsInvalidHexEscapes = 1086,
+    CssInvalidHexEscape = 1086,
 }
 
 impl DiagnosticKind {
