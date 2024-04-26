@@ -64,6 +64,8 @@ pub enum DiagnosticKind {
     InputEndedBeforeReachingClosingQuoteForAttributeValue = 1084,
     ExpectingEitherSemicolonOrNewLineHere = 1085,
     CssInvalidHexEscape = 1086,
+    ExpectingDirective = 1087,
+    ExpectingStatement = 1088,
 }
 
 impl DiagnosticKind {

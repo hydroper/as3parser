@@ -56,6 +56,13 @@ impl<'input> Parser<'input> {
         self.compilation_unit().add_diagnostic(Diagnostic::new_syntax_error(location, kind, arguments));
     }
 
+    fn patch_syntax_error(&self, original: DiagnosticKind, location: &Location, kind: DiagnosticKind, arguments: Vec<DiagnosticArgument>) {
+        if self.compilation_unit().diagnostics.borrow().last().unwrap().kind == original {
+            self.compilation_unit().diagnostics.borrow_mut().pop();
+            self.compilation_unit().add_diagnostic(Diagnostic::new_syntax_error(location, kind, arguments));
+        }
+    }
+
     /*
     fn add_warning(&self, location: &Location, kind: DiagnosticKind, arguments: Vec<DiagnosticArgument>) {
         self.compilation_unit().add_diagnostic(Diagnostic::new_warning(location, kind, arguments));
@@ -2266,9 +2273,19 @@ impl<'input> Parser<'input> {
         // ExpressionStatement
         } else {
             self.mark_location();
+
+            // Store offset for patching error
+            let i = self.tokenizer.characters().index();
+
             let exp = self.parse_expression(ParserExpressionContext {
                 allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
             })?;
+
+            // Patch error
+            if i == self.tokenizer.characters().index() {
+                self.patch_syntax_error(DiagnosticKind::ExpectingExpression, &self.tokenizer.cursor_location(), DiagnosticKind::ExpectingStatement, diagnostic_arguments![Token(self.token.0.clone())]);
+            }
+
             let semicolon = if exp.is_invalidated() {
                 self.next()?;
                 true
@@ -3234,7 +3251,12 @@ impl<'input> Parser<'input> {
         } else if self.peek(Token::Use) {
             self.parse_use_namespace_directive()
         } else {
-            self.parse_statement(context)
+            let i = self.tokenizer.characters().index();
+            let r = self.parse_statement(context);
+            if i == self.tokenizer.characters().index() {
+                self.patch_syntax_error(DiagnosticKind::ExpectingStatement, &self.tokenizer.cursor_location(), DiagnosticKind::ExpectingDirective, diagnostic_arguments![Token(self.token.0.clone())]);
+            }
+            r
         }
     }
 
@@ -5062,7 +5084,15 @@ impl<'input> Parser<'input> {
                     while pi_characters.has_remaining() {
                         data.push(pi_characters.next_or_zero());
                     }
-                    match process_xml_pi(self.compilation_unit(), (location.first_offset() + 2 + name.len(), location.last_offset() - 2), &name) {
+
+                    // XMLPI may not have been successfully parsed, thus
+                    // slice until where possible.
+                    let i = location.first_offset() + 2 + name.len();
+                    let mut j = location.last_offset();
+                    j = if i < j { j - 1 } else { j };
+                    j = if i < j { j - 1 } else { j };
+
+                    match process_xml_pi(self.compilation_unit(), (i, j), &name) {
                         Ok(errors) => {
                             for error in errors.iter() {
                                 match error {
@@ -5076,9 +5106,6 @@ impl<'input> Parser<'input> {
                                         self.add_syntax_error(&location, DiagnosticKind::XmlPiEncodingMustBeUtf8, vec![]);
                                     },
                                 }
-                            }
-                            if !errors.is_empty() {
-                                return Err(ParserError::Common);
                             }
                         },
                         Err(_) => {

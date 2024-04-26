@@ -444,7 +444,7 @@ impl<'input> Tokenizer<'input> {
                 let ch = self.characters.peek_or_zero();
                 if self.characters.reached_end() {
                     self.add_unexpected_eof_error(DiagnosticKind::InputEndedBeforeReachingClosingSlashForRegExp);
-                    return Err(ParserError::Common);
+                    break;
                 } else if CharacterValidator::is_line_terminator(ch) {
                     self.add_unexpected_error();
                     self.consume_line_terminator();
@@ -457,7 +457,7 @@ impl<'input> Tokenizer<'input> {
                 self.consume_line_terminator();
             } else if self.characters.reached_end() {
                 self.add_unexpected_eof_error(DiagnosticKind::InputEndedBeforeReachingClosingSlashForRegExp);
-                return Err(ParserError::Common);
+                break;
             } else {
                 body.push(ch);
                 self.characters.next();
@@ -553,7 +553,7 @@ impl<'input> Tokenizer<'input> {
                     self.characters.skip_in_place();
                 } else {
                     self.add_unexpected_eof_error(DiagnosticKind::InputEndedBeforeReachingClosingSeqForMultiLineComment);
-                    return Err(ParserError::Common);
+                    break;
                 }
             }
 
@@ -881,7 +881,7 @@ impl<'input> Tokenizer<'input> {
                     self.consume_line_terminator();
                 } else if !self.characters.has_remaining() {
                     self.add_unexpected_eof_error(DiagnosticKind::InputEndedBeforeReachingClosingQuoteForString);
-                    return Err(ParserError::Common);
+                    break;
                 } else {
                     value.push(ch);
                     self.characters.next();
@@ -901,7 +901,7 @@ impl<'input> Tokenizer<'input> {
                         self.consume_line_terminator();
                     } else if !self.characters.has_remaining() {
                         self.add_unexpected_eof_error(DiagnosticKind::InputEndedBeforeReachingClosingQuoteForString);
-                        return Err(ParserError::Common);
+                        break;
                     } else {
                         value.push(ch);
                         self.characters.next();
@@ -931,7 +931,7 @@ impl<'input> Tokenizer<'input> {
                     self.consume_line_terminator();
                 } else if !self.characters.has_remaining() {
                     self.add_unexpected_eof_error(DiagnosticKind::InputEndedBeforeReachingClosingQuoteForString);
-                    return Err(ParserError::Common);
+                    break;
                 } else {
                     builder.push(ch);
                     self.characters.next();
@@ -953,7 +953,7 @@ impl<'input> Tokenizer<'input> {
                         self.consume_line_terminator();
                     } else if !self.characters.has_remaining() {
                         self.add_unexpected_eof_error(DiagnosticKind::InputEndedBeforeReachingClosingQuoteForString);
-                        return Err(ParserError::Common);
+                        break;
                     } else {
                         builder.push(ch);
                         self.characters.next();
@@ -993,7 +993,7 @@ impl<'input> Tokenizer<'input> {
         self.characters.next();
         if !self.characters.has_remaining() {
             self.add_unexpected_error();
-            return Err(ParserError::Common);
+            return Ok(Some("".into()));
         }
         if self.consume_line_terminator() {
             return Ok(Some("".into()));
@@ -1101,6 +1101,7 @@ impl<'input> Tokenizer<'input> {
                 self.characters.next();
                 if self.characters.peek_or_zero() != '>' {
                     self.add_unexpected_error();
+                    /*
                     while self.characters.has_remaining() {
                         self.characters.next();
                         if self.characters.peek_or_zero() == '>' {
@@ -1109,7 +1110,9 @@ impl<'input> Tokenizer<'input> {
                             return Ok((Token::XmlSlashGt, location));
                         }
                     }
-                    return Err(ParserError::Common);
+                    */
+                    let location = start.combine_with(self.cursor_location());
+                    return Ok((Token::XmlSlashGt, location));
                 }
                 self.characters.next();
                 let location = start.combine_with(self.cursor_location());
@@ -1127,7 +1130,9 @@ impl<'input> Tokenizer<'input> {
                 }
                 if self.characters.reached_end() {
                     self.add_unexpected_eof_error(DiagnosticKind::InputEndedBeforeReachingClosingQuoteForAttributeValue);
-                    return Err(ParserError::Common)
+                    let value = self.compilation_unit.text()[(start.first_offset + 1)..self.cursor_location().first_offset].to_owned();
+                    let location = start.combine_with(self.cursor_location());
+                    return Ok((Token::XmlAttributeValue(value), location));
                 }
                 let value = self.compilation_unit.text()[(start.first_offset + 1)..self.cursor_location().first_offset].to_owned();
                 self.characters.next();
@@ -1226,7 +1231,7 @@ impl<'input> Tokenizer<'input> {
                     self.consume_line_terminator();
                 } else if self.characters.reached_end() {
                     self.add_unexpected_eof_error(DiagnosticKind::InputEndedBeforeReachingClosingSeqForXmlComment);
-                    return Err(ParserError::Common);
+                    break;
                 } else {
                     self.characters.next();
                 }
@@ -1249,7 +1254,7 @@ impl<'input> Tokenizer<'input> {
                     self.consume_line_terminator();
                 } else if self.characters.reached_end() {
                     self.add_unexpected_eof_error(DiagnosticKind::InputEndedBeforeReachingClosingSeqForCData);
-                    return Err(ParserError::Common);
+                    break;
                 } else {
                     self.characters.next();
                 }
@@ -1272,7 +1277,7 @@ impl<'input> Tokenizer<'input> {
                     self.consume_line_terminator();
                 } else if self.characters.reached_end() {
                     self.add_unexpected_eof_error(DiagnosticKind::InputEndedBeforeReachingClosingSeqForPi);
-                    return Err(ParserError::Common);
+                    break;
                 } else {
                     self.characters.next();
                 }
