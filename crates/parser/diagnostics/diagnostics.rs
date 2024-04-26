@@ -1,3 +1,5 @@
+use std::any::Any;
+
 use maplit::hashmap;
 use crate::ns::*;
 
@@ -14,7 +16,7 @@ pub struct Diagnostic {
     pub(crate) is_warning: bool,
     pub(crate) is_verify_error: bool,
     pub(crate) arguments: Vec<DiagnosticArgument>,
-    pub(crate) custom_id: RefCell<Option<String>>,
+    pub(crate) custom_kind: RefCell<Option<Rc<dyn Any>>>,
 }
 
 impl Eq for Diagnostic {}
@@ -46,7 +48,7 @@ impl Diagnostic {
             is_verify_error: false,
             is_warning: false,
             arguments,
-            custom_id: RefCell::new(None),
+            custom_kind: RefCell::new(None),
         }
     }
 
@@ -57,7 +59,7 @@ impl Diagnostic {
             is_verify_error: true,
             is_warning: false,
             arguments,
-            custom_id: RefCell::new(None),
+            custom_kind: RefCell::new(None),
         }
     }
 
@@ -68,7 +70,7 @@ impl Diagnostic {
             is_verify_error: false,
             is_warning: true,
             arguments,
-            custom_id: RefCell::new(None),
+            custom_kind: RefCell::new(None),
         }
     }
 
@@ -104,12 +106,12 @@ impl Diagnostic {
         self.kind.id()
     }
 
-    pub fn custom_id(&self) -> Option<String> {
-        self.custom_id.borrow().clone()
+    pub fn custom_kind(&self) -> Option<Rc<dyn Any>> {
+        self.custom_kind.borrow().clone()
     }
 
-    pub fn set_custom_id(&self, id: Option<&str>) {
-        self.custom_id.replace(id.map(|id| id.to_owned()));
+    pub fn set_custom_kind(&self, id: Option<Rc<dyn Any>>) {
+        self.custom_kind.replace(id);
     }
 
     /// Formats the diagnostic by overriding the message text.

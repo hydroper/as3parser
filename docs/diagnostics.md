@@ -47,16 +47,22 @@ The `diagnostic_arguments![]` literal takes elements in one of the forms:
 * `Token(token)`
 * `String(string)`
 
-## Custom IDs
+## Custom kinds
 
-If you need to support your own messages, set the `custom_id` field:
+If you need to support your own messages, set the `custom_kind` field:
 
 ```rust
-diagnostic.set_custom_id(Some("myMessage"));
+diagnostic.set_custom_kind(Some(Rc::new(kind)));
 ```
 
-Finish formatting your own message by attaching additional information with:
+Where `kind` is an enumeration's variant. You may then later cast the custom kind from `Rc<dyn Any>` to your enumeration through `.downcast::<MyEnum>()`.
 
-```
+If you want, for simple debugging purposes, you may finish formatting your own message with location information by using:
+
+```rust
 diagnostic.format_with_message("My message", Some(custom_id_number))
 ```
+
+For real use cases, calling `.format_with_message()` is not preferred if your application is not solely in English, since it will add categories such as `Warning`.
+
+Moreover, argument variants in `as3_parser::ns::Diagnostic` may not be enough. For example, a compiler may want to store a symbol argument; in this case, an extra layer over `as3_parser::ns::Diagnostic` must be provided, supporting more variants.
