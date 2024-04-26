@@ -133,6 +133,19 @@ impl<'input> CssParser<'input> {
         }
     }
 
+    fn expect_string(&mut self) -> (String, Location) {
+        if let Token::String(v) = self.token.0.clone() {
+            self.expecting_token_error = false;
+            let location = self.token.1.clone();
+            self.next();
+            (v, location)
+        } else {
+            self.expecting_token_error = true;
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingStringLiteral, diagnostic_arguments![Token(self.token.0.clone())]);
+            ("".into(), self.tokenizer.cursor_location())
+        }
+    }
+
     pub fn expect_eof(&mut self) {
         self.expect(Token::Eof);
     }
@@ -165,6 +178,41 @@ impl<'input> CssParser<'input> {
         Rc::new(CssMediaQueryCondition::Invalidated(InvalidatedNode {
             location: location.clone(),
         }))
+    }
+
+    fn eof(&self) -> bool {
+        matches!(self.token.0, Token::Eof)
+    }
+
+    pub fn parse_document(&mut self) -> Rc<CssDocument> {
+        self.mark_location();
+        let mut directives: Vec<Rc<CssDirective>> = vec![];
+        while !self.eof() {
+            directives.push(self.parse_directive());
+        }
+        let loc = self.pop_location();
+        Rc::new(CssDocument {
+            location: loc,
+            directives,
+        })
+    }
+
+    fn parse_directive(&mut self) -> Rc<CssDirective> {
+        if self.peek(Token::CssAtNamespace) {
+            self.mark_location();
+            self.next();
+            let prefix = self.expect_identifier();
+            let uri = self.expect_string();
+            self.expect(Token::CssSemicolons);
+            let loc = self.pop_location();
+            Rc::new(CssDirective::NamespaceDefinition(CssNamespaceDefinition {
+                location: loc,
+                prefix,
+                uri,
+            }))
+        } else {
+            todo!()
+        }
     }
 }
 

@@ -331,8 +331,7 @@ pub struct CssCombinatorSelector {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct CssDocument {
     pub location: Location,
-    /// List of rules, `@namespace` definitions, and `@font-face` definitions.
-    pub children: Vec<Rc<CssDirective>>,
+    pub directives: Vec<Rc<CssDirective>>,
 }
 
 /// CSS DOM for an `@font-face` statement.
@@ -427,6 +426,6 @@ pub struct CssRule {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct CssNamespaceDefinition {
     pub location: Location,
-    pub prefix: String,
-    pub uri: String,
+    pub prefix: (String, Location),
+    pub uri: (String, Location),
 }

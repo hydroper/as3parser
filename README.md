@@ -47,7 +47,7 @@ MXML supports a subset of CSS.
 - [ ] Parse a style sheet
   - [ ] Document
   - [ ] Directive
-    - [ ] `@namespace`
+    - [x] `@namespace`
     - [ ] `@media`
       - [ ] Conditions
       - [ ] Rules
