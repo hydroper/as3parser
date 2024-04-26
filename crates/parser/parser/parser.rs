@@ -8,7 +8,7 @@ pub struct Parser<'input> {
     locations: Vec<Location>,
     activations: Vec<ParserActivation>,
     ignore_xml_whitespace: bool,
-    expected_token_error: bool,
+    expecting_token_error: bool,
 }
 
 impl<'input> Parser<'input> {
@@ -21,7 +21,7 @@ impl<'input> Parser<'input> {
             locations: vec![],
             activations: vec![],
             ignore_xml_whitespace: options.ignore_xml_whitespace,
-            expected_token_error: false,
+            expecting_token_error: false,
         }
     }
 
@@ -172,7 +172,7 @@ impl<'input> Parser<'input> {
 
     fn expect(&mut self, token: Token) -> Result<(), ParserError> {
         if self.token.0 != token {
-            self.expected_token_error = true;
+            self.expecting_token_error = true;
             self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagnostic_arguments![Token(token.clone()), Token(self.token.0.clone())]);
             let expecting_identifier_name = token.is_identifier_name();
             while self.token.0 != Token::Eof && (if expecting_identifier_name { self.token.0.is_identifier_name() } else { true }) {
@@ -183,7 +183,7 @@ impl<'input> Parser<'input> {
             }
             Ok(())
         } else {
-            self.expected_token_error = false;
+            self.expecting_token_error = false;
             self.next()?;
             Ok(())
         }
@@ -192,20 +192,20 @@ impl<'input> Parser<'input> {
     /// Expects a token; but if it fails, does not skip any token.
     fn non_greedy_expect(&mut self, token: Token) -> Result<(), ParserError> {
         if self.token.0 != token {
-            self.expected_token_error = true;
+            self.expecting_token_error = true;
             self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagnostic_arguments![Token(token.clone()), Token(self.token.0.clone())]);
             Ok(())
         } else {
-            self.expected_token_error = false;
+            self.expecting_token_error = false;
             self.next()?;
             Ok(())
         }
     }
 
     fn non_greedy_expect_virtual_semicolon(&mut self) -> Result<(), ParserError> {
-        self.expected_token_error = false;
+        self.expecting_token_error = false;
         if !self.parse_semicolon()? {
-            self.expected_token_error = true;
+            self.expecting_token_error = true;
             self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingEitherSemicolonOrNewLineHere, vec![]);
         }
         Ok(())
@@ -213,7 +213,7 @@ impl<'input> Parser<'input> {
 
     fn expect_and_ie_xml_tag(&mut self, token: Token) -> Result<(), ParserError> {
         if self.token.0 != token {
-            self.expected_token_error = true;
+            self.expecting_token_error = true;
             self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagnostic_arguments![Token(token.clone()), Token(self.token.0.clone())]);
             while self.token.0 != Token::Eof {
                 self.next_ie_xml_tag()?;
@@ -223,7 +223,7 @@ impl<'input> Parser<'input> {
             }
             Ok(())
         } else {
-            self.expected_token_error = false;
+            self.expecting_token_error = false;
             self.next_ie_xml_tag()?;
             Ok(())
         }
@@ -232,11 +232,11 @@ impl<'input> Parser<'input> {
     /// Expects a token; but if it fails, does not skip any token.
     fn non_greedy_expect_and_ie_xml_tag(&mut self, token: Token) -> Result<(), ParserError> {
         if self.token.0 != token {
-            self.expected_token_error = true;
+            self.expecting_token_error = true;
             self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagnostic_arguments![Token(token.clone()), Token(self.token.0.clone())]);
             Ok(())
         } else {
-            self.expected_token_error = false;
+            self.expecting_token_error = false;
             self.next_ie_xml_tag()?;
             Ok(())
         }
@@ -244,7 +244,7 @@ impl<'input> Parser<'input> {
 
     fn expect_and_ie_xml_content(&mut self, token: Token) -> Result<(), ParserError> {
         if self.token.0 != token {
-            self.expected_token_error = true;
+            self.expecting_token_error = true;
             self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagnostic_arguments![Token(token.clone()), Token(self.token.0.clone())]);
             while self.token.0 != Token::Eof {
                 self.next_ie_xml_content()?;
@@ -254,7 +254,7 @@ impl<'input> Parser<'input> {
             }
             Ok(())
         } else {
-            self.expected_token_error = false;
+            self.expecting_token_error = false;
             self.next_ie_xml_content()?;
             Ok(())
         }
@@ -262,11 +262,11 @@ impl<'input> Parser<'input> {
 
     fn non_greedy_expect_and_ie_xml_content(&mut self, token: Token) -> Result<(), ParserError> {
         if self.token.0 != token {
-            self.expected_token_error = true;
+            self.expecting_token_error = true;
             self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagnostic_arguments![Token(token.clone()), Token(self.token.0.clone())]);
             Ok(())
         } else {
-            self.expected_token_error = false;
+            self.expecting_token_error = false;
             self.next_ie_xml_content()?;
             Ok(())
         }
@@ -274,20 +274,20 @@ impl<'input> Parser<'input> {
 
     fn expect_identifier(&mut self, reserved_words: bool) -> Result<(String, Location), ParserError> {
         if let Token::Identifier(id) = self.token.0.clone() {
-            self.expected_token_error = false;
+            self.expecting_token_error = false;
             let location = self.token.1.clone();
             self.next()?;
             Ok((id, location))
         } else {
             if reserved_words {
                 if let Some(id) = self.token.0.reserved_word_name() {
-                    self.expected_token_error = false;
+                    self.expecting_token_error = false;
                     let location = self.token.1.clone();
                     self.next()?;
                     return Ok((id, location));
                 }
             }
-            self.expected_token_error = true;
+            self.expecting_token_error = true;
             self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingIdentifier, diagnostic_arguments![Token(self.token.0.clone())]);
             /*
             while self.token.0 != Token::Eof && self.token.0.is_identifier_name() {
@@ -305,12 +305,12 @@ impl<'input> Parser<'input> {
     fn _expect_context_keyword(&mut self, name: &str) -> Result<(), ParserError> {
         if let Token::Identifier(id) = self.token.0.clone() {
             if id == name && self.token.1.character_count() == name.len() {
-                self.expected_token_error = false;
+                self.expecting_token_error = false;
                 self.next()?;
                 return Ok(());
             }
         }
-        self.expected_token_error = true;
+        self.expecting_token_error = true;
         self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagnostic_arguments![String(format!("'{name}'")), Token(self.token.0.clone())]);
         while self.token.0 != Token::Eof && self.token.0.is_identifier_name() {
             if self._consume_context_keyword(name)? {
@@ -325,12 +325,12 @@ impl<'input> Parser<'input> {
     fn non_greedy_expect_context_keyword(&mut self, name: &str) -> Result<(), ParserError> {
         if let Token::Identifier(id) = self.token.0.clone() {
             if id == name && self.token.1.character_count() == name.len() {
-                self.expected_token_error = false;
+                self.expecting_token_error = false;
                 self.next()?;
                 return Ok(());
             }
         }
-        self.expected_token_error = true;
+        self.expecting_token_error = true;
         self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagnostic_arguments![String(format!("'{name}'")), Token(self.token.0.clone())]);
         Ok(())
     }
@@ -339,9 +339,9 @@ impl<'input> Parser<'input> {
     /// but starts with a greater-than symbol, the first character is shifted off
     /// from the facing token.
     fn _expect_type_parameters_gt(&mut self) -> Result<(), ParserError> {
-        self.expected_token_error = false;
+        self.expecting_token_error = false;
         if !self.consume_type_parameters_gt()? {
-            self.expected_token_error = true;
+            self.expecting_token_error = true;
             self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagnostic_arguments![Token(Token::Gt), Token(self.token.0.clone())]);
             while self.token.0 != Token::Eof {
                 self.next()?;
@@ -353,9 +353,9 @@ impl<'input> Parser<'input> {
         Ok(())
     }
     fn non_greedy_expect_type_parameters_gt(&mut self) -> Result<(), ParserError> {
-        self.expected_token_error = false;
+        self.expecting_token_error = false;
         if !self.consume_type_parameters_gt()? {
-            self.expected_token_error = true;
+            self.expecting_token_error = true;
             self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagnostic_arguments![Token(Token::Gt), Token(self.token.0.clone())]);
         }
         Ok(())
@@ -515,7 +515,7 @@ impl<'input> Parser<'input> {
                 })?;
                 let mut alternative = self.create_invalidated_expression(&self.tokenizer.cursor_location());
                 self.non_greedy_expect(Token::Colon)?;
-                if !self.expected_token_error {
+                if !self.expecting_token_error {
                     alternative = self.parse_expression(ParserExpressionContext {
                         min_precedence: OperatorPrecedence::AssignmentAndOther,
                         ..context.clone()
@@ -1011,7 +1011,7 @@ impl<'input> Parser<'input> {
         let mut params: Vec<Rc<Parameter>> = vec![];
         let mut return_annotation = Some(self.create_invalidated_expression(&self.tokenizer.cursor_location()));
         self.non_greedy_expect(Token::LeftParen)?;
-        if !self.expected_token_error {
+        if !self.expecting_token_error {
             if !self.peek(Token::RightParen) {
                 params.push(self.parse_parameter()?);
                 while self.consume(Token::Comma)? {
@@ -1019,7 +1019,7 @@ impl<'input> Parser<'input> {
                 }
             }
             self.non_greedy_expect(Token::RightParen)?;
-            if !self.expected_token_error {
+            if !self.expecting_token_error {
                 return_annotation = if self.consume(Token::Colon)? { Some(self.parse_type_expression()?) } else { None };
             }
             self.validate_parameter_list(params.iter().map(|p| (p.kind, p.location.clone())).collect::<Vec<_>>())?;
@@ -1180,7 +1180,7 @@ impl<'input> Parser<'input> {
             self.non_greedy_expect_type_parameters_gt()?;
             let mut elements: Vec<Element> = vec![];
             self.non_greedy_expect(Token::LeftBracket)?;
-            if !self.expected_token_error {
+            if !self.expecting_token_error {
                 while !self.peek(Token::RightBracket) {
                     if self.peek(Token::Ellipsis) {
                         self.mark_location();
@@ -1534,7 +1534,7 @@ impl<'input> Parser<'input> {
                 self.consume_and_ie_xml_tag(Token::XmlWhitespace)?;
                 self.non_greedy_expect_and_ie_xml_tag(Token::Assign)?;
                 let mut value = XmlAttributeValue::Value(("".into(), self.token.1.clone()));
-                if !self.expected_token_error {
+                if !self.expecting_token_error {
                     self.consume_and_ie_xml_tag(Token::XmlWhitespace)?;
                     if self.consume(Token::LeftBrace)? {
                         let expr = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::AssignmentAndOther, ..default() })?;
@@ -2087,7 +2087,7 @@ impl<'input> Parser<'input> {
 
         let mut parameters = vec![];
         self.non_greedy_expect(Token::LeftParen)?;
-        if !self.expected_token_error {
+        if !self.expecting_token_error {
             if !self.peek(Token::RightParen) {
                 parameters.push(self.parse_function_type_parameter()?);
                 while self.consume(Token::Comma)? {
@@ -2100,7 +2100,7 @@ impl<'input> Parser<'input> {
 
         let mut result_type = self.create_invalidated_expression(&self.tokenizer.cursor_location());
         self.non_greedy_expect(Token::Colon)?;
-        if !self.expected_token_error {
+        if !self.expecting_token_error {
             result_type = self.parse_type_expression()?;
         }
         Ok(Rc::new(Expression::FunctionType(FunctionTypeExpression {
@@ -2425,7 +2425,7 @@ impl<'input> Parser<'input> {
         self.mark_location();
         self.non_greedy_expect(Token::LeftBrace)?;
         let mut directives = vec![];
-        if !self.expected_token_error {
+        if !self.expecting_token_error {
             let mut semicolon = false;
             while !self.peek(Token::RightBrace) && !self.peek(Token::Eof) {
                 if !directives.is_empty() && !semicolon {
@@ -2455,13 +2455,13 @@ impl<'input> Parser<'input> {
         let mut alternative: Option<Rc<Directive>> = None;
         let semicolon;
         self.non_greedy_expect(Token::LeftParen)?;
-        if self.expected_token_error {
+        if self.expecting_token_error {
             semicolon = self.parse_semicolon()?;
         } else {
             test = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
             consequent = self.create_invalidated_directive(&self.tokenizer.cursor_location());
             self.non_greedy_expect(Token::RightParen)?;
-            if self.expected_token_error {
+            if self.expecting_token_error {
                 semicolon = self.parse_semicolon()?;
             } else {
                 let (consequent_1, semicolon_1) = self.parse_substatement(context.clone())?;
@@ -2500,12 +2500,12 @@ impl<'input> Parser<'input> {
         let mut discriminant = self.create_invalidated_expression(&self.tokenizer.cursor_location());
         let mut cases: Vec<Case> = vec![];
         self.non_greedy_expect(Token::LeftParen)?;
-        if !self.expected_token_error {
+        if !self.expecting_token_error {
             discriminant = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
             self.non_greedy_expect(Token::RightParen)?;
-            if !self.expected_token_error {
+            if !self.expecting_token_error {
                 self.non_greedy_expect(Token::LeftBrace)?;
-                if !self.expected_token_error {
+                if !self.expecting_token_error {
                     cases = self.parse_case_elements(context)?;
                     self.non_greedy_expect(Token::RightBrace)?;
                 }
@@ -2576,12 +2576,12 @@ impl<'input> Parser<'input> {
         let mut discriminant = self.create_invalidated_expression(&self.tokenizer.cursor_location());
         let mut cases: Vec<TypeCase> = vec![];
         self.non_greedy_expect(Token::LeftParen)?;
-        if !self.expected_token_error {
+        if !self.expecting_token_error {
             discriminant = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
             self.non_greedy_expect(Token::RightParen)?;
-            if !self.expected_token_error {
+            if !self.expecting_token_error {
                 self.non_greedy_expect(Token::LeftBrace)?;
-                if !self.expected_token_error {
+                if !self.expecting_token_error {
                     cases = self.parse_type_case_elements(context)?;
                     self.non_greedy_expect(Token::RightBrace)?;
                 }
@@ -2608,12 +2608,12 @@ impl<'input> Parser<'input> {
             } else {
                 self.mark_location();
                 self.non_greedy_expect(Token::Case)?;
-                if !self.expected_token_error {
+                if !self.expecting_token_error {
                     self.non_greedy_expect(Token::LeftParen)?;
-                    if !self.expected_token_error {
+                    if !self.expecting_token_error {
                         let parameter = Some(self.parse_typed_destructuring()?);
                         self.non_greedy_expect(Token::RightParen)?;
-                        if !self.expected_token_error {
+                        if !self.expecting_token_error {
                             let block = Rc::new(self.parse_block(context.clone())?);
                             cases.push(TypeCase {
                                 location: self.pop_location(),
@@ -2644,10 +2644,10 @@ impl<'input> Parser<'input> {
 
         let mut test = self.create_invalidated_expression(&self.tokenizer.cursor_location());
         self.non_greedy_expect(Token::While)?;
-        if !self.expected_token_error {
+        if !self.expecting_token_error {
             test = self.create_invalidated_expression(&self.tokenizer.cursor_location());
             self.non_greedy_expect(Token::LeftParen)?;
-            if !self.expected_token_error {
+            if !self.expecting_token_error {
                 test = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
                 self.non_greedy_expect(Token::RightParen)?;
             }
@@ -2673,11 +2673,11 @@ impl<'input> Parser<'input> {
         let mut body = self.create_invalidated_directive(&self.tokenizer.cursor_location());
         let semicolon: bool;
         self.non_greedy_expect(Token::LeftParen)?;
-        if !self.expected_token_error {
+        if !self.expecting_token_error {
             test = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
             body = self.create_invalidated_directive(&self.tokenizer.cursor_location());
             self.non_greedy_expect(Token::RightParen)?;
-            if !self.expected_token_error {
+            if !self.expecting_token_error {
                 let (body_1, semicolon_1) = self.parse_substatement(context)?;
                 body = body_1;
                 semicolon = semicolon_1;
@@ -2711,7 +2711,7 @@ impl<'input> Parser<'input> {
         }
 
         self.non_greedy_expect(Token::LeftParen)?;
-        if self.expected_token_error {
+        if self.expecting_token_error {
             let body = self.create_invalidated_directive(&self.tokenizer.cursor_location());
             let semicolon = self.parse_semicolon()?;
             return Ok((Rc::new(Directive::ForStatement(ForStatement {
@@ -2791,7 +2791,7 @@ impl<'input> Parser<'input> {
 
     fn parse_for_each_statement(&mut self, context: ParserDirectiveContext) -> Result<(Rc<Directive>, bool), ParserError> {
         self.non_greedy_expect(Token::LeftParen)?;
-        if self.expected_token_error {
+        if self.expecting_token_error {
             let left = ForInBinding::Expression(self.create_invalidated_expression(&self.tokenizer.cursor_location()));
             let right = self.create_invalidated_expression(&self.tokenizer.cursor_location());
             let body = self.create_invalidated_directive(&self.tokenizer.cursor_location());
@@ -2822,7 +2822,7 @@ impl<'input> Parser<'input> {
         };
         let mut right = self.create_invalidated_expression(&self.tokenizer.cursor_location());
         self.non_greedy_expect(Token::In)?;
-        if !self.expected_token_error {
+        if !self.expecting_token_error {
             right = self.parse_expression(ParserExpressionContext {
                 allow_in: true, min_precedence: OperatorPrecedence::List, ..default()
             })?;
@@ -2909,7 +2909,7 @@ impl<'input> Parser<'input> {
 
         let mut object = self.create_invalidated_expression(&self.tokenizer.cursor_location());
         self.non_greedy_expect(Token::LeftParen)?;
-        if !self.expected_token_error {
+        if !self.expecting_token_error {
             object = self.parse_expression(ParserExpressionContext { allow_in: true, min_precedence: OperatorPrecedence::List, ..default() })?;
         }
         self.non_greedy_expect(Token::RightParen)?;
@@ -3033,10 +3033,10 @@ impl<'input> Parser<'input> {
                 self.mark_location();
                 self.next()?;
                 self.non_greedy_expect(Token::LeftParen)?;
-                if !self.expected_token_error {
+                if !self.expecting_token_error {
                     let parameter = self.parse_typed_destructuring()?;
                     self.non_greedy_expect(Token::RightParen)?;
-                    if !self.expected_token_error {
+                    if !self.expecting_token_error {
                         let block = Rc::new(self.parse_block(context.clone())?);
                         catch_clauses.push(CatchClause {
                             location: self.pop_location(),
@@ -3077,15 +3077,15 @@ impl<'input> Parser<'input> {
         let mut expression = self.create_invalidated_expression(&self.tokenizer.cursor_location());
         self.forbid_line_break_before_token();
         self.non_greedy_expect_context_keyword("xml")?;
-        if !self.expected_token_error {
+        if !self.expecting_token_error {
             expression = self.create_invalidated_expression(&self.tokenizer.cursor_location());
             self.forbid_line_break_before_token();
             self.non_greedy_expect_context_keyword("namespace")?;
-            if !self.expected_token_error {
+            if !self.expecting_token_error {
                 expression = self.create_invalidated_expression(&self.tokenizer.cursor_location());
                 self.non_greedy_expect(Token::Assign)?;
 
-                if !self.expected_token_error {
+                if !self.expecting_token_error {
                     expression = self.parse_expression(ParserExpressionContext {
                         allow_in: true,
                         allow_assignment: false,
@@ -3601,7 +3601,7 @@ impl<'input> Parser<'input> {
         self.next()?;
         let mut expression = self.create_invalidated_expression(&self.tokenizer.cursor_location());
         self.non_greedy_expect_context_keyword("namespace")?;
-        if !self.expected_token_error {
+        if !self.expecting_token_error {
             expression = self.parse_expression(ParserExpressionContext {
                 min_precedence: OperatorPrecedence::List,
                 ..default()
@@ -3978,7 +3978,7 @@ impl<'input> Parser<'input> {
         let left = self.expect_identifier(true)?;
         let mut right = self.create_invalidated_expression(&self.tokenizer.cursor_location());
         self.non_greedy_expect(Token::Assign)?;
-        if !self.expected_token_error {
+        if !self.expecting_token_error {
             right = self.parse_type_expression()?;
         }
 
@@ -4098,7 +4098,7 @@ impl<'input> Parser<'input> {
         }
         let mut list: Vec<Rc<TypeParameter>> = vec![];
         self.non_greedy_expect(Token::Lt)?;
-        if !self.expected_token_error {
+        if !self.expecting_token_error {
             list.push(self.parse_type_parameter()?);
             while self.consume(Token::Comma)? {
                 list.push(self.parse_type_parameter()?);
@@ -4134,7 +4134,7 @@ impl<'input> Parser<'input> {
             self.next()?;
             let mut test = self.create_invalidated_expression(&self.tokenizer.cursor_location());
             self.non_greedy_expect(Token::LeftParen)?;
-            if !self.expected_token_error {
+            if !self.expecting_token_error {
                 test = self.parse_configuration_expression()?;
             }
             self.non_greedy_expect(Token::RightParen)?;
@@ -4880,7 +4880,7 @@ impl<'input> Parser<'input> {
                 self.consume_and_ie_xml_tag(Token::XmlWhitespace)?;
                 self.non_greedy_expect_and_ie_xml_tag(Token::Assign)?;
                 let mut value = ("".into(), self.token.1.clone());
-                if !self.expected_token_error {
+                if !self.expecting_token_error {
                     self.consume_and_ie_xml_tag(Token::XmlWhitespace)?;
                     value = self.parse_xml_attribute_value()?;
                 }
