@@ -45,3 +45,32 @@ impl TryFrom<u32> for OperatorPrecedence {
         if let Some(v) = FromPrimitive::from_u32(value as u32) { Ok(v) } else { Err(()) }
     }
 }
+
+#[derive(FromPrimitive)]
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[repr(u32)]
+pub enum CssOperatorPrecedence {
+    MultiValue = 2,
+    Array = 1,
+}
+
+impl CssOperatorPrecedence {
+    pub fn add(&self, value: u32) -> Option<Self> {
+        FromPrimitive::from_u32(*self as u32 + value)
+    }
+
+    pub fn value_of(&self) -> u32 {
+        *self as u32
+    }
+
+    pub fn includes(&self, other: &Self) -> bool {
+        *self <= *other
+    }
+}
+
+impl TryFrom<u32> for CssOperatorPrecedence {
+    type Error = ();
+    fn try_from(value: u32) -> Result<Self, Self::Error> {
+        if let Some(v) = FromPrimitive::from_u32(value as u32) { Ok(v) } else { Err(()) }
+    }
+}

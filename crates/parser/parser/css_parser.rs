@@ -166,8 +166,8 @@ impl<'input> CssParser<'input> {
         }))
     }
 
-    fn create_invalidated_property_value(&self, location: &Location) -> Rc<CssPropertyValueNode> {
-        Rc::new(CssPropertyValueNode::Invalidated(InvalidatedNode {
+    fn create_invalidated_property_value(&self, location: &Location) -> Rc<CssPropertyValue> {
+        Rc::new(CssPropertyValue::Invalidated(InvalidatedNode {
             location: location.clone(),
         }))
     }
@@ -533,6 +533,10 @@ impl<'input> CssParser<'input> {
         }
         Rc::new(CssProperty::new(self.pop_location(), name, value))
     }
+
+    fn parse_property_value(&mut self) -> Rc<CssPropertyValue> {
+        //
+    }
 }
 
 fn _rgb_bytes_to_integer(r: f64, g: f64, b: f64) -> u32 {
@@ -568,12 +572,24 @@ impl<'input> CssParserFacade<'input> {
     pub fn parse_selector_condition(&self) -> Rc<CssSelectorCondition> {
         let mut parser = self.create_parser();
         parser.next();
-        parser.parse_selector_condition()
+        let r = parser.parse_selector_condition();
+        parser.expect_eof();
+        r
     }
 
-    pub fn parse_property(&mut self) -> Rc<CssProperty> {
+    pub fn parse_property(&self) -> Rc<CssProperty> {
         let mut parser = self.create_parser();
         parser.next();
-        parser.parse_property()
+        let r = parser.parse_property();
+        parser.expect_eof();
+        r
+    }
+
+    pub fn parse_property_value(&self) -> Rc<CssPropertyValue> {
+        let mut parser = self.create_parser();
+        parser.next();
+        let r = parser.parse_property_value();
+        parser.expect_eof();
+        r
     }
 }

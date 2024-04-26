@@ -49,9 +49,10 @@ impl CssDirective {
 }
 
 #[derive(Clone, Serialize, Deserialize)]
-pub enum CssPropertyValueNode {
+pub enum CssPropertyValue {
     Invalidated(InvalidatedNode),
     Array(CssArrayPropertyValue),
+    MultiValue(CssMultiValuePropertyValue),
     Color(CssColorPropertyValue),
     Number(CssNumberPropertyValue),
     RgbColor(CssRgbColorPropertyValue),
@@ -65,11 +66,12 @@ pub enum CssPropertyValueNode {
     Embed(CssEmbedPropertyValue),
 }
 
-impl CssPropertyValueNode {
+impl CssPropertyValue {
     pub fn location(&self) -> Location {
         match self {
             Self::Invalidated(v) => v.location.clone(),
             Self::Array(v) => v.location.clone(),
+            Self::MultiValue(v) => v.location.clone(),
             Self::Color(v) => v.location.clone(),
             Self::Number(v) => v.location.clone(),
             Self::RgbColor(v) => v.location.clone(),
@@ -106,7 +108,7 @@ impl CssSelector {
     }
 }
 
-/// Array type property values are comma-separated values in CSS properties.
+/// Array property values are comma-separated values in CSS properties.
 ///
 /// For example:
 ///
@@ -116,8 +118,20 @@ impl CssSelector {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct CssArrayPropertyValue {
     pub location: Location,
-    /// List of `CssPropertyValue`s.
-    pub elements: Vec<Rc<CssDirective>>,
+    pub elements: Vec<Rc<CssPropertyValue>>,
+}
+
+/// Multi-value property values are space-separated values in CSS properties.
+///
+/// For example:
+///
+/// ```css
+/// 1px solid blue
+/// ```
+#[derive(Clone, Serialize, Deserialize)]
+pub struct CssMultiValuePropertyValue {
+    pub location: Location,
+    pub values: Vec<Rc<CssPropertyValue>>,
 }
 
 /// A CSS base selector.
@@ -346,12 +360,12 @@ pub struct CssFontFace {
 pub struct CssProperty {
     pub location: Location,
     pub name: (String, Location),
-    pub value: Rc<CssPropertyValueNode>,
+    pub value: Rc<CssPropertyValue>,
     _phantom: PhantomData<()>,
 }
 
 impl CssProperty {
-    pub fn new(location: Location, name: (String, Location), value: Rc<CssPropertyValueNode>) -> Self {
+    pub fn new(location: Location, name: (String, Location), value: Rc<CssPropertyValue>) -> Self {
         Self {
             location,
             name: (Self::normalize(&name.0), name.1),
