@@ -29,6 +29,7 @@ pub enum Token {
     CssAtMedia,
     CssAtFontFace,
     CssImportant,
+    CssSemicolons,
 
     // Punctuator
     ColonColon,
@@ -199,6 +200,7 @@ impl ToString for Token {
             Token::CssAtMedia => "at-media",
             Token::CssAtFontFace => "at-font-face",
             Token::CssImportant => "'!important'",
+            Token::CssSemicolons => "semicolon",
 
             // Punctuators
             Token::ColonColon => "colon-colon",

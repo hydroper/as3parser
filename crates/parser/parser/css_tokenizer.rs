@@ -103,6 +103,7 @@ impl<'input> CssTokenizer<'input> {
             }
             if word.is_empty() {
                 self.add_unexpected_error();
+                word = INVALIDATED_IDENTIFIER.to_owned();
             }
             return (Token::CssHashWord(word), start.combine_with(self.cursor_location()));
         }
@@ -150,7 +151,7 @@ impl<'input> CssTokenizer<'input> {
                 while self.characters.peek_or_zero() == ';' {
                     self.characters.next();
                 }
-                (Token::Semicolon, start.combine_with(self.cursor_location()))
+                (Token::CssSemicolons, start.combine_with(self.cursor_location()))
             },
             '^' => {
                 self.characters.next();

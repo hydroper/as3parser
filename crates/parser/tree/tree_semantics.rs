@@ -199,6 +199,7 @@ impl_semantics_with_loc_field!(
     MxmlAttribute,
     CssProperty,
     CssRule,
+    CssDocument,
 );
 
 impl_semantics_1!(
@@ -221,4 +222,5 @@ impl_semantics_1!(
     CssPropertyValueNode,
     CssSelector,
     CssProperty,
+    CssDocument,
 );
