@@ -136,6 +136,36 @@ impl<'input> CssParser<'input> {
     pub fn expect_eof(&mut self) {
         self.expect(Token::Eof);
     }
+
+    fn create_invalidated_directive(&self, location: &Location) -> Rc<CssDirective> {
+        Rc::new(CssDirective::Invalidated(InvalidatedNode {
+            location: location.clone(),
+        }))
+    }
+
+    fn create_invalidated_property_value(&self, location: &Location) -> Rc<CssPropertyValueNode> {
+        Rc::new(CssPropertyValueNode::Invalidated(InvalidatedNode {
+            location: location.clone(),
+        }))
+    }
+
+    fn create_invalidated_selector(&self, location: &Location) -> Rc<CssSelector> {
+        Rc::new(CssSelector::Invalidated(InvalidatedNode {
+            location: location.clone(),
+        }))
+    }
+
+    fn create_invalidated_selector_condition(&self, location: &Location) -> Rc<CssSelectorCondition> {
+        Rc::new(CssSelectorCondition::Invalidated(InvalidatedNode {
+            location: location.clone(),
+        }))
+    }
+
+    fn create_invalidated_media_query_condition(&self, location: &Location) -> Rc<CssMediaQueryCondition> {
+        Rc::new(CssMediaQueryCondition::Invalidated(InvalidatedNode {
+            location: location.clone(),
+        }))
+    }
 }
 
 fn _rgb_bytes_to_integer(r: f64, g: f64, b: f64) -> u32 {
