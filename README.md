@@ -75,10 +75,9 @@ MXML supports a subset of CSS.
     - [ ] `Embed(...)`
       - The arguments may be key-value entries each as an identifier key followed by `=` followed by a string or text property value.
       - An entry may be a keyless entry.
+    - [ ] Ignore operators `+`, `-`, `*`, and `/`, returning an invalidated value.
 - [ ] `CssParserFacade::parse_text()`
-  - [ ] Parses a series of tokens that together form an unquoted list of characters, such as URLs in `url(../font.ttf)`, and font names in `font-family: Font 1, _serif;`, into a text. Number tokens, identifiers, hash words, and punctuators, are each taken in their raw character forms and concatenated in order.
-    - [ ] Spacing between concatenation: if delta of last offset of a token and the first offset of another token is not zero, a space character is contributed between these tokens.
-  - [ ] If a string is found, it overrides the last parsed text.
+  - [ ] If the source text starts with a quote or an apostrophe, parses a string and expects end-of-file; otherwise returns source text as is before ever scanning the first token.
 
 Conform a bit to the Apache Royale sources:
 

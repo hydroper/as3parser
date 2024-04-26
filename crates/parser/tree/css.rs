@@ -57,8 +57,7 @@ pub enum CssPropertyValue {
     Number(CssNumberPropertyValue),
     RgbColor(CssRgbColorPropertyValue),
     String(CssStringPropertyValue),
-    Text(CssTextPropertyValue),
-
+    Identifier(CssIdentifierPropertyValue),
     ClassReference(CssClassReferencePropertyValue),
     PropertyReference(CssPropertyReferencePropertyValue),
     Url(CssUrlPropertyValue),
@@ -285,9 +284,8 @@ pub struct CssStringPropertyValue {
     pub value: String,
 }
 
-/// A CSS text is a string value written without quotes.
 #[derive(Clone, Serialize, Deserialize)]
-pub struct CssTextPropertyValue {
+pub struct CssIdentifierPropertyValue {
     pub location: Location,
     pub value: String,
 }
