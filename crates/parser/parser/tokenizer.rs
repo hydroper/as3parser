@@ -60,40 +60,40 @@ impl<'input> Tokenizer<'input> {
                 return (Token::Comma, location);
             },
             '(' => {
-                // LeftParen
+                // ParenOpen
                 self.characters.next();
                 let location = start.combine_with(self.cursor_location());
-                return (Token::LeftParen, location);
+                return (Token::ParenOpen, location);
             },
             ')' => {
-                // RightParen
+                // ParenClose
                 self.characters.next();
                 let location = start.combine_with(self.cursor_location());
-                return (Token::RightParen, location);
+                return (Token::ParenClose, location);
             },
             '[' => {
-                // LeftBracket
+                // SquareOpen
                 self.characters.next();
                 let location = start.combine_with(self.cursor_location());
-                return (Token::LeftBracket, location);
+                return (Token::SquareOpen, location);
             },
             ']' => {
-                // RightBracket
+                // SquareClose
                 self.characters.next();
                 let location = start.combine_with(self.cursor_location());
-                return (Token::RightBracket, location);
+                return (Token::SquareClose, location);
             },
             '{' => {
-                // LeftBrace
+                // BlockOpen
                 self.characters.next();
                 let location = start.combine_with(self.cursor_location());
-                return (Token::LeftBrace, location);
+                return (Token::BlockOpen, location);
             },
             '}' => {
-                // RightBrace
+                // BlockClose
                 self.characters.next();
                 let location = start.combine_with(self.cursor_location());
-                return (Token::RightBrace, location);
+                return (Token::BlockClose, location);
             },
             ':' => {
                 self.characters.next();
@@ -1145,11 +1145,11 @@ impl<'input> Tokenizer<'input> {
                 (Token::XmlAttributeValue(value), location)
             },
 
-            // LeftBrace
+            // BlockOpen
             '{' => {
                 self.characters.next();
                 let location = start.combine_with(self.cursor_location());
-                (Token::LeftBrace, location)
+                (Token::BlockOpen, location)
             },
 
             _ => {
@@ -1189,11 +1189,11 @@ impl<'input> Tokenizer<'input> {
                 (Token::Lt, location)
             },
             
-            // LeftBrace
+            // BlockOpen
             '{' => {
                 self.characters.next();
                 let location = start.combine_with(self.cursor_location());
-                (Token::LeftBrace, location)
+                (Token::BlockOpen, location)
             },
 
             // XmlName
