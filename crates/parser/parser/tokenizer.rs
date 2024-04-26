@@ -934,6 +934,8 @@ impl<'input> Tokenizer<'input> {
                     self.consume_line_terminator();
                 } else if !self.characters.has_remaining() {
                     self.add_unexpected_eof_error(DiagnosticKind::InputEndedBeforeReachingClosingQuoteForString);
+                    lines.push(builder.clone());
+                    builder.clear();
                     break;
                 } else {
                     builder.push(ch);
@@ -956,6 +958,8 @@ impl<'input> Tokenizer<'input> {
                         self.consume_line_terminator();
                     } else if !self.characters.has_remaining() {
                         self.add_unexpected_eof_error(DiagnosticKind::InputEndedBeforeReachingClosingQuoteForString);
+                        lines.push(builder.clone());
+                        builder.clear();
                         break;
                     } else {
                         builder.push(ch);
@@ -967,7 +971,7 @@ impl<'input> Tokenizer<'input> {
 
         let location = start.combine_with(self.cursor_location());
 
-        if lines[0].is_empty() {
+        if lines[0].is_empty() && lines.len() > 1 {
             lines.remove(0);
         }
 

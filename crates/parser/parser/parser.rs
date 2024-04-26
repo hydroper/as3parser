@@ -57,6 +57,9 @@ impl<'input> Parser<'input> {
     }
 
     fn patch_syntax_error(&self, original: DiagnosticKind, location: &Location, kind: DiagnosticKind, arguments: Vec<DiagnosticArgument>) {
+        if self.compilation_unit().diagnostics.borrow().is_empty() {
+            return;
+        }
         if self.compilation_unit().diagnostics.borrow().last().unwrap().kind == original {
             self.compilation_unit().diagnostics.borrow_mut().pop();
             self.compilation_unit().add_diagnostic(Diagnostic::new_syntax_error(location, kind, arguments));
