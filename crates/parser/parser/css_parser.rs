@@ -108,6 +108,29 @@ impl<'input> CssTokenizer<'input> {
             return (Token::CssHashWord(word), start.combine_with(self.cursor_location()));
         }
 
+        if ch == '@' {
+            // @namespace
+            if self.characters.peek_seq(10) == "@namespace" {
+                self.characters.skip_count_in_place(10);
+                return (Token::CssAtNamespace, start.combine_with(self.cursor_location()));
+            }
+            // @font-face
+            if self.characters.peek_seq(10) == "@font-face" {
+                self.characters.skip_count_in_place(10);
+                return (Token::CssAtFontFace, start.combine_with(self.cursor_location()));
+            }
+            // @media
+            if self.characters.peek_seq(6) == "@media" {
+                self.characters.skip_count_in_place(6);
+                return (Token::CssAtMedia, start.combine_with(self.cursor_location()));
+            }
+        }
+
+        if ch == '!' && self.characters.peek_seq(10) == "!important" {
+            self.characters.skip_count_in_place(10);
+            return (Token::CssImportant, start.combine_with(self.cursor_location()));
+        }
+
         match ch {
             // .
             // .DECIMAL
@@ -129,6 +152,108 @@ impl<'input> CssTokenizer<'input> {
                     self.characters.next();
                 }
                 (Token::Semicolon, start.combine_with(self.cursor_location()))
+            },
+            '^' => {
+                self.characters.next();
+                if self.characters.peek_or_zero() != '=' {
+                    self.add_unexpected_error();
+                    self.characters.next();
+                    self.scan()
+                } else {
+                    self.characters.next();
+                    (Token::CssBeginsWith, start.combine_with(self.cursor_location()))
+                }
+            },
+            '$' => {
+                self.characters.next();
+                if self.characters.peek_or_zero() != '=' {
+                    self.add_unexpected_error();
+                    self.characters.next();
+                    self.scan()
+                } else {
+                    self.characters.next();
+                    (Token::CssEndsWith, start.combine_with(self.cursor_location()))
+                }
+            },
+            '*' => {
+                self.characters.next();
+                if self.characters.peek_or_zero() == '=' {
+                    self.characters.next();
+                    (Token::CssContains, start.combine_with(self.cursor_location()))
+                } else {
+                    (Token::Times, start.combine_with(self.cursor_location()))
+                }
+            },
+            '~' => {
+                self.characters.next();
+                if self.characters.peek_or_zero() == '=' {
+                    self.characters.next();
+                    (Token::CssListMatch, start.combine_with(self.cursor_location()))
+                } else {
+                    (Token::Tilde, start.combine_with(self.cursor_location()))
+                }
+            },
+            '|' => {
+                self.characters.next();
+                if self.characters.peek_or_zero() == '=' {
+                    self.characters.next();
+                    (Token::CssHreflangMatch, start.combine_with(self.cursor_location()))
+                } else {
+                    (Token::Pipe, start.combine_with(self.cursor_location()))
+                }
+            },
+            '{' => {
+                self.characters.next();
+                (Token::LeftBrace, start.combine_with(self.cursor_location()))
+            },
+            '}' => {
+                self.characters.next();
+                (Token::RightBrace, start.combine_with(self.cursor_location()))
+            },
+            '[' => {
+                self.characters.next();
+                (Token::LeftBracket, start.combine_with(self.cursor_location()))
+            },
+            ']' => {
+                self.characters.next();
+                (Token::RightBracket, start.combine_with(self.cursor_location()))
+            },
+            '(' => {
+                self.characters.next();
+                (Token::LeftParen, start.combine_with(self.cursor_location()))
+            },
+            ')' => {
+                self.characters.next();
+                (Token::RightParen, start.combine_with(self.cursor_location()))
+            },
+            ',' => {
+                self.characters.next();
+                (Token::Comma, start.combine_with(self.cursor_location()))
+            },
+            '%' => {
+                self.characters.next();
+                (Token::Percent, start.combine_with(self.cursor_location()))
+            },
+            '=' => {
+                self.characters.next();
+                (Token::Equals, start.combine_with(self.cursor_location()))
+            },
+            ':' => {
+                self.characters.next();
+                if self.characters.peek_or_zero() == ':' {
+                    self.characters.next();
+                    (Token::ColonColon, start.combine_with(self.cursor_location()))
+                } else {
+                    (Token::Colon, start.combine_with(self.cursor_location()))
+                }
+            },
+            '>' => {
+                self.characters.next();
+                (Token::Gt, start.combine_with(self.cursor_location()))
+            },
+            '+' => {
+                self.characters.next();
+                (Token::Plus, start.combine_with(self.cursor_location()))
             },
             _ => {
                 if self.characters.reached_end() {
@@ -263,7 +388,7 @@ impl<'input> CssTokenizer<'input> {
             }
         }
         let loc = start.combine_with(self.cursor_location());
-        (Token::StringLiteral(builder), loc)
+        (Token::String(builder), loc)
     }
 }
 

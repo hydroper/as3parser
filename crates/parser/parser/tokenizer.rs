@@ -332,9 +332,9 @@ impl<'input> Tokenizer<'input> {
                     let location = start.combine_with(self.cursor_location());
                     return Ok((Token::RemainderAssign, location));
                 }
-                // Remainder
+                // Percent
                 let location = start.combine_with(self.cursor_location());
-                return Ok((Token::Remainder, location));
+                return Ok((Token::Percent, location));
             },
             '&' => {
                 self.characters.next();
@@ -359,7 +359,7 @@ impl<'input> Tokenizer<'input> {
                 }
                 // BitwiseAnd
                 let location = start.combine_with(self.cursor_location());
-                return Ok((Token::BitwiseAnd, location));
+                return Ok((Token::Ampersand, location));
             },
             '^' => {
                 self.characters.next();
@@ -384,7 +384,7 @@ impl<'input> Tokenizer<'input> {
                 }
                 // BitwiseXor
                 let location = start.combine_with(self.cursor_location());
-                return Ok((Token::BitwiseXor, location));
+                return Ok((Token::Hat, location));
             },
             '|' => {
                 self.characters.next();
@@ -409,13 +409,13 @@ impl<'input> Tokenizer<'input> {
                 }
                 // BitwiseOr
                 let location = start.combine_with(self.cursor_location());
-                return Ok((Token::BitwiseOr, location));
+                return Ok((Token::Pipe, location));
             },
             '~' => {
                 // BitwiseNot
                 self.characters.next();
                 let location = start.combine_with(self.cursor_location());
-                return Ok((Token::BitwiseNot, location));
+                return Ok((Token::Tilde, location));
             },
             _ => {
                 if self.characters.has_remaining() {
@@ -470,7 +470,7 @@ impl<'input> Tokenizer<'input> {
         }
         
         let location = start.combine_with(self.cursor_location());
-        Ok((Token::RegExpLiteral { body, flags }, location))
+        Ok((Token::RegExp { body, flags }, location))
     }
 
     fn character_ahead_location(&self) -> Location {
@@ -776,7 +776,7 @@ impl<'input> Tokenizer<'input> {
 
         let location = start.combine_with(self.cursor_location());
 
-        Ok(Some((Token::NumericLiteral(string, suffix), location)))
+        Ok(Some((Token::Number(string, suffix), location)))
     }
 
     fn scan_hex_literal(&mut self, start: Location) -> Result<Option<(Token, Location)>, ParserError> {
@@ -793,7 +793,7 @@ impl<'input> Tokenizer<'input> {
 
         let location = start.combine_with(self.cursor_location());
         let s = self.compilation_unit.text()[location.first_offset..location.last_offset].to_owned();
-        Ok(Some((Token::NumericLiteral(s, suffix), location)))
+        Ok(Some((Token::Number(s, suffix), location)))
     }
 
     fn scan_bin_literal(&mut self, start: Location) -> Result<Option<(Token, Location)>, ParserError> {
@@ -810,7 +810,7 @@ impl<'input> Tokenizer<'input> {
 
         let location = start.combine_with(self.cursor_location());
         let s = self.compilation_unit.text()[location.first_offset..location.last_offset].to_owned();
-        Ok(Some((Token::NumericLiteral(s, suffix), location)))
+        Ok(Some((Token::Number(s, suffix), location)))
     }
 
     fn consume_underscore_followed_by_dec_digit(&mut self) -> Result<(), ParserError> {
@@ -914,7 +914,7 @@ impl<'input> Tokenizer<'input> {
         }
 
         let location = start.combine_with(self.cursor_location());
-        Ok(Some((Token::StringLiteral(value), location)))
+        Ok(Some((Token::String(value), location)))
     }
 
     fn scan_triple_string_literal(&mut self, delim: char, start: Location, raw: bool) -> Result<Option<(Token, Location)>, ParserError> {
@@ -986,7 +986,7 @@ impl<'input> Tokenizer<'input> {
         }
 
         let value = lines.join("\n");
-        Ok(Some((Token::StringLiteral(value), location)))
+        Ok(Some((Token::String(value), location)))
     }
 
     fn consume_escape_sequence(&mut self) -> Result<Option<String>, ParserError> {
@@ -1339,16 +1339,16 @@ mod tests {
         "###.into(), &CompilerOptions::default());
         let mut tokenizer = Tokenizer::new(&source, &default());
 
-        let Ok((Token::StringLiteral(s), _)) = tokenizer.scan_ie_div() else { panic!() };
+        let Ok((Token::String(s), _)) = tokenizer.scan_ie_div() else { panic!() };
         assert_eq!(s, "Some AAA content");
 
-        let Ok((Token::StringLiteral(s), _)) = tokenizer.scan_ie_div() else { panic!() };
+        let Ok((Token::String(s), _)) = tokenizer.scan_ie_div() else { panic!() };
         assert_eq!(s, "Another\n    common\ncontent");
 
-        let Ok((Token::StringLiteral(s), _)) = tokenizer.scan_ie_div() else { panic!() };
+        let Ok((Token::String(s), _)) = tokenizer.scan_ie_div() else { panic!() };
         assert_eq!(s, "a\x08");
 
-        let Ok((Token::StringLiteral(s), _)) = tokenizer.scan_ie_div() else { panic!() };
+        let Ok((Token::String(s), _)) = tokenizer.scan_ie_div() else { panic!() };
         assert_eq!(s, "a\\b");
     }
 
@@ -1381,7 +1381,7 @@ mod tests {
         "###.into(), &CompilerOptions::default());
         let mut tokenizer = Tokenizer::new(&source, &default());
         for n in numbers {
-            let Ok((Token::NumericLiteral(n2, suffix), location)) = tokenizer.scan_ie_div() else { panic!() };
+            let Ok((Token::Number(n2, suffix), location)) = tokenizer.scan_ie_div() else { panic!() };
             assert_eq!(n, NumericLiteral { value: n2, location, suffix }.parse_double(false).unwrap());
         }
     }
@@ -1396,12 +1396,12 @@ mod tests {
         let mut tokenizer = Tokenizer::new(&source, &default());
 
         let Ok((Token::Div, start)) = tokenizer.scan_ie_div() else { panic!() };
-        let Ok((Token::RegExpLiteral { body, flags }, _)) = tokenizer.scan_regexp_literal(start, "".into()) else { panic!() };
+        let Ok((Token::RegExp { body, flags }, _)) = tokenizer.scan_regexp_literal(start, "".into()) else { panic!() };
         assert_eq!(body, "(?:)");
         assert_eq!(flags, "");
 
         let Ok((Token::Div, start)) = tokenizer.scan_ie_div() else { panic!() };
-        let Ok((Token::RegExpLiteral { body, flags }, _)) = tokenizer.scan_regexp_literal(start, "".into()) else { panic!() };
+        let Ok((Token::RegExp { body, flags }, _)) = tokenizer.scan_regexp_literal(start, "".into()) else { panic!() };
         assert_eq!(body, "(?:)");
         assert_eq!(flags, "gi");
     }

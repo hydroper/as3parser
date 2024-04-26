@@ -801,7 +801,7 @@ impl<'input> Parser<'input> {
                 location: self.pop_location(),
                 value: true,
             }))))
-        } else if let Token::NumericLiteral(n, suffix) = self.token.0.clone() {
+        } else if let Token::Number(n, suffix) = self.token.0.clone() {
             self.mark_location();
             self.next()?;
             Ok(Some(Rc::new(Expression::NumericLiteral(NumericLiteral {
@@ -809,7 +809,7 @@ impl<'input> Parser<'input> {
                 value: n,
                 suffix,
             }))))
-        } else if let Token::StringLiteral(ref s) = self.token.0.clone() {
+        } else if let Token::String(ref s) = self.token.0.clone() {
             self.mark_location();
             self.next()?;
             Ok(Some(Rc::new(Expression::StringLiteral(StringLiteral {
@@ -825,7 +825,7 @@ impl<'input> Parser<'input> {
         } else if self.peek(Token::Div) || self.peek(Token::DivideAssign) {
             self.mark_location();
             self.token = self.tokenizer.scan_regexp_literal(self.token.1.clone(), if self.peek(Token::DivideAssign) { "=".into() } else { "".into() })?;
-            let Token::RegExpLiteral { ref body, ref flags } = self.token.0.clone() else {
+            let Token::RegExp { ref body, ref flags } = self.token.0.clone() else {
                 panic!();
             };
             self.next()?;
@@ -980,7 +980,7 @@ impl<'input> Parser<'input> {
             Token::Decrement => Some((Operator::PreDecrement, OperatorPrecedence::Postfix)),
             Token::Plus => Some((Operator::Positive, OperatorPrecedence::Unary)),
             Token::Minus => Some((Operator::Negative, OperatorPrecedence::Unary)),
-            Token::BitwiseNot => Some((Operator::BitwiseNot, OperatorPrecedence::Unary)),
+            Token::Tilde => Some((Operator::BitwiseNot, OperatorPrecedence::Unary)),
             Token::Exclamation => Some((Operator::LogicalNot, OperatorPrecedence::Unary)),
             _ => None,
         }
@@ -1137,14 +1137,14 @@ impl<'input> Parser<'input> {
     }
 
     fn parse_field_name(&mut self) -> Result<(FieldName, Location), ParserError> {
-        if let Token::StringLiteral(value) = &self.token.0.clone() {
+        if let Token::String(value) = &self.token.0.clone() {
             let location = self.token_location();
             self.next()?;
             Ok((FieldName::StringLiteral(Rc::new(Expression::StringLiteral(StringLiteral {
                 location: location.clone(),
                 value: value.clone(),
             }))), location))
-        } else if let Token::NumericLiteral(value, suffix) = &self.token.0.clone() {
+        } else if let Token::Number(value, suffix) = &self.token.0.clone() {
             let location = self.token_location();
             self.next()?;
             Ok((FieldName::NumericLiteral(Rc::new(Expression::NumericLiteral(NumericLiteral {
@@ -1359,7 +1359,7 @@ impl<'input> Parser<'input> {
                 location: self.pop_location(),
                 value: true,
             })))
-        } else if let Token::NumericLiteral(n, suffix) = self.token.0.clone() {
+        } else if let Token::Number(n, suffix) = self.token.0.clone() {
             self.mark_location();
             self.next()?;
             Ok(Rc::new(Expression::NumericLiteral(NumericLiteral {
@@ -1367,7 +1367,7 @@ impl<'input> Parser<'input> {
                 value: n,
                 suffix,
             })))
-        } else if let Token::StringLiteral(ref s) = self.token.0.clone() {
+        } else if let Token::String(ref s) = self.token.0.clone() {
             self.mark_location();
             self.next()?;
             Ok(Rc::new(Expression::StringLiteral(StringLiteral {
@@ -1383,7 +1383,7 @@ impl<'input> Parser<'input> {
         } else if self.peek(Token::Div) || self.peek(Token::DivideAssign) {
             self.mark_location();
             self.token = self.tokenizer.scan_regexp_literal(self.token.1.clone(), if self.peek(Token::DivideAssign) { "=".into() } else { "".into() })?;
-            let Token::RegExpLiteral { ref body, ref flags } = self.token.0.clone() else {
+            let Token::RegExp { ref body, ref flags } = self.token.0.clone() else {
                 panic!();
             };
             self.next()?;
@@ -3116,7 +3116,7 @@ impl<'input> Parser<'input> {
             let id = (id.clone(), self.token_location());
             self.next()?;
 
-            if id.0 == "include" && id.1.character_count() == "include".len() && matches!(self.token.0, Token::StringLiteral(_)) && !self.previous_token.1.line_break(&self.token.1) {
+            if id.0 == "include" && id.1.character_count() == "include".len() && matches!(self.token.0, Token::String(_)) && !self.previous_token.1.line_break(&self.token.1) {
                 return self.parse_include_directive(context, id.1);
             }
 
@@ -3526,7 +3526,7 @@ impl<'input> Parser<'input> {
     fn parse_include_directive(&mut self, context: ParserDirectiveContext, start: Location) -> Result<(Rc<Directive>, bool), ParserError> {
         self.push_location(&start);
         let source_path_location = self.token_location();
-        let Token::StringLiteral(source) = &self.token.0.clone() else {
+        let Token::String(source) = &self.token.0.clone() else {
             panic!();
         };
         let source = source.clone();
@@ -4210,14 +4210,14 @@ impl<'input> Parser<'input> {
                 if let Some((value_1, _)) = self.consume_identifier(false)? {
                     value = value_1;
                 } else {
-                    if let Token::StringLiteral(s) = &self.token.0 {
+                    if let Token::String(s) = &self.token.0 {
                         value = s.clone();
                         self.next()?;
                     } else {
                         self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingStringLiteral, diagnostic_arguments![Token(self.token.0.clone())]);
                         while self.token.0 != Token::Eof {
                             self.next()?;
-                            if let Token::StringLiteral(s) = self.token.0.clone() {
+                            if let Token::String(s) = self.token.0.clone() {
                                 self.pop_location();
                                 self.mark_location();
                                 value = s;

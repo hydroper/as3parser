@@ -28,10 +28,12 @@ pub fn default<T: Default>() -> T {
     T::default()
 }
 
+/// Counts the first whitespace characters of a string.
 pub fn count_first_whitespace_characters(input: &str) -> usize {
     input.chars().count() - input.trim_start().chars().count()
 }
 
+/// Decreases the last offset of a range without ever going behind the first offset.
 pub fn decrease_last_offset(first_offset: usize, mut last_offset: usize, count: usize) -> usize {
     for _ in 0..count {
         last_offset = if first_offset < last_offset { last_offset - 1 } else { last_offset };

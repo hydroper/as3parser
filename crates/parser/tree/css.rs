@@ -149,6 +149,7 @@ pub enum CssSelectorCondition {
     Attribute {
         location: Location,
         name: (String, Location),
+        operator: CssAttributeOperator,
         value: Option<(String, Location)>,
     },
 }
@@ -163,6 +164,29 @@ impl CssSelectorCondition {
             Self::PseudoElement((_, l)) => l.clone(),
             Self::Not { location, .. } => location.clone(),
             Self::Attribute { location, .. } => location.clone(),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum CssAttributeOperator {
+    Equals,
+    BeginsWith,
+    EndsWith,
+    Contains,
+    ListMatch,
+    HreflangMatch,
+}
+
+impl ToString for CssAttributeOperator {
+    fn to_string(&self) -> String {
+        match self {
+            Self::Equals => "=".into(),
+            Self::BeginsWith => "^=".into(),
+            Self::EndsWith => "$=".into(),
+            Self::Contains => "*=".into(),
+            Self::ListMatch => "~=".into(),
+            Self::HreflangMatch => "|=".into(),
         }
     }
 }
