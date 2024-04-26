@@ -68,6 +68,9 @@ impl<'input> Parser<'input> {
 
     /*
     fn add_warning(&self, location: &Location, kind: DiagnosticKind, arguments: Vec<DiagnosticArgument>) {
+        if self.compilation_unit().prevent_equal_offset_warning(location) {
+            return;
+        }
         self.compilation_unit().add_diagnostic(Diagnostic::new_warning(location, kind, arguments));
     }
     */

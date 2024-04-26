@@ -129,28 +129,31 @@ impl CompilationUnit {
     }
 
     /// Determines whether to skip contributing an error when it
-    /// occurs at the same offset of the last error.
+    /// occurs at the same offset of another error.
     pub fn prevent_equal_offset_error(&self, location: &Location) -> bool {
         let diag_list = self.diagnostics.borrow();
-        if diag_list.is_empty() {
-            return false;
-        }
-        let mut i = (diag_list.len() - 1) as isize;
-        let mut j = 0;
-        while i >= 0 {
-            let diag = &diag_list[i as usize];
+        for diag in diag_list.iter() {
             if diag.is_warning() {
-                i -= 1;
                 continue;
             }
             if diag.location.first_offset == location.first_offset {
                 return true;
             }
-            i -= 1;
-            if j >= 14 {
-                break;
+        }
+        false
+    }
+
+    /// Determines whether to skip contributing a warning when it
+    /// occurs at the same offset of another warning.
+    pub fn prevent_equal_offset_warning(&self, location: &Location) -> bool {
+        let diag_list = self.diagnostics.borrow();
+        for diag in diag_list.iter() {
+            if diag.is_error() {
+                continue;
             }
-            j += 1;
+            if diag.location.first_offset == location.first_offset {
+                return true;
+            }
         }
         false
     }
