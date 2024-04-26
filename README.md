@@ -75,8 +75,6 @@ MXML supports a subset of CSS.
     - [ ] `Embed(...)`
       - The arguments may be key-value entries each as an identifier key followed by `=` followed by a string or text property value.
       - An entry may be a keyless entry.
-- [ ] `CssParserFacade`
-  - [ ] `CssParserFacade::parse_document()`
 
 Conform a bit to the Apache Royale sources:
 
