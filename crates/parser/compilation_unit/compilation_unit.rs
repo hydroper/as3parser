@@ -87,6 +87,22 @@ impl CompilationUnit {
         self.comments.borrow_mut()
     }
 
+    /// Contributes a comment if there is no other comment
+    /// in the same location.
+    pub fn add_comment(&self, comment: Rc<Comment>) {
+        let mut dup = false;
+        let i = comment.location.borrow().first_offset();
+        for c1 in self.comments.borrow().iter() {
+            if c1.location.borrow().first_offset == i {
+                dup = true;
+                break;
+            }
+        }
+        if !dup {
+            self.comments.borrow_mut().push(comment);
+        }
+    }
+
     /// Diagnostics of the source file after parsing and/or
     /// verification.
     pub fn diagnostics(&self) -> Vec<Diagnostic> {

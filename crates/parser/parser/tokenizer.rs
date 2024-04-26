@@ -531,7 +531,7 @@ impl<'input> Tokenizer<'input> {
             let location = start.combine_with(self.cursor_location());
             self.consume_line_terminator();
 
-            self.compilation_unit.comments.borrow_mut().push(Rc::new(Comment {
+            self.compilation_unit.add_comment(Rc::new(Comment {
                 multiline: false,
                 content: RefCell::new(self.compilation_unit.text()[(location.first_offset() + 2)..location.last_offset()].to_owned()),
                 location: RefCell::new(location),
@@ -562,7 +562,7 @@ impl<'input> Tokenizer<'input> {
             let i = location.first_offset() + 2;
             let j = decrease_last_offset(i, location.last_offset(), 2);
 
-            self.compilation_unit.comments.borrow_mut().push(Rc::new(Comment {
+            self.compilation_unit.add_comment(Rc::new(Comment {
                 multiline: true,
                 content: RefCell::new(self.compilation_unit.text()[i..j].to_owned()),
                 location: RefCell::new(location),
