@@ -4,8 +4,7 @@ use crate::ns::*;
 use num_traits::ToPrimitive;
 use serde::{Serialize, Deserialize};
 
-/// CSS3 selector combinators. Only *descendant* is supported at the
-/// moment.
+/// CSS3 selector combinators.
 /// 
 /// See also: [CSS3 selectors: combinators](http://www.w3.org/TR/css3-selectors/#combinators).
 #[derive(Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -323,8 +322,8 @@ pub struct CssEmbedEntry {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct CssCombinatorSelector {
     pub location: Location,
-    pub left: Rc<CssDirective>,
-    pub right: Rc<CssDirective>,
+    pub left: Rc<CssSelector>,
+    pub right: Rc<CssSelector>,
     pub combinator_type: CssCombinatorType,
 }
 

@@ -364,7 +364,66 @@ impl<'input> CssParser<'input> {
     }
 
     fn parse_opt_rule(&mut self) -> Option<CssRule> {
-        //
+        let mut selectors: Vec<Rc<CssSelector>> = vec![self.parse_opt_selector()?];
+        while self.consume(Token::Comma) {
+            if let Some(s) = self.parse_opt_selector() {
+                selectors.push(s);
+            } else {
+                self.add_syntax_error(&self.token.1, DiagnosticKind::Unexpected, diagnostic_arguments![Token(self.token.0.clone())]);
+            }
+        }
+        let mut properties: Vec<Rc<CssProperty>> = vec![];
+        self.expect(Token::LeftBrace);
+        while !(self.eof() || self.peek(Token::RightBrace)) {
+            if !properties.is_empty() {
+                self.expect(Token::CssSemicolons);
+            }
+            properties.push(Rc::new(self.parse_property()));
+        }
+        self.expect(Token::RightBrace);
+        self.push_location(&selectors[0].location());
+        Some(CssRule {
+            location: self.pop_location(),
+            selectors,
+            properties,
+        })
+    }
+
+    fn parse_opt_selector(&mut self) -> Option<Rc<CssSelector>> {
+        self.mark_location();
+        let mut namespace_prefix: Option<(String, Location)> = None;
+        let mut element_name: Option<(String, Location)> = self.consume_identifier();
+        let mut conditions: Vec<Rc<CssSelectorCondition>> = vec![];
+        if self.consume(Token::Pipe) {
+            namespace_prefix = element_name.clone();
+            element_name = Some(self.expect_identifier());
+        }
+        while let Some(condition) = self.parse_opt_selector_condition() {
+            conditions.push(condition);
+        }
+        if element_name.is_none() && conditions.is_empty() {
+            self.pop_location();
+            return None;
+        }
+        let mut base = Rc::new(CssSelector::Base(CssBaseSelector {
+            location: self.pop_location(),
+            namespace_prefix,
+            element_name,
+            conditions,
+        }));
+        
+        // Parse descendant combinators
+        while let Some(right) = self.parse_opt_selector() {
+            self.push_location(&base.location());
+            base = Rc::new(CssSelector::Combinator(CssCombinatorSelector {
+                location: self.pop_location(),
+                left: base,
+                right,
+                combinator_type: CssCombinatorType::Descendant,
+            }));
+        }
+
+        Some(base)
     }
 }
 

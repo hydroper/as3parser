@@ -46,19 +46,13 @@ MXML supports a subset of CSS.
 - [x] Define tree structures
 - [ ] Parse a style sheet
   - [x] Document
-  - [ ] Directive
+  - [x] Directive
     - [x] `@namespace`
     - [x] `@media`
     - [x] `@font-face`
-    - [ ] Rule
-      - [ ] Selectors
-      - [ ] Properties
-  - [ ] Selector
-    - [ ] Base selector
-      - [ ] Namespace prefix
-      - [ ] Element name
-      - [ ] Conditions
-    - [ ] Combinator selector
+    - [x] Rule
+  - [x] Selector
+  - [ ] Selector condition
   - [ ] Property
   - [ ] Property value
     - [ ] Color property value
