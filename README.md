@@ -53,7 +53,7 @@ MXML supports a subset of CSS.
     - [x] Rule
   - [x] Selector
   - [x] Selector condition
-  - [ ] Property
+  - [x] Property
   - [ ] Property value
     - [ ] Color property value
       - Based in `Token::HashWord` matching a hash character followed by 3 or 6 hexadecimal digits.

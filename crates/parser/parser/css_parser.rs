@@ -214,8 +214,14 @@ impl<'input> CssParser<'input> {
             self.mark_location();
             self.next();
             let prefix = self.expect_identifier();
-            let uri = self.expect_string();
-            self.expect(Token::CssSemicolons);
+            let uri = if self.expecting_token_error {
+                (String::new(), self.tokenizer.cursor_location())
+            } else {
+                self.expect_string()
+            };
+            if !self.expecting_token_error {
+                self.expect(Token::CssSemicolons);
+            }
             let loc = self.pop_location();
             Rc::new(CssDirective::NamespaceDefinition(CssNamespaceDefinition {
                 location: loc,
@@ -281,7 +287,7 @@ impl<'input> CssParser<'input> {
             if !properties.is_empty() {
                 self.expect(Token::CssSemicolons);
             }
-            properties.push(Rc::new(self.parse_property()));
+            properties.push(self.parse_property());
         }
         self.expect(Token::BlockClose);
         Rc::new(CssDirective::FontFace(CssFontFace {
@@ -378,7 +384,7 @@ impl<'input> CssParser<'input> {
             if !properties.is_empty() {
                 self.expect(Token::CssSemicolons);
             }
-            properties.push(Rc::new(self.parse_property()));
+            properties.push(self.parse_property());
         }
         self.expect(Token::BlockClose);
         self.push_location(&selectors[0].location());
@@ -514,6 +520,19 @@ impl<'input> CssParser<'input> {
             None
         }
     }
+
+    fn parse_property(&mut self) -> Rc<CssProperty> {
+        self.mark_location();
+        let name = self.expect_identifier();
+        let mut value = self.create_invalidated_property_value(&self.tokenizer.cursor_location());
+        if !self.expecting_token_error {
+            self.expect(Token::Colon);
+            if !self.expecting_token_error {
+                value = self.parse_property_value();
+            }
+        }
+        Rc::new(CssProperty::new(self.pop_location(), name, value))
+    }
 }
 
 fn _rgb_bytes_to_integer(r: f64, g: f64, b: f64) -> u32 {
@@ -550,5 +569,11 @@ impl<'input> CssParserFacade<'input> {
         let mut parser = self.create_parser();
         parser.next();
         parser.parse_selector_condition()
+    }
+
+    pub fn parse_property(&mut self) -> Rc<CssProperty> {
+        let mut parser = self.create_parser();
+        parser.next();
+        parser.parse_property()
     }
 }
