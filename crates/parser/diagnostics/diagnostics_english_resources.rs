@@ -69,6 +69,7 @@ lazy_static! {
         DiagnosticKind::CssInvalidHexEscape.id() => "Invalid hexadecimal escape: '\\{1}'.".into(),
         DiagnosticKind::ExpectingDirective.id() => "Expecting directive before {1}".into(),
         DiagnosticKind::ExpectingStatement.id() => "Expecting statement before {1}".into(),
+        DiagnosticKind::Unexpected.id() => "Unexpected {1}".into(),
         // DiagnosticKind::K.id() => ".".into(),
     };
 }

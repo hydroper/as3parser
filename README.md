@@ -45,14 +45,11 @@ MXML supports a subset of CSS.
 
 - [x] Define tree structures
 - [ ] Parse a style sheet
-  - [ ] Document
+  - [x] Document
   - [ ] Directive
     - [x] `@namespace`
-    - [ ] `@media`
-      - [ ] Conditions
-      - [ ] Rules
-    - [ ] `@font-face`
-      - [ ] Properties
+    - [x] `@media`
+    - [x] `@font-face`
     - [ ] Rule
       - [ ] Selectors
       - [ ] Properties
@@ -84,8 +81,8 @@ MXML supports a subset of CSS.
     - [ ] `Embed(...)`
       - The arguments may be key-value entries each as an identifier key followed by `=` followed by a string or text property value.
       - An entry may be a keyless entry.
-- `ParserFacade`
-  - [ ] `ParserFacade::parse_css()`
+- [ ] `CssParserFacade`
+  - [ ] `CssParserFacade::parse_document()`
 
 Conform a bit to the Apache Royale sources:
 

@@ -66,6 +66,7 @@ pub enum DiagnosticKind {
     CssInvalidHexEscape = 1086,
     ExpectingDirective = 1087,
     ExpectingStatement = 1088,
+    Unexpected = 1089,
 }
 
 impl DiagnosticKind {

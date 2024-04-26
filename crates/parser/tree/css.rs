@@ -32,6 +32,7 @@ impl ToString for CssCombinatorType {
 pub enum CssDirective {
     Invalidated(InvalidatedNode),
     FontFace(CssFontFace),
+    MediaQuery(CssMediaQuery),
     NamespaceDefinition(CssNamespaceDefinition),
     Rule(CssRule),
 }
@@ -41,6 +42,7 @@ impl CssDirective {
         match self {
             Self::Invalidated(v) => v.location.clone(),
             Self::FontFace(v) => v.location.clone(),
+            Self::MediaQuery(v) => v.location.clone(),
             Self::NamespaceDefinition(v) => v.location.clone(),
             Self::Rule(v) => v.location.clone(),
         }
@@ -338,8 +340,7 @@ pub struct CssDocument {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct CssFontFace {
     pub location: Location,
-    // List of `CssDirective::Property` variants.
-    pub properties: Vec<Rc<CssDirective>>,
+    pub properties: Vec<Rc<CssProperty>>,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -398,20 +399,33 @@ pub struct CssMediaQuery {
 #[derive(Clone, Serialize, Deserialize)]
 pub enum CssMediaQueryCondition {
     Invalidated(InvalidatedNode),
-    Base((Rc<CssMediaQueryCondition>, Location)),
-    And((Rc<CssMediaQueryCondition>, Location)),
-    Not((Rc<CssMediaQueryCondition>, Location)),
-    Only((Rc<CssMediaQueryCondition>, Location)),
+    /// Identifier. Example: "screen".
+    Id((String, Location)),
+    /// The `only` keyword followed by an identifier.
+    /// Example: "only screen".
+    OnlyId {
+        location: Location,
+        id: (String, Location),
+    },
+    /// A parenthesized property, such as
+    /// `(application-dpi: 240)`.
+    ParenProperty((Rc<CssProperty>, Location)),
+    /// A `condition1 and condition2` expression.
+    And {
+        location: Location,
+        left: Rc<CssMediaQueryCondition>,
+        right: Rc<CssMediaQueryCondition>,
+    },
 }
 
 impl CssMediaQueryCondition {
     pub fn location(&self) -> Location {
         match self {
             Self::Invalidated(v) => v.location.clone(),
-            Self::Base((_, l)) => l.clone(),
-            Self::And((_, l)) => l.clone(),
-            Self::Not((_, l)) => l.clone(),
-            Self::Only((_, l)) => l.clone(),
+            Self::Id((_, l)) => l.clone(),
+            Self::OnlyId { location, .. } => location.clone(),
+            Self::ParenProperty((_, l)) => l.clone(),
+            Self::And { location, .. } => location.clone(),
         }
     }
 }

@@ -86,7 +86,7 @@ impl<'input> CssParser<'input> {
         }
     }
 
-    fn peek_context_keyword(&self, name: &str) -> bool {
+    fn peek_keyword(&self, name: &str) -> bool {
         if let Token::Identifier(id) = self.token.0.clone() { id == name && self.token.1.character_count() == name.len() } else { false }
     }
 
@@ -107,6 +107,16 @@ impl<'input> CssParser<'input> {
         } else {
             None
         }
+    }
+
+    fn consume_keyword(&mut self, name: &str) -> bool {
+        if let Token::Identifier(name1) = self.token.0.clone() {
+            if name1 == name {
+                self.next();
+                return true;
+            }
+        }
+        false
     }
 
     /// Expects a token in non-greedy mode: if it fails, does not skip any token.
@@ -198,7 +208,9 @@ impl<'input> CssParser<'input> {
     }
 
     fn parse_directive(&mut self) -> Rc<CssDirective> {
-        if self.peek(Token::CssAtNamespace) {
+        if let Some(rule) = self.parse_opt_rule() {
+            Rc::new(CssDirective::Rule(rule))
+        } else if self.peek(Token::CssAtNamespace) {
             self.mark_location();
             self.next();
             let prefix = self.expect_identifier();
@@ -210,9 +222,149 @@ impl<'input> CssParser<'input> {
                 prefix,
                 uri,
             }))
+        } else if self.peek(Token::CssAtMedia) {
+            self.parse_media_query()
+        } else if self.peek(Token::CssAtFontFace) {
+            self.parse_font_face()
         } else {
-            todo!()
+            self.add_syntax_error(&self.token.1, DiagnosticKind::ExpectingDirective, diagnostic_arguments![Token(self.token.0.clone())]);
+            let d = self.create_invalidated_directive(&self.tokenizer.cursor_location());
+            self.next();
+            d
         }
+    }
+
+    fn parse_media_query(&mut self) -> Rc<CssDirective> {
+        self.mark_location();
+        self.next();
+        let mut conditions: Vec<Rc<CssMediaQueryCondition>> = vec![];
+        let condition = self.parse_opt_media_query_condition();
+        if let Some(condition) = condition {
+            conditions.push(condition);
+        } else {
+            self.add_syntax_error(&self.token.1, DiagnosticKind::Unexpected, diagnostic_arguments![Token(self.token.0.clone())]);
+        }
+        loop {
+            if let Some(condition) = self.parse_opt_media_query_condition() {
+                conditions.push(condition);
+            } else if self.eof() || self.peek(Token::LeftBrace) {
+                break;
+            } else if !self.consume(Token::Comma) {
+                self.add_syntax_error(&self.token.1, DiagnosticKind::Unexpected, diagnostic_arguments![Token(self.token.0.clone())]);
+                self.next();
+            }
+        }
+        let mut rules: Vec<Rc<CssRule>> = vec![];
+        self.expect(Token::LeftBrace);
+        while !(self.eof() || self.peek(Token::RightBrace)) {
+            if let Some(rule) = self.parse_opt_rule() {
+                rules.push(Rc::new(rule));
+            } else {
+                self.add_syntax_error(&self.token.1, DiagnosticKind::Unexpected, diagnostic_arguments![Token(self.token.0.clone())]);
+                self.next();
+            }
+        }
+        self.expect(Token::RightBrace);
+        Rc::new(CssDirective::MediaQuery(CssMediaQuery {
+            location: self.pop_location(),
+            conditions,
+            rules,
+        }))
+    }
+
+    fn parse_font_face(&mut self) -> Rc<CssDirective> {
+        self.mark_location();
+        self.next();
+        let mut properties: Vec<Rc<CssProperty>> = vec![];
+        self.expect(Token::LeftBrace);
+        while !(self.eof() || self.peek(Token::RightBrace)) {
+            if !properties.is_empty() {
+                self.expect(Token::CssSemicolons);
+            }
+            properties.push(Rc::new(self.parse_property()));
+        }
+        self.expect(Token::RightBrace);
+        Rc::new(CssDirective::FontFace(CssFontFace {
+            location: self.pop_location(),
+            properties,
+        }))
+    }
+
+    fn parse_opt_media_query_condition(&mut self) -> Option<Rc<CssMediaQueryCondition>> {
+        let mut base: Option<Rc<CssMediaQueryCondition>> = None;
+        if self.peek_keyword("only") {
+            self.mark_location();
+            self.next();
+            let id = self.expect_identifier();
+            base = Some(Rc::new(CssMediaQueryCondition::OnlyId {
+                location: self.pop_location(),
+                id,
+            }));
+        }
+        if let Some(id) = self.consume_identifier() {
+            base = Some(Rc::new(CssMediaQueryCondition::Id(id)));
+        }
+        if self.peek(Token::LeftParen) {
+            self.mark_location();
+            let property = self.parse_arguments().unwrap().parse_property();
+            let loc = self.pop_location();
+            base = Some(Rc::new(CssMediaQueryCondition::ParenProperty((property, loc))));
+        }
+        if let Some(mut base) = base.clone() {
+            while self.consume_keyword("and") {
+                self.push_location(&base.location());
+                if let Some(right) = self.parse_opt_media_query_condition() {
+                    base = Rc::new(CssMediaQueryCondition::And {
+                        location: self.pop_location(),
+                        left: base,
+                        right,
+                    });
+                } else {
+                    self.add_syntax_error(&self.token.1, DiagnosticKind::Unexpected, diagnostic_arguments![Token(self.token.0.clone())]);
+                    base = Rc::new(CssMediaQueryCondition::And {
+                        location: self.pop_location(),
+                        left: base,
+                        right: self.create_invalidated_media_query_condition(&self.tokenizer.cursor_location()),
+                    });
+                }
+            }
+            return Some(base);
+        }
+        base
+    }
+
+    fn parse_arguments(&mut self) -> Result<CssParserFacade, ParserError> {
+        self.expect(Token::LeftParen);
+        let i = self.tokenizer.characters().index();
+        if self.expecting_token_error {
+            return Err(ParserError::Common);
+        }
+        let mut nesting = 1;
+        let mut j;
+        loop {
+            j = self.tokenizer.characters().index();
+            if self.consume(Token::RightParen) {
+                nesting -= 1;
+                if nesting == 0 {
+                    break;
+                }
+            } else if self.eof() {
+                self.expect(Token::RightParen);
+                break;
+            } else if self.consume(Token::LeftParen) {
+                nesting += 1;
+            } else {
+                self.next();
+            }
+        }
+        Ok(CssParserFacade(self.compilation_unit(), ParserOptions {
+            byte_range: Some((i, j)),
+            ..default()
+        }))
+    }
+
+    fn parse_opt_rule(&mut self) -> Option<CssRule> {
+        //
     }
 }
 
@@ -227,5 +379,21 @@ fn _calc_rgb_byte(value: f64) -> u32 {
     // Float
     } else {
         (value * 255.0).round().to_u32().unwrap_or(0).clamp(0, 255)
+    }
+}
+
+/// A simplified interface for executing the CSS parser.
+pub struct CssParserFacade<'input>(pub &'input Rc<CompilationUnit>, pub ParserOptions);
+
+impl<'input> CssParserFacade<'input> {
+    fn create_parser(&self) -> CssParser<'input> {
+        CssParser::new(self.0, &self.1)
+    }
+
+    /// Parses `CssDocument` until end-of-file.
+    pub fn parse_document(&self) -> Rc<CssDocument> {
+        let mut parser = self.create_parser();
+        parser.next();
+        parser.parse_document()
     }
 }
