@@ -43,8 +43,9 @@
 
                 // Ace Editor
                 this.editor = ace.edit("editor", {
-                    mode: "ace/mode/actionscript",
-                    selectionStyle: "text"
+                    // mode: "ace/mode/actionscript",
+                    selectionStyle: "text",
+                    tabSize: 4,
                 });
                 /* this.editor.setTheme("ace/theme/dreamweaver"); */
                 this.editor.setOptions({
@@ -55,6 +56,7 @@
                     mode: "ace/mode/json",
                     selectionStyle: "text",
                     readOnly: true,
+                    tabSize: 2,
                 });
                 /* this.ast.setTheme("ace/theme/dreamweaver"); */
                 this.ast.setOptions({

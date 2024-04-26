@@ -13,9 +13,7 @@ struct ParserResult {
 struct ParserDiagnosticResult {
     warning: bool,
     column1: usize,
-    column2: usize,
     line1: usize,
-    line2: usize,
     message: String,
 }
 
@@ -39,9 +37,7 @@ pub fn parse(input: &str, source_type: &str) -> String {
         diagnostics.push(ParserDiagnosticResult {
             warning: diagnostic.is_warning(),
             column1: diagnostic.location().first_column() + 1,
-            column2: diagnostic.location().last_column() + 1,
             line1: diagnostic.location().first_line_number(),
-            line2: diagnostic.location().last_line_number(),
             message: diagnostic.format_message_english(),
         });
     }
