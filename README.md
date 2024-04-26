@@ -76,8 +76,7 @@ MXML supports a subset of CSS.
       - The arguments may be key-value entries each as an identifier key followed by `=` followed by a string or text property value.
       - An entry may be a keyless entry.
     - [ ] Ignore operators `+`, `-`, `*`, and `/`, returning an invalidated value.
-- [ ] `CssParserFacade::parse_text()`
-  - [ ] If the source text starts with a quote or an apostrophe, parses a string and expects end-of-file; otherwise returns source text as is before ever scanning the first token.
+- [x] `CssParserFacade::parse_text()`
 
 Conform a bit to the Apache Royale sources:
 

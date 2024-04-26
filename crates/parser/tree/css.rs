@@ -75,7 +75,7 @@ impl CssPropertyValue {
             Self::Number(v) => v.location.clone(),
             Self::RgbColor(v) => v.location.clone(),
             Self::String(v) => v.location.clone(),
-            Self::Text(v) => v.location.clone(),
+            Self::Identifier(v) => v.location.clone(),
             Self::ClassReference(v) => v.location.clone(),
             Self::PropertyReference(v) => v.location.clone(),
             Self::Url(v) => v.location.clone(),

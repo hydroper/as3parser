@@ -31,6 +31,10 @@ impl<'input> CssTokenizer<'input> {
         &self.characters
     }
 
+    pub fn characters_mut(&mut self) -> &mut CharacterReader<'input> {
+        &mut self.characters
+    }
+
     fn character_ahead_location(&self) -> Location {
         if self.characters.reached_end() {
             return self.cursor_location();
@@ -266,7 +270,7 @@ impl<'input> CssTokenizer<'input> {
         }
     }
 
-    fn consume_whitespace(&mut self) -> bool {
+    pub fn consume_whitespace(&mut self) -> bool {
         let ch = self.characters.peek_or_zero();
         if [' ', '\t', '\n', '\r'].contains(&ch) {
             self.characters.next();

@@ -528,13 +528,13 @@ impl<'input> CssParser<'input> {
         if !self.expecting_token_error {
             self.expect(Token::Colon);
             if !self.expecting_token_error {
-                value = self.parse_property_value();
+                value = self.parse_property_value(CssOperatorPrecedence::Array);
             }
         }
         Rc::new(CssProperty::new(self.pop_location(), name, value))
     }
 
-    fn parse_property_value(&mut self) -> Rc<CssPropertyValue> {
+    fn parse_property_value(&mut self, min_precedence: CssOperatorPrecedence) -> Rc<CssPropertyValue> {
         //
     }
 }
@@ -568,6 +568,30 @@ impl<'input> CssParserFacade<'input> {
         parser.parse_document()
     }
 
+    /// Parses either a string or return source text as is.
+    pub fn parse_text(&self) -> (String, Location) {
+        let mut parser = self.create_parser();
+        parser.tokenizer.consume_whitespace();
+        let d = parser.tokenizer.characters().peek_or_zero();
+        if ['"', '\''].contains(&d) {
+            parser.next();
+            let mut v: (String, Location) = ("".into(), parser.tokenizer.cursor_location());
+            while let Token::String(v1) = parser.token.0.clone() {
+                v = (v1, parser.token.1.clone());
+                parser.next();
+            }
+            v
+        } else {
+            let mut s = String::new();
+            let i = parser.tokenizer.characters().index();
+            while let Some(ch) = parser.tokenizer.characters_mut().next() {
+                s.push(ch);
+            }
+            let j = parser.tokenizer.characters().index();
+            (s, Location::with_offsets(parser.compilation_unit(), i, j))
+        }
+    }
+
     /// Parses `CssSelectorCondition` until end-of-file.
     pub fn parse_selector_condition(&self) -> Rc<CssSelectorCondition> {
         let mut parser = self.create_parser();
@@ -588,7 +612,7 @@ impl<'input> CssParserFacade<'input> {
     pub fn parse_property_value(&self) -> Rc<CssPropertyValue> {
         let mut parser = self.create_parser();
         parser.next();
-        let r = parser.parse_property_value();
+        let r = parser.parse_property_value(CssOperatorPrecedence::Array);
         parser.expect_eof();
         r
     }

@@ -184,7 +184,7 @@ impl_semantics_with_loc_call!(
     CssDirective,
     CssMediaQueryCondition,
     CssSelectorCondition,
-    CssPropertyValueNode,
+    CssPropertyValue,
     CssSelector,
 );
 
@@ -221,7 +221,7 @@ impl_semantics_1!(
     CssRule,
     CssMediaQueryCondition,
     CssSelectorCondition,
-    CssPropertyValueNode,
+    CssPropertyValue,
     CssSelector,
     CssProperty,
     CssDocument,
