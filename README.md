@@ -72,14 +72,20 @@ MXML supports a subset of CSS.
     - [ ] String property value
     - [ ] Text property value
       - Converted from a series of tokens that together form an unquoted list of characters, such as URLs in `url(../font.ttf)`, and font names in `font-family: Font 1, _serif;`. Number tokens, identifiers, hash words, and punctuators, are each taken in their raw character forms and concatenated in order.
-    - [ ] Function call property values
-      - [ ] `url(...) format(...)`
-      - [ ] All function names are parsed using `CssFunctionName::from_str`
-- [ ] `CssParserFacade`
-  - [ ] `CssParserFacade::parse_document()`
-  - [ ] `CssParserFacade::parse_string_argument()`: The only argument may be a string or text property value.
-  - [ ] `CssParserFacade::parse_embed_arguments()`: The arguments may be key-value entries each as an identifier key followed by `=` followed by a string or text property value.
-    - An entry may be a keyless entry.
+    - [ ] `ClassReference(...)`
+      - The only argument may be a string or text property value.
+    - [ ] `PropertyReference(...)`
+      - The only argument may be a string or text property value.
+    - [ ] `url(...)`
+      - The only argument may be a string or text property value.
+    - [ ] `url(...) format(...)`
+    - [ ] `local(...)`
+      - The only argument may be a string or text property value.
+    - [ ] `Embed(...)`
+      - The arguments may be key-value entries each as an identifier key followed by `=` followed by a string or text property value.
+      - An entry may be a keyless entry.
+- `ParserFacade`
+  - [ ] `ParserFacade::parse_css()`
 
 Conform a bit to the Apache Royale sources:
 

@@ -50,36 +50,40 @@ impl CssDirective {
 #[derive(Clone, Serialize, Deserialize)]
 pub enum CssPropertyValueNode {
     Invalidated(InvalidatedNode),
-    ArrayPropertyValue(CssArrayPropertyValue),
-    ColorPropertyValue(CssColorPropertyValue),
-    FunctionCallPropertyValue(CssFunctionCallPropertyValue),
-    NumberPropertyValue(CssNumberPropertyValue),
-    RgbColorPropertyValue(CssRgbColorPropertyValue),
-    StringPropertyValue(CssStringPropertyValue),
-    TextPropertyValue(CssTextPropertyValue),
+    Array(CssArrayPropertyValue),
+    Color(CssColorPropertyValue),
+    Number(CssNumberPropertyValue),
+    RgbColor(CssRgbColorPropertyValue),
+    String(CssStringPropertyValue),
+    Text(CssTextPropertyValue),
+
+    ClassReference(CssClassReferencePropertyValue),
+    PropertyReference(CssPropertyReferencePropertyValue),
+    Url(CssUrlPropertyValue),
+    Local(CssLocalPropertyValue),
+    Embed(CssEmbedPropertyValue),
 }
 
 impl CssPropertyValueNode {
     pub fn location(&self) -> Location {
         match self {
             Self::Invalidated(v) => v.location.clone(),
-            Self::ArrayPropertyValue(v) => v.location.clone(),
-            Self::ColorPropertyValue(v) => v.location.clone(),
-            Self::FunctionCallPropertyValue(v) => v.location.clone(),
-            Self::NumberPropertyValue(v) => v.location.clone(),
-            Self::RgbColorPropertyValue(v) => v.location.clone(),
-            Self::StringPropertyValue(v) => v.location.clone(),
-            Self::TextPropertyValue(v) => v.location.clone(),
+            Self::Array(v) => v.location.clone(),
+            Self::Color(v) => v.location.clone(),
+            Self::Number(v) => v.location.clone(),
+            Self::RgbColor(v) => v.location.clone(),
+            Self::String(v) => v.location.clone(),
+            Self::Text(v) => v.location.clone(),
+            Self::ClassReference(v) => v.location.clone(),
+            Self::PropertyReference(v) => v.location.clone(),
+            Self::Url(v) => v.location.clone(),
+            Self::Local(v) => v.location.clone(),
+            Self::Embed(v) => v.location.clone(),
         }
     }
 
-    pub fn as_array_property_value(&self) -> Option<&CssArrayPropertyValue> {
-        let Self::ArrayPropertyValue(v) = self else { return None; };
-        Some(v)
-    }
-
-    pub fn as_function_call_property_value(&self) -> Option<&CssFunctionCallPropertyValue> {
-        let Self::FunctionCallPropertyValue(v) = self else { return None; };
+    pub fn as_array(&self) -> Option<&CssArrayPropertyValue> {
+        let Self::Array(v) = self else { return None; };
         Some(v)
     }
 }
@@ -273,59 +277,44 @@ pub struct CssTextPropertyValue {
     pub value: String,
 }
 
-/// CSS function call property value.
-///
-/// For example:
-///
-/// ```css
-/// Embed("bg.png")
-/// ```
 #[derive(Clone, Serialize, Deserialize)]
-pub struct CssFunctionCallPropertyValue {
+pub struct CssClassReferencePropertyValue {
     pub location: Location,
-    /// Name of the function.
-    pub name: (CssFunctionName, Location),
-    /// Raw arguments text excluding the parentheses.
-    pub raw_arguments: (String, Location),
-    /// If the function call is in the `url("") format("")` form,
-    /// indicates the raw `format` call arguments, excluding
-    /// the parentheses.
-    pub url_format: Option<(String, Location)>,
+    /// Name or "null".
+    pub name: (String, Location),
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum CssFunctionName {
-    ClassReference,
-    PropertyReference,
-    Embed,
-    Url,
-    Local,
+#[derive(Clone, Serialize, Deserialize)]
+pub struct CssPropertyReferencePropertyValue {
+    pub location: Location,
+    pub name: (String, Location),
 }
 
-impl FromStr for CssFunctionName {
-    type Err = ParserError;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "ClassReference" => Ok(Self::ClassReference),
-            "PropertyReference" => Ok(Self::PropertyReference),
-            "Embed" => Ok(Self::Embed),
-            "url" => Ok(Self::Url),
-            "local" => Ok(Self::Local),
-            _ => Err(ParserError::Common),
-        }
-    }
+#[derive(Clone, Serialize, Deserialize)]
+pub struct CssUrlPropertyValue {
+    pub location: Location,
+    pub url: (String, Location),
+    pub format: Option<(String, Location)>,
 }
 
-impl ToString for CssFunctionName {
-    fn to_string(&self) -> String {
-        match self {
-            Self::ClassReference => "ClassReference".into(),
-            Self::PropertyReference => "PropertyReference".into(),
-            Self::Embed => "Embed".into(),
-            Self::Url => "url".into(),
-            Self::Local => "local".into(),
-        }
-    }
+#[derive(Clone, Serialize, Deserialize)]
+pub struct CssLocalPropertyValue {
+    pub location: Location,
+    pub name: (String, Location),
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct CssEmbedPropertyValue {
+    pub location: Location,
+    pub entries: Vec<Rc<CssEmbedEntry>>,
+}
+
+/// Represents a key-value entry for an `Embed` function call property value.
+/// It may be a keyless entry.
+#[derive(Clone, Serialize, Deserialize)]
+pub struct CssEmbedEntry {
+    pub key: Option<(String, Location)>,
+    pub value: (String, Location),
 }
 
 /// A CSS selector containing a combinator.
@@ -440,12 +429,4 @@ pub struct CssNamespaceDefinition {
     pub location: Location,
     pub prefix: String,
     pub uri: String,
-}
-
-/// Represents a key-value entry for an `Embed` function call property value.
-/// It may be a keyless entry.
-#[derive(Clone, Serialize, Deserialize)]
-pub struct CssEmbedEntry {
-    pub key: Option<(String, Location)>,
-    pub value: (String, Location),
 }
