@@ -480,7 +480,7 @@ impl<'input> Tokenizer<'input> {
         let offset = self.characters.index();
         let mut next_characters = self.characters.clone();
         next_characters.next().unwrap();
-        Location::with_offsets(&self.compilation_unit, offset, next_characters.index() + 1)
+        Location::with_offsets(&self.compilation_unit, offset, next_characters.index())
     }
 
     pub fn cursor_location(&self) -> Location {
