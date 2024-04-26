@@ -29,9 +29,9 @@ pub fn parse(input: &str, source_type: &str) -> String {
     let source_type = source_type.to_lowercase();
 
     if source_type == "mxml" {
-        mxml = ParserFacade(&compilation_unit, default()).parse_mxml();
+        mxml = Some(ParserFacade(&compilation_unit, default()).parse_mxml());
     } else {
-        program = ParserFacade(&compilation_unit, default()).parse_program();
+        program = Some(ParserFacade(&compilation_unit, default()).parse_program());
     }
     let mut diagnostics = vec![];
     compilation_unit.sort_diagnostics();

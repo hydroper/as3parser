@@ -200,6 +200,7 @@ impl_semantics_with_loc_field!(
     CssProperty,
     CssRule,
     CssDocument,
+    QualifiedIdentifier,
 );
 
 impl_semantics_1!(
@@ -211,6 +212,7 @@ impl_semantics_1!(
     Block,
     Program,
     SimpleVariableDefinition,
+    QualifiedIdentifier,
     Mxml,
     MxmlContent,
     MxmlElement,

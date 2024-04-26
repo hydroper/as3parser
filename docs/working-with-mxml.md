@@ -26,9 +26,7 @@ let parser_options = ParserOptions {
     ..default()
 };
 
-if let Some(document) = ParserFacade(&compilation_unit, parser_options).parse_mxml() {
-    // document: Rc<Mxml>
-}
+let document: Rc<Mxml> = ParserFacade(&compilation_unit, parser_options).parse_mxml();
 ```
 
 The nodes used for ECMAScript for XML (E4X) and MXML are distinct. For example, MXML uses `MxmlElement` instead of `XmlElement`, and `MxmlContent` instead of `XmlContent`.

@@ -18,13 +18,14 @@ Parse programs or expressions through the `ParserFacade` structure of the `as3_p
 ```rust
 use as3_parser::ns::*;
 
+// Create compilation unit
 let compilation_unit = CompilationUnit::new(None, "x ** y".into(), &CompilerOptions::default());
 
+// Parser options
 let parser_options = ParserOptions::default();
 
-if let Some(program) = ParserFacade(&compilation_unit, parser_options).parse_program() {
-    // program: Rc<Program>
-}
+// Parse through ParserFacade
+let program = ParserFacade(&compilation_unit, parser_options).parse_program();
 ```
 
 ## Serializing nodes

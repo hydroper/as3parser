@@ -28,32 +28,14 @@ fn main() -> io::Result<()> {
     let source_content = fs::read_to_string(&source_path)?;
     let compilation_unit = CompilationUnit::new(Some(source_path), source_content, &CompilerOptions::default());
     if arguments.mxml {
-        if let Some(document) = ParserFacade(&compilation_unit, default()).parse_mxml() {
-            if arguments.file_log {
-                fs::write(&source_path_ast_json, serde_json::to_string_pretty(&document).unwrap())?;
-            } else {
-                println!("MXML successfuly parsed.");
-            }
-        } else {
-            if arguments.file_log {
-                fs::write(&source_path_ast_json, "{}")?;
-            } else {
-                println!("MXML failed to parse.");
-            }
+        let document = ParserFacade(&compilation_unit, default()).parse_mxml();
+        if arguments.file_log {
+            fs::write(&source_path_ast_json, serde_json::to_string_pretty(&document).unwrap())?;
         }
     } else {
-        if let Some(program) = ParserFacade(&compilation_unit, default()).parse_program() {
-            if arguments.file_log {
-                fs::write(&source_path_ast_json, serde_json::to_string_pretty(&program).unwrap())?;
-            } else {
-                println!("AS3 program successfuly parsed.");
-            }
-        } else {
-            if arguments.file_log {
-                fs::write(&source_path_ast_json, "{}")?;
-            } else {
-                println!("AS3 program failed to parse.");
-            }
+        let program = ParserFacade(&compilation_unit, default()).parse_program();
+        if arguments.file_log {
+            fs::write(&source_path_ast_json, serde_json::to_string_pretty(&program).unwrap())?;
         }
     }
     let mut diagnostics = vec![];

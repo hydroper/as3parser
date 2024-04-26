@@ -12,9 +12,8 @@ fn main() {
     let compilation_unit = CompilationUnit::new(Some(source_path), source_content, &CompilerOptions::default());
 
     // Parse program
-    if let Some(program) = ParserFacade(&compilation_unit, default()).parse_program() {
-        visit_program(&program);
-    }
+    let program = ParserFacade(&compilation_unit, default()).parse_program();
+    visit_program(&program);
 
     // Report diagnostics
     compilation_unit.sort_diagnostics();

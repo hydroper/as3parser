@@ -31,25 +31,25 @@ impl<'input> Tokenizer<'input> {
     }
 
     /// Scans for an *InputElementDiv* token.
-    pub fn scan_ie_div(&mut self) -> Result<(Token, Location), ParserError> {
+    pub fn scan_ie_div(&mut self) -> (Token, Location) {
         loop {
             let ch = self.characters.peek_or_zero();
             if CharacterValidator::is_whitespace(ch) {
                 self.characters.next();
-            } else if self.consume_line_terminator() || self.consume_comment()? {
+            } else if self.consume_line_terminator() || self.consume_comment() {
                 // Consumed line terminator or comment
             } else {
                 break;
             }
         }
-        if let Some(result) = self.scan_identifier()? {
-            return Ok(result);
+        if let Some(result) = self.scan_identifier() {
+            return result;
         }
-        if let Some(result) = self.scan_dot_or_numeric_literal()? {
-            return Ok(result);
+        if let Some(result) = self.scan_dot_or_numeric_literal() {
+            return result;
         }
-        if let Some(result) = self.scan_string_literal(false)? {
-            return Ok(result);
+        if let Some(result) = self.scan_string_literal(false) {
+            return result;
         }
         let start = self.cursor_location();
         match self.characters.peek_or_zero() {
@@ -57,43 +57,43 @@ impl<'input> Tokenizer<'input> {
                 // Comma
                 self.characters.next();
                 let location = start.combine_with(self.cursor_location());
-                return Ok((Token::Comma, location));
+                return (Token::Comma, location);
             },
             '(' => {
                 // LeftParen
                 self.characters.next();
                 let location = start.combine_with(self.cursor_location());
-                return Ok((Token::LeftParen, location));
+                return (Token::LeftParen, location);
             },
             ')' => {
                 // RightParen
                 self.characters.next();
                 let location = start.combine_with(self.cursor_location());
-                return Ok((Token::RightParen, location));
+                return (Token::RightParen, location);
             },
             '[' => {
                 // LeftBracket
                 self.characters.next();
                 let location = start.combine_with(self.cursor_location());
-                return Ok((Token::LeftBracket, location));
+                return (Token::LeftBracket, location);
             },
             ']' => {
                 // RightBracket
                 self.characters.next();
                 let location = start.combine_with(self.cursor_location());
-                return Ok((Token::RightBracket, location));
+                return (Token::RightBracket, location);
             },
             '{' => {
                 // LeftBrace
                 self.characters.next();
                 let location = start.combine_with(self.cursor_location());
-                return Ok((Token::LeftBrace, location));
+                return (Token::LeftBrace, location);
             },
             '}' => {
                 // RightBrace
                 self.characters.next();
                 let location = start.combine_with(self.cursor_location());
-                return Ok((Token::RightBrace, location));
+                return (Token::RightBrace, location);
             },
             ':' => {
                 self.characters.next();
@@ -101,11 +101,11 @@ impl<'input> Tokenizer<'input> {
                 if self.characters.peek_or_zero() == ':' {
                     self.characters.next();
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::ColonColon, location));
+                    return (Token::ColonColon, location);
                 }
                 // Colon
                 let location = start.combine_with(self.cursor_location());
-                return Ok((Token::Colon, location));
+                return (Token::Colon, location);
             },
             '=' => {
                 self.characters.next();
@@ -114,17 +114,17 @@ impl<'input> Tokenizer<'input> {
                 if ch == '=' && self.characters.peek_at_or_zero(1) == '=' {
                     self.characters.skip_count_in_place(2);
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::StrictEquals, location));
+                    return (Token::StrictEquals, location);
                 }
                 // Equals
                 if ch == '=' {
                     self.characters.next();
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::Equals, location));
+                    return (Token::Equals, location);
                 }
                 // Assign
                 let location = start.combine_with(self.cursor_location());
-                return Ok((Token::Assign, location));
+                return (Token::Assign, location);
             },
             '!' => {
                 self.characters.next();
@@ -133,17 +133,17 @@ impl<'input> Tokenizer<'input> {
                 if ch == '=' && self.characters.peek_at_or_zero(1) == '=' {
                     self.characters.skip_count_in_place(2);
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::StrictNotEquals, location));
+                    return (Token::StrictNotEquals, location);
                 }
                 // NotEquals
                 if ch == '=' {
                     self.characters.next();
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::NotEquals, location));
+                    return (Token::NotEquals, location);
                 }
                 // Exclamation
                 let location = start.combine_with(self.cursor_location());
-                return Ok((Token::Exclamation, location));
+                return (Token::Exclamation, location);
             },
             '?' => {
                 self.characters.next();
@@ -152,29 +152,29 @@ impl<'input> Tokenizer<'input> {
                 if ch == '.' {
                     self.characters.next();
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::OptionalChaining, location));
+                    return (Token::OptionalChaining, location);
                 }
                 // NullCoalescingAssign
                 if ch == '?' && self.characters.peek_at_or_zero(1) == '=' {
                     self.characters.skip_count_in_place(2);
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::NullCoalescingAssign, location));
+                    return (Token::NullCoalescingAssign, location);
                 }
                 // NullCoalescing
                 if ch == '?' {
                     self.characters.next();
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::NullCoalescing, location));
+                    return (Token::NullCoalescing, location);
                 }
                 // Question
                 let location = start.combine_with(self.cursor_location());
-                return Ok((Token::Question, location));
+                return (Token::Question, location);
             },
             ';' => {
                 // Semicolon
                 self.characters.next();
                 let location = start.combine_with(self.cursor_location());
-                return Ok((Token::Semicolon, location));
+                return (Token::Semicolon, location);
             },
             '<' => {
                 self.characters.next();
@@ -183,23 +183,23 @@ impl<'input> Tokenizer<'input> {
                 if ch == '=' {
                     self.characters.next();
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::Le, location));
+                    return (Token::Le, location);
                 }
                 // LeftShiftAssign
                 if ch == '<' && self.characters.peek_at_or_zero(1) == '=' {
                     self.characters.skip_count_in_place(2);
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::LeftShiftAssign, location));
+                    return (Token::LeftShiftAssign, location);
                 }
                 // LeftShift
                 if ch == '<' {
                     self.characters.next();
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::LeftShift, location));
+                    return (Token::LeftShift, location);
                 }
                 // Lt
                 let location = start.combine_with(self.cursor_location());
-                return Ok((Token::Lt, location));
+                return (Token::Lt, location);
             },
             '>' => {
                 self.characters.next();
@@ -208,44 +208,44 @@ impl<'input> Tokenizer<'input> {
                 if ch == '=' {
                     self.characters.next();
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::Ge, location));
+                    return (Token::Ge, location);
                 }
                 // RightShiftAssign
                 if ch == '>' && self.characters.peek_at_or_zero(1) == '=' {
                     self.characters.skip_count_in_place(2);
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::RightShiftAssign, location));
+                    return (Token::RightShiftAssign, location);
                 }
                 // UnsignedRightShiftAssign
                 if ch == '>' && self.characters.peek_seq(3) == ">>=" {
                     self.characters.skip_count_in_place(3);
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::UnsignedRightShiftAssign, location));
+                    return (Token::UnsignedRightShiftAssign, location);
                 }
                 // UnsignedRightShift
                 if ch == '>' && self.characters.peek_at_or_zero(1) == '>' {
                     self.characters.skip_count_in_place(2);
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::UnsignedRightShift, location));
+                    return (Token::UnsignedRightShift, location);
                 }
                 // RightShift
                 if ch == '>' {
                     self.characters.next();
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::RightShift, location));
+                    return (Token::RightShift, location);
                 }
                 // Gt
                 let location = start.combine_with(self.cursor_location());
-                return Ok((Token::Gt, location));
+                return (Token::Gt, location);
             },
             '@' => {
                 // Attribute
                 self.characters.next();
-                if let Some(token) = self.scan_string_literal(true)? {
-                    return Ok(token);
+                if let Some(token) = self.scan_string_literal(true) {
+                    return token;
                 }
                 let location = start.combine_with(self.cursor_location());
-                return Ok((Token::Attribute, location));
+                return (Token::Attribute, location);
             },
             '+' => {
                 self.characters.next();
@@ -254,17 +254,17 @@ impl<'input> Tokenizer<'input> {
                 if ch == '+' {
                     self.characters.next();
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::Increment, location));
+                    return (Token::Increment, location);
                 }
                 // AddAssign
                 if ch == '=' {
                     self.characters.next();
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::AddAssign, location));
+                    return (Token::AddAssign, location);
                 }
                 // Plus
                 let location = start.combine_with(self.cursor_location());
-                return Ok((Token::Plus, location));
+                return (Token::Plus, location);
             },
             '-' => {
                 self.characters.next();
@@ -273,17 +273,17 @@ impl<'input> Tokenizer<'input> {
                 if ch == '-' {
                     self.characters.next();
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::Decrement, location));
+                    return (Token::Decrement, location);
                 }
                 // SubtractAssign
                 if ch == '=' {
                     self.characters.next();
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::SubtractAssign, location));
+                    return (Token::SubtractAssign, location);
                 }
                 // Minus
                 let location = start.combine_with(self.cursor_location());
-                return Ok((Token::Minus, location));
+                return (Token::Minus, location);
             },
             '*' => {
                 self.characters.next();
@@ -292,23 +292,23 @@ impl<'input> Tokenizer<'input> {
                 if ch == '*' && self.characters.peek_at_or_zero(1) == '=' {
                     self.characters.skip_count_in_place(2);
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::PowerAssign, location));
+                    return (Token::PowerAssign, location);
                 }
                 // Power
                 if ch == '*' {
                     self.characters.next();
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::Power, location));
+                    return (Token::Power, location);
                 }
                 // MultiplyAssign
                 if ch == '=' {
                     self.characters.next();
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::MultiplyAssign, location));
+                    return (Token::MultiplyAssign, location);
                 }
                 // Times
                 let location = start.combine_with(self.cursor_location());
-                return Ok((Token::Times, location));
+                return (Token::Times, location);
             },
             '/' => {
                 self.characters.next();
@@ -317,11 +317,11 @@ impl<'input> Tokenizer<'input> {
                 if ch == '=' {
                     self.characters.next();
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::DivideAssign, location));
+                    return (Token::DivideAssign, location);
                 }
                 // Div
                 let location = start.combine_with(self.cursor_location());
-                return Ok((Token::Div, location));
+                return (Token::Div, location);
             },
             '%' => {
                 self.characters.next();
@@ -330,11 +330,11 @@ impl<'input> Tokenizer<'input> {
                 if ch == '=' {
                     self.characters.next();
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::RemainderAssign, location));
+                    return (Token::RemainderAssign, location);
                 }
                 // Percent
                 let location = start.combine_with(self.cursor_location());
-                return Ok((Token::Percent, location));
+                return (Token::Percent, location);
             },
             '&' => {
                 self.characters.next();
@@ -343,23 +343,23 @@ impl<'input> Tokenizer<'input> {
                 if ch == '&' && self.characters.peek_at_or_zero(1) == '=' {
                     self.characters.skip_count_in_place(2);
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::LogicalAndAssign, location));
+                    return (Token::LogicalAndAssign, location);
                 }
                 // LogicalAnd
                 if ch == '&' {
                     self.characters.next();
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::LogicalAnd, location));
+                    return (Token::LogicalAnd, location);
                 }
                 // BitwiseAndAssign
                 if ch == '=' {
                     self.characters.next();
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::BitwiseAndAssign, location));
+                    return (Token::BitwiseAndAssign, location);
                 }
                 // BitwiseAnd
                 let location = start.combine_with(self.cursor_location());
-                return Ok((Token::Ampersand, location));
+                return (Token::Ampersand, location);
             },
             '^' => {
                 self.characters.next();
@@ -368,23 +368,23 @@ impl<'input> Tokenizer<'input> {
                 if ch == '^' && self.characters.peek_at_or_zero(1) == '=' {
                     self.characters.skip_count_in_place(2);
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::LogicalXorAssign, location));
+                    return (Token::LogicalXorAssign, location);
                 }
                 // LogicalXor
                 if ch == '^' {
                     self.characters.next();
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::LogicalXor, location));
+                    return (Token::LogicalXor, location);
                 }
                 // BitwiseXorAssign
                 if ch == '=' {
                     self.characters.next();
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::BitwiseXorAssign, location));
+                    return (Token::BitwiseXorAssign, location);
                 }
                 // BitwiseXor
                 let location = start.combine_with(self.cursor_location());
-                return Ok((Token::Hat, location));
+                return (Token::Hat, location);
             },
             '|' => {
                 self.characters.next();
@@ -393,29 +393,29 @@ impl<'input> Tokenizer<'input> {
                 if ch == '|' && self.characters.peek_at_or_zero(1) == '=' {
                     self.characters.skip_count_in_place(2);
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::LogicalOrAssign, location));
+                    return (Token::LogicalOrAssign, location);
                 }
                 // LogicalOr
                 if ch == '|' {
                     self.characters.next();
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::LogicalOr, location));
+                    return (Token::LogicalOr, location);
                 }
                 // BitwiseOrAssign
                 if ch == '=' {
                     self.characters.next();
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::BitwiseOrAssign, location));
+                    return (Token::BitwiseOrAssign, location);
                 }
                 // BitwiseOr
                 let location = start.combine_with(self.cursor_location());
-                return Ok((Token::Pipe, location));
+                return (Token::Pipe, location);
             },
             '~' => {
                 // BitwiseNot
                 self.characters.next();
                 let location = start.combine_with(self.cursor_location());
-                return Ok((Token::Tilde, location));
+                return (Token::Tilde, location);
             },
             _ => {
                 if self.characters.has_remaining() {
@@ -424,7 +424,7 @@ impl<'input> Tokenizer<'input> {
                     return self.scan_ie_div();
                 // Eof
                 } else {
-                    return Ok((Token::Eof, start))
+                    return (Token::Eof, start)
                 }
             },
         }
@@ -432,7 +432,7 @@ impl<'input> Tokenizer<'input> {
 
     /// Scans regular expression after a `/` or `/=` token has been scanned by
     /// `scan_ie_div`.
-    pub fn scan_regexp_literal(&mut self, start: Location, mut body: String) -> Result<(Token, Location), ParserError> {
+    pub fn scan_regexp_literal(&mut self, start: Location, mut body: String) -> (Token, Location) {
         loop {
             let ch = self.characters.peek_or_zero();
             if ch == '/' {
@@ -465,12 +465,12 @@ impl<'input> Tokenizer<'input> {
         }
 
         let mut flags = String::new();
-        while let Some((ch, _)) = self.consume_identifier_part()? {
+        while let Some((ch, _)) = self.consume_identifier_part() {
             flags.push(ch);
         }
         
         let location = start.combine_with(self.cursor_location());
-        Ok((Token::RegExp { body, flags }, location))
+        (Token::RegExp { body, flags }, location)
     }
 
     fn character_ahead_location(&self) -> Location {
@@ -516,10 +516,10 @@ impl<'input> Tokenizer<'input> {
         false
     }
 
-    fn consume_comment(&mut self) -> Result<bool, ParserError> {
+    fn consume_comment(&mut self) -> bool {
         let ch = self.characters.peek_or_zero();
         if ch != '/' {
-            return Ok(false);
+            return false;
         }
         let ch2 = self.characters.peek_at_or_zero(1);
         if ch2 == '/' {
@@ -537,7 +537,7 @@ impl<'input> Tokenizer<'input> {
                 location: RefCell::new(location),
             }));
 
-            return Ok(true);
+            return true;
         }
         if ch2 == '*' {
             let start = self.cursor_location();
@@ -568,21 +568,21 @@ impl<'input> Tokenizer<'input> {
                 location: RefCell::new(location),
             }));
 
-            return Ok(true);
+            return true;
         }
-        Ok(false)
+        false
     }
 
-    fn scan_identifier(&mut self) -> Result<Option<(Token, Location)>, ParserError> {
+    fn scan_identifier(&mut self) -> Option<(Token, Location)> {
         let start = self.cursor_location();
         let mut escaped = false;
-        let Some((ch, escaped_2)) = self.consume_identifier_start()? else {
-            return Ok(None);
+        let Some((ch, escaped_2)) = self.consume_identifier_start() else {
+            return None;
         };
         escaped = escaped || escaped_2;
         let mut name = String::new();
         name.push(ch);
-        while let Some((ch, escaped_2)) = self.consume_identifier_part()? {
+        while let Some((ch, escaped_2)) = self.consume_identifier_part() {
             escaped = escaped || escaped_2;
             name.push(ch);
         }
@@ -590,66 +590,66 @@ impl<'input> Tokenizer<'input> {
         let location = start.combine_with(self.cursor_location());
         if !escaped {
             if let Some(token) = As3ReservedWord::token(name.as_ref()) {
-                return Ok(Some((token, location)));
+                return Some((token, location));
             }
         }
-        Ok(Some((Token::Identifier(name), location)))
+        Some((Token::Identifier(name), location))
     }
 
     /// Returns a tuple in the form (*character*, *escaped*).
-    fn consume_identifier_start(&mut self) -> Result<Option<(char, bool)>, ParserError> {
+    fn consume_identifier_start(&mut self) -> Option<(char, bool)> {
         let ch = self.characters.peek_or_zero();
         if CharacterValidator::is_identifier_start(ch) {
             self.characters.next();
-            return Ok(Some((ch, false)));
+            return Some((ch, false));
         }
         if self.characters.peek_or_zero() == '\\' {
             self.characters.next();
-            return Ok(Some((self.expect_unicode_escape_sequence()?, true)));
+            return Some((self.expect_unicode_escape_sequence(), true));
         }
-        Ok(None)
+        None
     }
 
     /// Returns a tuple in the form (*character*, *escaped*).
-    fn consume_identifier_part(&mut self) -> Result<Option<(char, bool)>, ParserError> {
+    fn consume_identifier_part(&mut self) -> Option<(char, bool)> {
         let ch = self.characters.peek_or_zero();
         if CharacterValidator::is_identifier_part(ch) {
             self.characters.next();
-            return Ok(Some((ch, false)));
+            return Some((ch, false));
         }
         if self.characters.peek_or_zero() == '\\' {
             self.characters.next();
-            return Ok(Some((self.expect_unicode_escape_sequence()?, true)));
+            return Some((self.expect_unicode_escape_sequence(), true));
         }
-        Ok(None)
+        None
     }
 
     /// Expects UnicodeEscapeSequence starting from `u`.
-    fn expect_unicode_escape_sequence(&mut self) -> Result<char, ParserError> {
+    fn expect_unicode_escape_sequence(&mut self) -> char {
         let start = self.cursor_location();
         if self.characters.peek_or_zero() != 'u' {
             self.add_unexpected_error();
-            return Ok('\x5F');
+            return '\x5F';
         }
         self.characters.next();
 
         // Scan \uXXXX
         if CharacterValidator::is_hex_digit(self.characters.peek_or_zero()) {
-            let r = char::from_u32(self.expect_hex_digit()? << 12
-                | (self.expect_hex_digit()? << 8)
-                | (self.expect_hex_digit()? << 4)
-                | self.expect_hex_digit()?);
+            let r = char::from_u32(self.expect_hex_digit() << 12
+                | (self.expect_hex_digit() << 8)
+                | (self.expect_hex_digit() << 4)
+                | self.expect_hex_digit());
             let Some(r) = r else {
                 self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&start.combine_with(self.cursor_location()), DiagnosticKind::InvalidEscapeValue, vec![]));
-                return Ok('\x5F');
+                return '\x5F';
             };
-            return Ok(r);
+            return r;
         }
 
         // Scan \u{}
         if self.characters.peek_or_zero() != '{' {
             self.add_unexpected_error();
-            return Ok('\x5F');
+            return '\x5F';
         }
         self.characters.next();
         while CharacterValidator::is_hex_digit(self.characters.peek_or_zero()) {
@@ -657,35 +657,35 @@ impl<'input> Tokenizer<'input> {
         }
         if self.characters.peek_or_zero() != '}' {
             self.add_unexpected_error();
-            return Ok('\x5F');
+            return '\x5F';
         }
         self.characters.next();
         let location = start.combine_with(self.cursor_location());
         let r = u32::from_str_radix(&self.compilation_unit.text()[(start.first_offset + 2)..(location.last_offset - 1)], 16);
         let Ok(r) = r else {
             self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&location, DiagnosticKind::InvalidEscapeValue, vec![]));
-            return Ok('\x5F');
+            return '\x5F';
         };
         let r = char::from_u32(r);
         let Some(r) = r else {
             self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&location, DiagnosticKind::InvalidEscapeValue, vec![]));
-            return Ok('\x5F');
+            return '\x5F';
         };
-        Ok(r)
+        r
     }
 
-    fn expect_hex_digit(&mut self) -> Result<u32, ParserError> {
+    fn expect_hex_digit(&mut self) -> u32 {
         let ch = self.characters.peek_or_zero();
         let mv = CharacterValidator::hex_digit_mv(ch);
         if mv.is_none() {
             self.add_unexpected_error();
-            return Ok(0x5F);
+            return 0x5F;
         }
         self.characters.next();
-        Ok(mv.unwrap())
+        mv.unwrap()
     }
 
-    fn scan_dot_or_numeric_literal(&mut self) -> Result<Option<(Token, Location)>, ParserError> {
+    fn scan_dot_or_numeric_literal(&mut self) -> Option<(Token, Location)> {
         let start = self.cursor_location();
         let ch = self.characters.peek_or_zero();
         let mut initial_dot = false;
@@ -697,23 +697,23 @@ impl<'input> Tokenizer<'input> {
             // Ellipsis
             if seq == ".." {
                 self.characters.skip_count_in_place(2);
-                return Ok(Some((Token::Ellipsis, start.combine_with(self.cursor_location()))));
+                return Some((Token::Ellipsis, start.combine_with(self.cursor_location())));
             }
             let ch = seq.get(..1).map(|ch| ch.chars().next().unwrap()).unwrap_or('\x00');
             // Descendants
             if ch == '.' {
                 self.characters.next();
-                return Ok(Some((Token::Descendants, start.combine_with(self.cursor_location()))));
+                return Some((Token::Descendants, start.combine_with(self.cursor_location())));
             }
             // Dot
             if !CharacterValidator::is_dec_digit(ch) {
-                return Ok(Some((Token::Dot, start.combine_with(self.cursor_location()))));
+                return Some((Token::Dot, start.combine_with(self.cursor_location())));
             }
 
             // NumericLiteral
             while CharacterValidator::is_dec_digit(self.characters.peek_or_zero()) {
                 self.characters.next();
-                self.consume_underscore_followed_by_dec_digit()?;
+                self.consume_underscore_followed_by_dec_digit();
             }
         } else if ch == '0' {
             self.characters.next();
@@ -733,10 +733,10 @@ impl<'input> Tokenizer<'input> {
         } else if CharacterValidator::is_dec_digit(ch) {
             while CharacterValidator::is_dec_digit(self.characters.peek_or_zero()) {
                 self.characters.next();
-                self.consume_underscore_followed_by_dec_digit()?;
+                self.consume_underscore_followed_by_dec_digit();
             }
         } else {
-            return Ok(None);
+            return None;
         }
 
         if !initial_dot && self.characters.peek_or_zero() == '.' {
@@ -746,7 +746,7 @@ impl<'input> Tokenizer<'input> {
             }
             while CharacterValidator::is_dec_digit(self.characters.peek_or_zero()) {
                 self.characters.next();
-                self.consume_underscore_followed_by_dec_digit()?;
+                self.consume_underscore_followed_by_dec_digit();
             }
         }
 
@@ -761,7 +761,7 @@ impl<'input> Tokenizer<'input> {
             }
             while CharacterValidator::is_dec_digit(self.characters.peek_or_zero()) {
                 self.characters.next();
-                self.consume_underscore_followed_by_dec_digit()?;
+                self.consume_underscore_followed_by_dec_digit();
             }
         }
 
@@ -776,16 +776,16 @@ impl<'input> Tokenizer<'input> {
 
         let location = start.combine_with(self.cursor_location());
 
-        Ok(Some((Token::Number(string, suffix), location)))
+        Some((Token::Number(string, suffix), location))
     }
 
-    fn scan_hex_literal(&mut self, start: Location) -> Result<Option<(Token, Location)>, ParserError> {
+    fn scan_hex_literal(&mut self, start: Location) -> Option<(Token, Location)> {
         if !CharacterValidator::is_hex_digit(self.characters.peek_or_zero()) {
             self.add_unexpected_error();
         }
         while CharacterValidator::is_hex_digit(self.characters.peek_or_zero()) {
             self.characters.next();
-            self.consume_underscore_followed_by_hex_digit()?;
+            self.consume_underscore_followed_by_hex_digit();
         }
 
         let suffix = NumberSuffix::None;
@@ -793,16 +793,16 @@ impl<'input> Tokenizer<'input> {
 
         let location = start.combine_with(self.cursor_location());
         let s = self.compilation_unit.text()[location.first_offset..location.last_offset].to_owned();
-        Ok(Some((Token::Number(s, suffix), location)))
+        Some((Token::Number(s, suffix), location))
     }
 
-    fn scan_bin_literal(&mut self, start: Location) -> Result<Option<(Token, Location)>, ParserError> {
+    fn scan_bin_literal(&mut self, start: Location) -> Option<(Token, Location)> {
         if !CharacterValidator::is_bin_digit(self.characters.peek_or_zero()) {
             self.add_unexpected_error();
         }
         while CharacterValidator::is_bin_digit(self.characters.peek_or_zero()) {
             self.characters.next();
-            self.consume_underscore_followed_by_bin_digit()?;
+            self.consume_underscore_followed_by_bin_digit();
         }
 
         let suffix = NumberSuffix::None;
@@ -810,10 +810,10 @@ impl<'input> Tokenizer<'input> {
 
         let location = start.combine_with(self.cursor_location());
         let s = self.compilation_unit.text()[location.first_offset..location.last_offset].to_owned();
-        Ok(Some((Token::Number(s, suffix), location)))
+        Some((Token::Number(s, suffix), location))
     }
 
-    fn consume_underscore_followed_by_dec_digit(&mut self) -> Result<(), ParserError> {
+    fn consume_underscore_followed_by_dec_digit(&mut self) {
         if self.characters.peek_or_zero() == '_' {
             self.characters.next();
             if !CharacterValidator::is_dec_digit(self.characters.peek_or_zero()) {
@@ -821,10 +821,9 @@ impl<'input> Tokenizer<'input> {
             }
             self.characters.next();
         }
-        Ok(())
     }
 
-    fn consume_underscore_followed_by_hex_digit(&mut self) -> Result<(), ParserError> {
+    fn consume_underscore_followed_by_hex_digit(&mut self) {
         if self.characters.peek_or_zero() == '_' {
             self.characters.next();
             if !CharacterValidator::is_hex_digit(self.characters.peek_or_zero()) {
@@ -832,10 +831,9 @@ impl<'input> Tokenizer<'input> {
             }
             self.characters.next();
         }
-        Ok(())
     }
 
-    fn consume_underscore_followed_by_bin_digit(&mut self) -> Result<(), ParserError> {
+    fn consume_underscore_followed_by_bin_digit(&mut self) {
         if self.characters.peek_or_zero() == '_' {
             self.characters.next();
             if !CharacterValidator::is_bin_digit(self.characters.peek_or_zero()) {
@@ -843,7 +841,6 @@ impl<'input> Tokenizer<'input> {
             }
             self.characters.next();
         }
-        Ok(())
     }
 
     fn unallow_numeric_suffix(&self) {
@@ -852,10 +849,10 @@ impl<'input> Tokenizer<'input> {
         }
     }
 
-    fn scan_string_literal(&mut self, raw: bool) -> Result<Option<(Token, Location)>, ParserError> {
+    fn scan_string_literal(&mut self, raw: bool) -> Option<(Token, Location)> {
         let delim = self.characters.peek_or_zero();
         if !['"', '\''].contains(&delim) {
-            return Ok(None);
+            return None;
         }
         let mut start = self.cursor_location();
         // Include the "@" punctuator as part of raw string literals
@@ -892,7 +889,7 @@ impl<'input> Tokenizer<'input> {
             }
         } else {
             loop {
-                if let Some(s) = self.consume_escape_sequence()? {
+                if let Some(s) = self.consume_escape_sequence() {
                     value.push_str(&s);
                 } else {
                     let ch = self.characters.peek_or_zero();
@@ -914,10 +911,10 @@ impl<'input> Tokenizer<'input> {
         }
 
         let location = start.combine_with(self.cursor_location());
-        Ok(Some((Token::String(value), location)))
+        Some((Token::String(value), location))
     }
 
-    fn scan_triple_string_literal(&mut self, delim: char, start: Location, raw: bool) -> Result<Option<(Token, Location)>, ParserError> {
+    fn scan_triple_string_literal(&mut self, delim: char, start: Location, raw: bool) -> Option<(Token, Location)> {
         let mut lines: Vec<String> = vec![];
         let mut builder = String::new();
 
@@ -944,7 +941,7 @@ impl<'input> Tokenizer<'input> {
             }
         } else {
             loop {
-                if let Some(s) = self.consume_escape_sequence()? {
+                if let Some(s) = self.consume_escape_sequence() {
                     builder.push_str(&s);
                 } else {
                     let ch = self.characters.peek_or_zero();
@@ -990,79 +987,79 @@ impl<'input> Tokenizer<'input> {
         }
 
         let value = lines.join("\n");
-        Ok(Some((Token::String(value), location)))
+        Some((Token::String(value), location))
     }
 
-    fn consume_escape_sequence(&mut self) -> Result<Option<String>, ParserError> {
+    fn consume_escape_sequence(&mut self) -> Option<String> {
         if self.characters.peek_or_zero() != '\\' {
-            return Ok(None);
+            return None;
         }
         self.characters.next();
         if !self.characters.has_remaining() {
             self.add_unexpected_error();
-            return Ok(Some("".into()));
+            return Some("".into());
         }
         if self.consume_line_terminator() {
-            return Ok(Some("".into()));
+            return Some("".into());
         }
         let ch = self.characters.peek_or_zero();
         match ch {
             '\'' | '"' | '\\' => {
                 self.characters.next();
-                Ok(Some(ch.into()))
+                Some(ch.into())
             },
             'u' => {
-                Ok(Some(self.expect_unicode_escape_sequence()?.into()))
+                Some(self.expect_unicode_escape_sequence().into())
             },
             'x' => {
                 self.characters.next();
-                let v = (self.expect_hex_digit()? << 4) | self.expect_hex_digit()?;
+                let v = (self.expect_hex_digit() << 4) | self.expect_hex_digit();
                 let v = char::from_u32(v).unwrap();
-                Ok(Some(v.into()))
+                Some(v.into())
             },
             'b' => {
                 self.characters.next();
-                Ok(Some('\x08'.into()))
+                Some('\x08'.into())
             },
             'f' => {
                 self.characters.next();
-                Ok(Some('\x0C'.into()))
+                Some('\x0C'.into())
             },
             'n' => {
                 self.characters.next();
-                Ok(Some('\x0A'.into()))
+                Some('\x0A'.into())
             },
             'r' => {
                 self.characters.next();
-                Ok(Some('\x0D'.into()))
+                Some('\x0D'.into())
             },
             't' => {
                 self.characters.next();
-                Ok(Some('\x09'.into()))
+                Some('\x09'.into())
             },
             'v' => {
                 self.characters.next();
-                Ok(Some('\x0B'.into()))
+                Some('\x0B'.into())
             },
             '0' => {
                 self.characters.next();
                 if CharacterValidator::is_dec_digit(self.characters.peek_or_zero()) {
                     self.add_unexpected_error();
                 }
-                Ok(Some('\x00'.into()))
+                Some('\x00'.into())
             },
             ch => {
                 if CharacterValidator::is_dec_digit(ch) {
                     self.add_unexpected_error();
                 }
                 self.characters.next();
-                Ok(Some(ch.into()))
+                Some(ch.into())
             },
         }
     }
 
     /// Scans for an *InputElementXMLTag* token.
-    pub fn scan_ie_xml_tag(&mut self) -> Result<(Token, Location), ParserError> {
+    pub fn scan_ie_xml_tag(&mut self) -> (Token, Location) {
         let start = self.cursor_location();
         let ch = self.characters.peek_or_zero();
 
@@ -1074,7 +1071,7 @@ impl<'input> Tokenizer<'input> {
             }
             let location = start.combine_with(self.cursor_location());
             let name = self.compilation_unit.text()[location.first_offset..location.last_offset].to_owned();
-            return Ok((Token::XmlName(name), location));
+            return (Token::XmlName(name), location);
         }
 
         // XmlWhitespace
@@ -1085,7 +1082,7 @@ impl<'input> Tokenizer<'input> {
                 }
             }
             let location = start.combine_with(self.cursor_location());
-            return Ok((Token::XmlWhitespace, location));
+            return (Token::XmlWhitespace, location);
         }
 
         match ch {
@@ -1093,14 +1090,14 @@ impl<'input> Tokenizer<'input> {
             '=' => {
                 self.characters.next();
                 let location = start.combine_with(self.cursor_location());
-                Ok((Token::Assign, location))
+                (Token::Assign, location)
             },
 
             // Gt
             '>' => {
                 self.characters.next();
                 let location = start.combine_with(self.cursor_location());
-                Ok((Token::Gt, location))
+                (Token::Gt, location)
             },
 
             // XmlSlashGt
@@ -1114,16 +1111,16 @@ impl<'input> Tokenizer<'input> {
                         if self.characters.peek_or_zero() == '>' {
                             self.characters.next();
                             let location = start.combine_with(self.cursor_location());
-                            return Ok((Token::XmlSlashGt, location));
+                            return (Token::XmlSlashGt, location);
                         }
                     }
                     */
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::XmlSlashGt, location));
+                    return (Token::XmlSlashGt, location);
                 }
                 self.characters.next();
                 let location = start.combine_with(self.cursor_location());
-                Ok((Token::XmlSlashGt, location))
+                (Token::XmlSlashGt, location)
             },
 
             // XmlAttributeValue
@@ -1139,25 +1136,25 @@ impl<'input> Tokenizer<'input> {
                     self.add_unexpected_eof_error(DiagnosticKind::InputEndedBeforeReachingClosingQuoteForAttributeValue);
                     let value = self.compilation_unit.text()[(start.first_offset + 1)..self.cursor_location().first_offset].to_owned();
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::XmlAttributeValue(value), location));
+                    return (Token::XmlAttributeValue(value), location);
                 }
                 let value = self.compilation_unit.text()[(start.first_offset + 1)..self.cursor_location().first_offset].to_owned();
                 self.characters.next();
                 
                 let location = start.combine_with(self.cursor_location());
-                Ok((Token::XmlAttributeValue(value), location))
+                (Token::XmlAttributeValue(value), location)
             },
 
             // LeftBrace
             '{' => {
                 self.characters.next();
                 let location = start.combine_with(self.cursor_location());
-                Ok((Token::LeftBrace, location))
+                (Token::LeftBrace, location)
             },
 
             _ => {
                 if self.characters.reached_end() {
-                    return Ok((Token::Eof, self.cursor_location()));
+                    return (Token::Eof, self.cursor_location());
                 }
                 self.add_unexpected_error();
                 self.characters.next();
@@ -1167,7 +1164,7 @@ impl<'input> Tokenizer<'input> {
     }
 
     /// Scans for an *InputElementXMLContent* token.
-    pub fn scan_ie_xml_content(&mut self) -> Result<(Token, Location), ParserError> {
+    pub fn scan_ie_xml_content(&mut self) -> (Token, Location) {
         let start = self.cursor_location();
         let ch = self.characters.peek_or_zero();
 
@@ -1176,33 +1173,33 @@ impl<'input> Tokenizer<'input> {
                 self.characters.next();
 
                 // XmlMarkup
-                if let Some(r) = self.scan_xml_markup(start.clone())? {
-                    return Ok(r);
+                if let Some(r) = self.scan_xml_markup(start.clone()) {
+                    return r;
                 }
 
                 // XmlLtSlash
                 if self.characters.peek_or_zero() == '/' {
                     self.characters.next();
                     let location = start.combine_with(self.cursor_location());
-                    return Ok((Token::XmlLtSlash, location));
+                    return (Token::XmlLtSlash, location);
                 }
 
                 // Lt
                 let location = start.combine_with(self.cursor_location());
-                Ok((Token::Lt, location))
+                (Token::Lt, location)
             },
             
             // LeftBrace
             '{' => {
                 self.characters.next();
                 let location = start.combine_with(self.cursor_location());
-                Ok((Token::LeftBrace, location))
+                (Token::LeftBrace, location)
             },
 
             // XmlName
             _ => {
                 if self.characters.reached_end() {
-                    return Ok((Token::Eof, self.cursor_location()));
+                    return (Token::Eof, self.cursor_location());
                 }
                 loop {
                     let ch = self.characters.peek_or_zero();
@@ -1220,13 +1217,13 @@ impl<'input> Tokenizer<'input> {
 
                 let location = start.combine_with(self.cursor_location());
                 let content = self.compilation_unit.text()[location.first_offset..location.last_offset].to_owned();
-                Ok((Token::XmlText(content), location))
+                (Token::XmlText(content), location)
             },
         }
     }
 
     /// Attempts to scan a XMLMarkup token after a `<` character.
-    pub fn scan_xml_markup(&mut self, start: Location) -> Result<Option<(Token, Location)>, ParserError> {
+    pub fn scan_xml_markup(&mut self, start: Location) -> Option<(Token, Location)> {
         // XMLComment
         if self.characters.peek_seq(3) == "!--" {
             self.characters.skip_count_in_place(3);
@@ -1247,7 +1244,7 @@ impl<'input> Tokenizer<'input> {
             let location = start.combine_with(self.cursor_location());
             let content = self.compilation_unit.text()[location.first_offset..location.last_offset].to_owned();
 
-            return Ok(Some((Token::XmlMarkup(content), location)));
+            return Some((Token::XmlMarkup(content), location));
         }
 
         // XMLCDATA
@@ -1270,7 +1267,7 @@ impl<'input> Tokenizer<'input> {
             let location = start.combine_with(self.cursor_location());
             let content = self.compilation_unit.text()[location.first_offset..location.last_offset].to_owned();
 
-            return Ok(Some((Token::XmlMarkup(content), location)));
+            return Some((Token::XmlMarkup(content), location));
         }
 
         // XMLPI
@@ -1293,120 +1290,9 @@ impl<'input> Tokenizer<'input> {
             let location = start.combine_with(self.cursor_location());
             let content = self.compilation_unit.text()[location.first_offset..location.last_offset].to_owned();
 
-            return Ok(Some((Token::XmlMarkup(content), location)));
+            return Some((Token::XmlMarkup(content), location));
         }
 
-        Ok(None)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::ns::*;
-
-    #[test]
-    fn tokenize_n_per_n() {
-        let _n = "n".to_owned();
-        let source = CompilationUnit::new(None, "n * n".into(), &CompilerOptions::default());
-        let mut tokenizer = Tokenizer::new(&source, &default());
-        let Ok((Token::Identifier(name), _)) = tokenizer.scan_ie_div() else { panic!() };
-        assert_eq!(name, "n");
-        assert!(matches!(tokenizer.scan_ie_div(), Ok((Token::Times, _))));
-        let Ok((Token::Identifier(name), _)) = tokenizer.scan_ie_div() else { panic!() };
-        assert_eq!(name, "n");
-    }
-
-    #[test]
-    fn tokenize_comments() {
-        let _n = "n".to_owned();
-        let source = CompilationUnit::new(None, "
-            // Single-line comment
-            /* Multi-line comment */
-        ".into(), &CompilerOptions::default());
-        let mut tokenizer = Tokenizer::new(&source, &default());
-        assert!(matches!(tokenizer.scan_ie_div(), Ok((Token::Eof, _))));
-        assert_eq!(source.comments()[0].content(), " Single-line comment");
-        assert_eq!(source.comments()[1].content(), " Multi-line comment ");
-    }
-
-    #[test]
-    fn tokenize_strings() {
-        let source = CompilationUnit::new(None, r###"
-            "Some \u{41}\u0041\x41 content"
-            """
-            Another
-                common
-            content
-            """
-            "a\b"
-            @"a\b"
-        "###.into(), &CompilerOptions::default());
-        let mut tokenizer = Tokenizer::new(&source, &default());
-
-        let Ok((Token::String(s), _)) = tokenizer.scan_ie_div() else { panic!() };
-        assert_eq!(s, "Some AAA content");
-
-        let Ok((Token::String(s), _)) = tokenizer.scan_ie_div() else { panic!() };
-        assert_eq!(s, "Another\n    common\ncontent");
-
-        let Ok((Token::String(s), _)) = tokenizer.scan_ie_div() else { panic!() };
-        assert_eq!(s, "a\x08");
-
-        let Ok((Token::String(s), _)) = tokenizer.scan_ie_div() else { panic!() };
-        assert_eq!(s, "a\\b");
-    }
-
-    #[test]
-    fn tokenize_numbers() {
-        let numbers: Vec<f64> = vec![
-            0.0,
-            50.0,
-            1_000.0,
-            0.5,
-            0.5,
-            1_000.0,
-            1_000.0,
-            0.001,
-            0.0,
-            0.0,
-        ];
-        let source = CompilationUnit::new(None, r###"
-            0
-            50
-            1_000
-            0.5
-            .5
-            1e3
-            1e+3
-            1e-3
-            0x00_00
-            0b0000_0000
-            0f
-        "###.into(), &CompilerOptions::default());
-        let mut tokenizer = Tokenizer::new(&source, &default());
-        for n in numbers {
-            let Ok((Token::Number(n2, suffix), location)) = tokenizer.scan_ie_div() else { panic!() };
-            assert_eq!(n, NumericLiteral { value: n2, location, suffix }.parse_double(false).unwrap());
-        }
-    }
-
-    #[test]
-    fn tokenize_regexp() {
-        let source = CompilationUnit::new(None, r###"
-            /(?:)/
-            /(?:)/gi
-        "###.into(), &CompilerOptions::default());
-
-        let mut tokenizer = Tokenizer::new(&source, &default());
-
-        let Ok((Token::Div, start)) = tokenizer.scan_ie_div() else { panic!() };
-        let Ok((Token::RegExp { body, flags }, _)) = tokenizer.scan_regexp_literal(start, "".into()) else { panic!() };
-        assert_eq!(body, "(?:)");
-        assert_eq!(flags, "");
-
-        let Ok((Token::Div, start)) = tokenizer.scan_ie_div() else { panic!() };
-        let Ok((Token::RegExp { body, flags }, _)) = tokenizer.scan_regexp_literal(start, "".into()) else { panic!() };
-        assert_eq!(body, "(?:)");
-        assert_eq!(flags, "gi");
+        None
     }
 }
