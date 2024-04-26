@@ -204,27 +204,27 @@ impl<'input> CssTokenizer<'input> {
             },
             '{' => {
                 self.characters.next();
-                (Token::LeftBrace, start.combine_with(self.cursor_location()))
+                (Token::BlockOpen, start.combine_with(self.cursor_location()))
             },
             '}' => {
                 self.characters.next();
-                (Token::RightBrace, start.combine_with(self.cursor_location()))
+                (Token::BlockClose, start.combine_with(self.cursor_location()))
             },
             '[' => {
                 self.characters.next();
-                (Token::LeftBracket, start.combine_with(self.cursor_location()))
+                (Token::SquareOpen, start.combine_with(self.cursor_location()))
             },
             ']' => {
                 self.characters.next();
-                (Token::RightBracket, start.combine_with(self.cursor_location()))
+                (Token::SquareClose, start.combine_with(self.cursor_location()))
             },
             '(' => {
                 self.characters.next();
-                (Token::LeftParen, start.combine_with(self.cursor_location()))
+                (Token::ParenOpen, start.combine_with(self.cursor_location()))
             },
             ')' => {
                 self.characters.next();
-                (Token::RightParen, start.combine_with(self.cursor_location()))
+                (Token::ParenClose, start.combine_with(self.cursor_location()))
             },
             ',' => {
                 self.characters.next();
@@ -236,7 +236,7 @@ impl<'input> CssTokenizer<'input> {
             },
             '=' => {
                 self.characters.next();
-                (Token::Equals, start.combine_with(self.cursor_location()))
+                (Token::Assign, start.combine_with(self.cursor_location()))
             },
             ':' => {
                 self.characters.next();

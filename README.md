@@ -52,7 +52,7 @@ MXML supports a subset of CSS.
     - [x] `@font-face`
     - [x] Rule
   - [x] Selector
-  - [ ] Selector condition
+  - [x] Selector condition
   - [ ] Property
   - [ ] Property value
     - [ ] Color property value

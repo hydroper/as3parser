@@ -247,7 +247,7 @@ impl<'input> CssParser<'input> {
         loop {
             if let Some(condition) = self.parse_opt_media_query_condition() {
                 conditions.push(condition);
-            } else if self.eof() || self.peek(Token::LeftBrace) {
+            } else if self.eof() || self.peek(Token::BlockOpen) {
                 break;
             } else if !self.consume(Token::Comma) {
                 self.add_syntax_error(&self.token.1, DiagnosticKind::Unexpected, diagnostic_arguments![Token(self.token.0.clone())]);
@@ -255,8 +255,8 @@ impl<'input> CssParser<'input> {
             }
         }
         let mut rules: Vec<Rc<CssRule>> = vec![];
-        self.expect(Token::LeftBrace);
-        while !(self.eof() || self.peek(Token::RightBrace)) {
+        self.expect(Token::BlockOpen);
+        while !(self.eof() || self.peek(Token::BlockClose)) {
             if let Some(rule) = self.parse_opt_rule() {
                 rules.push(Rc::new(rule));
             } else {
@@ -264,7 +264,7 @@ impl<'input> CssParser<'input> {
                 self.next();
             }
         }
-        self.expect(Token::RightBrace);
+        self.expect(Token::BlockClose);
         Rc::new(CssDirective::MediaQuery(CssMediaQuery {
             location: self.pop_location(),
             conditions,
@@ -276,14 +276,14 @@ impl<'input> CssParser<'input> {
         self.mark_location();
         self.next();
         let mut properties: Vec<Rc<CssProperty>> = vec![];
-        self.expect(Token::LeftBrace);
-        while !(self.eof() || self.peek(Token::RightBrace)) {
+        self.expect(Token::BlockOpen);
+        while !(self.eof() || self.peek(Token::BlockClose)) {
             if !properties.is_empty() {
                 self.expect(Token::CssSemicolons);
             }
             properties.push(Rc::new(self.parse_property()));
         }
-        self.expect(Token::RightBrace);
+        self.expect(Token::BlockClose);
         Rc::new(CssDirective::FontFace(CssFontFace {
             location: self.pop_location(),
             properties,
@@ -304,7 +304,7 @@ impl<'input> CssParser<'input> {
         if let Some(id) = self.consume_identifier() {
             base = Some(Rc::new(CssMediaQueryCondition::Id(id)));
         }
-        if self.peek(Token::LeftParen) {
+        if self.peek(Token::ParenOpen) {
             self.mark_location();
             let property = self.parse_arguments().unwrap().parse_property();
             let loc = self.pop_location();
@@ -334,7 +334,7 @@ impl<'input> CssParser<'input> {
     }
 
     fn parse_arguments(&mut self) -> Result<CssParserFacade, ParserError> {
-        self.expect(Token::LeftParen);
+        self.expect(Token::ParenOpen);
         let i = self.tokenizer.characters().index();
         if self.expecting_token_error {
             return Err(ParserError::Common);
@@ -343,15 +343,15 @@ impl<'input> CssParser<'input> {
         let mut j;
         loop {
             j = self.tokenizer.characters().index();
-            if self.consume(Token::RightParen) {
+            if self.consume(Token::ParenClose) {
                 nesting -= 1;
                 if nesting == 0 {
                     break;
                 }
             } else if self.eof() {
-                self.expect(Token::RightParen);
+                self.expect(Token::ParenClose);
                 break;
-            } else if self.consume(Token::LeftParen) {
+            } else if self.consume(Token::ParenOpen) {
                 nesting += 1;
             } else {
                 self.next();
@@ -373,14 +373,14 @@ impl<'input> CssParser<'input> {
             }
         }
         let mut properties: Vec<Rc<CssProperty>> = vec![];
-        self.expect(Token::LeftBrace);
-        while !(self.eof() || self.peek(Token::RightBrace)) {
+        self.expect(Token::BlockOpen);
+        while !(self.eof() || self.peek(Token::BlockClose)) {
             if !properties.is_empty() {
                 self.expect(Token::CssSemicolons);
             }
             properties.push(Rc::new(self.parse_property()));
         }
-        self.expect(Token::RightBrace);
+        self.expect(Token::BlockClose);
         self.push_location(&selectors[0].location());
         Some(CssRule {
             location: self.pop_location(),
@@ -425,6 +425,95 @@ impl<'input> CssParser<'input> {
 
         Some(base)
     }
+
+    fn parse_selector_condition(&mut self) -> Rc<CssSelectorCondition> {
+        let Some(c) = self.parse_opt_selector_condition() else {
+            self.add_syntax_error(&self.token.1, DiagnosticKind::Unexpected, diagnostic_arguments![Token(self.token.0.clone())]);
+            return self.create_invalidated_selector_condition(&self.tokenizer.cursor_location());
+        };
+        c
+    }
+
+    fn parse_opt_selector_condition(&mut self) -> Option<Rc<CssSelectorCondition>> {
+        if self.peek(Token::Dot) {
+            self.mark_location();
+            self.next();
+            let class_name = self.expect_identifier().0;
+            return Some(Rc::new(CssSelectorCondition::Class((class_name, self.pop_location()))));
+        }
+        if let Token::CssHashWord(id_value) = self.token.0.clone() {
+            let loc = self.token.1.clone();
+            self.next();
+            return Some(Rc::new(CssSelectorCondition::Id((id_value, loc))));
+        }
+        if self.peek(Token::Colon) {
+            self.mark_location();
+            self.next();
+            if self.consume_keyword("not") {
+                let condition = if let Ok(a) = self.parse_arguments() {
+                    a.parse_selector_condition()
+                } else {
+                    self.add_syntax_error(&self.token.1, DiagnosticKind::Unexpected, diagnostic_arguments![Token(self.token.0.clone())]);
+                    self.duplicate_location();
+                    let loc = self.pop_location();
+                    self.create_invalidated_selector_condition(&loc)
+                };
+                return Some(Rc::new(CssSelectorCondition::Not {
+                    location: self.pop_location(),
+                    condition,
+                }));
+            } else {
+                let name = self.expect_identifier().0;
+                return Some(Rc::new(CssSelectorCondition::Pseudo((name, self.pop_location()))));
+            }
+        }
+        if self.peek(Token::ColonColon) {
+            self.mark_location();
+            self.next();
+            let name = self.expect_identifier().0;
+            return Some(Rc::new(CssSelectorCondition::PseudoElement((name, self.pop_location()))));
+        }
+        if self.peek(Token::SquareOpen) {
+            self.mark_location();
+            self.next();
+            let name = self.expect_identifier();
+            let mut operator: Option<CssAttributeOperator> = None;
+            let mut value: Option<(String, Location)> = None;
+            while let Some(t1) = self.consume_attribute_operator() {
+                operator = Some(t1);
+            }
+            while let Token::String(s1) = self.token.0.clone() {
+                value = Some((s1, self.token.1.clone()));
+                self.next();
+            }
+            self.expect(Token::SquareClose);
+            return Some(Rc::new(CssSelectorCondition::Attribute {
+                location: self.pop_location(),
+                name,
+                operator,
+                value,
+            }));
+        }
+        None
+    }
+
+    fn consume_attribute_operator(&mut self) -> Option<CssAttributeOperator> {
+        if self.consume(Token::CssBeginsWith) {
+            Some(CssAttributeOperator::BeginsWith)
+        } else if self.consume(Token::CssEndsWith) {
+            Some(CssAttributeOperator::EndsWith)
+        } else if self.consume(Token::CssContains) {
+            Some(CssAttributeOperator::Contains)
+        } else if self.consume(Token::CssListMatch) {
+            Some(CssAttributeOperator::ListMatch)
+        } else if self.consume(Token::CssHreflangMatch) {
+            Some(CssAttributeOperator::HreflangMatch)
+        } else if self.consume(Token::Assign) {
+            Some(CssAttributeOperator::Equals)
+        } else {
+            None
+        }
+    }
 }
 
 fn _rgb_bytes_to_integer(r: f64, g: f64, b: f64) -> u32 {
@@ -454,5 +543,12 @@ impl<'input> CssParserFacade<'input> {
         let mut parser = self.create_parser();
         parser.next();
         parser.parse_document()
+    }
+
+    /// Parses `CssSelectorCondition` until end-of-file.
+    pub fn parse_selector_condition(&self) -> Rc<CssSelectorCondition> {
+        let mut parser = self.create_parser();
+        parser.next();
+        parser.parse_selector_condition()
     }
 }

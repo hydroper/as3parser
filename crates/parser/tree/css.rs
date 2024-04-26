@@ -150,7 +150,7 @@ pub enum CssSelectorCondition {
     Attribute {
         location: Location,
         name: (String, Location),
-        operator: CssAttributeOperator,
+        operator: Option<CssAttributeOperator>,
         value: Option<(String, Location)>,
     },
 }
