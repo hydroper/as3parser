@@ -13,6 +13,8 @@ mod parser;
 pub use parser::*;
 mod css_parser;
 pub use css_parser::*;
+mod css_tokenizer;
+pub use css_tokenizer::*;
 mod parser_error;
 pub use parser_error::*;
 mod token;
