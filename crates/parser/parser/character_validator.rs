@@ -67,6 +67,15 @@ impl CharacterValidator {
         }
     }
 
+    pub fn is_css_identifier_start(ch: char) -> bool {
+        (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')
+    }
+
+    pub fn is_css_identifier_part(ch: char) -> bool {
+        (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') ||
+        (ch >= '0' && ch <= '9') || ch == '_' || ch == '-'
+    }
+
     pub fn is_identifier_start(ch: char) -> bool {
         if ch == '\x5f' || ch == '\x24' {
             return true;

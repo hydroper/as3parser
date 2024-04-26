@@ -5085,12 +5085,8 @@ impl<'input> Parser<'input> {
                         data.push(pi_characters.next_or_zero());
                     }
 
-                    // XMLPI may not have been successfully parsed, thus
-                    // slice until where possible.
                     let i = location.first_offset() + 2 + name.len();
-                    let mut j = location.last_offset();
-                    j = if i < j { j - 1 } else { j };
-                    j = if i < j { j - 1 } else { j };
+                    let j = decrease_last_offset(i, location.last_offset(), 2);
 
                     match process_xml_pi(self.compilation_unit(), (i, j), &name) {
                         Ok(errors) => {
@@ -5328,9 +5324,6 @@ struct PlainMxmlAttribute {
     pub name: (String, Location),
     pub value: (String, Location),
 }
-
-#[path = "css_parser.rs"]
-pub(crate) mod css_parser;
 
 /// A simplified interface for executing the parser.
 pub struct ParserFacade<'input>(pub &'input Rc<CompilationUnit>, pub ParserOptions);

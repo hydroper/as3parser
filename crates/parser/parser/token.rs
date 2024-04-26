@@ -15,6 +15,13 @@ pub enum Token {
         flags: String,
     },
 
+    CssNumber {
+        value: f64,
+        unit: Option<String>,
+    },
+
+    CssHashWord(String),
+
     // Punctuator
     ColonColon,
     /// The `@` token.
@@ -172,6 +179,9 @@ impl ToString for Token {
             Token::StringLiteral(_) => "string",
             Token::NumericLiteral(_, _) => "number",
             Token::RegExpLiteral { .. } => "regular expression",
+
+            Token::CssNumber { .. } => "number",
+            Token::CssHashWord(_) => "hash-word",
 
             // Punctuators
             Token::ColonColon => "colon-colon",

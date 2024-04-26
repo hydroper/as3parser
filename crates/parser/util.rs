@@ -31,3 +31,10 @@ pub fn default<T: Default>() -> T {
 pub fn count_first_whitespace_characters(input: &str) -> usize {
     input.chars().count() - input.trim_start().chars().count()
 }
+
+pub fn decrease_last_offset(first_offset: usize, mut last_offset: usize, count: usize) -> usize {
+    for _ in 0..count {
+        last_offset = if first_offset < last_offset { last_offset - 1 } else { last_offset };
+    }
+    last_offset
+}
