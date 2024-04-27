@@ -7,7 +7,7 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-as3_parser = { path = "../crates/parser", version = "0.5" }
+as3_parser = { path = "../crates/parser", version = "1.0" }
 maplit = "1.0.2"
 serde = { version = "1.0.192", features = ["rc", "derive"] }
 serde_json = "1.0.108"

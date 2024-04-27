@@ -4834,7 +4834,7 @@ impl<'input> Parser<'input> {
     }
 
     /// Parses MXMLElement starting from its XMLTagContent.
-    fn parse_mxml_element(&mut self, start: Location, namespace: &Rc<MxmlNamespace>) -> MxmlElement {
+    fn parse_mxml_element(&mut self, start: Location, namespace: &Rc<MxmlNamespace>, encoding: &mut String) -> MxmlElement {
         self.push_location(&start);
         let namespace = Rc::new(MxmlNamespace::new(Some(namespace)));
         let name = self.parse_xml_name();
@@ -4876,7 +4876,7 @@ impl<'input> Parser<'input> {
 
         if !is_empty {
             self.expect_and_ie_xml_content(Token::Gt);
-            content = Some(self.parse_mxml_content(false, &namespace));
+            content = Some(self.parse_mxml_content(false, &namespace, encoding));
             self.non_greedy_expect_and_ie_xml_tag(Token::XmlLtSlash);
             let name = self.parse_xml_name();
             closing_name = Some(self.process_mxml_tag_name(name, &namespace));
@@ -5028,7 +5028,7 @@ impl<'input> Parser<'input> {
     }
 
     /// Parses XMLContent until either the `</` token or end-of-file.
-    fn parse_mxml_content(&mut self, until_eof: bool, namespace: &Rc<MxmlNamespace>) -> Vec<Rc<MxmlContent>> {
+    fn parse_mxml_content(&mut self, until_eof: bool, namespace: &Rc<MxmlNamespace>, encoding: &mut String) -> Vec<Rc<MxmlContent>> {
         let mut content = vec![];
         while if until_eof { self.tokenizer.characters().has_remaining() } else { !self.peek(Token::XmlLtSlash) } {
             if let Token::XmlMarkup(markup) = self.token.0.clone() {
@@ -5058,17 +5058,17 @@ impl<'input> Parser<'input> {
                     let i = location.first_offset() + 2 + name.len();
                     let j = decrease_last_offset(i, location.last_offset(), 2);
 
-                    let errors = process_xml_pi(self.compilation_unit(), (i, j), &name);
+                    let errors = process_xml_pi(self.compilation_unit(), (i, j), &name, encoding);
                     for error in errors.iter() {
                         match error {
                             XmlPiError::UnknownAttribute(name) => {
                                 self.add_syntax_error(&location, DiagnosticKind::XmlPiUnknownAttribute, diagarg![name.clone()]);
                             },
-                            XmlPiError::VersionMustBe10 => {
-                                self.add_syntax_error(&location, DiagnosticKind::XmlPiVersionMustBe10, vec![]);
+                            XmlPiError::Version => {
+                                self.add_syntax_error(&location, DiagnosticKind::XmlPiVersion, vec![]);
                             },
-                            XmlPiError::EncodingMustBeUtf8 => {
-                                self.add_syntax_error(&location, DiagnosticKind::XmlPiEncodingMustBeUtf8, vec![]);
+                            XmlPiError::Encoding => {
+                                self.add_syntax_error(&location, DiagnosticKind::XmlPiEncoding, vec![]);
                             },
                         }
                     }
@@ -5084,7 +5084,7 @@ impl<'input> Parser<'input> {
                 content.push(Rc::new(MxmlContent::Characters((unescape_xml(&text), location))));
             } else if self.consume_and_ie_xml_tag(Token::Lt) {
                 let start = self.token_location();
-                let element = self.parse_mxml_element(start, namespace);
+                let element = self.parse_mxml_element(start, namespace, encoding);
                 content.push(Rc::new(MxmlContent::Element(Rc::new(element))));
             } else if !until_eof {
                 self.expect_and_ie_xml_content(Token::XmlLtSlash);
@@ -5099,7 +5099,8 @@ impl<'input> Parser<'input> {
     fn parse_mxml(&mut self) -> Rc<Mxml> {
         self.mark_location();
         let ns = Rc::new(MxmlNamespace::new(None));
-        let mut content = self.parse_mxml_content(true, &ns);
+        let mut encoding = "utf-8".to_owned();
+        let mut content = self.parse_mxml_content(true, &ns, &mut encoding);
         self.filter_mxml_whitespace_out(&mut content);
 
         let mut element_count = 0usize;
@@ -5124,7 +5125,7 @@ impl<'input> Parser<'input> {
         Rc::new(Mxml {
             location,
             version: XmlVersion::Version10,
-            encoding: "utf-8".into(),
+            encoding,
             content,
         })
     }
@@ -5179,7 +5180,7 @@ fn join_asdoc_content(content: &Vec<(String, Location)>) -> (String, Location) {
     (s, location)
 }
 
-fn process_xml_pi(cu: &Rc<CompilationUnit>, byte_range: (usize, usize), name: &str) -> Vec<XmlPiError> {
+fn process_xml_pi(cu: &Rc<CompilationUnit>, byte_range: (usize, usize), name: &str, encoding: &mut String) -> Vec<XmlPiError> {
     if name != "xml" {
         return vec![];
     }
@@ -5199,12 +5200,15 @@ fn process_xml_pi(cu: &Rc<CompilationUnit>, byte_range: (usize, usize), name: &s
             match name.0.as_ref() {
                 "version" => {
                     if value.0 != "1.0" {
-                        errors.push(XmlPiError::VersionMustBe10);
+                        errors.push(XmlPiError::Version);
                     }
                 },
                 "encoding" => {
-                    if value.0.to_lowercase() != "utf-8" {
-                        errors.push(XmlPiError::EncodingMustBeUtf8);
+                    let v = value.0.to_lowercase();
+                    if ["utf-8", "utf-16"].contains(&v.as_str()) {
+                        *encoding = v;
+                    } else {
+                        errors.push(XmlPiError::Encoding);
                     }
                 },
                 _ => {
@@ -5225,8 +5229,8 @@ fn is_flex_documentable_meta_data(name: &str) -> bool {
 
 enum XmlPiError {
     UnknownAttribute(String),
-    VersionMustBe10,
-    EncodingMustBeUtf8,
+    Version,
+    Encoding,
 }
 
 struct ParserAsDocLine {

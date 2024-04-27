@@ -272,15 +272,17 @@ impl<'input> CssParser<'input> {
         }
         let mut rules: Vec<Rc<CssRule>> = vec![];
         self.expect(Token::BlockOpen);
-        while !(self.eof() || self.peek(Token::BlockClose)) {
-            if let Some(rule) = self.parse_opt_rule() {
-                rules.push(Rc::new(rule));
-            } else {
-                self.add_syntax_error(&self.token.1, DiagnosticKind::Unexpected, diagarg![self.token.0.clone()]);
-                self.next();
+        if !self.expecting_token_error {
+            while !(self.eof() || self.peek(Token::BlockClose)) {
+                if let Some(rule) = self.parse_opt_rule() {
+                    rules.push(Rc::new(rule));
+                } else {
+                    self.add_syntax_error(&self.token.1, DiagnosticKind::Unexpected, diagarg![self.token.0.clone()]);
+                    self.next();
+                }
             }
+            self.expect(Token::BlockClose);
         }
-        self.expect(Token::BlockClose);
         Rc::new(CssDirective::MediaQuery(CssMediaQuery {
             location: self.pop_location(),
             conditions,
@@ -293,14 +295,16 @@ impl<'input> CssParser<'input> {
         self.next();
         let mut properties: Vec<Rc<CssProperty>> = vec![];
         self.expect(Token::BlockOpen);
-        self.consume(Token::CssSemicolons);
-        while !(self.eof() || self.peek(Token::BlockClose)) {
-            properties.push(self.parse_property());
-            if !self.consume(Token::CssSemicolons) {
-                break;
+        if !self.expecting_token_error {
+            self.consume(Token::CssSemicolons);
+            while !(self.eof() || self.peek(Token::BlockClose)) {
+                properties.push(self.parse_property());
+                if !self.consume(Token::CssSemicolons) {
+                    break;
+                }
             }
+            self.expect(Token::BlockClose);
         }
-        self.expect(Token::BlockClose);
         Rc::new(CssDirective::FontFace(CssFontFace {
             location: self.pop_location(),
             properties,
@@ -376,14 +380,16 @@ impl<'input> CssParser<'input> {
         }
         let mut properties: Vec<Rc<CssProperty>> = vec![];
         self.expect(Token::BlockOpen);
-        self.consume(Token::CssSemicolons);
-        while !(self.eof() || self.peek(Token::BlockClose)) {
-            properties.push(self.parse_property());
-            if !self.consume(Token::CssSemicolons) {
-                break;
+        if !self.expecting_token_error {
+            self.consume(Token::CssSemicolons);
+            while !(self.eof() || self.peek(Token::BlockClose)) {
+                properties.push(self.parse_property());
+                if !self.consume(Token::CssSemicolons) {
+                    break;
+                }
             }
+            self.expect(Token::BlockClose);
         }
-        self.expect(Token::BlockClose);
         self.push_location(&selectors[0].location());
         Some(CssRule {
             location: self.pop_location(),
@@ -631,6 +637,10 @@ impl<'input> CssParser<'input> {
                     entries,
                 })));
             } else {
+                if self.peek(Token::ParenOpen) {
+                    self.add_syntax_error(&self.token_location(), DiagnosticKind::Unexpected, diagarg![self.token.0.clone()]);
+                    self.parse_arguments().unwrap();
+                }
                 base = Some(Rc::new(CssPropertyValue::Identifier(CssIdentifierPropertyValue {
                     location: self.pop_location(),
                     value: id.0,
