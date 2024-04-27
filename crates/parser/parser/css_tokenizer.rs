@@ -348,6 +348,7 @@ impl<'input> CssTokenizer<'input> {
         let mut mv = f64::from_str(digits).unwrap_or(f64::NAN);
         let mut unit: Option<String> = None;
         if self.characters.peek_or_zero() == '%' {
+            self.characters.next();
             mv /= 100.0;
         } else {
             unit = self.consume_css_id();
