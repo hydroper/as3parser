@@ -201,13 +201,18 @@ impl<'input> CssParser<'input> {
 
     pub fn parse_document(&mut self) -> Rc<CssDocument> {
         self.mark_location();
+        let just_eof = self.peek(Token::Eof);
         let mut directives: Vec<Rc<CssDirective>> = vec![];
         while !self.eof() {
             directives.push(self.parse_directive());
         }
         let loc = self.pop_location();
         Rc::new(CssDocument {
-            location: loc,
+            location: if just_eof {
+                self.token.1.clone()
+            } else {
+                loc
+            },
             directives,
         })
     }
