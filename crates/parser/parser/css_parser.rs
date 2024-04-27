@@ -356,31 +356,16 @@ impl<'input> CssParser<'input> {
     }
 
     fn parse_arguments(&mut self) -> Result<CssParserFacade, ParserError> {
-        self.expect(Token::ParenOpen);
-        let i = self.token.1.first_offset();
-        if self.expecting_token_error {
+        if !self.peek(Token::ParenOpen) {
+            self.add_syntax_error(&self.token.1, DiagnosticKind::Expecting, diagnostic_arguments![Token(Token::ParenOpen), Token(self.token.0.clone())]);
             return Err(ParserError::Common);
         }
-        let mut nesting = 1;
-        let mut j;
-        loop {
-            j = self.token.1.first_offset();
-            if self.consume(Token::ParenClose) {
-                nesting -= 1;
-                if nesting == 0 {
-                    break;
-                }
-            } else if self.eof() {
-                self.expect(Token::ParenClose);
-                break;
-            } else if self.consume(Token::ParenOpen) {
-                nesting += 1;
-            } else {
-                self.next();
-            }
-        }
+        let (byte_range, token) = self.tokenizer.scan_arguments();
+        self.previous_token = self.token.clone();
+        self.token = token;
+        self.next();
         Ok(CssParserFacade(self.compilation_unit(), ParserOptions {
-            byte_range: Some((i, j)),
+            byte_range: Some(byte_range),
             ..default()
         }))
     }

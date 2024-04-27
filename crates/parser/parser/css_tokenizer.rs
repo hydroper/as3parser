@@ -50,16 +50,23 @@ impl<'input> CssTokenizer<'input> {
         Location::with_offset(&self.compilation_unit, offset)
     }
 
+    fn add_syntax_error(&self, location: &Location, kind: DiagnosticKind, arguments: Vec<DiagnosticArgument>) {
+        if self.compilation_unit().prevent_equal_offset_error(location) {
+            return;
+        }
+        self.compilation_unit().add_diagnostic(Diagnostic::new_syntax_error(location, kind, arguments));
+    }
+
     fn add_unexpected_error(&self) {
         if self.characters.has_remaining() {
-            self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&self.character_ahead_location(), DiagnosticKind::UnexpectedCharacter, diagnostic_arguments![String(self.characters.peek_or_zero().to_string())]))
+            self.add_syntax_error(&self.character_ahead_location(), DiagnosticKind::UnexpectedCharacter, diagnostic_arguments![String(self.characters.peek_or_zero().to_string())])
         } else {
-            self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&self.cursor_location(), DiagnosticKind::UnexpectedEnd, vec![]))
+            self.add_syntax_error(&self.cursor_location(), DiagnosticKind::UnexpectedEnd, vec![])
         }
     }
 
     fn add_unexpected_eof_error(&self, kind: DiagnosticKind) {
-        self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&self.cursor_location(), kind, vec![]));
+        self.add_syntax_error(&self.cursor_location(), kind, vec![]);
     }
 
     pub fn scan(&mut self) -> (Token, Location) {
@@ -380,7 +387,7 @@ impl<'input> CssTokenizer<'input> {
                     if let Some(mv) = mv {
                         builder.push(mv);
                     } else {
-                        self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&loc, DiagnosticKind::CssInvalidHexEscape, diagnostic_arguments![String(digits)]));
+                        self.add_syntax_error(&loc, DiagnosticKind::CssInvalidHexEscape, diagnostic_arguments![String(digits)]);
                     }
                 }
             } else if self.characters.reached_end() {
@@ -393,5 +400,34 @@ impl<'input> CssTokenizer<'input> {
         }
         let loc = start.combine_with(self.cursor_location());
         (Token::String(builder), loc)
+    }
+
+    pub fn scan_arguments(&mut self) -> ((usize, usize), (Token, Location)) {
+        let i = self.characters.index();
+        let mut j: usize;
+        let mut nesting = 1;
+        let token: (Token, Location);
+        loop {
+            j = self.characters.index();
+            let ch = self.characters.peek_or_zero();
+            if ch == ')' {
+                self.characters.next();
+                nesting -= 1;
+                if nesting == 0 {
+                    token = (Token::ParenClose, Location::with_offsets(&self.compilation_unit, j, self.characters.index()));
+                    break;
+                }
+            } else if ch == '(' {
+                self.characters.next();
+                nesting += 1;
+            } else if self.characters.reached_end() {
+                self.add_syntax_error(&self.cursor_location(), DiagnosticKind::Expecting, diagnostic_arguments![Token(Token::ParenClose), Token(Token::Eof)]);
+                token = (Token::Eof, self.cursor_location());
+                break;
+            } else {
+                self.characters.next();
+            }
+        }
+        ((i, j), token)
     }
 }
