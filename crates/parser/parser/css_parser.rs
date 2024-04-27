@@ -45,14 +45,14 @@ impl<'input> CssParser<'input> {
         self.locations.pop().unwrap().combine_with(self.previous_token.1.clone())
     }
 
-    fn add_syntax_error(&self, location: &Location, kind: DiagnosticKind, arguments: Vec<DiagnosticArgument>) {
+    fn add_syntax_error(&self, location: &Location, kind: DiagnosticKind, arguments: Vec<Rc<dyn DiagnosticArgument>>) {
         if self.compilation_unit().prevent_equal_offset_error(location) {
             return;
         }
         self.compilation_unit().add_diagnostic(Diagnostic::new_syntax_error(location, kind, arguments));
     }
 
-    fn _patch_syntax_error(&self, original: DiagnosticKind, location: &Location, kind: DiagnosticKind, arguments: Vec<DiagnosticArgument>) {
+    fn _patch_syntax_error(&self, original: DiagnosticKind, location: &Location, kind: DiagnosticKind, arguments: Vec<Rc<dyn DiagnosticArgument>>) {
         if self.compilation_unit().diagnostics.borrow().is_empty() {
             return;
         }
@@ -63,7 +63,7 @@ impl<'input> CssParser<'input> {
     }
 
     /*
-    fn add_warning(&self, location: &Location, kind: DiagnosticKind, arguments: Vec<DiagnosticArgument>) {
+    fn add_warning(&self, location: &Location, kind: DiagnosticKind, arguments: Vec<Rc<dyn DiagnosticArgument>>) {
         if self.compilation_unit().prevent_equal_offset_warning(location) {
             return;
         }
@@ -126,7 +126,7 @@ impl<'input> CssParser<'input> {
     fn expect(&mut self, token: Token) {
         if self.token.0 != token {
             self.expecting_token_error = true;
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagarg![Token(token.clone()), Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagarg![token.clone(), self.token.0.clone()]);
         } else {
             self.expecting_token_error = false;
             self.next();
@@ -141,7 +141,7 @@ impl<'input> CssParser<'input> {
             (id, location)
         } else {
             self.expecting_token_error = true;
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingIdentifier, diagarg![Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingIdentifier, diagarg![self.token.0.clone()]);
             (INVALIDATED_IDENTIFIER.to_owned(), self.tokenizer.cursor_location())
         }
     }
@@ -153,7 +153,7 @@ impl<'input> CssParser<'input> {
             Some(value)
         } else {
             self.expecting_token_error = true;
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::Unexpected, diagarg![Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::Unexpected, diagarg![self.token.0.clone()]);
             None
         }
     }
@@ -166,7 +166,7 @@ impl<'input> CssParser<'input> {
             (v, location)
         } else {
             self.expecting_token_error = true;
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingStringLiteral, diagarg![Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingStringLiteral, diagarg![self.token.0.clone()]);
             ("".into(), self.tokenizer.cursor_location())
         }
     }
@@ -248,7 +248,7 @@ impl<'input> CssParser<'input> {
         } else if self.peek(Token::CssAtFontFace) {
             self.parse_font_face()
         } else {
-            self.add_syntax_error(&self.token.1, DiagnosticKind::ExpectingDirective, diagarg![Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token.1, DiagnosticKind::ExpectingDirective, diagarg![self.token.0.clone()]);
             let d = self.create_invalidated_directive(&self.tokenizer.cursor_location());
             self.next();
             d
@@ -263,7 +263,7 @@ impl<'input> CssParser<'input> {
         if let Some(condition) = condition {
             conditions.push(condition);
         } else {
-            self.add_syntax_error(&self.token.1, DiagnosticKind::Unexpected, diagarg![Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token.1, DiagnosticKind::Unexpected, diagarg![self.token.0.clone()]);
         }
         loop {
             if let Some(condition) = self.parse_opt_media_query_condition() {
@@ -271,7 +271,7 @@ impl<'input> CssParser<'input> {
             } else if self.eof() || self.peek(Token::BlockOpen) {
                 break;
             } else if !self.consume(Token::Comma) {
-                self.add_syntax_error(&self.token.1, DiagnosticKind::Unexpected, diagarg![Token(self.token.0.clone())]);
+                self.add_syntax_error(&self.token.1, DiagnosticKind::Unexpected, diagarg![self.token.0.clone()]);
                 self.next();
             }
         }
@@ -281,7 +281,7 @@ impl<'input> CssParser<'input> {
             if let Some(rule) = self.parse_opt_rule() {
                 rules.push(Rc::new(rule));
             } else {
-                self.add_syntax_error(&self.token.1, DiagnosticKind::Unexpected, diagarg![Token(self.token.0.clone())]);
+                self.add_syntax_error(&self.token.1, DiagnosticKind::Unexpected, diagarg![self.token.0.clone()]);
                 self.next();
             }
         }
@@ -342,7 +342,7 @@ impl<'input> CssParser<'input> {
                         right,
                     });
                 } else {
-                    self.add_syntax_error(&self.token.1, DiagnosticKind::Unexpected, diagarg![Token(self.token.0.clone())]);
+                    self.add_syntax_error(&self.token.1, DiagnosticKind::Unexpected, diagarg![self.token.0.clone()]);
                     base = Rc::new(CssMediaQueryCondition::And {
                         location: self.pop_location(),
                         left: base,
@@ -357,7 +357,7 @@ impl<'input> CssParser<'input> {
 
     fn parse_arguments(&mut self) -> Result<CssParserFacade, ParserError> {
         if !self.peek(Token::ParenOpen) {
-            self.add_syntax_error(&self.token.1, DiagnosticKind::Expecting, diagarg![Token(Token::ParenOpen), Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token.1, DiagnosticKind::Expecting, diagarg![Token::ParenOpen, self.token.0.clone()]);
             return Err(ParserError::Common);
         }
         let (byte_range, token) = self.tokenizer.scan_arguments();
@@ -376,7 +376,7 @@ impl<'input> CssParser<'input> {
             if let Some(s) = self.parse_opt_selector() {
                 selectors.push(s);
             } else {
-                self.add_syntax_error(&self.token.1, DiagnosticKind::Unexpected, diagarg![Token(self.token.0.clone())]);
+                self.add_syntax_error(&self.token.1, DiagnosticKind::Unexpected, diagarg![self.token.0.clone()]);
             }
         }
         let mut properties: Vec<Rc<CssProperty>> = vec![];
@@ -436,7 +436,7 @@ impl<'input> CssParser<'input> {
 
     fn parse_selector_condition(&mut self) -> Rc<CssSelectorCondition> {
         let Some(c) = self.parse_opt_selector_condition() else {
-            self.add_syntax_error(&self.token.1, DiagnosticKind::Unexpected, diagarg![Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token.1, DiagnosticKind::Unexpected, diagarg![self.token.0.clone()]);
             return self.create_invalidated_selector_condition(&self.tokenizer.cursor_location());
         };
         c
@@ -537,7 +537,7 @@ impl<'input> CssParser<'input> {
 
     fn parse_property_value(&mut self, min_precedence: CssOperatorPrecedence) -> Rc<CssPropertyValue> {
         let Some(v) = self.parse_opt_property_value(min_precedence) else {
-            self.add_syntax_error(&self.token.1, DiagnosticKind::Unexpected, diagarg![Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token.1, DiagnosticKind::Unexpected, diagarg![self.token.0.clone()]);
             return self.create_invalidated_property_value(&self.tokenizer.cursor_location());
         };
         v

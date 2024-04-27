@@ -42,10 +42,7 @@ compilation_unit.add_diagnostic(Diagnostic::new_verify_error(&location, Diagnost
 compilation_unit.add_diagnostic(Diagnostic::new_warning(&location, DiagnosticKind::K, diagarg![]));
 ```
 
-The `diagarg![]` literal takes elements in one of the forms:
-
-* `Token(token)`
-* `String(string)`
+The `diagarg![]` literal takes elements that implement the `DiagnosticArgument` trait.
 
 ## Custom kinds
 
@@ -64,3 +61,21 @@ diagnostic.format_with_message("My message", Some(custom_id_number))
 ```
 
 For real use cases, calling `.format_with_message()` is not preferred if your application is not solely in English, since it will add categories such as `Warning`.
+
+## Arguments
+
+Diagnostics allow arbitrary argument data as long as it implements the `DiagnosticArgument` trait. The `diagarg!` literal autoboxes arguments in `Rc::new(...)`.
+
+To downcast to your data type, first make sure to have this attribute at the top of your crate:
+
+```rust
+#![feature(trait_upcasting)]
+```
+
+Then, use the following code snippet:
+
+```rust
+if let Ok(value) = Rc::downcast::<DataType>(arg.clone()) {
+    // value: Rc<DataType>
+}
+```

@@ -1,6 +1,6 @@
 [package]
 name = "as3_parser"
-version = "0.5.27"
+version = "0.5.28"
 edition = "2021"
 authors = ["hydroper <matheusdiasdesouzads@gmail.com>"]
 repository = "https://github.com/hydroper/as3parser"

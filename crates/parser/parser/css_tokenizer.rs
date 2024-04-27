@@ -50,7 +50,7 @@ impl<'input> CssTokenizer<'input> {
         Location::with_offset(&self.compilation_unit, offset)
     }
 
-    fn add_syntax_error(&self, location: &Location, kind: DiagnosticKind, arguments: Vec<DiagnosticArgument>) {
+    fn add_syntax_error(&self, location: &Location, kind: DiagnosticKind, arguments: Vec<Rc<dyn DiagnosticArgument>>) {
         if self.compilation_unit().prevent_equal_offset_error(location) {
             return;
         }
@@ -59,7 +59,7 @@ impl<'input> CssTokenizer<'input> {
 
     fn add_unexpected_error(&self) {
         if self.characters.has_remaining() {
-            self.add_syntax_error(&self.character_ahead_location(), DiagnosticKind::UnexpectedCharacter, diagarg![String(self.characters.peek_or_zero().to_string())])
+            self.add_syntax_error(&self.character_ahead_location(), DiagnosticKind::UnexpectedCharacter, diagarg![self.characters.peek_or_zero().to_string()])
         } else {
             self.add_syntax_error(&self.cursor_location(), DiagnosticKind::UnexpectedEnd, vec![])
         }
@@ -388,7 +388,7 @@ impl<'input> CssTokenizer<'input> {
                     if let Some(mv) = mv {
                         builder.push(mv);
                     } else {
-                        self.add_syntax_error(&loc, DiagnosticKind::CssInvalidHexEscape, diagarg![String(digits)]);
+                        self.add_syntax_error(&loc, DiagnosticKind::CssInvalidHexEscape, diagarg![digits]);
                     }
                 }
             } else if self.characters.reached_end() {
@@ -422,7 +422,7 @@ impl<'input> CssTokenizer<'input> {
                 self.characters.next();
                 nesting += 1;
             } else if self.characters.reached_end() {
-                self.add_syntax_error(&self.cursor_location(), DiagnosticKind::Expecting, diagarg![Token(Token::ParenClose), Token(Token::Eof)]);
+                self.add_syntax_error(&self.cursor_location(), DiagnosticKind::Expecting, diagarg![Token::ParenClose, Token::Eof]);
                 token = (Token::Eof, self.cursor_location());
                 break;
             } else {

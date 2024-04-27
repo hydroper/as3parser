@@ -49,14 +49,14 @@ impl<'input> Parser<'input> {
         self.locations.pop().unwrap().combine_with(self.previous_token.1.clone())
     }
 
-    fn add_syntax_error(&self, location: &Location, kind: DiagnosticKind, arguments: Vec<DiagnosticArgument>) {
+    fn add_syntax_error(&self, location: &Location, kind: DiagnosticKind, arguments: Vec<Rc<dyn DiagnosticArgument>>) {
         if self.compilation_unit().prevent_equal_offset_error(location) {
             return;
         }
         self.compilation_unit().add_diagnostic(Diagnostic::new_syntax_error(location, kind, arguments));
     }
 
-    fn patch_syntax_error(&self, original: DiagnosticKind, location: &Location, kind: DiagnosticKind, arguments: Vec<DiagnosticArgument>) {
+    fn patch_syntax_error(&self, original: DiagnosticKind, location: &Location, kind: DiagnosticKind, arguments: Vec<Rc<dyn DiagnosticArgument>>) {
         if self.compilation_unit().diagnostics.borrow().is_empty() {
             return;
         }
@@ -67,7 +67,7 @@ impl<'input> Parser<'input> {
     }
 
     /*
-    fn add_warning(&self, location: &Location, kind: DiagnosticKind, arguments: Vec<DiagnosticArgument>) {
+    fn add_warning(&self, location: &Location, kind: DiagnosticKind, arguments: Vec<Rc<dyn DiagnosticArgument>>) {
         if self.compilation_unit().prevent_equal_offset_warning(location) {
             return;
         }
@@ -173,7 +173,7 @@ impl<'input> Parser<'input> {
     fn expect(&mut self, token: Token) {
         if self.token.0 != token {
             self.expecting_token_error = true;
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagarg![Token(token.clone()), Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagarg![token.clone(), self.token.0.clone()]);
             let expecting_identifier_name = token.is_identifier_name();
             while self.token.0 != Token::Eof && (if expecting_identifier_name { self.token.0.is_identifier_name() } else { true }) {
                 self.next();
@@ -191,7 +191,7 @@ impl<'input> Parser<'input> {
     fn non_greedy_expect(&mut self, token: Token) {
         if self.token.0 != token {
             self.expecting_token_error = true;
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagarg![Token(token.clone()), Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagarg![token.clone(), self.token.0.clone()]);
         } else {
             self.expecting_token_error = false;
             self.next();
@@ -209,7 +209,7 @@ impl<'input> Parser<'input> {
     fn expect_and_ie_xml_tag(&mut self, token: Token) {
         if self.token.0 != token {
             self.expecting_token_error = true;
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagarg![Token(token.clone()), Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagarg![token.clone(), self.token.0.clone()]);
             while self.token.0 != Token::Eof {
                 self.next_ie_xml_tag();
                 if self.token.0 == token {
@@ -226,7 +226,7 @@ impl<'input> Parser<'input> {
     fn non_greedy_expect_and_ie_xml_tag(&mut self, token: Token) {
         if self.token.0 != token {
             self.expecting_token_error = true;
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagarg![Token(token.clone()), Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagarg![token.clone(), self.token.0.clone()]);
         } else {
             self.expecting_token_error = false;
             self.next_ie_xml_tag();
@@ -236,7 +236,7 @@ impl<'input> Parser<'input> {
     fn expect_and_ie_xml_content(&mut self, token: Token) {
         if self.token.0 != token {
             self.expecting_token_error = true;
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagarg![Token(token.clone()), Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagarg![token.clone(), self.token.0.clone()]);
             while self.token.0 != Token::Eof {
                 self.next_ie_xml_content();
                 if self.token.0 == token {
@@ -252,7 +252,7 @@ impl<'input> Parser<'input> {
     fn non_greedy_expect_and_ie_xml_content(&mut self, token: Token) {
         if self.token.0 != token {
             self.expecting_token_error = true;
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagarg![Token(token.clone()), Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagarg![token.clone(), self.token.0.clone()]);
         } else {
             self.expecting_token_error = false;
             self.next_ie_xml_content();
@@ -275,7 +275,7 @@ impl<'input> Parser<'input> {
                 }
             }
             self.expecting_token_error = true;
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingIdentifier, diagarg![Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingIdentifier, diagarg![self.token.0.clone()]);
             /*
             while self.token.0 != Token::Eof && self.token.0.is_identifier_name() {
                 if let Some(id) = self.consume_identifier(reserved_words) {
@@ -298,7 +298,7 @@ impl<'input> Parser<'input> {
             }
         }
         self.expecting_token_error = true;
-        self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagarg![String(format!("'{name}'")), Token(self.token.0.clone())]);
+        self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagarg![format!("'{name}'"), self.token.0.clone()]);
         while self.token.0 != Token::Eof && self.token.0.is_identifier_name() {
             if self._consume_context_keyword(name) {
                 return;
@@ -317,7 +317,7 @@ impl<'input> Parser<'input> {
             }
         }
         self.expecting_token_error = true;
-        self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagarg![String(format!("'{name}'")), Token(self.token.0.clone())]);
+        self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagarg![format!("'{name}'"), self.token.0.clone()]);
     }
 
     /// Expects a greater-than symbol. If the facing token is not greater-than,
@@ -327,7 +327,7 @@ impl<'input> Parser<'input> {
         self.expecting_token_error = false;
         if !self.consume_type_parameters_gt() {
             self.expecting_token_error = true;
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagarg![Token(Token::Gt), Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagarg![Token::Gt, self.token.0.clone()]);
             while self.token.0 != Token::Eof {
                 self.next();
                 if self.consume_type_parameters_gt() {
@@ -341,7 +341,7 @@ impl<'input> Parser<'input> {
         self.expecting_token_error = false;
         if !self.consume_type_parameters_gt() {
             self.expecting_token_error = true;
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagarg![Token(Token::Gt), Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagarg![Token::Gt, self.token.0.clone()]);
         }
     }
 
@@ -414,7 +414,7 @@ impl<'input> Parser<'input> {
         if let Some(exp) = self.parse_opt_expression(context) {
             exp
         } else {
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingExpression, diagarg![Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingExpression, diagarg![self.token.0.clone()]);
             self.create_invalidated_expression(&self.tokenizer.cursor_location())
         }
     }
@@ -871,7 +871,7 @@ impl<'input> Parser<'input> {
             if let Some(activation) = self.activations.last_mut() {
                 activation.uses_await = true;
             } else {
-                self.add_syntax_error(&operator_token.1, DiagnosticKind::NotAllowedHere, diagarg![Token(operator_token.0)]);
+                self.add_syntax_error(&operator_token.1, DiagnosticKind::NotAllowedHere, diagarg![operator_token.0]);
             }
             Some(Rc::new(Expression::Unary(UnaryExpression {
                 location: self.pop_location(),
@@ -890,7 +890,7 @@ impl<'input> Parser<'input> {
             if let Some(activation) = self.activations.last_mut() {
                 activation.uses_yield = true;
             } else {
-                self.add_syntax_error(&operator_token.1, DiagnosticKind::NotAllowedHere, diagarg![Token(operator_token.0)]);
+                self.add_syntax_error(&operator_token.1, DiagnosticKind::NotAllowedHere, diagarg![operator_token.0]);
             }
             Some(Rc::new(Expression::Unary(UnaryExpression {
                 location: self.pop_location(),
@@ -1414,7 +1414,7 @@ impl<'input> Parser<'input> {
             let id = self.parse_qualified_identifier();
             Rc::new(Expression::QualifiedIdentifier(id))
         } else {
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingExpression, diagarg![Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingExpression, diagarg![self.token.0.clone()]);
             self.create_invalidated_expression(&self.tokenizer.cursor_location())
         }
     }
@@ -1576,7 +1576,7 @@ impl<'input> Parser<'input> {
             self.next_ie_xml_tag();
             return (value, location);
         } else {
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingXmlAttributeValue, diagarg![Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingXmlAttributeValue, diagarg![self.token.0.clone()]);
             ("".into(), self.tokenizer.cursor_location())
         }
     }
@@ -1601,7 +1601,7 @@ impl<'input> Parser<'input> {
             self.next_ie_xml_tag();
             return (name, name_location);
         } else {
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingXmlName, diagarg![Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingXmlName, diagarg![self.token.0.clone()]);
             (INVALIDATED_IDENTIFIER.into(), self.tokenizer.cursor_location())
         }
     }
@@ -1765,7 +1765,7 @@ impl<'input> Parser<'input> {
             return self.finish_qualified_identifier(attribute, ql, qual);
         }
 
-        self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingIdentifier, diagarg![Token(self.token.0.clone())]);
+        self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingIdentifier, diagarg![self.token.0.clone()]);
         QualifiedIdentifier {
             location: self.pop_location(),
             attribute: false,
@@ -1843,7 +1843,7 @@ impl<'input> Parser<'input> {
             return self.finish_qualified_identifier(attribute, ql, qual);
         }
 
-        self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingIdentifier, diagarg![Token(self.token.0.clone())]);
+        self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingIdentifier, diagarg![self.token.0.clone()]);
         QualifiedIdentifier {
             location: self.pop_location(),
             attribute: false,
@@ -1887,7 +1887,7 @@ impl<'input> Parser<'input> {
                 id: QualifiedIdentifierIdentifier::Brackets(brackets),
             }
         } else {
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingIdentifier, diagarg![Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingIdentifier, diagarg![self.token.0.clone()]);
             QualifiedIdentifier {
                 location: self.pop_location(),
                 attribute,
@@ -2193,7 +2193,7 @@ impl<'input> Parser<'input> {
                 }
 
                 if !allowed_here {
-                    self.add_syntax_error(&node.location(), DiagnosticKind::NotAllowedHere, diagarg![Token(Token::Super)]);
+                    self.add_syntax_error(&node.location(), DiagnosticKind::NotAllowedHere, diagarg![Token::Super]);
                 }
 
                 (node, semicolon)
@@ -2269,7 +2269,7 @@ impl<'input> Parser<'input> {
 
             // Patch error
             if i == self.tokenizer.characters().index() {
-                self.patch_syntax_error(DiagnosticKind::ExpectingExpression, &self.tokenizer.cursor_location(), DiagnosticKind::ExpectingStatement, diagarg![Token(self.token.0.clone())]);
+                self.patch_syntax_error(DiagnosticKind::ExpectingExpression, &self.tokenizer.cursor_location(), DiagnosticKind::ExpectingStatement, diagarg![self.token.0.clone()]);
             }
 
             let semicolon = if exp.is_invalidated() {
@@ -2922,7 +2922,7 @@ impl<'input> Parser<'input> {
         }));
 
         if label.is_some() && !context.is_label_defined(label.clone().unwrap()) {
-            self.add_syntax_error(&label_location.unwrap(), DiagnosticKind::UndefinedLabel, diagarg![String(label.clone().unwrap())]);
+            self.add_syntax_error(&label_location.unwrap(), DiagnosticKind::UndefinedLabel, diagarg![label.clone().unwrap()]);
         } else if !context.is_break_allowed(label) {
             self.add_syntax_error(&node.location(), DiagnosticKind::IllegalBreak, vec![]);
         }
@@ -2946,7 +2946,7 @@ impl<'input> Parser<'input> {
         }));
 
         if label.is_some() && !context.is_label_defined(label.clone().unwrap()) {
-            self.add_syntax_error(&label_location.unwrap(), DiagnosticKind::UndefinedLabel, diagarg![String(label.clone().unwrap())]);
+            self.add_syntax_error(&label_location.unwrap(), DiagnosticKind::UndefinedLabel, diagarg![label.clone().unwrap()]);
         } else if !context.is_continue_allowed(label) {
             self.add_syntax_error(&node.location(), DiagnosticKind::IllegalContinue, vec![]);
         }
@@ -3240,7 +3240,7 @@ impl<'input> Parser<'input> {
             let i = self.tokenizer.characters().index();
             let r = self.parse_statement(context);
             if i == self.tokenizer.characters().index() {
-                self.patch_syntax_error(DiagnosticKind::ExpectingStatement, &self.tokenizer.cursor_location(), DiagnosticKind::ExpectingDirective, diagarg![Token(self.token.0.clone())]);
+                self.patch_syntax_error(DiagnosticKind::ExpectingStatement, &self.tokenizer.cursor_location(), DiagnosticKind::ExpectingDirective, diagarg![self.token.0.clone()]);
             }
             r
         }
@@ -3346,7 +3346,7 @@ impl<'input> Parser<'input> {
             }
 
             if !error {
-                self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingDirectiveKeyword, diagarg![Token(self.token.0.clone())]);
+                self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingDirectiveKeyword, diagarg![self.token.0.clone()]);
             }
             self.push_location(&context.start_location);
             let loc = self.pop_location();
@@ -4200,7 +4200,7 @@ impl<'input> Parser<'input> {
                         value = s.clone();
                         self.next();
                     } else {
-                        self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingStringLiteral, diagarg![Token(self.token.0.clone())]);
+                        self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingStringLiteral, diagarg![self.token.0.clone()]);
                         while self.token.0 != Token::Eof {
                             self.next();
                             if let Token::String(s) = self.token.0.clone() {
@@ -4244,7 +4244,7 @@ impl<'input> Parser<'input> {
                 expression,
             }))
         } else {
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingExpression, diagarg![Token(self.token.0.clone())]);
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingExpression, diagarg![self.token.0.clone()]);
             self.create_invalidated_expression(&self.tokenizer.cursor_location())
         }
     }
@@ -4556,7 +4556,7 @@ impl<'input> Parser<'input> {
                     let (content, location) = join_asdoc_content(building_content);
                     // Content must be non empty
                     if regex_is_match!(r"^\s*$", &content) {
-                        self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagarg![String(tag_name.clone())]);
+                        self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagarg![tag_name.clone()]);
                     }
                     let location = tag_location.combine_with(location);
                     tags.push((AsDocTag::Author(content), location));
@@ -4577,7 +4577,7 @@ impl<'input> Parser<'input> {
                     let (content, location) = join_asdoc_content(building_content);
                     // Content must be non empty
                     if regex_is_match!(r"^\s*$", &content) {
-                        self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagarg![String(tag_name.clone())]);
+                        self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagarg![tag_name.clone()]);
                     }
                     let location = tag_location.combine_with(location);
                     tags.push((AsDocTag::Created(content), location));
@@ -4631,7 +4631,7 @@ impl<'input> Parser<'input> {
 
                     // Content must be empty
                     if !regex_is_match!(r"^\s*$", &text) {
-                        self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagarg![String(tag_name.clone())]);
+                        self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagarg![tag_name.clone()]);
                     }
 
                     tags.push((AsDocTag::InheritDoc, location));
@@ -4644,7 +4644,7 @@ impl<'input> Parser<'input> {
 
                     // Content must be non empty
                     if regex_is_match!(r"^\s*$", &text) {
-                        self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagarg![String(tag_name.clone())]);
+                        self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagarg![tag_name.clone()]);
                     }
 
                     tags.push((AsDocTag::Internal(text), location));
@@ -4657,7 +4657,7 @@ impl<'input> Parser<'input> {
 
                     // Content must be non empty
                     if regex_is_match!(r"^\s*$", &text) {
-                        self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagarg![String(tag_name.clone())]);
+                        self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagarg![tag_name.clone()]);
                     }
 
                     tags.push((AsDocTag::Langversion(text), location));
@@ -4682,7 +4682,7 @@ impl<'input> Parser<'input> {
 
                     // Content must be non empty
                     if regex_is_match!(r"^\s*$", &text) {
-                        self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagarg![String(tag_name.clone())]);
+                        self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagarg![tag_name.clone()]);
                     }
 
                     tags.push((AsDocTag::Playerversion(text), location));
@@ -4695,7 +4695,7 @@ impl<'input> Parser<'input> {
 
                     // Content must be empty
                     if !regex_is_match!(r"^\s*$", &text) {
-                        self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagarg![String(tag_name.clone())]);
+                        self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagarg![tag_name.clone()]);
                     }
 
                     tags.push((AsDocTag::Private, location));
@@ -4708,7 +4708,7 @@ impl<'input> Parser<'input> {
 
                     // Content must be non empty
                     if regex_is_match!(r"^\s*$", &text) {
-                        self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagarg![String(tag_name.clone())]);
+                        self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagarg![tag_name.clone()]);
                     }
 
                     tags.push((AsDocTag::Productversion(text), location));
@@ -4764,7 +4764,7 @@ impl<'input> Parser<'input> {
                         let exp = ParserFacade(self.compilation_unit(), parser_options).parse_type_expression();
                         tags.push((AsDocTag::Throws { class_reference: exp, description }, location));
                     } else {
-                        self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagarg![String(tag_name.clone())]);
+                        self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagarg![tag_name.clone()]);
                     }
                 },
 
@@ -4773,7 +4773,7 @@ impl<'input> Parser<'input> {
                     let (content, location) = join_asdoc_content(building_content);
                     // Content must be non empty
                     if regex_is_match!(r"^\s*$", &content) {
-                        self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagarg![String(tag_name.clone())]);
+                        self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagarg![tag_name.clone()]);
                     }
                     let location = tag_location.combine_with(location);
                     tags.push((AsDocTag::Version(content), location));
@@ -4781,7 +4781,7 @@ impl<'input> Parser<'input> {
 
                 // Unrecognized tag
                 _ => {
-                    self.add_syntax_error(&tag_location, DiagnosticKind::UnrecognizedAsDocTag, diagarg![String(tag_name.clone())]);
+                    self.add_syntax_error(&tag_location, DiagnosticKind::UnrecognizedAsDocTag, diagarg![tag_name.clone()]);
                 },
             }
         } else if !building_content.is_empty() {
@@ -4798,7 +4798,7 @@ impl<'input> Parser<'input> {
     fn parse_asdoc_reference(&self, reference: &str, reference_loc: &Location, tag_location: &Location, tag_name: &str) -> Option<Rc<AsDocReference>> {
         let split: Vec<&str> = reference.split("#").collect();
         if split.len() > 2 {
-            self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagarg![String(tag_name.to_owned())]);
+            self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagarg![tag_name.to_owned()]);
             return None;
         }
         let mut base: Option<Rc<Expression>> = None;
@@ -4827,7 +4827,7 @@ impl<'input> Parser<'input> {
         }
 
         if base.is_none() && instance_property.is_none() {
-            self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagarg![String(tag_name.to_owned())]);
+            self.add_syntax_error(&tag_location, DiagnosticKind::FailedParsingAsDocTag, diagarg![tag_name.to_owned()]);
             return None;
         }
         Some(Rc::new(AsDocReference { base, instance_property, }))
@@ -4990,12 +4990,12 @@ impl<'input> Parser<'input> {
                 Ok(_) => {
                     for prev_attrib in output.iter() {
                         if prev_attrib.name.equals_name(&attrib.name, namespace).unwrap_or(false) {
-                            self.add_syntax_error(&attrib.name.location, DiagnosticKind::RedefiningXmlAttribute, diagarg![String(attrib.name.name.clone())]);
+                            self.add_syntax_error(&attrib.name.location, DiagnosticKind::RedefiningXmlAttribute, diagarg![attrib.name.name.clone()]);
                         }
                     }
                 },
                 Err(MxmlNameError::PrefixNotDefined(prefix)) => {
-                    self.add_syntax_error(&attrib.name.location, DiagnosticKind::XmlPrefixNotDefined, diagarg![String(prefix)]);
+                    self.add_syntax_error(&attrib.name.location, DiagnosticKind::XmlPrefixNotDefined, diagarg![prefix]);
                 },
             }
             output.push(attrib);
@@ -5021,7 +5021,7 @@ impl<'input> Parser<'input> {
         match name.resolve_prefix(namespace) {
             Ok(_) => {},
             Err(MxmlNameError::PrefixNotDefined(prefix)) => {
-                self.add_syntax_error(&name.location, DiagnosticKind::XmlPrefixNotDefined, diagarg![String(prefix)]);
+                self.add_syntax_error(&name.location, DiagnosticKind::XmlPrefixNotDefined, diagarg![prefix]);
             },
         }
         name
@@ -5062,7 +5062,7 @@ impl<'input> Parser<'input> {
                     for error in errors.iter() {
                         match error {
                             XmlPiError::UnknownAttribute(name) => {
-                                self.add_syntax_error(&location, DiagnosticKind::XmlPiUnknownAttribute, diagarg![String(name.clone())]);
+                                self.add_syntax_error(&location, DiagnosticKind::XmlPiUnknownAttribute, diagarg![name.clone()]);
                             },
                             XmlPiError::VersionMustBe10 => {
                                 self.add_syntax_error(&location, DiagnosticKind::XmlPiVersionMustBe10, vec![]);

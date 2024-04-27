@@ -30,6 +30,13 @@ impl<'input> Tokenizer<'input> {
         &self.characters
     }
 
+    fn add_syntax_error(&self, location: &Location, kind: DiagnosticKind, arguments: Vec<Rc<dyn DiagnosticArgument>>) {
+        if self.compilation_unit.prevent_equal_offset_error(location) {
+            return;
+        }
+        self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(location, kind, arguments));
+    }
+
     /// Scans for an *InputElementDiv* token.
     pub fn scan_ie_div(&mut self) -> (Token, Location) {
         loop {
@@ -490,14 +497,14 @@ impl<'input> Tokenizer<'input> {
 
     fn add_unexpected_error(&self) {
         if self.characters.has_remaining() {
-            self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&self.character_ahead_location(), DiagnosticKind::UnexpectedCharacter, diagarg![String(self.characters.peek_or_zero().to_string())]))
+            self.add_syntax_error(&self.character_ahead_location(), DiagnosticKind::UnexpectedCharacter, diagarg![self.characters.peek_or_zero().to_string()])
         } else {
-            self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&self.cursor_location(), DiagnosticKind::UnexpectedEnd, vec![]))
+            self.add_syntax_error(&self.cursor_location(), DiagnosticKind::UnexpectedEnd, vec![])
         }
     }
 
     fn add_unexpected_eof_error(&self, kind: DiagnosticKind) {
-        self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&self.cursor_location(), kind, vec![]));
+        self.add_syntax_error(&self.cursor_location(), kind, vec![]);
     }
 
     // LineTerminator
@@ -640,7 +647,7 @@ impl<'input> Tokenizer<'input> {
                 | (self.expect_hex_digit() << 4)
                 | self.expect_hex_digit());
             let Some(r) = r else {
-                self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&start.combine_with(self.cursor_location()), DiagnosticKind::InvalidEscapeValue, vec![]));
+                self.add_syntax_error(&start.combine_with(self.cursor_location()), DiagnosticKind::InvalidEscapeValue, vec![]);
                 return '\x5F';
             };
             return r;
@@ -663,12 +670,12 @@ impl<'input> Tokenizer<'input> {
         let location = start.combine_with(self.cursor_location());
         let r = u32::from_str_radix(&self.compilation_unit.text()[(start.first_offset + 2)..(location.last_offset - 1)], 16);
         let Ok(r) = r else {
-            self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&location, DiagnosticKind::InvalidEscapeValue, vec![]));
+            self.add_syntax_error(&location, DiagnosticKind::InvalidEscapeValue, vec![]);
             return '\x5F';
         };
         let r = char::from_u32(r);
         let Some(r) = r else {
-            self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&location, DiagnosticKind::InvalidEscapeValue, vec![]));
+            self.add_syntax_error(&location, DiagnosticKind::InvalidEscapeValue, vec![]);
             return '\x5F';
         };
         r
@@ -877,7 +884,7 @@ impl<'input> Tokenizer<'input> {
                     self.characters.next();
                     break;
                 } else if CharacterValidator::is_line_terminator(ch) {
-                    self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&self.character_ahead_location(), DiagnosticKind::StringLiteralMustBeTerminatedBeforeLineBreak, vec![]));
+                    self.add_syntax_error(&self.character_ahead_location(), DiagnosticKind::StringLiteralMustBeTerminatedBeforeLineBreak, vec![]);
                     self.consume_line_terminator();
                 } else if !self.characters.has_remaining() {
                     self.add_unexpected_eof_error(DiagnosticKind::InputEndedBeforeReachingClosingQuoteForString);
@@ -897,7 +904,7 @@ impl<'input> Tokenizer<'input> {
                         self.characters.next();
                         break;
                     } else if CharacterValidator::is_line_terminator(ch) {
-                        self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&self.character_ahead_location(), DiagnosticKind::StringLiteralMustBeTerminatedBeforeLineBreak, vec![]));
+                        self.add_syntax_error(&self.character_ahead_location(), DiagnosticKind::StringLiteralMustBeTerminatedBeforeLineBreak, vec![]);
                         self.consume_line_terminator();
                     } else if !self.characters.has_remaining() {
                         self.add_unexpected_eof_error(DiagnosticKind::InputEndedBeforeReachingClosingQuoteForString);
