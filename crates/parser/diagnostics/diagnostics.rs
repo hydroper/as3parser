@@ -162,7 +162,7 @@ impl Diagnostic {
 /// The `diagarg![...]` literal is used for initializing
 /// diagnostic arguments.
 /// 
-/// For example: `diagarg![token, "foo".into()]`.
+/// For example: `diagarg![token, "foo".to_owned()]`.
 pub macro diagarg {
     ($($value:expr),*) => { vec![ $(Rc::new($value)),* ] },
 }
