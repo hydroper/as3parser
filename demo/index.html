@@ -16,6 +16,7 @@
                 <select id="sourceFormOption">
                     <option value="as">ActionScript</option>
                     <option value="mxml">MXML</option>
+                    <option value="css">CSS</option>
                 </select>
             </div>
             <div id="messageLog"></div>
@@ -101,7 +102,7 @@
                     diagnostics1.push("<div class=\"problem\"><div class=\"" + (diagnostic.warning ? "warning" : "error") + "-icon\"></div>" + diagnostic.line1 + ":" + diagnostic.column1 + ": " + diagnostic.message.replace(/\&/g, "&amp;").replace(/\</g, "&lt;") + "</div>");
                 }
                 this.messageLog.innerHTML = diagnostics1.join("");
-                const treeKey = sourceForm == "as" ? "program" : "mxml";
+                const treeKey = sourceForm == "as" ? "program" : sourceForm;
                 this.ast.setValue(result[treeKey] == null ? '"Failed to parse"' : JSON.stringify(result[treeKey], null, 2));
                 this.ast.clearSelection();
             }

@@ -51,17 +51,29 @@ impl CssDirective {
 #[derive(Clone, Serialize, Deserialize)]
 pub enum CssPropertyValue {
     Invalidated(InvalidatedNode),
+    /// Example: `yellow, #fff`
     Array(CssArrayPropertyValue),
+    /// Example: `1px solid red`
     MultiValue(CssMultiValuePropertyValue),
+    /// Example: `yellow`, `#fff`
     Color(CssColorPropertyValue),
+    /// Example: `10, 10.0, 10pt`
     Number(CssNumberPropertyValue),
+    /// Example: `rgb(10% 10% 10%)`, `rgb(10%, 10%, 10%)`
     RgbColor(CssRgbColorPropertyValue),
+    /// Example: `"string"`
     String(CssStringPropertyValue),
+    /// Example: `solid`, `_serif`
     Identifier(CssIdentifierPropertyValue),
+    /// `ClassReference(...)`
     ClassReference(CssClassReferencePropertyValue),
+    /// `PropertyReference(...)`
     PropertyReference(CssPropertyReferencePropertyValue),
+    //// `url(...) [format(...)]`
     Url(CssUrlPropertyValue),
+    /// `local(...)`
     Local(CssLocalPropertyValue),
+    /// `Embed(...)`
     Embed(CssEmbedPropertyValue),
 }
 
@@ -212,9 +224,10 @@ pub struct CssColorPropertyValue {
 }
 
 impl CssColorPropertyValue {
-    pub fn from_hex(location: Location, token_text: &str) -> Self {
-        assert!(token_text.starts_with("#"), "Invalid color: {token_text}");
-        let mut token_text = token_text.to_owned();
+    pub fn from_hex(location: Location, token_text: &str) -> Result<Self, ParserError> {
+        let mut token_text = if token_text.starts_with('#') { token_text.to_owned() } else {
+            "#".to_owned() + token_text
+        };
         if token_text.len() == 4 {
             let mut six = String::new();
             let chars: Vec<_> = token_text.chars().collect();
@@ -227,10 +240,10 @@ impl CssColorPropertyValue {
             six.push(chars[3]);
             token_text = six;
         }
-        Self {
+        Ok(Self {
             location,
-            color_int: u32::from_str_radix(&token_text, 16).unwrap(),
-        }
+            color_int: u32::from_str_radix(&token_text[1..], 16).map_err(|_| ParserError::Common)?.clamp(0x000000, 0xFFFFFF),
+        })
     }
 
     pub fn text(&self) -> String {
@@ -326,6 +339,7 @@ pub struct CssEmbedPropertyValue {
 /// It may be a keyless entry.
 #[derive(Clone, Serialize, Deserialize)]
 pub struct CssEmbedEntry {
+    pub location: Location,
     pub key: Option<(String, Location)>,
     pub value: (String, Location),
 }
@@ -359,6 +373,7 @@ pub struct CssProperty {
     pub location: Location,
     pub name: (String, Location),
     pub value: Rc<CssPropertyValue>,
+    #[serde(skip)]
     _phantom: PhantomData<()>,
 }
 

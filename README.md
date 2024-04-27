@@ -23,6 +23,8 @@ ActionScript 3 parser in the Rust language.
 
 [Working with MXML](docs/working-with-mxml.md)
 
+[Working with CSS](docs/working-with-css.md)
+
 [Attaching Meaning](docs/attaching-meaning.md)
 
 [Reference Documents](docs/references.md)
@@ -38,52 +40,6 @@ The [wiki](https://github.com/hydroper/as3parser/wiki) of this repository contai
 ## Verifier
 
 ActionScript execution consists of parsing, verification, and evaluation. Verification can be performed ahead of time, as is already done by the existing initial compilers of the language (ASC 2 and Apache Flex's MXML compiler), reporting errors and warnings, deriving a control flow graph for every activation, and attaching symbols to syntactic nodes. This project might be integrated with a verifier in the future.
-
-## CSS parsing
-
-MXML supports a subset of CSS.
-
-- [x] Define tree structures
-- [ ] Parse a style sheet
-  - [x] Document
-  - [x] Directive
-    - [x] `@namespace`
-    - [x] `@media`
-    - [x] `@font-face`
-    - [x] Rule
-  - [x] Selector
-  - [x] Selector condition
-  - [x] Property
-  - [ ] Property value
-    - [ ] Array property values (lower precedence than multi values)
-    - [ ] Multi value property values (higher precedence than array)
-    - [ ] Color property value
-      - Based in `Token::HashWord` matching a hash character followed by 3 or 6 hexadecimal digits.
-    - [ ] Number property value
-    - [ ] RGB color property value (`rgb(r, g, b)`)
-      - Each component may each be a number token, converted together into a color integer through `rgb_bytes_to_integer(r, g, b)`.
-    - [ ] String property value
-    - [ ] `ClassReference(...)`
-      - The only argument may be a string or text property value.
-    - [ ] `PropertyReference(...)`
-      - The only argument may be a string or text property value.
-    - [ ] `url(...)`
-      - The only argument may be a string or text property value.
-    - [ ] `url(...) format(...)`
-    - [ ] `local(...)`
-      - The only argument may be a string or text property value.
-    - [ ] `Embed(...)`
-      - The arguments may be key-value entries each as an identifier key followed by `=` followed by a string or text property value.
-      - An entry may be a keyless entry.
-    - [ ] Ignore operators `+`, `-`, `*`, and `/`, returning an invalidated value.
-- [x] `CssParserFacade::parse_text()`
-
-Conform a bit to the Apache Royale sources:
-
-- [CSS.g](https://github.com/apache/royale-compiler/blob/develop/compiler/src/main/antlr3/org/apache/royale/compiler/internal/css/CSS.g)
-- [CSSTree.g](https://github.com/apache/royale-compiler/blob/develop/compiler/src/main/antlr3/org/apache/royale/compiler/internal/css/CSSTree.g)
-- [org.apache.royale.compiler.css](https://github.com/apache/royale-compiler/tree/fc03f3b4fa9bc93e2492dc3dc7db045656b8fa24/compiler/src/main/java/org/apache/royale/compiler/css)
-- (Implementation) [org.apache.royale.compiler.internal.css](https://github.com/apache/royale-compiler/tree/fc03f3b4fa9bc93e2492dc3dc7db045656b8fa24/compiler/src/main/java/org/apache/royale/compiler/internal/css)
 
 ## License
 

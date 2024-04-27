@@ -6,6 +6,7 @@ use as3_parser::ns::*;
 struct ParserResult {
     program: Option<Rc<Program>>,
     mxml: Option<Rc<Mxml>>,
+    css: Option<Rc<CssDocument>>,
     diagnostics: Vec<ParserDiagnosticResult>,
 }
 
@@ -25,11 +26,14 @@ pub fn parse(input: &str, source_type: &str) -> String {
 
     let mut program: Option<Rc<Program>> = None;
     let mut mxml: Option<Rc<Mxml>> = None;
+    let mut css: Option<Rc<CssDocument>> = None;
 
     let source_type = source_type.to_lowercase();
 
     if source_type == "mxml" {
         mxml = Some(ParserFacade(&compilation_unit, default()).parse_mxml());
+    } else if source_type == "css" {
+        css = Some(CssParserFacade(&compilation_unit, default()).parse_document());
     } else {
         program = Some(ParserFacade(&compilation_unit, default()).parse_program());
     }
@@ -48,6 +52,7 @@ pub fn parse(input: &str, source_type: &str) -> String {
     serde_json::to_string_pretty(&ParserResult {
         program,
         mxml,
+        css,
         diagnostics,
     }).unwrap()
 }

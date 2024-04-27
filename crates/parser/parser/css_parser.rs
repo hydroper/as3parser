@@ -146,6 +146,18 @@ impl<'input> CssParser<'input> {
         }
     }
 
+    fn expect_unitless_number(&mut self) -> Option<f64> {
+        if let Token::CssNumber { value, .. } = self.token.0.clone() {
+            self.expecting_token_error = false;
+            self.next();
+            Some(value)
+        } else {
+            self.expecting_token_error = true;
+            self.add_syntax_error(&self.token_location(), DiagnosticKind::Unexpected, diagnostic_arguments![Token(self.token.0.clone())]);
+            None
+        }
+    }
+
     fn expect_string(&mut self) -> (String, Location) {
         if let Token::String(v) = self.token.0.clone() {
             self.expecting_token_error = false;
@@ -175,7 +187,7 @@ impl<'input> CssParser<'input> {
         }))
     }
 
-    fn create_invalidated_selector(&self, location: &Location) -> Rc<CssSelector> {
+    fn _create_invalidated_selector(&self, location: &Location) -> Rc<CssSelector> {
         Rc::new(CssSelector::Invalidated(InvalidatedNode {
             location: location.clone(),
         }))
@@ -286,11 +298,12 @@ impl<'input> CssParser<'input> {
         self.next();
         let mut properties: Vec<Rc<CssProperty>> = vec![];
         self.expect(Token::BlockOpen);
+        self.consume(Token::CssSemicolons);
         while !(self.eof() || self.peek(Token::BlockClose)) {
-            if !properties.is_empty() {
-                self.expect(Token::CssSemicolons);
-            }
             properties.push(self.parse_property());
+            if !self.consume(Token::CssSemicolons) {
+                break;
+            }
         }
         self.expect(Token::BlockClose);
         Rc::new(CssDirective::FontFace(CssFontFace {
@@ -344,14 +357,14 @@ impl<'input> CssParser<'input> {
 
     fn parse_arguments(&mut self) -> Result<CssParserFacade, ParserError> {
         self.expect(Token::ParenOpen);
-        let i = self.tokenizer.characters().index();
+        let i = self.token.1.first_offset();
         if self.expecting_token_error {
             return Err(ParserError::Common);
         }
         let mut nesting = 1;
         let mut j;
         loop {
-            j = self.tokenizer.characters().index();
+            j = self.token.1.first_offset();
             if self.consume(Token::ParenClose) {
                 nesting -= 1;
                 if nesting == 0 {
@@ -383,11 +396,12 @@ impl<'input> CssParser<'input> {
         }
         let mut properties: Vec<Rc<CssProperty>> = vec![];
         self.expect(Token::BlockOpen);
+        self.consume(Token::CssSemicolons);
         while !(self.eof() || self.peek(Token::BlockClose)) {
-            if !properties.is_empty() {
-                self.expect(Token::CssSemicolons);
-            }
             properties.push(self.parse_property());
+            if !self.consume(Token::CssSemicolons) {
+                break;
+            }
         }
         self.expect(Token::BlockClose);
         self.push_location(&selectors[0].location());
@@ -462,7 +476,6 @@ impl<'input> CssParser<'input> {
                 let condition = if let Ok(a) = self.parse_arguments() {
                     a.parse_selector_condition()
                 } else {
-                    self.add_syntax_error(&self.token.1, DiagnosticKind::Unexpected, diagnostic_arguments![Token(self.token.0.clone())]);
                     self.duplicate_location();
                     let loc = self.pop_location();
                     self.create_invalidated_selector_condition(&loc)
@@ -538,15 +551,187 @@ impl<'input> CssParser<'input> {
     }
 
     fn parse_property_value(&mut self, min_precedence: CssOperatorPrecedence) -> Rc<CssPropertyValue> {
-        //
+        let Some(v) = self.parse_opt_property_value(min_precedence) else {
+            self.add_syntax_error(&self.token.1, DiagnosticKind::Unexpected, diagnostic_arguments![Token(self.token.0.clone())]);
+            return self.create_invalidated_property_value(&self.tokenizer.cursor_location());
+        };
+        v
+    }
+
+    fn parse_opt_property_value(&mut self, min_precedence: CssOperatorPrecedence) -> Option<Rc<CssPropertyValue>> {
+        let base: Option<Rc<CssPropertyValue>>;
+        let t1 = self.token.0.clone();
+
+        // #HHH
+        // #HHHHHH
+        if let Token::CssHashWord(word) = t1 {
+            self.mark_location();
+            self.next();
+            let loc = self.pop_location();
+            if let Ok(v) = CssColorPropertyValue::from_hex(loc.clone(), &word) {
+                base = Some(Rc::new(CssPropertyValue::Color(v)));
+            } else {
+                base = Some(self.create_invalidated_property_value(&loc));
+            }
+        // "..."
+        // '...'
+        } else if let Token::String(value) = t1 {
+            self.mark_location();
+            self.next();
+            base = Some(Rc::new(CssPropertyValue::String(CssStringPropertyValue {
+                location: self.pop_location(),
+                value
+            })));
+        // DECIMAL
+        } else if let Token::CssNumber { value, unit } = t1 {
+            self.mark_location();
+            self.next();
+            let loc = self.pop_location();
+            base = Some(Rc::new(CssPropertyValue::Number(CssNumberPropertyValue {
+                location: loc,
+                value,
+                unit,
+            })));
+        } else if let Some(id) = self.peek_identifier() {
+            self.mark_location();
+            self.next();
+            let color_int = css_color_constant_to_int(&id.0);
+            // COLOR_NAME such as "red"
+            if let Some(color_int) = color_int {
+                base = Some(Rc::new(CssPropertyValue::Color(CssColorPropertyValue {
+                    location: self.pop_location(),
+                    color_int,
+                })));
+            // rgb(...)
+            } else if id.0 == "rgb" && self.peek(Token::ParenOpen) {
+                if let Some(color_int) = self.parse_arguments().unwrap().parse_rgb() {
+                    base = Some(Rc::new(CssPropertyValue::RgbColor(CssRgbColorPropertyValue {
+                        location: self.pop_location(),
+                        color_int,
+                    })));
+                } else {
+                    let loc = self.pop_location();
+                    base = Some(self.create_invalidated_property_value(&loc));
+                }
+            } else if id.0 == "ClassReference" && self.peek(Token::ParenOpen) {
+                let name = self.parse_arguments().unwrap().parse_text();
+                base = Some(Rc::new(CssPropertyValue::ClassReference(CssClassReferencePropertyValue {
+                    location: self.pop_location(),
+                    name,
+                })));
+            } else if id.0 == "PropertyReference" && self.peek(Token::ParenOpen) {
+                let name = self.parse_arguments().unwrap().parse_text();
+                base = Some(Rc::new(CssPropertyValue::PropertyReference(CssPropertyReferencePropertyValue {
+                    location: self.pop_location(),
+                    name,
+                })));
+            } else if id.0 == "url" && self.peek(Token::ParenOpen) {
+                let url = self.parse_arguments().unwrap().parse_text();
+                let mut format: Option<(String, Location)> = None;
+                if self.consume_keyword("format") {
+                    if let Ok(a) = self.parse_arguments() {
+                        format = Some(a.parse_text());
+                    }
+                }
+                base = Some(Rc::new(CssPropertyValue::Url(CssUrlPropertyValue {
+                    location: self.pop_location(),
+                    url,
+                    format,
+                })));
+            } else if id.0 == "local" && self.peek(Token::ParenOpen) {
+                let name = self.parse_arguments().unwrap().parse_text();
+                base = Some(Rc::new(CssPropertyValue::Local(CssLocalPropertyValue {
+                    location: self.pop_location(),
+                    name,
+                })));
+            } else if id.0 == "Embed" && self.peek(Token::ParenOpen) {
+                let entries = self.parse_arguments().unwrap().parse_embed_entries();
+                base = Some(Rc::new(CssPropertyValue::Embed(CssEmbedPropertyValue {
+                    location: self.pop_location(),
+                    entries,
+                })));
+            } else {
+                base = Some(Rc::new(CssPropertyValue::Identifier(CssIdentifierPropertyValue {
+                    location: self.pop_location(),
+                    value: id.0,
+                })));
+            }
+        } else if  self.peek(Token::Plus)  || self.peek(Token::Minus)
+                || self.peek(Token::Times) || self.peek(Token::Div) {
+            base = Some(self.create_invalidated_property_value(&self.token.1));
+            self.next();
+        } else {
+            return None;
+        }
+
+        let mut base = base.unwrap();
+
+        loop {
+            if self.peek(Token::Comma) && min_precedence.includes(&CssOperatorPrecedence::Array) {
+                self.push_location(&base.location());
+                let mut elements: Vec<Rc<CssPropertyValue>> = vec![base];
+                while self.consume(Token::Comma) {
+                    elements.push(self.parse_property_value(CssOperatorPrecedence::MultiValue));
+                }
+                base = Rc::new(CssPropertyValue::Array(CssArrayPropertyValue {
+                    location: self.pop_location(),
+                    elements,
+                }));
+            } else if min_precedence.includes(&CssOperatorPrecedence::MultiValue) {
+                if let Some(mv1) = self.parse_opt_property_value(CssOperatorPrecedence::MultiValue) {
+                    self.push_location(&base.location());
+                    let mut values: Vec<Rc<CssPropertyValue>> = vec![base, mv1];
+                    while let Some(mv1) = self.parse_opt_property_value(CssOperatorPrecedence::MultiValue) {
+                        values.push(mv1);
+                    }
+                    base = Rc::new(CssPropertyValue::MultiValue(CssMultiValuePropertyValue {
+                        location: self.pop_location(),
+                        values,
+                    }));
+                } else {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+
+        Some(base)
+    }
+
+    fn parse_embed_entry(&mut self) -> Rc<CssEmbedEntry> {
+        self.mark_location();
+        if let Some(key) = self.consume_identifier() {
+            if self.consume(Token::Assign) {
+                let value = self.expect_string();
+                Rc::new(CssEmbedEntry {
+                    location: self.pop_location(),
+                    key: Some(key),
+                    value,
+                })
+            } else {
+                Rc::new(CssEmbedEntry {
+                    location: self.pop_location(),
+                    key: None,
+                    value: key,
+                })
+            }
+        } else {
+            let value = self.expect_string();
+            Rc::new(CssEmbedEntry {
+                location: self.pop_location(),
+                key: None,
+                value,
+            })
+        }
     }
 }
 
-fn _rgb_bytes_to_integer(r: f64, g: f64, b: f64) -> u32 {
-    (_calc_rgb_byte(r) << 16) | (_calc_rgb_byte(g) << 8) | _calc_rgb_byte(b)
+fn rgb_bytes_to_integer(r: f64, g: f64, b: f64) -> u32 {
+    (calc_rgb_byte(r) << 16) | (calc_rgb_byte(g) << 8) | calc_rgb_byte(b)
 }
 
-fn _calc_rgb_byte(value: f64) -> u32 {
+fn calc_rgb_byte(value: f64) -> u32 {
     // Integer
     if value.round() == value {
         value.round().to_u32().unwrap_or(0).clamp(0, 255)
@@ -618,5 +803,37 @@ impl<'input> CssParserFacade<'input> {
         let r = parser.parse_property_value(CssOperatorPrecedence::Array);
         parser.expect_eof();
         r
+    }
+
+    pub fn parse_rgb(&self) -> Option<u32> {
+        let mut parser = self.create_parser();
+        parser.next();
+        let r = parser.expect_unitless_number()?;
+        let g: f64;
+        let b: f64;
+        if parser.consume(Token::Comma) {
+            g = parser.expect_unitless_number()?;
+            parser.expect(Token::Comma);
+            b = parser.expect_unitless_number()?;
+        } else {
+            g = parser.expect_unitless_number()?;
+            b = parser.expect_unitless_number()?;
+        }
+        parser.expect_eof();
+        Some(rgb_bytes_to_integer(r, g, b))
+    }
+
+    pub fn parse_embed_entries(&self) -> Vec<Rc<CssEmbedEntry>> {
+        let mut parser = self.create_parser();
+        let mut entries: Vec<Rc<CssEmbedEntry>> = vec![];
+        parser.next();
+        if !parser.eof() {
+            entries.push(parser.parse_embed_entry());
+        }
+        while parser.consume(Token::Comma) {
+            entries.push(parser.parse_embed_entry());
+        }
+        parser.expect_eof();
+        entries
     }
 }
