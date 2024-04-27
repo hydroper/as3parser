@@ -64,5 +64,3 @@ diagnostic.format_with_message("My message", Some(custom_id_number))
 ```
 
 For real use cases, calling `.format_with_message()` is not preferred if your application is not solely in English, since it will add categories such as `Warning`.
-
-Moreover, argument variants in `as3_parser::ns::Diagnostic` may not be enough. For example, a compiler may want to store a symbol argument; in this case, an extra layer over `as3_parser::ns::Diagnostic` must be provided, supporting more variants.
