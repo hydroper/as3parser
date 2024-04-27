@@ -52,16 +52,6 @@ impl<'input> CssParser<'input> {
         self.compilation_unit().add_diagnostic(Diagnostic::new_syntax_error(location, kind, arguments));
     }
 
-    fn _patch_syntax_error(&self, original: DiagnosticKind, location: &Location, kind: DiagnosticKind, arguments: Vec<Rc<dyn DiagnosticArgument>>) {
-        if self.compilation_unit().diagnostics.borrow().is_empty() {
-            return;
-        }
-        if self.compilation_unit().diagnostics.borrow().last().unwrap().kind == original {
-            self.compilation_unit().diagnostics.borrow_mut().pop();
-            self.compilation_unit().add_diagnostic(Diagnostic::new_syntax_error(location, kind, arguments));
-        }
-    }
-
     /*
     fn add_warning(&self, location: &Location, kind: DiagnosticKind, arguments: Vec<Rc<dyn DiagnosticArgument>>) {
         if self.compilation_unit().prevent_equal_offset_warning(location) {

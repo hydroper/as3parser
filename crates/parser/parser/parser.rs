@@ -56,13 +56,13 @@ impl<'input> Parser<'input> {
         self.compilation_unit().add_diagnostic(Diagnostic::new_syntax_error(location, kind, arguments));
     }
 
-    fn patch_syntax_error(&self, original: DiagnosticKind, location: &Location, kind: DiagnosticKind, arguments: Vec<Rc<dyn DiagnosticArgument>>) {
+    fn patch_syntax_error(&self, original: DiagnosticKind, kind: DiagnosticKind, arguments: Vec<Rc<dyn DiagnosticArgument>>) {
         if self.compilation_unit().diagnostics.borrow().is_empty() {
             return;
         }
         if self.compilation_unit().diagnostics.borrow().last().unwrap().kind == original {
-            self.compilation_unit().diagnostics.borrow_mut().pop();
-            self.compilation_unit().add_diagnostic(Diagnostic::new_syntax_error(location, kind, arguments));
+            let loc = self.compilation_unit().diagnostics.borrow_mut().pop().unwrap().location();
+            self.compilation_unit().add_diagnostic(Diagnostic::new_syntax_error(&loc, kind, arguments));
         }
     }
 
@@ -2269,7 +2269,7 @@ impl<'input> Parser<'input> {
 
             // Patch error
             if i == self.tokenizer.characters().index() {
-                self.patch_syntax_error(DiagnosticKind::ExpectingExpression, &self.tokenizer.cursor_location(), DiagnosticKind::ExpectingStatement, diagarg![self.token.0.clone()]);
+                self.patch_syntax_error(DiagnosticKind::ExpectingExpression, DiagnosticKind::ExpectingStatement, diagarg![self.token.0.clone()]);
             }
 
             let semicolon = if exp.is_invalidated() {
@@ -3240,7 +3240,7 @@ impl<'input> Parser<'input> {
             let i = self.tokenizer.characters().index();
             let r = self.parse_statement(context);
             if i == self.tokenizer.characters().index() {
-                self.patch_syntax_error(DiagnosticKind::ExpectingStatement, &self.tokenizer.cursor_location(), DiagnosticKind::ExpectingDirective, diagarg![self.token.0.clone()]);
+                self.patch_syntax_error(DiagnosticKind::ExpectingStatement, DiagnosticKind::ExpectingDirective, diagarg![self.token.0.clone()]);
             }
             r
         }
