@@ -33,16 +33,16 @@ Adding a diagnostic to a `CompilationUnit` is a simple call, where `K` is the di
 
 ```rust
 // Syntax error
-compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&location, DiagnosticKind::K, diagnostic_arguments![]));
+compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&location, DiagnosticKind::K, diagarg![]));
 
 // Verify error
-compilation_unit.add_diagnostic(Diagnostic::new_verify_error(&location, DiagnosticKind::K, diagnostic_arguments![]));
+compilation_unit.add_diagnostic(Diagnostic::new_verify_error(&location, DiagnosticKind::K, diagarg![]));
 
 // Warning
-compilation_unit.add_diagnostic(Diagnostic::new_warning(&location, DiagnosticKind::K, diagnostic_arguments![]));
+compilation_unit.add_diagnostic(Diagnostic::new_warning(&location, DiagnosticKind::K, diagarg![]));
 ```
 
-The `diagnostic_arguments![]` literal takes elements in one of the forms:
+The `diagarg![]` literal takes elements in one of the forms:
 
 * `Token(token)`
 * `String(string)`

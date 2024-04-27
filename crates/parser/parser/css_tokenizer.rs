@@ -59,7 +59,7 @@ impl<'input> CssTokenizer<'input> {
 
     fn add_unexpected_error(&self) {
         if self.characters.has_remaining() {
-            self.add_syntax_error(&self.character_ahead_location(), DiagnosticKind::UnexpectedCharacter, diagnostic_arguments![String(self.characters.peek_or_zero().to_string())])
+            self.add_syntax_error(&self.character_ahead_location(), DiagnosticKind::UnexpectedCharacter, diagarg![String(self.characters.peek_or_zero().to_string())])
         } else {
             self.add_syntax_error(&self.cursor_location(), DiagnosticKind::UnexpectedEnd, vec![])
         }
@@ -388,7 +388,7 @@ impl<'input> CssTokenizer<'input> {
                     if let Some(mv) = mv {
                         builder.push(mv);
                     } else {
-                        self.add_syntax_error(&loc, DiagnosticKind::CssInvalidHexEscape, diagnostic_arguments![String(digits)]);
+                        self.add_syntax_error(&loc, DiagnosticKind::CssInvalidHexEscape, diagarg![String(digits)]);
                     }
                 }
             } else if self.characters.reached_end() {
@@ -422,7 +422,7 @@ impl<'input> CssTokenizer<'input> {
                 self.characters.next();
                 nesting += 1;
             } else if self.characters.reached_end() {
-                self.add_syntax_error(&self.cursor_location(), DiagnosticKind::Expecting, diagnostic_arguments![Token(Token::ParenClose), Token(Token::Eof)]);
+                self.add_syntax_error(&self.cursor_location(), DiagnosticKind::Expecting, diagarg![Token(Token::ParenClose), Token(Token::Eof)]);
                 token = (Token::Eof, self.cursor_location());
                 break;
             } else {

@@ -167,7 +167,11 @@ impl Diagnostic {
     }
 }
 
-pub macro diagnostic_arguments {
+/// The `diagarg![...]` literal is used for initializing
+/// diagnostic arguments.
+/// 
+/// For example: `diagarg![Token(t1), String("foo".into())]`.
+pub macro diagarg {
     ($($variant:ident($value:expr)),*) => { vec![ $(DiagnosticArgument::$variant($value)),* ] },
 }
 

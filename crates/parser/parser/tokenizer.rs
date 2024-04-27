@@ -490,7 +490,7 @@ impl<'input> Tokenizer<'input> {
 
     fn add_unexpected_error(&self) {
         if self.characters.has_remaining() {
-            self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&self.character_ahead_location(), DiagnosticKind::UnexpectedCharacter, diagnostic_arguments![String(self.characters.peek_or_zero().to_string())]))
+            self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&self.character_ahead_location(), DiagnosticKind::UnexpectedCharacter, diagarg![String(self.characters.peek_or_zero().to_string())]))
         } else {
             self.compilation_unit.add_diagnostic(Diagnostic::new_syntax_error(&self.cursor_location(), DiagnosticKind::UnexpectedEnd, vec![]))
         }
