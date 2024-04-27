@@ -13,3 +13,5 @@ cargo run --bin as3_parser_test -- --source-path tests/parser/Demo.as --file-log
 ```
 
 For parsing MXML, pass the `--mxml` flag.
+
+For parsing CSS, pass the `--css` flag.

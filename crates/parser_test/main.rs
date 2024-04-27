@@ -14,6 +14,9 @@ struct Arguments {
 
     #[arg(short, long)]
     mxml: bool,
+
+    #[arg(short, long)]
+    css: bool,
 }
 
 fn main() -> io::Result<()> {
@@ -23,12 +26,17 @@ fn main() -> io::Result<()> {
     // Canonicalize path
     // let source_path = std::path::Path::new(&source_path).canonicalize().unwrap().to_string_lossy().into_owned();
 
-    let source_path_ast_json = FlexPath::new_native(&source_path).change_extension(".ast.json").to_string_with_flex_separator();
+    let source_path_ast_json = FlexPath::new_native(&source_path).change_extension(".tree").to_string_with_flex_separator();
     let source_path_diagnostics = FlexPath::new_native(&source_path).change_extension(".diag").to_string_with_flex_separator();
     let source_content = fs::read_to_string(&source_path)?;
     let compilation_unit = CompilationUnit::new(Some(source_path), source_content, &CompilerOptions::default());
     if arguments.mxml {
         let document = ParserFacade(&compilation_unit, default()).parse_mxml();
+        if arguments.file_log {
+            fs::write(&source_path_ast_json, serde_json::to_string_pretty(&document).unwrap())?;
+        }
+    } else if arguments.css {
+        let document = CssParserFacade(&compilation_unit, default()).parse_document();
         if arguments.file_log {
             fs::write(&source_path_ast_json, serde_json::to_string_pretty(&document).unwrap())?;
         }
