@@ -3535,22 +3535,22 @@ impl<'input> Parser<'input> {
                 self.add_syntax_error(&source_path_location.clone(), DiagnosticKind::CircularIncludeDirective, vec![]);
 
                 // Use a placeholder compilation unit
-                nested_compilation_unit = CompilationUnit::new(None, "".into(), &self.tokenizer.compilation_unit().compiler_options);
+                nested_compilation_unit = CompilationUnit::new(None, "".into());
             } else {
                 if let Ok(content) = std::fs::read_to_string(&sub_file_path) {
-                    nested_compilation_unit = CompilationUnit::new(Some(sub_file_path.clone()), content, &self.tokenizer.compilation_unit().compiler_options);
+                    nested_compilation_unit = CompilationUnit::new(Some(sub_file_path.clone()), content);
                 } else {
                     self.add_syntax_error(&source_path_location.clone(), DiagnosticKind::FailedToIncludeFile, vec![]);
 
                     // Use a placeholder compilation unit
-                    nested_compilation_unit = CompilationUnit::new(None, "".into(), &self.tokenizer.compilation_unit().compiler_options);
+                    nested_compilation_unit = CompilationUnit::new(None, "".into());
                 }
             }
         } else {
             self.add_syntax_error(&source_path_location.clone(), DiagnosticKind::ParentSourceIsNotAFile, vec![]);
 
             // Use a placeholder compilation unit
-            nested_compilation_unit = CompilationUnit::new(None, "".into(), &self.tokenizer.compilation_unit().compiler_options);
+            nested_compilation_unit = CompilationUnit::new(None, "".into());
         }
 
         // Let it be such that the sub compilation unit is subsequent of

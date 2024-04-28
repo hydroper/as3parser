@@ -22,7 +22,7 @@ struct ParserDiagnosticResult {
 
 #[wasm_bindgen]
 pub fn parse(input: &str, source_type: &str) -> String {
-    let compilation_unit = CompilationUnit::new(None, input.to_owned(), &CompilerOptions::default());
+    let compilation_unit = CompilationUnit::new(None, input.to_owned());
 
     let mut program: Option<Rc<Program>> = None;
     let mut mxml: Option<Rc<Mxml>> = None;

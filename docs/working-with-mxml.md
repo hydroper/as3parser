@@ -17,7 +17,7 @@ let text = r#"
     creationComplete="initialize()">
 </s:Application>
 "#;
-let compilation_unit = CompilationUnit::new(None, text.into(), &CompilerOptions::default());
+let compilation_unit = CompilationUnit::new(None, text.into());
 
 let parser_options = ParserOptions {
     // Ignore whitespace chunks in a node list when at least one

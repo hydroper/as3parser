@@ -9,7 +9,7 @@ fn main() {
     let source_content = include_str!("Example.as").to_owned();
 
     // Create compilation unit
-    let compilation_unit = CompilationUnit::new(Some(source_path), source_content, &CompilerOptions::default());
+    let compilation_unit = CompilationUnit::new(Some(source_path), source_content);
 
     // Parse program
     let program = ParserFacade(&compilation_unit, default()).parse_program();

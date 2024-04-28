@@ -16,7 +16,7 @@ let text = r#"
 }
 "#;
 
-let compilation_unit = CompilationUnit::new(None, text.into(), &CompilerOptions::default());
+let compilation_unit = CompilationUnit::new(None, text.into());
 
 let document: Rc<CssDocument> = CssParserFacade(&compilation_unit, ParserOptions::default()).parse_document();
 ```

@@ -11,7 +11,6 @@ pub struct CompilationUnit {
     pub(crate) error_count: Cell<u32>,
     pub(crate) warning_count: Cell<u32>,
     pub(crate) invalidated: Cell<bool>,
-    pub(crate) compiler_options: Rc<CompilerOptions>,
     pub(crate) comments: RefCell<Vec<Rc<Comment>>>,
     pub(crate) included_from: RefCell<Option<Rc<CompilationUnit>>>,
     pub(crate) nested_compilation_units: RefCell<Vec<Rc<CompilationUnit>>>,
@@ -26,7 +25,6 @@ impl Default for CompilationUnit {
             invalidated: Cell::new(false),
             error_count: Cell::new(0),
             warning_count: Cell::new(0),
-            compiler_options: CompilerOptions::default(),
             comments: RefCell::new(vec![]),
             nested_compilation_units: RefCell::new(vec![]),
             included_from: RefCell::new(None),
@@ -36,7 +34,7 @@ impl Default for CompilationUnit {
 
 impl CompilationUnit {
     /// Constructs a source file in unparsed and non verified state.
-    pub fn new(file_path: Option<String>, text: String, compiler_options: &Rc<CompilerOptions>) -> Rc<Self> {
+    pub fn new(file_path: Option<String>, text: String) -> Rc<Self> {
         Rc::new(Self {
             file_path,
             source_text: SourceText::new(text),
@@ -44,7 +42,6 @@ impl CompilationUnit {
             invalidated: Cell::new(false),
             error_count: Cell::new(0),
             warning_count: Cell::new(0),
-            compiler_options: compiler_options.clone(),
             comments: RefCell::new(vec![]),
             nested_compilation_units: RefCell::new(vec![]),
             included_from: RefCell::new(None),
@@ -59,11 +56,6 @@ impl CompilationUnit {
     /// Source text.
     pub fn text(&self) -> &String {
         &self.source_text.contents
-    }
-
-    /// Compiler options.
-    pub fn compiler_options(&self) -> Rc<CompilerOptions> {
-        self.compiler_options.clone()
     }
 
     /// Whether the source contains any errors after parsing

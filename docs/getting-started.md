@@ -19,7 +19,7 @@ Parse programs or expressions through the `ParserFacade` structure of the `as3_p
 use as3_parser::ns::*;
 
 // Create compilation unit
-let compilation_unit = CompilationUnit::new(None, "x ** y".into(), &CompilerOptions::default());
+let compilation_unit = CompilationUnit::new(None, "x ** y".into());
 
 // Parser options
 let parser_options = ParserOptions::default();
