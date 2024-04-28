@@ -1,4 +1,4 @@
-use std::cell::RefMut;
+use std::{any::Any, cell::RefMut};
 use crate::ns::*;
 use hydroper_source_text::SourceText;
 
@@ -7,6 +7,7 @@ use hydroper_source_text::SourceText;
 pub struct CompilationUnit {
     pub(crate) file_path: Option<String>,
     pub(crate) source_text: SourceText,
+    pub(crate) compiler_options: RefCell<Option<Rc<dyn Any>>>,
     pub(crate) diagnostics: RefCell<Vec<Diagnostic>>,
     pub(crate) error_count: Cell<u32>,
     pub(crate) warning_count: Cell<u32>,
@@ -21,6 +22,7 @@ impl Default for CompilationUnit {
         Self {
             file_path: None,
             source_text: SourceText::new("".into()),
+            compiler_options: RefCell::new(None),
             diagnostics: RefCell::new(vec![]),
             invalidated: Cell::new(false),
             error_count: Cell::new(0),
@@ -38,6 +40,7 @@ impl CompilationUnit {
         Rc::new(Self {
             file_path,
             source_text: SourceText::new(text),
+            compiler_options: RefCell::new(None),
             diagnostics: RefCell::new(vec![]),
             invalidated: Cell::new(false),
             error_count: Cell::new(0),
@@ -56,6 +59,16 @@ impl CompilationUnit {
     /// Source text.
     pub fn text(&self) -> &String {
         &self.source_text.contents
+    }
+
+    /// Compiler options.
+    pub fn compiler_options(&self) -> Option<Rc<dyn Any>> {
+        self.compiler_options.borrow().clone()
+    }
+
+    /// Set compiler options.
+    pub fn set_compiler_options(&self, options: Option<Rc<dyn Any>>) {
+        self.compiler_options.replace(options);
     }
 
     /// Whether the source contains any errors after parsing
