@@ -25,6 +25,13 @@ impl<'input> Parser<'input> {
         }
     }
 
+    fn options(&self) -> ParserOptions {
+        ParserOptions {
+            ignore_xml_whitespace: self.ignore_xml_whitespace,
+            ..default()
+        }
+    }
+
     fn compilation_unit(&self) -> &Rc<CompilationUnit> {
         self.tokenizer.compilation_unit()
     }
@@ -4611,7 +4618,7 @@ impl<'input> Parser<'input> {
                     let reference_loc = c_location.shift_whitespace(&self.compilation_unit().text()[c_location.first_offset()..c_location.last_offset()]);
                     let parser_options = ParserOptions {
                         byte_range: Some((reference_loc.first_offset(), reference_loc.last_offset())),
-                        ..default()
+                        ..self.options()
                     };
                     let exp = ParserFacade(self.compilation_unit(), parser_options).parse_expression();
                     tags.push((AsDocTag::EventType(exp), location));
@@ -4759,7 +4766,7 @@ impl<'input> Parser<'input> {
                         reference_loc = Location::with_offsets(self.compilation_unit(), reference_loc.first_offset(), reference_loc.first_offset() + class_name.len());
                         let parser_options = ParserOptions {
                             byte_range: Some((reference_loc.first_offset(), reference_loc.last_offset())),
-                            ..default()
+                            ..self.options()
                         };
                         let exp = ParserFacade(self.compilation_unit(), parser_options).parse_type_expression();
                         tags.push((AsDocTag::Throws { class_reference: exp, description }, location));
@@ -4810,7 +4817,7 @@ impl<'input> Parser<'input> {
         if !base_text.is_empty() {
             let parser_options = ParserOptions {
                 byte_range: Some((reference_loc.first_offset(), reference_loc.first_offset() + base_text.len())),
-                ..default()
+                ..self.options()
             };
             let exp = ParserFacade(self.compilation_unit(), parser_options).parse_expression();
             base = Some(exp);
@@ -4820,7 +4827,7 @@ impl<'input> Parser<'input> {
         if let Some(text) = instance_property_text {
             let parser_options = ParserOptions {
                 byte_range: Some((text.1.first_offset(), text.1.last_offset())),
-                ..default()
+                ..self.options()
             };
             let exp = ParserFacade(self.compilation_unit(), parser_options).parse_qualified_identifier();
             instance_property = Some(Rc::new(exp));

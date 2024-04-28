@@ -21,6 +21,12 @@ impl<'input> CssParser<'input> {
         }
     }
 
+    fn options(&self) -> ParserOptions {
+        ParserOptions {
+            ..default()
+        }
+    }
+
     fn compilation_unit(&self) -> &Rc<CompilationUnit> {
         self.tokenizer.compilation_unit()
     }
@@ -365,7 +371,7 @@ impl<'input> CssParser<'input> {
         self.next();
         Ok(CssParserFacade(self.compilation_unit(), ParserOptions {
             byte_range: Some(byte_range),
-            ..default()
+            ..self.options()
         }))
     }
 
