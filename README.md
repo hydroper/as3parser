@@ -17,9 +17,9 @@ ActionScript 3 parser in the Rust language.
 
 [Getting started](docs/getting-started.md)
 
-[Working with diagnostics](docs/diagnostics.md)
+[Working with Diagnostics](docs/diagnostics.md)
 
-[Working with locations](docs/locations.md)
+[Working with Locations](docs/locations.md)
 
 [Working with MXML](docs/working-with-mxml.md)
 
@@ -33,19 +33,11 @@ ActionScript 3 parser in the Rust language.
 
 [Processing Deviations](docs/processing-deviations.md)
 
+[Building a Compiler](docs/building-a-compiler.md)
+
 ## Wiki
 
 The [wiki](https://github.com/hydroper/as3parser/wiki) of this repository contains other introductory articles.
-
-## Compiler
-
-An ActionScript compiler does more than just parsing, including verification, and SWF and SWC processing.
-
-An ActionScript compiler handles three source file formats: ActionScript 3, MXML, and CSS.
-
-An ActionScript compiler outputs several problems, constructs a flow graph for every activation, and attaches meaning to tree nodes.
-
-This project itself is not a compiler, but it's designated to facilitate writing one, parsing the three file formats mentioned.
 
 ## License
 
