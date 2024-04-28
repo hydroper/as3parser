@@ -758,7 +758,9 @@ impl<'input> CssParserFacade<'input> {
     /// Parses either a string or return source text as is.
     pub fn parse_text(&self) -> (String, Location) {
         let mut parser = self.create_parser();
-        parser.tokenizer.consume_whitespace();
+        while parser.tokenizer.consume_whitespace() {
+            // Consumed whitespace
+        }
         let d = parser.tokenizer.characters().peek_or_zero();
         if ['"', '\''].contains(&d) {
             parser.next();
