@@ -671,7 +671,7 @@ impl<'input> CssParser<'input> {
                 if let Some(mv1) = self.parse_opt_property_value(CssOperatorPrecedence::MultiValue) {
                     self.push_location(&base.location());
                     let mut values: Vec<Rc<CssPropertyValue>> = vec![base, mv1];
-                    while let Some(mv1) = self.parse_opt_property_value(CssOperatorPrecedence::MultiValue) {
+                    while let Some(mv1) = self.parse_opt_property_value(CssOperatorPrecedence::MultiValue.add(1).unwrap()) {
                         values.push(mv1);
                     }
                     base = Rc::new(CssPropertyValue::MultiValue(CssMultiValuePropertyValue {

@@ -50,6 +50,7 @@ impl TryFrom<u32> for OperatorPrecedence {
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(u32)]
 pub enum CssOperatorPrecedence {
+    Unary = 3,
     MultiValue = 2,
     Array = 1,
 }
