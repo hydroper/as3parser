@@ -668,7 +668,7 @@ impl<'input> CssParser<'input> {
                     elements,
                 }));
             } else if min_precedence.includes(&CssOperatorPrecedence::MultiValue) {
-                if let Some(mv1) = self.parse_opt_property_value(CssOperatorPrecedence::MultiValue) {
+                if let Some(mv1) = self.parse_opt_property_value(CssOperatorPrecedence::MultiValue.add(1).unwrap()) {
                     self.push_location(&base.location());
                     let mut values: Vec<Rc<CssPropertyValue>> = vec![base, mv1];
                     while let Some(mv1) = self.parse_opt_property_value(CssOperatorPrecedence::MultiValue.add(1).unwrap()) {
