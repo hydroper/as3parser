@@ -1,5 +1,5 @@
 {
-  "location": "1:1-7:2",
+  "location": "1:1-9:24",
   "directives": [
     {
       "Rule": {
@@ -129,6 +129,71 @@
             }
           }
         ]
+      }
+    },
+    {
+      "Rule": {
+        "location": "9:1-9:24",
+        "selectors": [
+          {
+            "Combinator": {
+              "location": "9:1-9:21",
+              "left": {
+                "Combinator": {
+                  "location": "9:1-9:14",
+                  "left": {
+                    "Base": {
+                      "location": "9:1-9:7",
+                      "namespace_prefix": null,
+                      "element_name": null,
+                      "conditions": [
+                        {
+                          "Id": [
+                            "myId1",
+                            "9:1-9:7"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "right": {
+                    "Base": {
+                      "location": "9:8-9:14",
+                      "namespace_prefix": null,
+                      "element_name": null,
+                      "conditions": [
+                        {
+                          "Id": [
+                            "myId2",
+                            "9:8-9:14"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "combinator_type": "Descendant"
+                }
+              },
+              "right": {
+                "Base": {
+                  "location": "9:15-9:21",
+                  "namespace_prefix": null,
+                  "element_name": null,
+                  "conditions": [
+                    {
+                      "Id": [
+                        "myId3",
+                        "9:15-9:21"
+                      ]
+                    }
+                  ]
+                }
+              },
+              "combinator_type": "Descendant"
+            }
+          }
+        ],
+        "properties": []
       }
     }
   ]

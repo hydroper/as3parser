@@ -5,3 +5,5 @@
 .myStyleName1[attr^="."] {
     color: red
 }
+
+#myId1 #myId2 #myId3 {}

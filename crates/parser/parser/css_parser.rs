@@ -399,30 +399,10 @@ impl<'input> CssParser<'input> {
     }
 
     fn parse_opt_selector(&mut self) -> Option<Rc<CssSelector>> {
-        self.mark_location();
-        let mut namespace_prefix: Option<(String, Location)> = None;
-        let mut element_name: Option<(String, Location)> = self.consume_identifier();
-        let mut conditions: Vec<Rc<CssSelectorCondition>> = vec![];
-        if self.consume(Token::Pipe) {
-            namespace_prefix = element_name.clone();
-            element_name = Some(self.expect_identifier());
-        }
-        while let Some(condition) = self.parse_opt_selector_condition() {
-            conditions.push(condition);
-        }
-        if element_name.is_none() && conditions.is_empty() {
-            self.pop_location();
-            return None;
-        }
-        let mut base = Rc::new(CssSelector::Base(CssBaseSelector {
-            location: self.pop_location(),
-            namespace_prefix,
-            element_name,
-            conditions,
-        }));
+        let mut base = self.parse_opt_base_selector()?;
         
         // Parse descendant combinators
-        while let Some(right) = self.parse_opt_selector() {
+        while let Some(right) = self.parse_opt_base_selector() {
             self.push_location(&base.location());
             base = Rc::new(CssSelector::Combinator(CssCombinatorSelector {
                 location: self.pop_location(),
@@ -433,6 +413,35 @@ impl<'input> CssParser<'input> {
         }
 
         Some(base)
+    }
+
+    fn parse_opt_base_selector(&mut self) -> Option<Rc<CssSelector>> {
+        self.mark_location();
+        let mut namespace_prefix: Option<(String, Location)> = None;
+        let mut element_name: Option<(String, Location)> = self.consume_identifier();
+        let mut conditions: Vec<Rc<CssSelectorCondition>> = vec![];
+        if self.consume(Token::Pipe) {
+            namespace_prefix = element_name.clone();
+            element_name = Some(self.expect_identifier());
+        }
+        // Parse conditions as long as they are not separated by whitespace
+        while (element_name.is_none() && conditions.is_empty()) || (self.token.1.first_offset() - self.previous_token.1.last_offset() == 0) {
+            if let Some(condition) = self.parse_opt_selector_condition() {
+                conditions.push(condition);
+            } else {
+                break;
+            }
+        }
+        if element_name.is_none() && conditions.is_empty() {
+            self.pop_location();
+            return None;
+        }
+        Some(Rc::new(CssSelector::Base(CssBaseSelector {
+            location: self.pop_location(),
+            namespace_prefix,
+            element_name,
+            conditions,
+        })))
     }
 
     fn parse_selector_condition(&mut self) -> Rc<CssSelectorCondition> {
