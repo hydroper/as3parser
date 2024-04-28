@@ -8,6 +8,12 @@ An ActionScript compiler outputs several problems, constructs a flow graph for e
 
 This project itself is not a compiler, but it's designated to facilitate writing one, parsing the three file formats mentioned.
 
+## Compiler options
+
+Attach compiler options to a compilation unit by defining your own options data type and storing a reference of it by calling `compilation_unit.set_compiler_options(Some(options))` where `options: Rc<dyn Any>`.
+
+The parser project leaves the compiler options to be defined as part of the compiler.
+
 ## SWF
 
 The Ruffle player contains a [`swf` package](https://github.com/ruffle-rs/ruffle/tree/master/swf) that reads and writes SWF from or into structures.
