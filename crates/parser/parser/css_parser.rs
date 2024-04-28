@@ -767,6 +767,7 @@ impl<'input> CssParserFacade<'input> {
                 v = (v1, parser.token.1.clone());
                 parser.next();
             }
+            parser.expect_eof();
             v
         } else {
             let mut s = String::new();
