@@ -4753,7 +4753,7 @@ impl<'input> Parser<'input> {
                     let (class_name_and_description, c_location) = join_asdoc_content(building_content);
                     let location = tag_location.combine_with(c_location.clone());
 
-                    let class_name_and_description = regex_captures!(r"^([^\s]+)(\s.*)", &class_name_and_description);
+                    let class_name_and_description = regex_captures!(r"^([^\s]+)(\s.*)?", &class_name_and_description);
 
                     if let Some((_, class_name, description)) = class_name_and_description {
                         let description = description.trim().to_owned();
