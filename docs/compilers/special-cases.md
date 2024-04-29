@@ -109,3 +109,8 @@ Properties from imported packages, when fully qualified, shadow variable names i
 
 * Use a `xmlns` prefix assigned to the full package name with a trailling `.*` sequence, as in `xmlns:fb="foo.bar.*"`.
 * Use the `import` directive in a `fx:Script` tag and refer lexically to a component in the MXML.
+
+## Dynamic
+
+* The `Object` and `*` data types are fully dynamic, thus they may be mixed freely in operations, such as addition, property and query operators.
+* There are `dynamic` classes, which allow for dynamic property operations.
