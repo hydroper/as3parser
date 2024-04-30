@@ -8,12 +8,6 @@ pub use by_address::ByAddress as NodeAsKey;
 mod character_reader;
 pub use character_reader::*;
 
-mod shared_array;
-pub use shared_array::*;
-
-mod shared_map;
-pub use shared_map::*;
-
 mod escaping;
 pub use escaping::*;
 
