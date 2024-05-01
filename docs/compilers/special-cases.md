@@ -112,5 +112,5 @@ Properties from imported packages, when fully qualified, shadow variable names i
 
 ## Dynamic
 
-* The `Object` and `*` data types are fully dynamic, thus they may be mixed freely in operations, such as addition, property and query operators.
-* There are `dynamic` classes, which allow for dynamic property operations.
+* The `Object` and `*` data types are fully dynamic, thus they may be mixed freely in operations, such as addition, property and query operators and iteration.
+* There are `dynamic` classes, which allow for dynamic property operations and iteration.
