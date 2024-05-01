@@ -29,7 +29,7 @@ jobs:
       - name: Update demo/dist
         run: wasm-bindgen --target web --out-dir demo/dist target/wasm32-unknown-unknown/release/as3_parser_demo.wasm
       - name: Git commit report
-        run:
+        run: |
           git config --global user.name 'hydroper'
           git config --global user.email 'matheusdiasdesouzads@gmail.com'
           git add demo
