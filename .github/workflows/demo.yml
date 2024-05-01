@@ -34,7 +34,7 @@ jobs:
           git config --global user.email 'matheusdiasdesouzads@gmail.com'
           git checkout demo
           git switch -C demo
+          git pull origin demo
           git add demo
           git commit -m "Automated report"
-          git pull origin demo
           git push origin demo
