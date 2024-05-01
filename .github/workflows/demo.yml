@@ -1,0 +1,34 @@
+name: Demo
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use nightly Rust
+        run: rustup default nightly
+      - name: Install wasm-bindgen CLI
+        run: cargo install wasm-bindgen-cli
+      - name: Build demo
+        run: cargo build -p as3_parser_demo --release --target wasm32-unknown-unknown
+      - name: Update demo/dist
+        run: wasm-bindgen --target web --out-dir demo/dist target/wasm32-unknown-unknown/release/as3_parser_demo.wasm
+      - name: Git commit report
+          git config --global user.name 'hydroper'
+          git config --global user.email 'matheusdiasdesouzads@gmail.com'
+          git add demo
+          git commit -m "Automated report"
+          git push origin demo
