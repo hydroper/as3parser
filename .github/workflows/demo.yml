@@ -36,4 +36,5 @@ jobs:
           git switch -C demo
           git add demo
           git commit -m "Automated report"
+          git pull origin demo
           git push origin demo
