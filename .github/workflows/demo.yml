@@ -32,6 +32,7 @@ jobs:
         run: |
           git config --global user.name 'hydroper'
           git config --global user.email 'matheusdiasdesouzads@gmail.com'
+          git checkout demo
           git add demo
           git commit -m "Automated report"
           git push origin demo
