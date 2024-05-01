@@ -35,7 +35,7 @@ jobs:
           git switch -C demo
           git rm --cached -r .
           git add demo
-          git rm --cached demo/src
+          git rm --cached -r demo/src
           git rm --cached demo/Cargo.toml
           git commit -m "Automated report"
           git push origin -f demo
