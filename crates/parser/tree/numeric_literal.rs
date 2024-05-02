@@ -41,7 +41,7 @@ impl NumericLiteral {
 
     /// Parses a single-precision floating point either in
     /// decimal, binary (`0b`) or hexadecimal (`0x`) notation.
-    pub fn parse_single(&self, negative: bool) -> Result<f32, ParserError> {
+    pub fn parse_float(&self, negative: bool) -> Result<f32, ParserError> {
         let s = self.value.replace('_', "");
         if s.starts_with('0') {
             if s[1..].starts_with('x') || s[1..].starts_with('X') {
@@ -71,6 +71,38 @@ impl NumericLiteral {
             }
         }
         i64::from_str(&s).map_err(|_| ParserError::Common)
+    }
+
+    /// Parses a signed integer either in
+    /// decimal, binary (`0b`) or hexadecimal (`0x`) notation.
+    pub fn parse_int(&self, negative: bool) -> Result<i32, ParserError> {
+        let s = self.value.replace('_', "");
+        if s.starts_with('0') {
+            if s[1..].starts_with('x') || s[1..].starts_with('X') {
+                let n = i32::from_str_radix(&(if negative { "-" } else { "" }.to_owned() + &s[2..]), 16);
+                return n.map_err(|_| ParserError::Common);
+            } else if s[1..].starts_with('b') || s[1..].starts_with('B') {
+                let n = i32::from_str_radix(&(if negative { "-" } else { "" }.to_owned() + &s[2..]), 2);
+                return n.map_err(|_| ParserError::Common);
+            }
+        }
+        i32::from_str(&s).map_err(|_| ParserError::Common)
+    }
+
+    /// Parses an unsigned integer either in
+    /// decimal, binary (`0b`) or hexadecimal (`0x`) notation.
+    pub fn parse_uint(&self) -> Result<u32, ParserError> {
+        let s = self.value.replace('_', "");
+        if s.starts_with('0') {
+            if s[1..].starts_with('x') || s[1..].starts_with('X') {
+                let n = u32::from_str_radix(&s[2..], 16);
+                return n.map_err(|_| ParserError::Common);
+            } else if s[1..].starts_with('b') || s[1..].starts_with('B') {
+                let n = u32::from_str_radix(&s[2..], 2);
+                return n.map_err(|_| ParserError::Common);
+            }
+        }
+        u32::from_str(&s).map_err(|_| ParserError::Common)
     }
 
     /// Parses a big integer either in
