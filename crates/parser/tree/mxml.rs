@@ -79,7 +79,12 @@ impl MxmlName {
     }
 
     pub fn to_string(&self, namespace: &Rc<MxmlNamespace>) -> String {
-        self.resolve_name(namespace).map(|(uri, localname)| format!("{uri}:{localname}")).unwrap_or("[error]".into())
+        self.resolve_name(namespace).map(|(uri, localname)| {
+            if uri.is_empty() {
+                return localname;
+            }
+            format!("{uri}:{localname}")
+        }).unwrap_or("[error]".into())
     }
 }
 
