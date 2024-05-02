@@ -77,6 +77,10 @@ impl MxmlName {
         let p2 = other.resolve_prefix(namespace)?;
         Ok(&p1 == &p2)
     }
+
+    pub fn to_string(&self, namespace: &Rc<MxmlNamespace>) -> String {
+        self.resolve_name(namespace).map(|(uri, localname)| format!("{uri}:{localname}")).unwrap_or("[error]".into())
+    }
 }
 
 #[derive(Clone)]

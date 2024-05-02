@@ -67,9 +67,10 @@ lazy_static! {
         DiagnosticKind::InputEndedBeforeReachingClosingQuoteForAttributeValue.id() => "Input ended before reaching the closing quotation mark for an attribute value.".into(),
         DiagnosticKind::ExpectingEitherSemicolonOrNewLineHere.id() => "Expecting either a semicolon or a new line here.".into(),
         DiagnosticKind::CssInvalidHexEscape.id() => "Invalid hexadecimal escape: '\\{1}'.".into(),
-        DiagnosticKind::ExpectingDirective.id() => "Expecting directive before {1}".into(),
-        DiagnosticKind::ExpectingStatement.id() => "Expecting statement before {1}".into(),
-        DiagnosticKind::Unexpected.id() => "Unexpected {1}".into(),
+        DiagnosticKind::ExpectingDirective.id() => "Expecting directive before {1}.".into(),
+        DiagnosticKind::ExpectingStatement.id() => "Expecting statement before {1}.".into(),
+        DiagnosticKind::Unexpected.id() => "Unexpected {1}.".into(),
+        DiagnosticKind::XmlClosingTagNameMustBeEquals.id() => "Closing tag name must be equals '{1}'.".into(),
         // DiagnosticKind::K.id() => ".".into(),
     };
 }

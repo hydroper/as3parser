@@ -4885,8 +4885,14 @@ impl<'input> Parser<'input> {
             self.expect_and_ie_xml_content(Token::Gt);
             content = Some(self.parse_mxml_content(false, &namespace, encoding));
             self.non_greedy_expect_and_ie_xml_tag(Token::XmlLtSlash);
-            let name = self.parse_xml_name();
-            closing_name = Some(self.process_mxml_tag_name(name, &namespace));
+            let name_1 = self.parse_xml_name();
+            let closing_name_1 = self.process_mxml_tag_name(name_1, &namespace);
+            if let Ok(equal) = name.equals_name(&closing_name_1, &namespace) {
+                if !equal {
+                    self.add_syntax_error(&closing_name_1.location, DiagnosticKind::XmlClosingTagNameMustBeEquals, diagarg![name.to_string(&namespace)]);
+                }
+            }
+            closing_name = Some(closing_name_1);
             self.consume_and_ie_xml_tag(Token::XmlWhitespace);
             self.non_greedy_expect_and_ie_xml_content(Token::Gt);
         }
@@ -5094,10 +5100,16 @@ impl<'input> Parser<'input> {
                 let element = self.parse_mxml_element(start, namespace, encoding);
                 content.push(Rc::new(MxmlContent::Element(Rc::new(element))));
             } else if !until_eof {
-                self.expect_and_ie_xml_content(Token::XmlLtSlash);
+                self.non_greedy_expect_and_ie_xml_content(Token::XmlLtSlash);
                 if !self.tokenizer.characters().has_remaining() {
                     break;
                 }
+            } else if self.peek(Token::XmlLtSlash) {
+                self.add_syntax_error(&self.token_location(), DiagnosticKind::Expecting, diagarg![Token::Eof, self.token.0.clone()]);
+                self.next_ie_xml_tag();
+                let _ = self.parse_xml_name();
+                self.consume_and_ie_xml_tag(Token::XmlWhitespace);
+                self.non_greedy_expect_and_ie_xml_content(Token::Gt);
             }
         }
         content
