@@ -15,29 +15,7 @@ ActionScript 3 parser in the Rust language.
 
 ## Documentation
 
-[Getting started](docs/getting-started.md)
-
-[Working with Diagnostics](docs/diagnostics.md)
-
-[Working with Locations](docs/locations.md)
-
-[Working with MXML](docs/working-with-mxml.md)
-
-[Working with CSS](docs/working-with-css.md)
-
-[Attaching Meaning](docs/attaching-meaning.md)
-
-[Reference Documents](docs/references.md)
-
-[New Syntax](docs/new-syntax.md)
-
-[Processing Deviations](docs/processing-deviations.md)
-
-[Building a Compiler](docs/building-a-compiler.md)
-
-## Wiki
-
-The [wiki](https://github.com/hydroper/as3parser/wiki) of this repository contains other introductory articles.
+Refer to the [wiki](https://github.com/hydroper/as3parser/wiki) of this repository for various informations, including a getting started point.
 
 ## License
 
