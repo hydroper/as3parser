@@ -103,6 +103,9 @@ enum E1 {
 
 // Shorthand field
 ( { x } );
+
+// Brackets field
+( { ["x"]: 10 } );
 ```
 
 ## Generators
