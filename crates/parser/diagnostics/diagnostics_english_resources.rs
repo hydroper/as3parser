@@ -39,7 +39,7 @@ lazy_static! {
         DiagnosticKind::FunctionMustContainBody.id() => "Function must contain body.".into(),
         DiagnosticKind::FunctionMustNotContainAnnotations.id() => "Function must not contain annotations.".into(),
         DiagnosticKind::NestedClassesNotAllowed.id() => "Nested classes are not allowed.".into(),
-        DiagnosticKind::DirectiveNotAllowedInInterface.id() => "Directive not allowed in interface.".into(),
+        DiagnosticKind::UnexpectedDirective.id() => "Unexpected directive.".into(),
         DiagnosticKind::FailedParsingAsDocTag.id() => "Failed parsing contents of ASDoc tag: '@{1}'.".into(),
         DiagnosticKind::UnrecognizedAsDocTag.id() => "Unrecognized ASDoc tag: '@{1}'.".into(),
         DiagnosticKind::UnrecognizedProxy.id() => "Unrecognized proxy: '{1}'.".into(),

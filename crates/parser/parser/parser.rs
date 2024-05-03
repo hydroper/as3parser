@@ -3727,14 +3727,11 @@ impl<'input> Parser<'input> {
 
         // Body verification.
         //
-        // Interface methods are skipped in the verification as they
-        // may omit body.
-        if !interface_method {
-            if (has_native || has_abstract) && common.body.is_some() {
-                self.add_syntax_error(&name.location(), DiagnosticKind::FunctionMustNotContainBody, diagarg![]);
-            } else if !(has_native || has_abstract) && common.body.is_none() {
-                self.add_syntax_error(&name.location(), DiagnosticKind::FunctionMustContainBody, diagarg![]);
-            }
+        // Note that interface methods must have a body unlike in Java.
+        if (has_native || has_abstract) && common.body.is_some() {
+            self.add_syntax_error(&name.location(), DiagnosticKind::FunctionMustNotContainBody, diagarg![]);
+        } else if (interface_method || !(has_native || has_abstract)) && common.body.is_none() {
+            self.add_syntax_error(&name.location(), DiagnosticKind::FunctionMustContainBody, diagarg![]);
         }
 
         // Interface methods must not contain any annotations except for meta-data.
@@ -3921,7 +3918,7 @@ impl<'input> Parser<'input> {
         // Interface block must only contain function definitions
         for directive in block.directives.iter() {
             if !(matches!(directive.as_ref(), Directive::FunctionDefinition(_))) {
-                self.add_syntax_error(&directive.location(), DiagnosticKind::DirectiveNotAllowedInInterface, diagarg![]);
+                self.add_syntax_error(&directive.location(), DiagnosticKind::UnexpectedDirective, diagarg![]);
             }
         }
 

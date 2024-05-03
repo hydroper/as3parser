@@ -35,7 +35,7 @@ pub enum DiagnosticKind {
     FunctionMustContainBody = 1055,
     FunctionMustNotContainAnnotations = 1056,
     NestedClassesNotAllowed = 1057,
-    DirectiveNotAllowedInInterface = 1058,
+    UnexpectedDirective = 1058,
     FailedParsingAsDocTag = 1059,
     UnrecognizedAsDocTag = 1060,
     UnrecognizedProxy = 1061,
