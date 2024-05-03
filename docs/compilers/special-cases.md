@@ -108,6 +108,7 @@ Properties from imported packages, when fully qualified, shadow variable names i
 ## Importing ActionScript 3 components in MXML
 
 * Use a `xmlns` prefix assigned to the full package name with a trailling `.*` sequence, as in `xmlns:fb="foo.bar.*"`.
+* Use a `xmlns` prefix assigned to `*` to import the top-level package.
 * Use the `import` directive in a `fx:Script` tag and refer lexically to a component in the MXML.
 
 ## Dynamic
