@@ -3730,7 +3730,7 @@ impl<'input> Parser<'input> {
         // Note that interface methods must never have a body unlike in Java.
         if (interface_method || has_native || has_abstract) && common.body.is_some() {
             self.add_syntax_error(&name.location(), DiagnosticKind::FunctionMustNotContainBody, diagarg![]);
-        } else if !(has_native || has_abstract) && common.body.is_none() {
+        } else if !(interface_method || has_native || has_abstract) && common.body.is_none() {
             self.add_syntax_error(&name.location(), DiagnosticKind::FunctionMustContainBody, diagarg![]);
         }
 
