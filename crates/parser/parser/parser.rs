@@ -3478,9 +3478,12 @@ impl<'input> Parser<'input> {
                 self.next();
                 break;
             } else {
-                package_name.push(self.expect_identifier(true));
+                let id1 = self.expect_identifier(true);
                 if !self.peek(Token::Dot) {
-                    self.non_greedy_expect(Token::Dot);
+                    import_specifier = ImportSpecifier::Identifier(id1.clone());
+                    break;
+                } else {
+                    package_name.push(id1.clone());
                 }
             }
         }
