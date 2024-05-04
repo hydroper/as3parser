@@ -3214,8 +3214,14 @@ impl<'input> Parser<'input> {
         || self.peek(Token::Internal) || self.peek(Token::Var) || self.peek(Token::Const)
         || self.peek(Token::Function) || self.peek(Token::Class) || self.peek(Token::Interface) {
             let rns = self.parse_opt_reserved_namespace();
+            let is_public = self.peek(Token::Public);
             let mut attributes: Vec<Attribute> = vec![];
             if let Some(rns) = rns {
+                // The public += ns.*; directive
+                if self.peek(Token::AddAssign) && is_public {
+                    return self.parse_package_concat_directive(&rns.location(), context);
+                }
+
                 // Do not proceed into parsing an annotatable directive
                 // if there is a "::" token.
                 if matches!(self.token.0, Token::ColonColon) {
@@ -3452,6 +3458,45 @@ impl<'input> Parser<'input> {
         }
     }
 
+    fn parse_package_concat_directive(&mut self, start: &Location, context: ParserDirectiveContext) -> (Rc<Directive>, bool) {
+        self.push_location(start);
+        self.next();
+        let mut package_name: Vec<(String, Location)> = vec![self.expect_identifier(false)];
+        let mut import_specifier = ImportSpecifier::Wildcard(self.token_location());
+
+        if !self.peek(Token::Dot) {
+            self.non_greedy_expect(Token::Dot);
+        }
+
+        while self.consume(Token::Dot) {
+            if self.peek(Token::Times) {
+                import_specifier = ImportSpecifier::Wildcard(self.token_location());
+                self.next();
+                break;
+            } else if self.peek(Token::Power) {
+                import_specifier = ImportSpecifier::Recursive(self.token_location());
+                self.next();
+                break;
+            } else {
+                package_name.push(self.expect_identifier(true));
+            }
+        }
+
+        let semicolon = self.parse_semicolon();
+
+        let node = Rc::new(Directive::PackageConcatDirective(PackageConcatDirective {
+            location: self.pop_location(),
+            package_name,
+            import_specifier,
+        }));
+
+        if !(matches!(context, ParserDirectiveContext::PackageBlock)) {
+            self.add_syntax_error(&node.location(), DiagnosticKind::UnexpectedDirective, vec![]);
+        }
+
+        (node, semicolon)
+    }
+
     fn parse_import_directive_or_expression_statement(&mut self, _context: ParserDirectiveContext) -> (Rc<Directive>, bool) {
         self.mark_location();
         self.next();
@@ -3490,6 +3535,10 @@ impl<'input> Parser<'input> {
             while self.consume(Token::Dot) {
                 if self.peek(Token::Times) {
                     import_specifier = ImportSpecifier::Wildcard(self.token_location());
+                    self.next();
+                    break;
+                } else if self.peek(Token::Power) {
+                    import_specifier = ImportSpecifier::Recursive(self.token_location());
                     self.next();
                     break;
                 } else {

@@ -120,6 +120,8 @@ mod include_directive;
 pub use include_directive::*;
 mod normal_configuration_directive;
 pub use normal_configuration_directive::*;
+mod package_concat_directive;
+pub use package_concat_directive::*;
 
 // Miscellaneous
 mod attributes;
