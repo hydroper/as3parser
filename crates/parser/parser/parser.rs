@@ -3479,6 +3479,9 @@ impl<'input> Parser<'input> {
                 break;
             } else {
                 package_name.push(self.expect_identifier(true));
+                if !self.peek(Token::Dot) {
+                    self.non_greedy_expect(Token::Dot);
+                }
             }
         }
 
