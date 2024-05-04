@@ -3213,8 +3213,8 @@ impl<'input> Parser<'input> {
         } else if self.peek(Token::Public) || self.peek(Token::Private) || self.peek(Token::Protected)
         || self.peek(Token::Internal) || self.peek(Token::Var) || self.peek(Token::Const)
         || self.peek(Token::Function) || self.peek(Token::Class) || self.peek(Token::Interface) {
-            let rns = self.parse_opt_reserved_namespace();
             let is_public = self.peek(Token::Public);
+            let rns = self.parse_opt_reserved_namespace();
             let mut attributes: Vec<Attribute> = vec![];
             if let Some(rns) = rns {
                 // The public += ns.*; directive
