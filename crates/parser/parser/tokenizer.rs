@@ -748,9 +748,11 @@ impl<'input> Tokenizer<'input> {
 
         if !initial_dot && self.characters.peek_or_zero() == '.' {
             self.characters.next();
+            /*
             if !CharacterValidator::is_dec_digit(self.characters.peek_or_zero()) {
                 self.add_unexpected_error();
             }
+            */
             while CharacterValidator::is_dec_digit(self.characters.peek_or_zero()) {
                 self.characters.next();
                 self.consume_underscore_followed_by_dec_digit();
