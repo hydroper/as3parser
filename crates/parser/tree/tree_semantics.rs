@@ -179,6 +179,7 @@ macro impl_semantics_1 {
 impl_semantics_with_loc_call!(
     struct TreeSemantics,
     Expression,
+    InitializerField,
     Directive,
     MxmlContent,
     CssDirective,
@@ -207,6 +208,7 @@ impl_semantics_1!(
     struct TreeSemantics1,
     fn new,
     Expression,
+    InitializerField,
     Directive,
     FunctionCommon,
     Block,
