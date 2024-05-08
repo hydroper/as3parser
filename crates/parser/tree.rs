@@ -122,6 +122,8 @@ mod normal_configuration_directive;
 pub use normal_configuration_directive::*;
 mod package_concat_directive;
 pub use package_concat_directive::*;
+mod directive_injection_node;
+pub use directive_injection_node::*;
 
 // Miscellaneous
 mod attributes;

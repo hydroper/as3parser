@@ -30,6 +30,18 @@ pub struct MxmlElement {
     pub closing_name: Option<MxmlName>,
 }
 
+impl MxmlElement {
+    pub fn inner_text(&self) -> String {
+        let mut j = String::new();
+        if let Some(c) = self.content.as_ref() {
+            for c1 in c.iter() {
+                j.push_str(&c1.inner_text());
+            }
+        }
+        j
+    }
+}
+
 #[derive(Clone, Serialize, Deserialize)]
 pub struct MxmlAttribute {
     pub location: Location,
@@ -118,6 +130,16 @@ impl MxmlContent {
             Self::Comment((_, l)) => l.clone(),
             Self::ProcessingInstruction { location: l, .. } => l.clone(),
             Self::Element(e) => e.location.clone(),
+        }
+    }
+
+    pub fn inner_text(&self) -> String {
+        match self {
+            Self::Characters((data, _)) => data.clone(),
+            Self::CData((data, _)) => data["<![CDATA[".len()..(data.len() - 3)].to_owned(),
+            Self::Comment(_) => String::new(),
+            Self::ProcessingInstruction { .. } => String::new(),
+            Self::Element(e) => e.inner_text(),
         }
     }
 }
