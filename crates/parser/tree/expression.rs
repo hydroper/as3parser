@@ -273,4 +273,18 @@ impl Expression {
         }
         None
     }
+
+    pub fn search_optional_chaining_placeholder(self: &Rc<Self>) -> Option<Rc<Expression>> {
+        match self.as_ref() {
+            Self::OptionalChainingPlaceholder(_) => Some(self.clone()),
+            Self::Member(e) => e.base.search_optional_chaining_placeholder(),
+            Self::ComputedMember(e) => e.base.search_optional_chaining_placeholder(),
+            Self::Descendants(e) => e.base.search_optional_chaining_placeholder(),
+            Self::Filter(e) => e.base.search_optional_chaining_placeholder(),
+            Self::Unary(e) => e.expression.search_optional_chaining_placeholder(),
+            Self::Call(e) => e.base.search_optional_chaining_placeholder(),
+            Self::WithTypeArguments(e) => e.base.search_optional_chaining_placeholder(),
+            _ => None,
+        }
+    }
 }
