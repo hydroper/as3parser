@@ -173,7 +173,11 @@ impl Expression {
     pub fn is_valid_assignment_left_hand_side(&self) -> bool {
         match self {
             Self::Invalidated(_) => true,
-            Self::Unary(e) => e.expression.is_valid_assignment_left_hand_side(),
+            Self::Unary(e) => if e.operator == Operator::NonNull {
+                e.expression.is_valid_assignment_left_hand_side()
+            } else {
+                true
+            },
             Self::ArrayLiteral(_) | Self::ObjectInitializer(_) => self.is_valid_destructuring(),
             _ => true,
         }

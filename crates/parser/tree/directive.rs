@@ -79,4 +79,28 @@ impl Directive {
             Self::NamespaceDefinition(d) => d.location.clone(),
         }
     }
+
+    #[inline(always)]
+    pub fn is_statement(&self) -> bool {
+        !self.is_directive()
+    }
+
+    pub fn is_directive(&self) -> bool {
+        matches!(
+            self,
+            Self::ConfigurationDirective(_) |
+            Self::ImportDirective(_) |
+            Self::UseNamespaceDirective(_) |
+            Self::IncludeDirective(_) |
+            Self::NormalConfigurationDirective(_) |
+            Self::PackageConcatDirective(_) |
+            Self::VariableDefinition(_) |
+            Self::FunctionDefinition(_) |
+            Self::ClassDefinition(_) |
+            Self::EnumDefinition(_) |
+            Self::InterfaceDefinition(_) |
+            Self::TypeDefinition(_) |
+            Self::NamespaceDefinition(_)
+        )
+    }
 }

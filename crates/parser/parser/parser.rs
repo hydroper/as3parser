@@ -3619,6 +3619,9 @@ impl<'input> Parser<'input> {
         // the super compilation unit.
         nested_compilation_unit.set_included_from(Some(self.tokenizer.compilation_unit().clone()));
 
+        // Inherit compiler options
+        nested_compilation_unit.set_compiler_options(self.tokenizer.compilation_unit().compiler_options());
+
         // Add sub compilation unit to super compilation unit
         self.tokenizer.compilation_unit().add_nested_compilation_unit(nested_compilation_unit.clone());
 
