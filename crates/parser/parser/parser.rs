@@ -3615,10 +3615,6 @@ impl<'input> Parser<'input> {
             nested_compilation_unit = CompilationUnit::new(None, "".into());
         }
 
-        // Let it be such that the sub compilation unit is subsequent of
-        // the super compilation unit.
-        nested_compilation_unit.set_included_from(Some(self.tokenizer.compilation_unit().clone()));
-
         // Inherit compiler options
         nested_compilation_unit.set_compiler_options(self.tokenizer.compilation_unit().compiler_options());
 

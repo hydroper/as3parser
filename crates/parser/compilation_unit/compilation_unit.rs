@@ -191,8 +191,9 @@ impl CompilationUnit {
         result
     }
 
-    pub fn add_nested_compilation_unit(&self, unit: Rc<CompilationUnit>) {
-        self.nested_compilation_units.borrow_mut().push(unit);
+    pub fn add_nested_compilation_unit(self: &Rc<Self>, unit: Rc<CompilationUnit>) {
+        self.nested_compilation_units.borrow_mut().push(unit.clone());
+        unit.set_included_from(Some(self.clone()));
     }
 
     pub fn add_diagnostic(&self, diagnostic: Diagnostic) {
