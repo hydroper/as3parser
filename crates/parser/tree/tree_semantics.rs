@@ -3,9 +3,9 @@ use by_address::ByAddress;
 
 const LARGE_BYTES: usize = 26_000;
 
-/// Represents a mapping of nodes to meaning (*symbols*).
+/// Represents a mapping of nodes to something.
 /// 
-/// A limited set of nodes may be mapped to symbols within this
+/// A limited set of nodes may be mapped to something within this
 /// structure through using the implemented `TreeSemanticsAccessor`
 /// methods, such as `.get()` and `.set()`.
 pub struct TreeSemantics<S> {
@@ -19,6 +19,11 @@ impl<S: Clone> TreeSemantics<S> {
             common: TreeSemantics1::new(),
             large_units: RefCell::new(HashMap::new()),
         }
+    }
+
+    pub fn clear(&self) {
+        self.common.clear();
+        self.large_units.borrow_mut().clear();
     }
 }
 
@@ -143,7 +148,7 @@ macro impl_semantics_with_loc_field {
 }
 
 macro impl_semantics_1 {
-    (struct $tree_semantics_1_id:ident, fn $new_id:ident, $($nodetype:ident),*$(,)?) => {
+    (struct $tree_semantics_1_id:ident, fn $new_id:ident, fn $clear_id:ident, $($nodetype:ident),*$(,)?) => {
         #[allow(non_snake_case)]
         struct $tree_semantics_1_id<S> {
             $($nodetype: RefCell<HashMap<NodeAsKey<Rc<$nodetype>>, Option<S>>>,)*
@@ -155,6 +160,10 @@ macro impl_semantics_1 {
                     $($nodetype: RefCell::new(HashMap::new()),)*
                 }
             }
+
+            pub fn $clear_id(&self) {
+                $(self.$nodetype.borrow_mut().clear();)*
+            } 
         }
 
         $(
@@ -208,6 +217,7 @@ impl_semantics_with_loc_field!(
 impl_semantics_1!(
     struct TreeSemantics1,
     fn new,
+    fn clear,
     Expression,
     InitializerField,
     Directive,
