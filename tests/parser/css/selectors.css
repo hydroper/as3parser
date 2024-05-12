@@ -1,9 +1,0 @@
-.myStyleName1.anotherOne s|VGroup, #id1 {
-    fontSize: 24
-}
-
-.myStyleName1[attr^="."] {
-    color: red
-}
-
-#myId1 #myId2 #myId3 {}
