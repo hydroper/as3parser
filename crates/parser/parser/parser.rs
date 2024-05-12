@@ -4180,7 +4180,7 @@ impl<'input> Parser<'input> {
             let mut test = self.create_invalidated_expression(&self.tokenizer.cursor_location());
             self.non_greedy_expect(Token::ParenOpen);
             if !self.expecting_token_error {
-                test = self.parse_configuration_expression();
+                test = self.parse_expression(ParserExpressionContext { ..default() });
             }
             self.non_greedy_expect(Token::ParenClose);
             let consequent = Rc::new(Directive::Block(self.parse_block(context.clone())));
@@ -4196,118 +4196,6 @@ impl<'input> Parser<'input> {
             }))
         } else {
             Rc::new(Directive::Block(self.parse_block(context.clone())))
-        }
-    }
-
-    fn parse_configuration_expression(&mut self) -> Rc<Expression> {
-        let mut base = self.parse_configuration_primary_expression();
-        if self.consume(Token::LogicalAnd) {
-            self.push_location(&base.location());
-            let right = self.parse_configuration_expression();
-            base = Rc::new(Expression::Binary(BinaryExpression {
-                location: self.pop_location(),
-                operator: Operator::LogicalAnd,
-                left: base.clone(),
-                right,
-            }));
-        } else if self.consume(Token::LogicalOr) {
-            self.push_location(&base.location());
-            let right = self.parse_configuration_expression();
-            base = Rc::new(Expression::Binary(BinaryExpression {
-                location: self.pop_location(),
-                operator: Operator::LogicalOr,
-                left: base.clone(),
-                right,
-            }));
-        }
-        base
-    }
-
-    fn parse_configuration_primary_expression(&mut self) -> Rc<Expression> {
-        if let Token::Identifier(_) = &self.token.0.clone() {
-            self.mark_location();
-            let mut id = self.expect_identifier(false);
-            let mut qual: Option<Rc<Expression>> = None;
-            if self.consume(Token::ColonColon) {
-                qual = Some(Rc::new(Expression::QualifiedIdentifier(QualifiedIdentifier {
-                    location: id.1.clone(),
-                    attribute: false,
-                    qualifier: None,
-                    id: QualifiedIdentifierIdentifier::Id(id.clone()),
-                })));
-                id = self.expect_identifier(true);
-            }
-            let id_location = self.pop_location();
-            let id = Rc::new(Expression::QualifiedIdentifier(QualifiedIdentifier {
-                location: id_location.clone(),
-                attribute: false,
-                qualifier: qual,
-                id: QualifiedIdentifierIdentifier::Id(id.clone()),
-            }));
-            let equality: Option<Operator> = if self.consume(Token::Assign) {
-                Some(Operator::Equals)
-            } else if self.consume(Token::NotEquals) {
-                Some(Operator::NotEquals)
-            } else {
-                None
-            };
-            if let Some(equality) = equality {
-                self.push_location(&id.location());
-                self.mark_location();
-                let mut value: String = "".into();
-                if let Some((value_1, _)) = self.consume_identifier(false) {
-                    value = value_1;
-                } else {
-                    if let Token::String(s) = &self.token.0 {
-                        value = s.clone();
-                        self.next();
-                    } else {
-                        self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingStringLiteral, diagarg![self.token.0.clone()]);
-                        while self.token.0 != Token::Eof {
-                            self.next();
-                            if let Token::String(s) = self.token.0.clone() {
-                                self.pop_location();
-                                self.mark_location();
-                                value = s;
-                                self.next();
-                            }
-                        }
-                    }
-                }
-                let right = Rc::new(Expression::StringLiteral(StringLiteral {
-                    location: self.pop_location(),
-                    value,
-                }));
-                Rc::new(Expression::Binary(BinaryExpression {
-                    location: self.pop_location(),
-                    operator: equality,
-                    left: id.clone(),
-                    right,
-                }))
-            } else {
-                id
-            }
-        } else if self.peek(Token::ParenOpen) {
-            self.mark_location();
-            self.next();
-            let expression = self.parse_configuration_expression();
-            self.non_greedy_expect(Token::ParenClose);
-            Rc::new(Expression::Paren(ParenExpression {
-                location: self.pop_location(),
-                expression,
-            }))
-        } else if self.peek(Token::Exclamation) {
-            self.mark_location();
-            self.next();
-            let expression = self.parse_configuration_primary_expression();
-            Rc::new(Expression::Unary(UnaryExpression {
-                location: self.pop_location(),
-                operator: Operator::LogicalNot,
-                expression,
-            }))
-        } else {
-            self.add_syntax_error(&self.token_location(), DiagnosticKind::ExpectingExpression, diagarg![self.token.0.clone()]);
-            self.create_invalidated_expression(&self.tokenizer.cursor_location())
         }
     }
 
